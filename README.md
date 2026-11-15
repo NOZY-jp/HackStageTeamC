@@ -5,7 +5,7 @@ Next.js (App Router) + TypeScript + Tailwind CSS のチーム開発リポジト�
 ## 企画
 
 - [シナリオ『お待たせ。』](docs/scenario.md) — SNSで消えた恋人と、待ち合わせのすり替えを追うARG。導入からNormal／Trueまでの脚本。
-- [ARG制作資料](docs/scenario-puzzles.md) — 複数サイトの役割、投稿本文、固定URLと予約記録を使う調査、分岐。ネタバレあり。
+- [Normal／Trueの調査設計](docs/scenario-investigation.md) — Normalの人物同定・保存版の検証・出展資料の調査と、同じ資料の小さな不一致から進むTrue。ネタバレあり。
 - [改稿記録](docs/scenario-review.md) — 前稿を取り下げた理由と、新稿の会話・事件・導線を直した記録。
 - [物語とエンディングの条件](docs/story-requirements.md) — 最新の必須条件。
 - [初期企画書](docs/concept.md) — 企画の出発点。現在の脚本は上記を参照。
