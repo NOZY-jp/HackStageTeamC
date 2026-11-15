@@ -2,6 +2,10 @@
 
 Next.js (App Router) + TypeScript + Tailwind CSS のチーム開発リポジトリ。Lint/Format は Biome に一本化し、ESLint は使わない。
 
+## 企画
+
+- [ネット恋愛・失踪ARG 企画書](docs/concept.md) — 届ける相手、ストーリー、調査体験、審査基準との対応、最小の体験案。
+
 ## セットアップ
 
 Node.js 24（Krypton LTS）以上を使う（`.nvmrc` に `24`）。
