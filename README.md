@@ -4,6 +4,8 @@ Next.js (App Router) + TypeScript + Tailwind CSS のチーム開発リポジト�
 
 ## セットアップ
 
+Node.js 24（Krypton LTS）以上を使う（`.nvmrc` に `24`）。
+
 ```bash
 npm ci
 npm run dev   # http://localhost:3000
