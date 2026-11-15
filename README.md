@@ -4,7 +4,11 @@ Next.js (App Router) + TypeScript + Tailwind CSS のチーム開発リポジト�
 
 ## 企画
 
-- [ネット恋愛・失踪ARG 企画書](docs/concept.md) — 届ける相手、ストーリー、調査体験、審査基準との対応、最小の体験案。
+- [シナリオ『きみの好きな、わたし。』](docs/scenario.md) — 導入、探索、再会時の分岐、Normal／True、後日談までの脚本。
+- [探索資料・謎解き設計](docs/scenario-puzzles.md) — 実際の問題、解法、証拠と会話分岐の対応。ネタバレあり。
+- [シナリオ推敲記録](docs/scenario-review.md) — 各稿の批評、改稿理由、保存した版の履歴。
+- [物語とエンディングの条件](docs/story-requirements.md) — 最新の必須条件。
+- [初期企画書](docs/concept.md) — 企画の出発点。現在の脚本は上記を参照。
 
 ## セットアップ
 
