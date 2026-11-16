@@ -1,6 +1,7 @@
 "use client";
 
 import { PaneToggles } from "@/components/pane-toggles";
+import { EmptyState } from "./empty-state";
 import { useVoice } from "./voice-context";
 
 type VoiceParticipant = {
@@ -58,6 +59,13 @@ export function VoiceChannelView({
 
       <div className="pane-scroll voice-body">
         <section aria-label="参加者" className="voice-participants">
+          {participants.length === 0 && !joined ? (
+            <EmptyState
+              kind="voice"
+              title="参加者はいません"
+              description="「参加」でこのチャンネルに入れます。"
+            />
+          ) : null}
           {participants.map((participant) => (
             <VoiceTile
               key={participant.id}

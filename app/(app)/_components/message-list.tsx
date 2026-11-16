@@ -3,6 +3,7 @@
 import { type ReactNode, useEffect, useRef } from "react";
 import { PaneToggles } from "@/components/pane-toggles";
 import type { Message } from "@/lib/mock/types";
+import { EmptyState } from "./empty-state";
 import { MessageRow } from "./message-row";
 
 const FIVE_MINUTES = 5 * 60 * 1000;
@@ -150,7 +151,7 @@ export function MessageList({
 
       <div ref={scrollRef} className="pane-scroll message-scroll">
         {messages.length === 0 ? (
-          <p className="message-empty">{emptyText}</p>
+          <EmptyState kind="message" title={emptyText} description="下の入力欄から送信できます。" />
         ) : (
           <div className="message-list-inner">
             {rows.map((row) =>
