@@ -10,23 +10,23 @@ export const dmThreads: DMThread[] = [
   },
   {
     id: "t2",
-    participantIds: ["u3", "u4"],
+    participantIds: ["u1", "u3"],
     lastMessageAt: "2026-11-04T13:12:00.000Z",
     unreadCount: 2,
   },
   {
     id: "t3",
-    participantIds: ["u6", "u7"],
+    participantIds: ["u1", "u6"],
     lastMessageAt: "2026-11-05T12:30:00.000Z",
   },
   {
     id: "t4",
-    participantIds: ["u8", "u9"],
+    participantIds: ["u1", "u8"],
     lastMessageAt: "2026-11-06T14:51:00.000Z",
   },
   {
     id: "t5",
-    participantIds: ["u10", "u11"],
+    participantIds: ["u1", "u10"],
     lastMessageAt: "2026-11-07T16:30:00.000Z",
   },
 ];

@@ -47,8 +47,8 @@ export function DmList({ activeThreadId }: { activeThreadId?: string }) {
         <input
           type="text"
           className="dm-search-input"
-          placeholder="検索"
-          aria-label="検索（未実装）"
+          placeholder="検索（準備中）"
+          aria-label="検索（準備中）"
           disabled
         />
       </div>
