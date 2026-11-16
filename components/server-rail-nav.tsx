@@ -10,6 +10,8 @@ export type RailGuild = {
   name: string;
   iconColor: string;
   initials: string;
+  /** iconColor 上の文字コントラストに合わせた文字色のトーン。 */
+  initialsTone: "dark" | "light";
   href: string;
   unreadCount: number;
   mentionCount: number;
@@ -126,7 +128,7 @@ export function ServerRailNav({ guilds }: { guilds: RailGuild[] }) {
             data-rail-item
             data-unread={unread ? "true" : undefined}
           >
-            <span aria-hidden="true" className="rail-initials">
+            <span aria-hidden="true" className="rail-initials" data-tone={guild.initialsTone}>
               {guild.initials}
             </span>
             {mention ? (
