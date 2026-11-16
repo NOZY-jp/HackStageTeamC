@@ -38,7 +38,7 @@ export function PostDetail({
           </Link>
         </p>
       ) : null}
-      <p className="tw-body tw-body-lg">{post.body}</p>
+      <p className="tw-post-body tw-post-body-lg">{post.body}</p>
       <p className="tw-detail-time">
         <time dateTime={post.postedAt}>{formatPostedAt(post.postedAt)}</time>
       </p>

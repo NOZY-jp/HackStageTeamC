@@ -41,8 +41,16 @@ export function TwitterNav() {
         );
         if (!item.href) {
           return (
-            <span key={item.label} className="tw-nav-item" aria-disabled="true">
+            <span
+              key={item.label}
+              className="tw-nav-item"
+              aria-disabled="true"
+              title="この機能はデモでは未実装です"
+            >
               {content}
+              <span className="tw-nav-badge" aria-hidden="true">
+                準備中
+              </span>
             </span>
           );
         }

@@ -449,6 +449,16 @@ a.tw-nav-item:focus-visible {
   cursor: not-allowed;
 }
 
+.tw-nav-badge {
+  margin-left: auto;
+  padding: 2px 8px;
+  border-radius: 999px;
+  background-color: var(--color-bg-input);
+  color: var(--color-text-muted);
+  font-size: 11px;
+  font-weight: 400;
+}
+
 .tw-icon {
   flex: none;
 }
@@ -717,7 +727,7 @@ a.tw-nav-item:focus-visible {
   font-size: 14px;
 }
 
-.tw-body {
+.tw-post-body {
   margin-top: 2px;
   font-size: 15px;
   line-height: 1.55;
@@ -725,7 +735,7 @@ a.tw-nav-item:focus-visible {
   overflow-wrap: anywhere;
 }
 
-.tw-body-lg {
+.tw-post-body-lg {
   margin-top: 12px;
   font-size: 20px;
   line-height: 1.5;
@@ -868,6 +878,10 @@ a.tw-nav-item:focus-visible {
     overflow: hidden;
     clip-path: inset(50%);
     white-space: nowrap;
+  }
+
+  .tw-nav-badge {
+    display: none;
   }
 }
 

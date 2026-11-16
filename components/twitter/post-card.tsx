@@ -62,7 +62,7 @@ export function PostCard({ post, author, replyTo }: { post: Post; author: User; 
             </Link>
           </p>
         ) : null}
-        <p className="tw-body">{post.body}</p>
+        <p className="tw-post-body">{post.body}</p>
         <PostStats post={post} />
       </div>
     </article>
