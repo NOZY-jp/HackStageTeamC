@@ -1,26 +1,348 @@
 @import "tailwindcss";
 
+/*
+ * 配色トークン（ダークのみ）。
+ * 色の値はここだけで定義し、コンポーネントからは hex を書かず
+ * var(--color-*) か下の @theme で定義した Tailwind ユーティリティ（bg-main 等）を使う。
+ */
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  color-scheme: dark;
+
+  --color-bg-app: #1e1f22;
+  --color-bg-rail: #1e1f22;
+  --color-bg-sidebar: #2b2d31;
+  --color-bg-main: #313338;
+  --color-bg-input: #383a40;
+  --color-text: #dbdee1;
+  --color-text-muted: #949ba4;
+  --color-accent: #5865f2;
+  --color-divider: #1f2023;
+  --color-hover: #35373c;
+  --color-selected: #404249;
+  --color-danger: #f23f43;
+
+  --rail-width: 72px;
+  --sidebar-width: 240px;
+  --pane-border: 1px;
+
+  /* 動きの長さ。prefers-reduced-motion では 0 にする（!important を使わない） */
+  --motion-fast: 120ms;
+  --motion-normal: 160ms;
 }
 
 @theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --color-app: var(--color-bg-app);
+  --color-rail: var(--color-bg-rail);
+  --color-sidebar: var(--color-bg-sidebar);
+  --color-main: var(--color-bg-main);
+  --color-input: var(--color-bg-input);
+  --color-fg: var(--color-text);
+  --color-fg-muted: var(--color-text-muted);
+  --color-brand: var(--color-accent);
+  --color-line: var(--color-divider);
+  --color-surface-hover: var(--color-hover);
+  --color-surface-selected: var(--color-selected);
+  --color-alert: var(--color-danger);
+  --font-sans:
+    "Hiragino Kaku Gothic ProN", "Hiragino Sans", "Noto Sans JP", "Yu Gothic UI", Meiryo, system-ui,
+    -apple-system, "Segoe UI", sans-serif;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+@layer base {
+  html,
+  body {
+    height: 100%;
+  }
+
+  body {
+    background-color: var(--color-bg-app);
+    color: var(--color-text);
+    font-family: var(--font-sans);
+    /* ページ全体はスクロールさせない（スクロールは各ペインの中だけ） */
+    overflow: hidden;
+  }
+
+  :focus-visible {
+    outline: 2px solid var(--color-accent);
+    outline-offset: 2px;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    :root {
+      --motion-fast: 0ms;
+      --motion-normal: 0ms;
+    }
   }
 }
 
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+/* ---- 3ペインの骨格（レール 72px / サイドバー 240px / メイン 可変） ---- */
+
+.app-shell {
+  display: grid;
+  grid-template-columns: var(--rail-width) var(--sidebar-width) minmax(0, 1fr);
+  height: 100dvh;
+  max-height: 100dvh;
+  overflow: hidden;
+  background-color: var(--color-bg-app);
+}
+
+.app-rail {
+  grid-column: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  min-height: 0;
+  padding: 8px 0;
+  overflow-x: hidden;
+  overflow-y: auto;
+  background-color: var(--color-bg-rail);
+  border-right: var(--pane-border) solid var(--color-divider);
+  z-index: 50;
+}
+
+.app-sidebar {
+  grid-column: 2;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  min-width: 0;
+  background-color: var(--color-bg-sidebar);
+  border-right: var(--pane-border) solid var(--color-divider);
+}
+
+.app-main {
+  grid-column: 3;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  min-width: 0;
+  background-color: var(--color-bg-main);
+}
+
+/* 各ペインの独立スクロール。page全体は動かさない */
+.pane-scroll {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  scrollbar-width: thin;
+  scrollbar-color: var(--color-bg-input) transparent;
+}
+
+.pane-header {
+  flex: none;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 48px;
+  padding: 0 12px;
+  border-bottom: var(--pane-border) solid var(--color-divider);
+}
+
+.app-backdrop {
+  display: none;
+  position: fixed;
+  inset: 0;
+  z-index: 35;
+  border: 0;
+  padding: 0;
+  background-color: rgb(0 0 0 / 0.55);
+  cursor: pointer;
+}
+
+.only-compact,
+.only-mobile {
+  display: none;
+}
+
+.pane-toggle {
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  flex: none;
+  border-radius: 6px;
+  color: var(--color-text-muted);
+  background-color: transparent;
+}
+
+.pane-toggle:hover,
+.pane-toggle:focus-visible {
+  background-color: var(--color-hover);
+  color: var(--color-text);
+}
+
+/* 1024px 未満: サイドバーはオーバーレイ、レールは常時表示 */
+@media (max-width: 1023.98px) {
+  .app-shell {
+    grid-template-columns: var(--rail-width) minmax(0, 1fr);
+  }
+
+  .app-sidebar {
+    position: fixed;
+    top: 0;
+    bottom: 0;
+    left: var(--rail-width);
+    width: var(--sidebar-width);
+    max-width: calc(100vw - var(--rail-width));
+    z-index: 40;
+    transform: translateX(-100%);
+    /* 閉じている間はフォーカス・読み上げの対象から外す */
+    visibility: hidden;
+    transition:
+      transform var(--motion-normal) ease,
+      visibility 0s linear var(--motion-normal);
+  }
+
+  .app-shell[data-sidebar-open="true"] .app-sidebar {
+    transform: none;
+    visibility: visible;
+    transition:
+      transform var(--motion-normal) ease,
+      visibility 0s;
+  }
+
+  .app-shell[data-sidebar-open="true"] .app-backdrop,
+  .app-shell[data-rail-open="true"] .app-backdrop {
+    display: block;
+  }
+
+  .only-compact {
+    display: inline-flex;
+  }
+}
+
+/* 640px 未満: レールもオーバーレイ。メインヘッダのハンバーガーで開閉 */
+@media (max-width: 639.98px) {
+  .app-shell {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .app-rail {
+    position: fixed;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    width: var(--rail-width);
+    transform: translateX(-100%);
+    visibility: hidden;
+    transition:
+      transform var(--motion-normal) ease,
+      visibility 0s linear var(--motion-normal);
+  }
+
+  .app-shell[data-rail-open="true"] .app-rail {
+    transform: none;
+    visibility: visible;
+    transition:
+      transform var(--motion-normal) ease,
+      visibility 0s;
+  }
+
+  .app-sidebar {
+    left: 0;
+    z-index: 45;
+    max-width: min(var(--sidebar-width), calc(100vw - 64px));
+  }
+
+  .only-mobile {
+    display: inline-flex;
+  }
+}
+
+/* レール内のアイコン（円・角丸ボタン） */
+.rail-button {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 48px;
+  height: 48px;
+  border-radius: 16px;
+  color: var(--color-text);
+  background-color: var(--color-bg-rail);
+  transition:
+    border-radius var(--motion-fast) ease,
+    background-color var(--motion-fast) ease,
+    color var(--motion-fast) ease;
+}
+
+.rail-button:hover,
+.rail-button:focus-visible {
+  border-radius: 14px;
+  background-color: var(--color-accent);
+  color: var(--color-text);
+}
+
+.rail-button[aria-current="page"] {
+  border-radius: 14px;
+  background-color: var(--color-accent);
+}
+
+/* 選択中を示す左のバー（色だけに頼らず aria-current と併用） */
+.rail-button::before {
+  content: "";
+  position: absolute;
+  left: -12px;
+  width: 4px;
+  height: 0;
+  border-radius: 0 4px 4px 0;
+  background-color: var(--color-text);
+  transition: height var(--motion-fast) ease;
+}
+
+.rail-button[aria-current="page"]::before {
+  height: 24px;
+}
+
+.rail-divider {
+  width: 32px;
+  height: 2px;
+  margin: 4px 0;
+  border-radius: 1px;
+  background-color: var(--color-divider);
+}
+
+.sidebar-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  min-height: 34px;
+  padding: 6px 8px;
+  border-radius: 6px;
+  color: var(--color-text-muted);
+  font-size: 15px;
+  line-height: 1.3;
+  text-align: left;
+}
+
+.sidebar-item:hover,
+.sidebar-item:focus-visible {
+  background-color: var(--color-hover);
+  color: var(--color-text);
+}
+
+.sidebar-item[aria-current="page"] {
+  background-color: var(--color-selected);
+  color: var(--color-text);
+}
+
+.sidebar-section {
+  padding: 12px 8px 4px;
+  color: var(--color-text-muted);
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+}
+
+.sidebar-empty {
+  margin: 8px;
+  padding: 12px;
+  border-radius: 8px;
+  color: var(--color-text-muted);
+  font-size: 13px;
+  line-height: 1.6;
 }
