@@ -1,14 +1,16 @@
 import { getUser } from "@/lib/mock";
 
+/** 現行 Discord の表示（idle は「退席中」）。 */
 const STATUS_LABELS: Record<string, string> = {
   online: "オンライン",
-  idle: "離席中",
+  idle: "退席中",
   dnd: "取り込み中",
   offline: "オフライン",
 };
 
 /**
  * サイドバー下端のユーザーパネル。表示専用。
+ * 名前の下はステータス文言、ハンドルはホバー／フォーカス時にスロット状に出す（#32）。
  * ミュート・設定アイコンは見た目だけで、押しても何も起きない（#7 の非対象）。
  */
 export function SidebarUserPanel({ userId }: { userId: string }) {
@@ -21,7 +23,10 @@ export function SidebarUserPanel({ userId }: { userId: string }) {
   const statusLabel = STATUS_LABELS[status] ?? STATUS_LABELS.offline;
 
   return (
-    <div className="sidebar-user">
+    <section
+      className="sidebar-user"
+      aria-label={`${user.displayName}（${statusLabel}）、ユーザーネーム ${user.handle}`}
+    >
       <span className="sidebar-user-avatar-wrap">
         <span
           aria-hidden="true"
@@ -39,7 +44,9 @@ export function SidebarUserPanel({ userId }: { userId: string }) {
       </span>
       <span className="sidebar-user-text">
         <span className="sidebar-user-name">{user.displayName}</span>
-        <span className="sidebar-user-handle">@{user.handle}</span>
+        <span className="sidebar-user-status" data-status={status}>
+          {statusLabel}
+        </span>
       </span>
 
       {/* 見た目のみ（操作不可）。実機能は #7 の非対象 */}
@@ -75,6 +82,9 @@ export function SidebarUserPanel({ userId }: { userId: string }) {
           <path d="M19.4 15a7.9 7.9 0 0 0 .1-1 7.9 7.9 0 0 0-.1-1l2-1.6-2-3.4-2.4 1a8 8 0 0 0-1.7-1L15 4.5h-4l-.3 2.5a8 8 0 0 0-1.7 1l-2.4-1-2 3.4L6.6 13a7.9 7.9 0 0 0 0 2l-2 1.6 2 3.4 2.4-1a8 8 0 0 0 1.7 1l.3 2.5h4l.3-2.5a8 8 0 0 0 1.7-1l2.4 1 2-3.4-2-1.6Z" />
         </svg>
       </span>
-    </div>
+
+      {/* 既定では隠しておき、行のホバー／フォーカスでスロット状に下から出す */}
+      <span className="sidebar-user-handle">{user.handle}</span>
+    </section>
   );
 }
