@@ -188,6 +188,11 @@
     grid-template-columns: var(--rail-width) minmax(0, 1fr);
   }
 
+  /* 2列レイアウトではメインは2列目。3列目を指定すると暗黙の0幅列が増える */
+  .app-main {
+    grid-column: 2;
+  }
+
   .app-sidebar {
     position: fixed;
     top: 0;
@@ -226,6 +231,15 @@
 @media (max-width: 639.98px) {
   .app-shell {
     grid-template-columns: minmax(0, 1fr);
+  }
+
+  /* 1列レイアウトでは 1 / -1 が1列目だけを指すよう、メインも1列目に置く */
+  .app-main {
+    grid-column: 1;
+  }
+
+  .voice-panel {
+    grid-column: 1;
   }
 
   .app-rail {
