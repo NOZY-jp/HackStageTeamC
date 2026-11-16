@@ -1,6 +1,6 @@
 import type { Message } from "../../types";
 
-/** HackStage 運営 のテキストチャンネルごとのメッセージ。キーはチャンネルID。 */
+/** ゲーム部 のテキストチャンネルごとのメッセージ。キーはチャンネルID。 */
 export const messagesByChannelS3: Record<string, Message[]> = {
   "s3-announcements": [
     {
