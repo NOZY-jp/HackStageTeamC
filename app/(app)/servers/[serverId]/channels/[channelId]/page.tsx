@@ -1,5 +1,5 @@
+import { notFound } from "next/navigation";
 import { ChannelSidebar } from "@/components/channel-sidebar";
-import { MainPane } from "@/components/main-pane";
 import { getChannel, getUser, listMessages, listVoiceStates } from "@/lib/mock";
 import { MessagePane } from "../../../../_components/message-pane";
 import { SELF_USER_ID } from "../../../../_components/self-user";
@@ -12,6 +12,11 @@ export default async function ChannelPage({
 }) {
   const { serverId, channelId } = await params;
   const channel = getChannel(channelId);
+
+  if (!channel) {
+    notFound();
+  }
+
   const selfUser = getUser(SELF_USER_ID);
   const currentUser = {
     id: SELF_USER_ID,
@@ -23,7 +28,7 @@ export default async function ChannelPage({
     <>
       <ChannelSidebar guildId={serverId} channelId={channelId} />
 
-      {channel?.kind === "text" ? (
+      {channel.kind === "text" ? (
         <MessagePane
           channelKey={channel.id}
           initialMessages={listMessages(channel.id)}
@@ -31,7 +36,7 @@ export default async function ChannelPage({
           topic={channel.topic}
           showHash
         />
-      ) : channel?.kind === "voice" ? (
+      ) : (
         <VoiceChannelView
           guildId={channel.guildId}
           channelId={channel.id}
@@ -49,17 +54,6 @@ export default async function ChannelPage({
             };
           })}
         />
-      ) : (
-        <MainPane label="チャンネル" heading={channel ? channel.name : channelId}>
-          <div className="flex h-full flex-col items-center justify-center gap-2 px-6 py-16 text-center">
-            <p className="text-base font-semibold text-fg">
-              {channel ? `#${channel.name}` : "チャンネルが見つかりません"}
-            </p>
-            <p className="text-sm leading-6 text-fg-muted">
-              URL のチャンネルIDを確認してください。
-            </p>
-          </div>
-        </MainPane>
       )}
     </>
   );

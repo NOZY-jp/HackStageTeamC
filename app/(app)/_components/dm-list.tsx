@@ -2,6 +2,7 @@ import Link from "next/link";
 import { SidebarPane } from "@/components/sidebar-pane";
 import { SidebarUserPanel } from "@/components/sidebar-user-panel";
 import { getUser, listDMMessages, listDMThreads } from "@/lib/mock";
+import { EmptyState } from "./empty-state";
 import { SELF_USER_ID } from "./self-user";
 
 const STATUS_LABELS: Record<string, string> = {
@@ -52,6 +53,14 @@ export function DmList({ activeThreadId }: { activeThreadId?: string }) {
           disabled
         />
       </div>
+
+      {threads.length === 0 ? (
+        <EmptyState
+          kind="dm"
+          title="DMがありません"
+          description="レールから相手を選んで開始できます。"
+        />
+      ) : null}
 
       <ul>
         {threads.map((thread) => {

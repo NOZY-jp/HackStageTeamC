@@ -1296,3 +1296,137 @@
 .message-composer-send:disabled {
   opacity: 0.4;
 }
+
+/* ---- 未検出・エラー・空・読み込み（#12） ---- */
+
+/* 未検出／エラーはレール以外の領域を使う（3ペインの骨格は保つ） */
+.route-state {
+  grid-column: 2 / -1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 32px;
+  background-color: var(--color-bg-main);
+  text-align: center;
+}
+
+.route-state-code {
+  color: var(--color-text-muted);
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+}
+
+.route-state-title {
+  color: var(--color-text);
+  font-size: 20px;
+  font-weight: 700;
+}
+
+.route-state-description {
+  color: var(--color-text-muted);
+  font-size: 14px;
+}
+
+.route-state-link {
+  margin-top: 8px;
+  padding: 8px 16px;
+  border-radius: 6px;
+  background-color: var(--color-accent);
+  color: var(--color-text);
+  font-size: 14px;
+  font-weight: 700;
+}
+
+.route-state-link:hover,
+.route-state-link:focus-visible {
+  background-color: var(--color-hover);
+}
+
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  width: 100%;
+  padding: 24px 16px;
+  text-align: center;
+}
+
+.empty-state-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 48px;
+  height: 48px;
+  margin-bottom: 4px;
+  border-radius: 50%;
+  background-color: var(--color-bg-app);
+  color: var(--color-text-muted);
+}
+
+.empty-state-title {
+  color: var(--color-text);
+  font-size: 15px;
+  font-weight: 700;
+}
+
+.empty-state-description {
+  color: var(--color-text-muted);
+  font-size: 13px;
+}
+
+/* メッセージログの空状態は残りの高さで中央に置く */
+.message-scroll > .empty-state {
+  flex: 1;
+}
+
+.skeleton-pane {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 12px;
+}
+
+.skeleton-block {
+  display: block;
+  border-radius: 6px;
+  background-color: var(--color-bg-input);
+}
+
+.skeleton-header {
+  width: 40%;
+  height: 14px;
+  margin-left: 12px;
+}
+
+.skeleton-row {
+  max-width: 100%;
+  height: 28px;
+}
+
+.skeleton-line {
+  max-width: 100%;
+  height: 16px;
+}
+
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+/* 640px 未満は1カラムになるので全幅に広げる */
+@media (max-width: 639.98px) {
+  .route-state {
+    grid-column: 1 / -1;
+  }
+}
