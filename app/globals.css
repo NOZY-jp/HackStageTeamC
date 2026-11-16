@@ -733,7 +733,7 @@
 
 .message-author {
   color: var(--color-text);
-  font-size: 15px;
+  font-size: 16px;
   font-weight: 700;
 }
 
@@ -749,8 +749,9 @@
 
 .message-body {
   color: var(--color-text);
-  font-size: 15px;
-  line-height: 1.5;
+  /* 本文は 16px / 行間 1.375（Discord 基準） */
+  font-size: 16px;
+  line-height: 1.375;
   overflow-wrap: anywhere;
   white-space: pre-wrap;
 }
