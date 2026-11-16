@@ -14,14 +14,14 @@
   --color-bg-main: #313338;
   --color-bg-input: #383a40;
   --color-text: #dbdee1;
-  --color-text-muted: #949ba4;
-  --color-accent: #5865f2;
+  --color-text-muted: #a8adb5;
+  --color-accent: #4752c4;
   --color-divider: #1f2023;
   --color-hover: #35373c;
   --color-selected: #404249;
-  --color-danger: #f23f43;
+  --color-danger: #c93b3d;
   --color-text-on-danger: #ffffff;
-  --color-status-online: #3ba55d;
+  --color-status-online: #4ade80;
   --color-status-idle: #faa81a;
   --color-status-dnd: #ed4245;
   --color-status-offline: #80848e;
@@ -71,13 +71,6 @@
   :focus-visible {
     outline: 2px solid var(--color-accent);
     outline-offset: 2px;
-  }
-
-  @media (prefers-reduced-motion: reduce) {
-    :root {
-      --motion-fast: 0ms;
-      --motion-normal: 0ms;
-    }
   }
 }
 
@@ -933,8 +926,8 @@
 }
 
 .voice-panel-button[aria-pressed="true"] {
-  background-color: var(--color-bg-sidebar);
-  color: var(--color-danger);
+  background-color: var(--color-danger);
+  color: var(--color-text-on-danger);
 }
 
 .voice-panel-leave {
@@ -1045,7 +1038,7 @@
 
 .voice-button[aria-pressed="true"] {
   outline: 2px solid var(--color-divider);
-  color: var(--color-danger);
+  color: var(--color-text);
 }
 
 .voice-button-primary {
@@ -1194,12 +1187,6 @@
   background-color: var(--color-bg-input);
 }
 
-/* テキストエリアは入力欄全体でフォーカスを示す */
-.message-composer:focus-within {
-  outline: 2px solid var(--color-accent);
-  outline-offset: 2px;
-}
-
 .message-composer-input {
   flex: 1;
   min-width: 0;
@@ -1212,7 +1199,6 @@
   font: inherit;
   font-size: 15px;
   line-height: 1.5;
-  outline: none;
   resize: none;
   overflow-y: auto;
 }
@@ -1376,5 +1362,13 @@
 @media (max-width: 639.98px) {
   .route-state {
     grid-column: 1 / -1;
+  }
+}
+
+/* モーション無効化。@layer の外に置く（レイヤー内だと未レイヤーの :root に負ける） */
+@media (prefers-reduced-motion: reduce) {
+  :root {
+    --motion-fast: 0ms;
+    --motion-normal: 0ms;
   }
 }
