@@ -1,5 +1,5 @@
+import { ChannelSidebar } from "@/components/channel-sidebar";
 import { MainPane } from "@/components/main-pane";
-import { ServerSidebar } from "@/components/server-sidebar";
 
 export default async function ChannelPage({
   params,
@@ -10,7 +10,7 @@ export default async function ChannelPage({
 
   return (
     <>
-      <ServerSidebar serverId={serverId} activeChannelId={channelId} />
+      <ChannelSidebar guildId={serverId} channelId={channelId} />
       <MainPane label="チャンネル" heading={`#${channelId}`}>
         <div className="flex h-full flex-col items-center justify-center gap-2 px-6 py-16 text-center">
           <p className="text-base font-semibold text-fg">
