@@ -1,6 +1,6 @@
 import type { Message } from "../../types";
 
-/** HackStage Team C のテキストチャンネルごとのメッセージ。キーはチャンネルID。 */
+/** 開発ラボ のテキストチャンネルごとのメッセージ。キーはチャンネルID。 */
 export const messagesByChannelS1: Record<string, Message[]> = {
   "s1-general": [
     {
