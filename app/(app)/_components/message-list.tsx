@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { type ReactNode, useEffect, useRef } from "react";
 import { PaneToggles } from "@/components/pane-toggles";
 import type { Message } from "@/lib/mock/types";
 import { MessageRow } from "./message-row";
@@ -36,6 +36,7 @@ export function MessageList({
   showHash = true,
   emptyText = "まだメッセージがありません",
   headerAvatar,
+  composer,
 }: {
   messages: Message[];
   title: string;
@@ -44,6 +45,8 @@ export function MessageList({
   emptyText?: string;
   /** DM などでヘッダに出す相手のアバター（省略時は出さない）。 */
   headerAvatar?: { displayName: string; avatarColor: string };
+  /** ログの下に差し込む入力欄（省略時は出さない）。 */
+  composer?: ReactNode;
 }) {
   const scrollRef = useRef<HTMLDivElement>(null);
 
@@ -168,6 +171,7 @@ export function MessageList({
           </div>
         )}
       </div>
+      {composer ? <div className="message-composer-area">{composer}</div> : null}
     </main>
   );
 }

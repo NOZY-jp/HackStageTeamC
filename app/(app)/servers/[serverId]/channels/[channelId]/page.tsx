@@ -1,7 +1,7 @@
 import { ChannelSidebar } from "@/components/channel-sidebar";
 import { MainPane } from "@/components/main-pane";
 import { getChannel, getUser, listMessages, listVoiceStates } from "@/lib/mock";
-import { MessageList } from "../../../../_components/message-list";
+import { MessagePane } from "../../../../_components/message-pane";
 import { SELF_USER_ID } from "../../../../_components/self-user";
 import { VoiceChannelView } from "../../../../_components/voice-channel-view";
 
@@ -24,8 +24,9 @@ export default async function ChannelPage({
       <ChannelSidebar guildId={serverId} channelId={channelId} />
 
       {channel?.kind === "text" ? (
-        <MessageList
-          messages={listMessages(channel.id)}
+        <MessagePane
+          channelKey={channel.id}
+          initialMessages={listMessages(channel.id)}
           title={channel.name}
           topic={channel.topic}
           showHash

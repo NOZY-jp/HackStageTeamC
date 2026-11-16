@@ -1,7 +1,7 @@
 import { MainPane } from "@/components/main-pane";
 import { getDMThread, getUser, listDMMessages } from "@/lib/mock";
 import { DmList } from "../../_components/dm-list";
-import { MessageList } from "../../_components/message-list";
+import { MessagePane } from "../../_components/message-pane";
 import { SELF_USER_ID } from "../../_components/self-user";
 
 export default async function DmThreadPage({ params }: { params: Promise<{ threadId: string }> }) {
@@ -31,8 +31,9 @@ export default async function DmThreadPage({ params }: { params: Promise<{ threa
   return (
     <>
       <DmList activeThreadId={threadId} />
-      <MessageList
-        messages={listDMMessages(thread.id)}
+      <MessagePane
+        channelKey={thread.id}
+        initialMessages={listDMMessages(thread.id)}
         title={otherName}
         showHash={false}
         headerAvatar={{ displayName: otherName, avatarColor: other?.avatarColor ?? "transparent" }}
