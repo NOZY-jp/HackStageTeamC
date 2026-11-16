@@ -39,7 +39,7 @@ export function DmList({ activeThreadId }: { activeThreadId?: string }) {
 
   return (
     <SidebarPane
-      label="ダイレクトメッセージ一覧"
+      label="ダイレクトメッセージ"
       title="ダイレクトメッセージ"
       footer={<SidebarUserPanel userId={SELF_USER_ID} />}
     >

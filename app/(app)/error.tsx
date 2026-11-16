@@ -12,7 +12,7 @@ export default function AppError({
       <p className="route-state-code" aria-hidden="true">
         !
       </p>
-      <p className="route-state-title">表示できませんでした</p>
+      <h1 className="route-state-title">表示できませんでした</h1>
       <p className="route-state-description">一時的な問題の可能性があります。</p>
       <button type="button" className="route-state-link" onClick={reset}>
         再試行

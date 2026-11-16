@@ -73,7 +73,7 @@ export function ServerRailNav({ guilds }: { guilds: RailGuild[] }) {
   return (
     <nav
       ref={navRef}
-      aria-label="サーバー"
+      aria-label="サーバー一覧"
       id="app-rail"
       className="app-rail"
       onKeyDown={handleKeyDown}
