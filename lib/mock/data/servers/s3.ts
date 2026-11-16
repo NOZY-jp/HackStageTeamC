@@ -1,11 +1,11 @@
 import type { Guild } from "../../types";
 
-/** HackStage 運営（ダミー）。カテゴリ3・テキスト7・ボイス3。 */
+/** ゲーム部（ダミー）。カテゴリ3・テキスト7・ボイス3。 */
 export const s3: Guild = {
   id: "s3",
-  name: "HackStage 運営",
+  name: "ゲーム部",
   iconColor: "#c2255c",
-  initials: "HO",
+  initials: "GB",
   categories: [
     {
       id: "s3-cat-1",
