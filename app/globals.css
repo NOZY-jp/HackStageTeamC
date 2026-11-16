@@ -21,6 +21,8 @@
   --color-selected: #404249;
   --color-danger: #f23f43;
   --color-text-on-danger: #ffffff;
+  /* 明るい背景（サーバーの iconColor）に載せる濃い文字 */
+  --color-text-on-light: #000000;
 
   --rail-width: 72px;
   --sidebar-width: 240px;
@@ -300,6 +302,15 @@
   font-size: 14px;
   font-weight: 700;
   line-height: 1;
+}
+
+/* iconColor の輝度に応じて濃い文字／白文字を選ぶ（4.5:1 以上を確保） */
+.rail-initials[data-tone="dark"] {
+  color: var(--color-text-on-light);
+}
+
+.rail-initials[data-tone="light"] {
+  color: var(--color-text-on-danger);
 }
 
 /* 左端のインジケータ（未読=短い白丸 / 選択中=長い白い縦棒） */
