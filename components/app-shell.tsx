@@ -32,7 +32,16 @@ export function useShellControls(): ShellControls {
  * 3ペインの外枠。オーバーレイ表示の開閉状態だけをクライアントで持つ。
  * 幅による切り替えは globals.css のメディアクエリで行い、JS では分岐しない。
  */
-export function AppShell({ rail, children }: { rail: ReactNode; children: ReactNode }) {
+export function AppShell({
+  rail,
+  children,
+  footer,
+}: {
+  rail: ReactNode;
+  children: ReactNode;
+  /** シェル下端に固定する領域（VCの接続パネルなど）。無いときは描画しない。 */
+  footer?: ReactNode;
+}) {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [railOpen, setRailOpen] = useState(false);
 
@@ -78,6 +87,7 @@ export function AppShell({ rail, children }: { rail: ReactNode; children: ReactN
         />
         {rail}
         {children}
+        {footer}
       </div>
     </ShellContext.Provider>
   );

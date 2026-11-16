@@ -1,7 +1,9 @@
 import { ChannelSidebar } from "@/components/channel-sidebar";
 import { MainPane } from "@/components/main-pane";
-import { getChannel, listMessages } from "@/lib/mock";
+import { getChannel, getUser, listMessages, listVoiceStates } from "@/lib/mock";
 import { MessageList } from "../../../../_components/message-list";
+import { SELF_USER_ID } from "../../../../_components/self-user";
+import { VoiceChannelView } from "../../../../_components/voice-channel-view";
 
 export default async function ChannelPage({
   params,
@@ -10,6 +12,12 @@ export default async function ChannelPage({
 }) {
   const { serverId, channelId } = await params;
   const channel = getChannel(channelId);
+  const selfUser = getUser(SELF_USER_ID);
+  const currentUser = {
+    id: SELF_USER_ID,
+    displayName: selfUser?.displayName ?? "自分",
+    avatarColor: selfUser?.avatarColor ?? "transparent",
+  };
 
   return (
     <>
@@ -22,6 +30,24 @@ export default async function ChannelPage({
           topic={channel.topic}
           showHash
         />
+      ) : channel?.kind === "voice" ? (
+        <VoiceChannelView
+          guildId={channel.guildId}
+          channelId={channel.id}
+          channelName={channel.name}
+          currentUser={currentUser}
+          participants={listVoiceStates(channel.id).map((state) => {
+            const user = getUser(state.userId);
+            return {
+              id: state.userId,
+              displayName: user?.displayName ?? state.userId,
+              avatarColor: user?.avatarColor ?? "transparent",
+              speaking: state.speaking,
+              muted: state.muted,
+              deafened: state.deafened,
+            };
+          })}
+        />
       ) : (
         <MainPane label="チャンネル" heading={channel ? channel.name : channelId}>
           <div className="flex h-full flex-col items-center justify-center gap-2 px-6 py-16 text-center">
@@ -29,9 +55,7 @@ export default async function ChannelPage({
               {channel ? `#${channel.name}` : "チャンネルが見つかりません"}
             </p>
             <p className="text-sm leading-6 text-fg-muted">
-              {channel?.kind === "voice"
-                ? "ボイスチャンネルの画面は #9 で実装します。"
-                : "URL のチャンネルIDを確認してください。"}
+              URL のチャンネルIDを確認してください。
             </p>
           </div>
         </MainPane>
