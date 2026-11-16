@@ -16,6 +16,8 @@
   --color-text: #dbdee1;
   --color-text-muted: #a8adb5;
   --color-accent: #4752c4;
+  /* 暗い背景の上に置く「線・アイコン・リング」用（面に載せる白文字用の accent とは別） */
+  --color-accent-fg: #8ea1ff;
   --color-divider: #1f2023;
   --color-hover: #35373c;
   --color-selected: #404249;
@@ -71,7 +73,7 @@
   }
 
   :focus-visible {
-    outline: 2px solid var(--color-accent);
+    outline: 2px solid var(--color-accent-fg);
     outline-offset: 2px;
   }
 }
@@ -876,7 +878,7 @@
 }
 
 .reaction[data-me="true"] {
-  border-color: var(--color-accent);
+  border-color: var(--color-accent-fg);
   color: var(--color-text);
 }
 
@@ -1276,7 +1278,7 @@
 
 .message-composer-send:hover:enabled {
   background-color: var(--color-hover);
-  color: var(--color-accent);
+  color: var(--color-accent-fg);
 }
 
 .message-composer-send:disabled {
