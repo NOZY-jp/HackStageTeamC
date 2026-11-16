@@ -1,6 +1,6 @@
+import { DmList } from "@/app/(discord-like)/_components/dm-list";
 import { MainPane } from "@/components/discord-like/main-pane";
 import { PlaceholderNotice } from "@/components/discord-like/placeholder-notice";
-import { DmList } from "../_components/dm-list";
 
 export default function DmPage() {
   return (

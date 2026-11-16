@@ -1,9 +1,9 @@
 import { notFound } from "next/navigation";
+import { MessagePane } from "@/app/(discord-like)/_components/message-pane";
+import { SELF_USER_ID } from "@/app/(discord-like)/_components/self-user";
+import { VoiceChannelView } from "@/app/(discord-like)/_components/voice-channel-view";
 import { ChannelSidebar } from "@/components/discord-like/channel-sidebar";
 import { getChannel, getUser, listMessages, listVoiceStates } from "@/lib/discord-like";
-import { MessagePane } from "../../../../_components/message-pane";
-import { SELF_USER_ID } from "../../../../_components/self-user";
-import { VoiceChannelView } from "../../../../_components/voice-channel-view";
 
 export default async function ChannelPage({
   params,

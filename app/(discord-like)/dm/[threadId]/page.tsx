@@ -1,8 +1,8 @@
 import { notFound } from "next/navigation";
+import { DmList } from "@/app/(discord-like)/_components/dm-list";
+import { MessagePane } from "@/app/(discord-like)/_components/message-pane";
+import { SELF_USER_ID } from "@/app/(discord-like)/_components/self-user";
 import { getDMThread, getUser, listDMMessages } from "@/lib/discord-like";
-import { DmList } from "../../_components/dm-list";
-import { MessagePane } from "../../_components/message-pane";
-import { SELF_USER_ID } from "../../_components/self-user";
 
 export default async function DmThreadPage({ params }: { params: Promise<{ threadId: string }> }) {
   const { threadId } = await params;
