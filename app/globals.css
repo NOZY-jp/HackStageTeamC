@@ -20,6 +20,9 @@
   --color-hover: #35373c;
   --color-selected: #404249;
   --color-danger: #f23f43;
+  --color-text-on-danger: #ffffff;
+  /* 明るい背景（サーバーの iconColor）に載せる濃い文字 */
+  --color-text-on-light: #000000;
 
   --rail-width: 72px;
   --sidebar-width: 240px;
@@ -43,6 +46,7 @@
   --color-surface-hover: var(--color-hover);
   --color-surface-selected: var(--color-selected);
   --color-alert: var(--color-danger);
+  --color-fg-on-danger: var(--color-text-on-danger);
   --font-sans:
     "Hiragino Kaku Gothic ProN", "Hiragino Sans", "Noto Sans JP", "Yu Gothic UI", Meiryo, system-ui,
     -apple-system, "Segoe UI", sans-serif;
@@ -93,12 +97,18 @@
   align-items: center;
   gap: 8px;
   min-height: 0;
-  padding: 8px 0;
+  padding: 8px 0 24px;
   overflow-x: hidden;
   overflow-y: auto;
   background-color: var(--color-bg-rail);
   border-right: var(--pane-border) solid var(--color-divider);
   z-index: 50;
+  scrollbar-width: none;
+}
+
+/* レールは縦スクロール可、スクロールバーは出さない */
+.app-rail::-webkit-scrollbar {
+  display: none;
 }
 
 .app-sidebar {
@@ -251,17 +261,18 @@
   }
 }
 
-/* レール内のアイコン（円・角丸ボタン） */
+/* レール内のアイコン: 通常16px角丸 → ホバー/選択で12px角丸 */
 .rail-button {
   position: relative;
   display: flex;
   align-items: center;
   justify-content: center;
+  flex: none;
   width: 48px;
   height: 48px;
   border-radius: 16px;
   color: var(--color-text);
-  background-color: var(--color-bg-rail);
+  background-color: var(--color-bg-input);
   transition:
     border-radius var(--motion-fast) ease,
     background-color var(--motion-fast) ease,
@@ -269,18 +280,40 @@
 }
 
 .rail-button:hover,
-.rail-button:focus-visible {
-  border-radius: 14px;
-  background-color: var(--color-accent);
-  color: var(--color-text);
-}
-
+.rail-button:focus-visible,
 .rail-button[aria-current="page"] {
-  border-radius: 14px;
+  border-radius: 12px;
+}
+
+/* DM ホームだけアクセント色で塗る（サーバーは iconColor をそのまま使う） */
+.rail-button-dm:hover,
+.rail-button-dm:focus-visible,
+.rail-button-dm[aria-current="page"] {
   background-color: var(--color-accent);
 }
 
-/* 選択中を示す左のバー（色だけに頼らず aria-current と併用） */
+/* レール上のフォーカスリングはアイコン色に埋もれないよう白系にする */
+.app-rail .rail-button:focus-visible {
+  outline: 2px solid var(--color-text);
+  outline-offset: 2px;
+}
+
+.rail-initials {
+  font-size: 14px;
+  font-weight: 700;
+  line-height: 1;
+}
+
+/* iconColor の輝度に応じて濃い文字／白文字を選ぶ（4.5:1 以上を確保） */
+.rail-initials[data-tone="dark"] {
+  color: var(--color-text-on-light);
+}
+
+.rail-initials[data-tone="light"] {
+  color: var(--color-text-on-danger);
+}
+
+/* 左端のインジケータ（未読=短い白丸 / 選択中=長い白い縦棒） */
 .rail-button::before {
   content: "";
   position: absolute;
@@ -292,8 +325,29 @@
   transition: height var(--motion-fast) ease;
 }
 
+.rail-button[data-unread="true"]::before {
+  height: 8px;
+}
+
 .rail-button[aria-current="page"]::before {
   height: 24px;
+}
+
+/* メンションの赤バッジ（右下） */
+.rail-mention {
+  position: absolute;
+  right: -4px;
+  bottom: -4px;
+  min-width: 16px;
+  height: 16px;
+  padding: 0 4px;
+  border-radius: 8px;
+  background-color: var(--color-danger);
+  color: var(--color-text-on-danger);
+  font-size: 11px;
+  font-weight: 700;
+  line-height: 16px;
+  text-align: center;
 }
 
 .rail-divider {
