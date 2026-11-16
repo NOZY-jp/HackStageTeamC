@@ -86,6 +86,8 @@
 .app-shell {
   display: grid;
   grid-template-columns: var(--rail-width) var(--sidebar-width) minmax(0, 1fr);
+  /* 2行目はシェル下端の固定領域（VCの接続パネル）。無いときは高さ0になる */
+  grid-template-rows: minmax(0, 1fr) auto;
   height: 100dvh;
   max-height: 100dvh;
   overflow: hidden;
@@ -857,4 +859,206 @@
 .reaction[data-me="true"] {
   border-color: var(--color-accent);
   color: var(--color-text);
+}
+
+/* ---- VC画面と接続パネル（#9） ---- */
+
+.voice-panel {
+  grid-column: 1 / -1;
+  grid-row: 2;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 6px 12px;
+  border-top: var(--pane-border) solid var(--color-divider);
+  background-color: var(--color-bg-input);
+}
+
+.voice-panel-channel {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+  color: var(--color-text);
+}
+
+.voice-panel-channel:hover,
+.voice-panel-channel:focus-visible {
+  color: var(--color-text);
+  text-decoration: underline;
+}
+
+.voice-panel-text {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  line-height: 1.2;
+}
+
+.voice-panel-name {
+  overflow: hidden;
+  font-size: 13px;
+  font-weight: 700;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.voice-panel-status {
+  color: var(--color-status-online);
+  font-size: 11px;
+}
+
+.voice-panel-actions {
+  display: flex;
+  flex: none;
+  gap: 6px;
+  margin-left: auto;
+}
+
+.voice-panel-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border-radius: 6px;
+  color: var(--color-text-muted);
+  background-color: transparent;
+}
+
+.voice-panel-button:hover,
+.voice-panel-button:focus-visible {
+  background-color: var(--color-hover);
+  color: var(--color-text);
+}
+
+.voice-panel-button[aria-pressed="true"] {
+  background-color: var(--color-bg-sidebar);
+  color: var(--color-danger);
+}
+
+.voice-panel-leave {
+  height: 32px;
+  padding: 0 12px;
+  border-radius: 6px;
+  background-color: var(--color-danger);
+  color: var(--color-text-on-danger);
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.voice-header {
+  gap: 8px;
+}
+
+.voice-header-icon {
+  flex: none;
+  color: var(--color-text-muted);
+}
+
+.voice-header-title {
+  overflow: hidden;
+  color: var(--color-text);
+  font-size: 15px;
+  font-weight: 700;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.voice-body {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  padding: 24px 16px;
+}
+
+.voice-participants {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+  align-content: flex-start;
+}
+
+.voice-tile {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  width: 112px;
+  padding: 12px 8px;
+  border: 2px solid transparent;
+  border-radius: 10px;
+  background-color: var(--color-bg-app);
+}
+
+.voice-tile[data-speaking="true"] {
+  border-color: var(--color-status-online);
+}
+
+.voice-tile-avatar {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  color: var(--color-text-on-danger);
+  font-size: 22px;
+  font-weight: 700;
+}
+
+.voice-tile-name {
+  max-width: 100%;
+  overflow: hidden;
+  color: var(--color-text);
+  font-size: 13px;
+  font-weight: 700;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.voice-tile-status {
+  color: var(--color-text-muted);
+  font-size: 11px;
+}
+
+.voice-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.voice-button {
+  height: 36px;
+  padding: 0 16px;
+  border-radius: 6px;
+  background-color: var(--color-bg-input);
+  color: var(--color-text);
+  font-size: 14px;
+  font-weight: 700;
+}
+
+.voice-button:hover,
+.voice-button:focus-visible {
+  background-color: var(--color-hover);
+}
+
+.voice-button[aria-pressed="true"] {
+  outline: 2px solid var(--color-divider);
+  color: var(--color-danger);
+}
+
+.voice-button-primary {
+  background-color: var(--color-accent);
+  color: var(--color-text);
+}
+
+.voice-button-danger {
+  background-color: var(--color-danger);
+  color: var(--color-text-on-danger);
+}
+
+.voice-note {
+  color: var(--color-text-muted);
+  font-size: 12px;
 }

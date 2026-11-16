@@ -1,10 +1,8 @@
+import { SELF_USER_ID } from "@/app/(app)/_components/self-user";
 import { getGuild, getUser, listChannels, listVoiceStates } from "@/lib/mock";
 import { ChannelTree, type SidebarSection } from "./channel-tree";
 import { SidebarPane } from "./sidebar-pane";
 import { SidebarUserPanel } from "./sidebar-user-panel";
-
-/** 下部ユーザーパネルに出す「自分」（固定）。 */
-const SELF_USER_ID = "u1";
 
 /**
  * チャンネル一覧の中ペイン（サーバー画面用）。
@@ -26,6 +24,12 @@ export function ChannelSidebar({ guildId, channelId }: { guildId: string; channe
   }
 
   const channels = listChannels(guildId); // position 昇順
+  const selfUser = getUser(SELF_USER_ID);
+  const currentUser = {
+    id: SELF_USER_ID,
+    displayName: selfUser?.displayName ?? "自分",
+    avatarColor: selfUser?.avatarColor ?? "transparent",
+  };
   const sections: SidebarSection[] = [];
 
   // カテゴリ未所属は先頭にまとめる
@@ -55,7 +59,12 @@ export function ChannelSidebar({ guildId, channelId }: { guildId: string; channe
       title={guild.name}
       footer={<SidebarUserPanel userId={SELF_USER_ID} />}
     >
-      <ChannelTree guildId={guildId} activeChannelId={channelId} sections={sections} />
+      <ChannelTree
+        guildId={guildId}
+        activeChannelId={channelId}
+        sections={sections}
+        currentUser={currentUser}
+      />
     </SidebarPane>
   );
 

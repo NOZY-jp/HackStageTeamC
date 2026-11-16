@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useState } from "react";
+import { useVoice } from "@/app/(app)/_components/voice-context";
 
 export type SidebarChannel = {
   id: string;
@@ -27,12 +28,15 @@ export function ChannelTree({
   guildId,
   activeChannelId,
   sections,
+  currentUser,
 }: {
   guildId: string;
   activeChannelId: string;
   sections: SidebarSection[];
+  currentUser: { id: string; displayName: string; avatarColor: string };
 }) {
   const [collapsed, setCollapsed] = useState<Record<string, boolean>>({});
+  const { connection } = useVoice();
 
   return (
     <div>
@@ -64,29 +68,32 @@ export function ChannelTree({
 
             {isCollapsed ? null : (
               <ul>
-                {section.channels.map((channel) => (
-                  <li key={channel.id}>
-                    <ChannelLink
-                      guildId={guildId}
-                      channel={channel}
-                      active={channel.id === activeChannelId}
-                    />
-                    {channel.kind === "voice" && channel.participants.length > 0 ? (
-                      <ul className="voice-members" aria-label={`${channel.name} の参加者`}>
-                        {channel.participants.map((participant) => (
-                          <li key={participant.id} className="voice-member">
-                            <span
-                              aria-hidden="true"
-                              className="voice-avatar"
-                              style={{ backgroundColor: participant.avatarColor }}
-                            />
-                            <span className="truncate">{participant.displayName}</span>
-                          </li>
-                        ))}
-                      </ul>
-                    ) : null}
-                  </li>
-                ))}
+                {section.channels.map((channel) => {
+                  const shown = withSelf(channel, connection?.channelId, currentUser);
+                  return (
+                    <li key={channel.id}>
+                      <ChannelLink
+                        guildId={guildId}
+                        channel={shown}
+                        active={channel.id === activeChannelId}
+                      />
+                      {shown.kind === "voice" && shown.participants.length > 0 ? (
+                        <ul className="voice-members" aria-label={`${channel.name} の参加者`}>
+                          {shown.participants.map((participant) => (
+                            <li key={participant.id} className="voice-member">
+                              <span
+                                aria-hidden="true"
+                                className="voice-avatar"
+                                style={{ backgroundColor: participant.avatarColor }}
+                              />
+                              <span className="truncate">{participant.displayName}</span>
+                            </li>
+                          ))}
+                        </ul>
+                      ) : null}
+                    </li>
+                  );
+                })}
               </ul>
             )}
           </section>
@@ -94,6 +101,26 @@ export function ChannelTree({
       })}
     </div>
   );
+}
+
+/** 参加中のVCには自分を参加者として足す（サイドバーの表示用）。 */
+function withSelf(
+  channel: SidebarChannel,
+  joinedChannelId: string | undefined,
+  currentUser: { id: string; displayName: string; avatarColor: string },
+): SidebarChannel {
+  if (channel.kind !== "voice" || joinedChannelId !== channel.id) {
+    return channel;
+  }
+  return { ...channel, participants: [...channel.participants, selfParticipant(currentUser)] };
+}
+
+function selfParticipant(currentUser: { id: string; displayName: string; avatarColor: string }) {
+  return {
+    id: currentUser.id,
+    displayName: `${currentUser.displayName}（自分）`,
+    avatarColor: currentUser.avatarColor,
+  };
 }
 
 function ChannelLink({
