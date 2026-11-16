@@ -20,6 +20,13 @@
   --color-hover: #35373c;
   --color-selected: #404249;
   --color-danger: #f23f43;
+  --color-text-on-danger: #ffffff;
+  /* 明るい背景（サーバーの iconColor）に載せる濃い文字 */
+  --color-text-on-light: #000000;
+  --color-status-online: #3ba55d;
+  --color-status-idle: #faa81a;
+  --color-status-dnd: #ed4245;
+  --color-status-offline: #80848e;
 
   --rail-width: 72px;
   --sidebar-width: 240px;
@@ -43,6 +50,7 @@
   --color-surface-hover: var(--color-hover);
   --color-surface-selected: var(--color-selected);
   --color-alert: var(--color-danger);
+  --color-fg-on-danger: var(--color-text-on-danger);
   --font-sans:
     "Hiragino Kaku Gothic ProN", "Hiragino Sans", "Noto Sans JP", "Yu Gothic UI", Meiryo, system-ui,
     -apple-system, "Segoe UI", sans-serif;
@@ -80,6 +88,8 @@
 .app-shell {
   display: grid;
   grid-template-columns: var(--rail-width) var(--sidebar-width) minmax(0, 1fr);
+  /* 2行目はシェル下端の固定領域（VCの接続パネル）。無いときは高さ0になる */
+  grid-template-rows: minmax(0, 1fr) auto;
   height: 100dvh;
   max-height: 100dvh;
   overflow: hidden;
@@ -93,12 +103,18 @@
   align-items: center;
   gap: 8px;
   min-height: 0;
-  padding: 8px 0;
+  padding: 8px 0 24px;
   overflow-x: hidden;
   overflow-y: auto;
   background-color: var(--color-bg-rail);
   border-right: var(--pane-border) solid var(--color-divider);
   z-index: 50;
+  scrollbar-width: none;
+}
+
+/* レールは縦スクロール可、スクロールバーは出さない */
+.app-rail::-webkit-scrollbar {
+  display: none;
 }
 
 .app-sidebar {
@@ -179,6 +195,11 @@
     grid-template-columns: var(--rail-width) minmax(0, 1fr);
   }
 
+  /* 2列レイアウトではメインは2列目。3列目を指定すると暗黙の0幅列が増える */
+  .app-main {
+    grid-column: 2;
+  }
+
   .app-sidebar {
     position: fixed;
     top: 0;
@@ -219,6 +240,15 @@
     grid-template-columns: minmax(0, 1fr);
   }
 
+  /* 1列レイアウトでは 1 / -1 が1列目だけを指すよう、メインも1列目に置く */
+  .app-main {
+    grid-column: 1;
+  }
+
+  .voice-panel {
+    grid-column: 1;
+  }
+
   .app-rail {
     position: fixed;
     top: 0;
@@ -251,17 +281,18 @@
   }
 }
 
-/* レール内のアイコン（円・角丸ボタン） */
+/* レール内のアイコン: 通常16px角丸 → ホバー/選択で12px角丸 */
 .rail-button {
   position: relative;
   display: flex;
   align-items: center;
   justify-content: center;
+  flex: none;
   width: 48px;
   height: 48px;
   border-radius: 16px;
   color: var(--color-text);
-  background-color: var(--color-bg-rail);
+  background-color: var(--color-bg-input);
   transition:
     border-radius var(--motion-fast) ease,
     background-color var(--motion-fast) ease,
@@ -269,18 +300,40 @@
 }
 
 .rail-button:hover,
-.rail-button:focus-visible {
-  border-radius: 14px;
-  background-color: var(--color-accent);
-  color: var(--color-text);
-}
-
+.rail-button:focus-visible,
 .rail-button[aria-current="page"] {
-  border-radius: 14px;
+  border-radius: 12px;
+}
+
+/* DM ホームだけアクセント色で塗る（サーバーは iconColor をそのまま使う） */
+.rail-button-dm:hover,
+.rail-button-dm:focus-visible,
+.rail-button-dm[aria-current="page"] {
   background-color: var(--color-accent);
 }
 
-/* 選択中を示す左のバー（色だけに頼らず aria-current と併用） */
+/* レール上のフォーカスリングはアイコン色に埋もれないよう白系にする */
+.app-rail .rail-button:focus-visible {
+  outline: 2px solid var(--color-text);
+  outline-offset: 2px;
+}
+
+.rail-initials {
+  font-size: 14px;
+  font-weight: 700;
+  line-height: 1;
+}
+
+/* iconColor の輝度に応じて濃い文字／白文字を選ぶ（4.5:1 以上を確保） */
+.rail-initials[data-tone="dark"] {
+  color: var(--color-text-on-light);
+}
+
+.rail-initials[data-tone="light"] {
+  color: var(--color-text-on-danger);
+}
+
+/* 左端のインジケータ（未読=短い白丸 / 選択中=長い白い縦棒） */
 .rail-button::before {
   content: "";
   position: absolute;
@@ -292,8 +345,29 @@
   transition: height var(--motion-fast) ease;
 }
 
+.rail-button[data-unread="true"]::before {
+  height: 8px;
+}
+
 .rail-button[aria-current="page"]::before {
   height: 24px;
+}
+
+/* メンションの赤バッジ（右下） */
+.rail-mention {
+  position: absolute;
+  right: -4px;
+  bottom: -4px;
+  min-width: 16px;
+  height: 16px;
+  padding: 0 4px;
+  border-radius: 8px;
+  background-color: var(--color-danger);
+  color: var(--color-text-on-danger);
+  font-size: 11px;
+  font-weight: 700;
+  line-height: 16px;
+  text-align: center;
 }
 
 .rail-divider {
@@ -305,6 +379,7 @@
 }
 
 .sidebar-item {
+  position: relative;
   display: flex;
   align-items: center;
   gap: 8px;
@@ -336,6 +411,204 @@
   font-weight: 700;
   letter-spacing: 0.02em;
   text-transform: uppercase;
+}
+
+/* 未読は太字＋左の小さい白ドット（行の外側に置いて文字位置を揃える） */
+.sidebar-item[data-unread="true"] {
+  color: var(--color-text);
+  font-weight: 700;
+}
+
+.sidebar-item[data-unread="true"]::before {
+  content: "";
+  position: absolute;
+  left: -4px;
+  top: 50%;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background-color: var(--color-text);
+  transform: translateY(-50%);
+}
+
+.sidebar-icon {
+  flex: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 16px;
+  height: 16px;
+  color: var(--color-text-muted);
+  font-size: 15px;
+  line-height: 1;
+}
+
+.sidebar-item[aria-current="page"] .sidebar-icon {
+  color: var(--color-text);
+}
+
+/* メンションの赤バッジ（右端） */
+.sidebar-badge {
+  flex: none;
+  margin-left: auto;
+  min-width: 16px;
+  height: 16px;
+  padding: 0 4px;
+  border-radius: 8px;
+  background-color: var(--color-danger);
+  color: var(--color-text-on-danger);
+  font-size: 11px;
+  font-weight: 700;
+  line-height: 16px;
+  text-align: center;
+}
+
+/* カテゴリ見出し（折りたたみボタン） */
+.sidebar-section-button {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  width: 100%;
+  padding: 12px 8px 4px;
+  color: var(--color-text-muted);
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  text-align: left;
+  text-transform: uppercase;
+}
+
+.sidebar-section-button:hover,
+.sidebar-section-button:focus-visible {
+  color: var(--color-text);
+}
+
+.sidebar-caret {
+  display: inline-block;
+  transition: transform var(--motion-fast) ease;
+}
+
+.sidebar-caret[data-collapsed="true"] {
+  transform: rotate(-90deg);
+}
+
+/* VC 行の下にぶら下がる参加者 */
+.voice-members {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 2px 0 4px 24px;
+}
+
+.voice-member {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 24px;
+  color: var(--color-text-muted);
+  font-size: 14px;
+  line-height: 1.3;
+}
+
+.voice-avatar {
+  flex: none;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+}
+
+/* 下端固定のユーザーパネル */
+.sidebar-footer {
+  flex: none;
+  border-top: var(--pane-border) solid var(--color-divider);
+  background-color: var(--color-bg-sidebar);
+}
+
+.sidebar-user {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px;
+  background-color: var(--color-bg-input);
+}
+
+.sidebar-user-avatar-wrap {
+  position: relative;
+  flex: none;
+  display: inline-flex;
+}
+
+.sidebar-user-avatar {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  color: var(--color-text-on-danger);
+  font-size: 14px;
+  font-weight: 700;
+}
+
+.status-dot {
+  position: absolute;
+  right: -2px;
+  bottom: -2px;
+  width: 12px;
+  height: 12px;
+  border: 2px solid var(--color-bg-input);
+  border-radius: 50%;
+  background-color: var(--color-status-offline);
+}
+
+.status-dot[data-status="online"] {
+  background-color: var(--color-status-online);
+}
+
+.status-dot[data-status="idle"] {
+  background-color: var(--color-status-idle);
+}
+
+.status-dot[data-status="dnd"] {
+  background-color: var(--color-status-dnd);
+}
+
+.status-dot[data-status="offline"] {
+  background-color: var(--color-status-offline);
+}
+
+.sidebar-user-text {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  line-height: 1.25;
+}
+
+.sidebar-user-name {
+  color: var(--color-text);
+  font-size: 14px;
+  font-weight: 700;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.sidebar-user-handle {
+  color: var(--color-text-muted);
+  font-size: 12px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.sidebar-user-action {
+  flex: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  color: var(--color-text-muted);
 }
 
 .sidebar-empty {
@@ -749,6 +1022,163 @@ a.tw-nav-item:focus-visible {
   font-size: 13px;
 }
 
+/* ---- メッセージログ（#8） ---- */
+
+.message-header {
+  gap: 12px;
+}
+
+.message-header-text {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  line-height: 1.25;
+}
+
+.message-header-title {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  min-width: 0;
+  color: var(--color-text);
+  font-size: 15px;
+  font-weight: 700;
+}
+
+.message-header-hash {
+  color: var(--color-text-muted);
+}
+
+.message-header-topic {
+  overflow: hidden;
+  color: var(--color-text-muted);
+  font-size: 12px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.message-header-actions {
+  display: flex;
+  flex: none;
+  gap: 2px;
+  margin-left: auto;
+}
+
+.message-header-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  color: var(--color-text-muted);
+}
+
+.message-scroll {
+  display: flex;
+  flex-direction: column;
+  overscroll-behavior: contain;
+}
+
+.message-list-inner {
+  display: flex;
+  flex-direction: column;
+  padding: 16px 0 24px;
+}
+
+.message-empty {
+  display: flex;
+  flex: 1;
+  align-items: center;
+  justify-content: center;
+  padding: 32px;
+  color: var(--color-text-muted);
+  font-size: 14px;
+}
+
+/* 日付区切り（細い横線＋中央ラベル） */
+.message-date {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin: 12px 16px 8px;
+  color: var(--color-text-muted);
+  font-size: 12px;
+  white-space: nowrap;
+}
+
+.message-date::before,
+.message-date::after {
+  content: "";
+  flex: 1;
+  height: 1px;
+  background-color: var(--color-divider);
+}
+
+.message {
+  display: flex;
+  gap: 12px;
+  padding: 4px 16px;
+}
+
+/* 連続発言は本文だけをインデント（16 + アバター40 + gap12 = 68） */
+.message[data-grouped="true"] {
+  padding-left: 68px;
+}
+
+.message-avatar {
+  flex: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  color: var(--color-text-on-danger);
+  font-size: 15px;
+  font-weight: 700;
+}
+
+.message-main {
+  min-width: 0;
+  flex: 1;
+}
+
+.message-meta {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+}
+
+.message-author {
+  color: var(--color-text);
+  font-size: 16px;
+  font-weight: 700;
+}
+
+.message-time {
+  color: var(--color-text-muted);
+  font-size: 12px;
+}
+
+.message-edited {
+  color: var(--color-text-muted);
+  font-size: 11px;
+}
+
+.message-body {
+  color: var(--color-text);
+  /* 本文は 16px / 行間 1.375（Discord 基準） */
+  font-size: 16px;
+  line-height: 1.375;
+  overflow-wrap: anywhere;
+  white-space: pre-wrap;
+}
+
+.message-body[data-system="true"] {
+  color: var(--color-text-muted);
+  font-size: 13px;
+}
+
 .tw-stat {
   display: inline-flex;
   align-items: center;
@@ -908,4 +1338,439 @@ a.tw-nav-item:focus-visible {
   .tw-stats {
     gap: 20px;
   }
+}
+
+.message-reply {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  min-width: 0;
+  margin-bottom: 2px;
+  color: var(--color-text-muted);
+  font-size: 13px;
+}
+
+.message-reply-author {
+  flex: none;
+  color: var(--color-text);
+  font-weight: 700;
+}
+
+.message-reply-body {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.message-reply-missing {
+  font-style: italic;
+}
+
+.message-attachments {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 8px;
+  max-width: 560px;
+  margin-top: 6px;
+}
+
+.message-attachments[data-count="2"] {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.message-attachments > * {
+  min-width: 0;
+}
+
+.message-image {
+  display: block;
+  width: auto;
+  height: auto;
+  max-width: 100%;
+  max-height: 360px;
+  border-radius: 4px;
+  object-fit: contain;
+}
+
+.message-image-fallback {
+  display: inline-block;
+  padding: 8px 12px;
+  border-radius: 4px;
+  background-color: var(--color-bg-input);
+  color: var(--color-text-muted);
+  font-size: 13px;
+}
+
+.message-files {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-top: 6px;
+}
+
+.message-file {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  max-width: 320px;
+  padding: 8px 12px;
+  border-radius: 4px;
+  background-color: var(--color-bg-input);
+  color: var(--color-text);
+  font-size: 13px;
+}
+
+.message-file-size {
+  flex: none;
+  color: var(--color-text-muted);
+  font-size: 12px;
+}
+
+.message-reactions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 6px;
+}
+
+.reaction {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 1px 8px;
+  border: 1px solid transparent;
+  border-radius: 8px;
+  background-color: var(--color-bg-input);
+  color: var(--color-text-muted);
+  font-size: 13px;
+}
+
+.reaction[data-me="true"] {
+  border-color: var(--color-accent);
+  color: var(--color-text);
+}
+
+/* ---- VC画面と接続パネル（#9） ---- */
+
+.voice-panel {
+  grid-column: 1 / -1;
+  grid-row: 2;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 6px 12px;
+  border-top: var(--pane-border) solid var(--color-divider);
+  background-color: var(--color-bg-input);
+}
+
+.voice-panel-channel {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+  color: var(--color-text);
+}
+
+.voice-panel-channel:hover,
+.voice-panel-channel:focus-visible {
+  color: var(--color-text);
+  text-decoration: underline;
+}
+
+.voice-panel-text {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  line-height: 1.2;
+}
+
+.voice-panel-name {
+  overflow: hidden;
+  font-size: 13px;
+  font-weight: 700;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.voice-panel-status {
+  color: var(--color-status-online);
+  font-size: 11px;
+}
+
+.voice-panel-actions {
+  display: flex;
+  flex: none;
+  gap: 6px;
+  margin-left: auto;
+}
+
+.voice-panel-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border-radius: 6px;
+  color: var(--color-text-muted);
+  background-color: transparent;
+}
+
+.voice-panel-button:hover,
+.voice-panel-button:focus-visible {
+  background-color: var(--color-hover);
+  color: var(--color-text);
+}
+
+.voice-panel-button[aria-pressed="true"] {
+  background-color: var(--color-bg-sidebar);
+  color: var(--color-danger);
+}
+
+.voice-panel-leave {
+  height: 32px;
+  padding: 0 12px;
+  border-radius: 6px;
+  background-color: var(--color-danger);
+  color: var(--color-text-on-danger);
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.voice-header {
+  gap: 8px;
+}
+
+.voice-header-icon {
+  flex: none;
+  color: var(--color-text-muted);
+}
+
+.voice-header-title {
+  overflow: hidden;
+  color: var(--color-text);
+  font-size: 15px;
+  font-weight: 700;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.voice-body {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  padding: 24px 16px;
+}
+
+.voice-participants {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+  align-content: flex-start;
+}
+
+.voice-tile {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  width: 112px;
+  padding: 12px 8px;
+  border: 2px solid transparent;
+  border-radius: 10px;
+  background-color: var(--color-bg-app);
+}
+
+.voice-tile[data-speaking="true"] {
+  border-color: var(--color-status-online);
+}
+
+.voice-tile-avatar {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  color: var(--color-text-on-danger);
+  font-size: 22px;
+  font-weight: 700;
+}
+
+.voice-tile-name {
+  max-width: 100%;
+  overflow: hidden;
+  color: var(--color-text);
+  font-size: 13px;
+  font-weight: 700;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.voice-tile-status {
+  color: var(--color-text-muted);
+  font-size: 11px;
+}
+
+.voice-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.voice-button {
+  height: 36px;
+  padding: 0 16px;
+  border-radius: 6px;
+  background-color: var(--color-bg-input);
+  color: var(--color-text);
+  font-size: 14px;
+  font-weight: 700;
+}
+
+.voice-button:hover,
+.voice-button:focus-visible {
+  background-color: var(--color-hover);
+}
+
+.voice-button[aria-pressed="true"] {
+  outline: 2px solid var(--color-divider);
+  color: var(--color-danger);
+}
+
+.voice-button-primary {
+  background-color: var(--color-accent);
+  color: var(--color-text);
+}
+
+.voice-button-danger {
+  background-color: var(--color-danger);
+  color: var(--color-text-on-danger);
+}
+
+.voice-note {
+  color: var(--color-text-muted);
+  font-size: 12px;
+}
+
+/* ---- DM一覧（#10） ---- */
+
+.dm-search {
+  padding: 8px 8px 4px;
+}
+
+.dm-search-input {
+  width: 100%;
+  height: 30px;
+  padding: 0 8px;
+  border-radius: 4px;
+  background-color: var(--color-bg-app);
+  color: var(--color-text);
+  font-size: 13px;
+}
+
+/* まだ使えない入力欄は淡色＋操作不可のカーソルで「準備中」と分かるようにする */
+.dm-search-input:disabled {
+  background-color: var(--color-bg-main);
+  color: var(--color-text-muted);
+  cursor: not-allowed;
+  opacity: 1;
+}
+
+.dm-search-input::placeholder {
+  color: var(--color-text-muted);
+}
+
+.dm-item {
+  gap: 10px;
+  padding: 6px 8px;
+  align-items: center;
+}
+
+.dm-avatar-wrap {
+  position: relative;
+  flex: none;
+  display: inline-flex;
+}
+
+.dm-avatar {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  color: var(--color-text-on-danger);
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.dm-avatar-wrap .status-dot {
+  right: -2px;
+  bottom: -2px;
+  border-color: var(--color-bg-sidebar);
+}
+
+.dm-text {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-width: 0;
+  line-height: 1.25;
+}
+
+.dm-name {
+  overflow: hidden;
+  color: var(--color-text);
+  font-size: 14px;
+  font-weight: 700;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.dm-preview {
+  overflow: hidden;
+  color: var(--color-text-muted);
+  font-size: 12px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.dm-meta {
+  display: flex;
+  flex: none;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 2px;
+}
+
+.dm-time {
+  color: var(--color-text-muted);
+  font-size: 11px;
+}
+
+.dm-badge {
+  min-width: 16px;
+  height: 16px;
+  padding: 0 4px;
+  border-radius: 8px;
+  background-color: var(--color-danger);
+  color: var(--color-text-on-danger);
+  font-size: 11px;
+  font-weight: 700;
+  line-height: 16px;
+  text-align: center;
+}
+
+/* DMヘッダの相手アバター */
+.message-header-avatar {
+  flex: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  color: var(--color-text-on-danger);
+  font-size: 12px;
+  font-weight: 700;
 }

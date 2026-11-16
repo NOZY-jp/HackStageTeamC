@@ -1,15 +1,15 @@
-import { DmSidebar } from "@/components/dm-sidebar";
 import { MainPane } from "@/components/main-pane";
 import { PlaceholderNotice } from "@/components/placeholder-notice";
+import { DmList } from "../_components/dm-list";
 
 export default function DmPage() {
   return (
     <>
-      <DmSidebar />
+      <DmList />
       <MainPane label="DMスレッド" heading="ダイレクトメッセージ">
         <PlaceholderNotice
-          title="スレッドを選択してください"
-          description="左の一覧から会話を選ぶと、ここにメッセージが表示されます。"
+          title="DMを選択してください"
+          description="左の一覧から相手を選ぶと、ここに会話が表示されます。"
         />
       </MainPane>
     </>
