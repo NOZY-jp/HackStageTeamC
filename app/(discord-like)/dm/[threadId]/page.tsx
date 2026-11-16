@@ -1,5 +1,5 @@
 import { notFound } from "next/navigation";
-import { getDMThread, getUser, listDMMessages } from "@/lib/mock";
+import { getDMThread, getUser, listDMMessages } from "@/lib/discord-like";
 import { DmList } from "../../_components/dm-list";
 import { MessagePane } from "../../_components/message-pane";
 import { SELF_USER_ID } from "../../_components/self-user";

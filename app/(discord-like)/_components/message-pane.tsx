@@ -1,14 +1,14 @@
 "use client";
 
 import { useMemo } from "react";
-import type { Message } from "@/lib/mock/types";
+import type { Message } from "@/lib/discord-like/types";
 import { useLocalMessages } from "./local-messages-context";
 import { MessageComposer } from "./message-composer";
 import { MessageList } from "./message-list";
 
 /**
  * メッセージログ＋入力欄。送信分はクライアント状態（Context）で持ち、
- * 初期データ（lib/mock）には書き戻さない。キーはチャンネルID／DMスレッドID。
+ * 初期データ（lib/discord-like）には書き戻さない。キーはチャンネルID／DMスレッドID。
  */
 export function MessagePane({
   channelKey,

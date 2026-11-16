@@ -1,6 +1,6 @@
 import { notFound } from "next/navigation";
-import { ChannelSidebar } from "@/components/channel-sidebar";
-import { getChannel, getUser, listMessages, listVoiceStates } from "@/lib/mock";
+import { ChannelSidebar } from "@/components/discord-like/channel-sidebar";
+import { getChannel, getUser, listMessages, listVoiceStates } from "@/lib/discord-like";
 import { MessagePane } from "../../../../_components/message-pane";
 import { SELF_USER_ID } from "../../../../_components/self-user";
 import { VoiceChannelView } from "../../../../_components/voice-channel-view";

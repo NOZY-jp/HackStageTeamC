@@ -2,7 +2,7 @@
 
 import Image from "next/image";
 import { useState } from "react";
-import type { MessageAttachment } from "@/lib/mock/types";
+import type { MessageAttachment } from "@/lib/discord-like/types";
 
 /** public/mock/ のダミー画像の実寸（アスペクト比を保つために使う）。 */
 const IMAGE_SIZES: Record<string, { width: number; height: number }> = {

@@ -1,5 +1,5 @@
-import { SELF_USER_ID } from "@/app/(app)/_components/self-user";
-import { getGuild, getUser, listChannels, listVoiceStates } from "@/lib/mock";
+import { SELF_USER_ID } from "@/app/(discord-like)/_components/self-user";
+import { getGuild, getUser, listChannels, listVoiceStates } from "@/lib/discord-like";
 import { ChannelTree, type SidebarSection } from "./channel-tree";
 import { SidebarPane } from "./sidebar-pane";
 import { SidebarUserPanel } from "./sidebar-user-panel";

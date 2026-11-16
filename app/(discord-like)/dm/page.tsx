@@ -1,5 +1,5 @@
-import { MainPane } from "@/components/main-pane";
-import { PlaceholderNotice } from "@/components/placeholder-notice";
+import { MainPane } from "@/components/discord-like/main-pane";
+import { PlaceholderNotice } from "@/components/discord-like/placeholder-notice";
 import { DmList } from "../_components/dm-list";
 
 export default function DmPage() {

@@ -1,7 +1,7 @@
 "use client";
 
-import { getUser } from "@/lib/mock";
-import type { Message } from "@/lib/mock/types";
+import { getUser } from "@/lib/discord-like";
+import type { Message } from "@/lib/discord-like/types";
 import { MessageAttachments } from "./message-attachments";
 
 /**

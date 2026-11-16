@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useState } from "react";
-import { useVoice } from "@/app/(app)/_components/voice-context";
+import { useVoice } from "@/app/(discord-like)/_components/voice-context";
 
 export type SidebarChannel = {
   id: string;
