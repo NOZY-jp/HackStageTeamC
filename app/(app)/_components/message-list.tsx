@@ -35,12 +35,15 @@ export function MessageList({
   topic,
   showHash = true,
   emptyText = "まだメッセージがありません",
+  headerAvatar,
 }: {
   messages: Message[];
   title: string;
   topic?: string;
   showHash?: boolean;
   emptyText?: string;
+  /** DM などでヘッダに出す相手のアバター（省略時は出さない）。 */
+  headerAvatar?: { displayName: string; avatarColor: string };
 }) {
   const scrollRef = useRef<HTMLDivElement>(null);
 
@@ -85,6 +88,15 @@ export function MessageList({
     <main id="app-main" className="app-main" aria-label={title}>
       <header className="pane-header message-header">
         <PaneToggles />
+        {headerAvatar ? (
+          <span
+            aria-hidden="true"
+            className="message-header-avatar"
+            style={{ backgroundColor: headerAvatar.avatarColor }}
+          >
+            {headerAvatar.displayName.slice(0, 1)}
+          </span>
+        ) : null}
         <div className="message-header-text">
           <h1 className="message-header-title">
             {showHash ? (
