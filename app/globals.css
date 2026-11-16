@@ -1098,6 +1098,14 @@
   font-size: 13px;
 }
 
+/* まだ使えない入力欄は淡色＋操作不可のカーソルで「準備中」と分かるようにする */
+.dm-search-input:disabled {
+  background-color: var(--color-bg-main);
+  color: var(--color-text-muted);
+  cursor: not-allowed;
+  opacity: 1;
+}
+
 .dm-search-input::placeholder {
   color: var(--color-text-muted);
 }
