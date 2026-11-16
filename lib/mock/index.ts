@@ -5,7 +5,12 @@ import { users } from "./data/users";
 import { voiceStates } from "./data/voice-states";
 import type { Channel, DMThread, Guild, Message, User, VoiceState } from "./types";
 
-/** すべて同期・純関数。内部配列はコピーして返し、呼び出し側から書き換えられないようにする。 */
+/**
+ * すべて同期・純関数。data/*.ts の保存オブジェクトは共有しているため、
+ * 返す値は毎回ディープコピーする（呼び出し側の書き換えが内部状態に波及しない）。
+ * structuredClone は Node 24 と Next.js のサーバー／クライアント両方で使える。
+ */
+const copyOf = <T>(value: T): T => structuredClone(value);
 
 const byPosition = (a: { position: number }, b: { position: number }): number =>
   a.position - b.position;
@@ -18,19 +23,20 @@ const byLastMessageAtDesc = (a: DMThread, b: DMThread): number =>
  * 並べ替えの基準が増えたら型と一緒に見直す。
  */
 export function listGuilds(): Guild[] {
-  return [...guilds];
+  return copyOf(guilds);
 }
 
 export function getGuild(id: string): Guild | undefined {
-  return guilds.find((guild) => guild.id === id);
+  const guild = guilds.find((candidate) => candidate.id === id);
+  return guild ? copyOf(guild) : undefined;
 }
 
 export function listChannels(guildId: string): Channel[] {
-  const guild = getGuild(guildId);
+  const guild = guilds.find((candidate) => candidate.id === guildId);
   if (!guild) {
     return [];
   }
-  return [...guild.channels].sort(byPosition);
+  return copyOf([...guild.channels].sort(byPosition));
 }
 
 /** 戻り値の Channel は kind が "text" | "voice" のリテラル型なので、そのまま絞り込める。 */
@@ -38,7 +44,7 @@ export function getChannel(id: string): Channel | undefined {
   for (const guild of guilds) {
     const channel = guild.channels.find((candidate) => candidate.id === id);
     if (channel) {
-      return channel;
+      return copyOf(channel);
     }
   }
   return undefined;
@@ -46,26 +52,28 @@ export function getChannel(id: string): Channel | undefined {
 
 /** チャンネルIDで引く（DM スレッドIDとは別名前空間）。 */
 export function listMessages(channelId: string): Message[] {
-  return [...(channelMessages[channelId] ?? [])].sort(bySentAt);
+  return copyOf([...(channelMessages[channelId] ?? [])].sort(bySentAt));
 }
 
 export function getUser(id: string): User | undefined {
-  return users.find((user) => user.id === id);
+  const user = users.find((candidate) => candidate.id === id);
+  return user ? copyOf(user) : undefined;
 }
 
 export function listDMThreads(): DMThread[] {
-  return [...dmThreads].sort(byLastMessageAtDesc);
+  return copyOf([...dmThreads].sort(byLastMessageAtDesc));
 }
 
 export function getDMThread(id: string): DMThread | undefined {
-  return dmThreads.find((thread) => thread.id === id);
+  const thread = dmThreads.find((candidate) => candidate.id === id);
+  return thread ? copyOf(thread) : undefined;
 }
 
 /** DM スレッドIDで引く（チャンネルIDとは別名前空間）。 */
 export function listDMMessages(threadId: string): Message[] {
-  return [...(dmMessages[threadId] ?? [])].sort(bySentAt);
+  return copyOf([...(dmMessages[threadId] ?? [])].sort(bySentAt));
 }
 
 export function listVoiceStates(channelId: string): VoiceState[] {
-  return voiceStates.filter((state) => state.channelId === channelId);
+  return copyOf(voiceStates.filter((state) => state.channelId === channelId));
 }

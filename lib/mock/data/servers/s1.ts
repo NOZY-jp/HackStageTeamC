@@ -1,11 +1,11 @@
 import type { Guild } from "../../types";
 
-/** HackStage Team C（ダミー）。カテゴリ3・テキスト8・ボイス3。 */
+/** 開発ラボ（ダミー）。カテゴリ3・テキスト8・ボイス3。 */
 export const s1: Guild = {
   id: "s1",
-  name: "HackStage Team C",
+  name: "開発ラボ",
   iconColor: "#5865f2",
-  initials: "HC",
+  initials: "DL",
   categories: [
     {
       id: "s1-cat-1",
