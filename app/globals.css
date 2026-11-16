@@ -1216,7 +1216,7 @@
   display: flex;
   align-items: flex-end;
   gap: 8px;
-  padding: 6px 8px 6px 12px;
+  padding: 6px 8px;
   border-radius: 8px;
   background-color: var(--color-bg-input);
 }
@@ -1243,6 +1243,24 @@
 
 .message-composer-input:disabled {
   opacity: 0.6;
+}
+
+/* 入力欄左の＋（見た目のみ。ホバーは控えめに） */
+.message-composer-attach {
+  flex: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border-radius: 6px;
+  color: var(--color-text-muted);
+}
+
+.message-composer-attach:hover,
+.message-composer-attach:focus-visible {
+  background-color: var(--color-hover);
+  color: var(--color-text);
 }
 
 .message-composer-send {
