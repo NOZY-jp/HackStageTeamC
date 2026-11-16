@@ -86,3 +86,38 @@ export type VoiceState = {
   speaking?: boolean;
   joinedAt: string;
 };
+
+/* ---- Twitter-like SNS（/twitter 配下）。User は Discord 側と共有する型を再利用する ---- */
+
+export type Post = {
+  /** URL に入る（/twitter/post/[postId]） */
+  id: string;
+  /** User.id（SNS 用ユーザーは lib/mock/data/twitter.ts の twitterUsers） */
+  authorId: string;
+  /** 投稿時刻（ISO 8601・JST オフセット付きの固定文字列） */
+  postedAt: string;
+  body: string;
+  /** 返信先の Post.id。無ければトップレベルの投稿 */
+  replyToId?: string;
+  replyCount: number;
+  repostCount: number;
+  likeCount: number;
+};
+
+/** プロフィール画面だけで使う付加情報。User.id で 1:1 に対応する。 */
+export type Profile = {
+  userId: string;
+  bio: string;
+  location?: string;
+  /** 参加月（ISO 8601 の日付） */
+  joinedAt: string;
+  followingCount: number;
+  followersCount: number;
+};
+
+export type Trend = {
+  id: string;
+  category: string;
+  name: string;
+  postCount: number;
+};
