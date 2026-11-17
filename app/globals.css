@@ -546,6 +546,8 @@
   align-items: center;
   gap: 8px;
   padding: 8px 8px 8px calc(var(--rail-width) + 8px);
+  /* ハンドルのスロットをパネル内に収める */
+  overflow: hidden;
   /* 上端の区切り線はパネルの高さを変えないよう内側の影で描く（従来の 49px を維持） */
   box-shadow: inset 0 var(--pane-border) 0 var(--color-divider);
   background-color: var(--color-bg-input);
@@ -619,12 +621,39 @@
   white-space: nowrap;
 }
 
-.sidebar-user-handle {
+/* 名前の下はステータス文言（Discord と同じ粒度） */
+.sidebar-user-status {
   color: var(--color-text-muted);
   font-size: 12px;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+}
+
+/*
+ * ハンドルは既定で隠し、行のホバー／フォーカスでスロット状に下から出す。
+ * 絶対配置なのでパネルの高さ（49px）は変えない。
+ */
+.sidebar-user-handle {
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  padding: 4px 8px;
+  color: var(--color-text-muted);
+  background-color: var(--color-bg-app);
+  font-size: 12px;
+  line-height: 1.4;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  transform: translateY(100%);
+  transition: transform var(--motion-fast) ease;
+}
+
+.sidebar-user:hover .sidebar-user-handle,
+.sidebar-user:focus-within .sidebar-user-handle {
+  transform: none;
 }
 
 .sidebar-user-action {
