@@ -1,5 +1,6 @@
 "use client";
 
+import { useEffect, useRef } from "react";
 import { PaneToggles } from "@/components/discord-like/pane-toggles";
 import { EmptyState } from "./empty-state";
 import { useVoice } from "./voice-context";
@@ -14,7 +15,8 @@ type VoiceParticipant = {
 };
 
 /**
- * VC画面。参加者タイルと参加/切断・トグルのみ。
+ * VC画面。参加者タイルと切断・トグルのみ。
+ * VCを開いた時点で自動参加する（Discord と同じ）。退出は「切断」。
  * 実音声・マイク権限・WebRTC は使わない（音は出ないのが仕様）。
  */
 export function VoiceChannelView({
@@ -34,6 +36,17 @@ export function VoiceChannelView({
   const joined = connection?.channelId === channelId;
   const muted = joined ? connection.muted : false;
   const deafened = joined ? connection.deafened : false;
+
+  // このチャンネルに入ったら自動参加する（再入場・StrictMode の二重実行は冪等にする）。
+  // 一度入ったチャンネルは記録しておき、「切断」後に勝手に再参加しない。
+  const autoJoinedChannelId = useRef<string | null>(null);
+  useEffect(() => {
+    if (autoJoinedChannelId.current === channelId) {
+      return;
+    }
+    autoJoinedChannelId.current = channelId;
+    join({ guildId, channelId, channelName });
+  }, [channelId, channelName, guildId, join]);
 
   return (
     <main id="app-main" className="app-main" aria-label={channelName}>
@@ -63,7 +76,7 @@ export function VoiceChannelView({
             <EmptyState
               kind="voice"
               title="参加者はいません"
-              description="「参加」でこのチャンネルに入れます。"
+              description="まだ誰も接続していません。"
             />
           ) : null}
           {participants.map((participant) => (
@@ -113,18 +126,8 @@ export function VoiceChannelView({
                 {deafened ? "スピーカーオフ" : "スピーカー"}
               </button>
             </>
-          ) : (
-            <button
-              type="button"
-              className="voice-button voice-button-primary"
-              onClick={() => join({ guildId, channelId, channelName })}
-            >
-              参加
-            </button>
-          )}
+          ) : null}
         </div>
-
-        <p className="voice-note">この画面は見た目だけの疑似参加です。音声の送受信は行いません。</p>
       </div>
     </main>
   );
