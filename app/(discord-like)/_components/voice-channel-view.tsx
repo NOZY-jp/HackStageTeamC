@@ -1,6 +1,7 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { usePathname } from "next/navigation";
+import { useEffect } from "react";
 import { PaneToggles } from "@/components/discord-like/pane-toggles";
 import { EmptyState } from "./empty-state";
 import { useVoice } from "./voice-context";
@@ -32,21 +33,25 @@ export function VoiceChannelView({
   participants: VoiceParticipant[];
   currentUser: { id: string; displayName: string; avatarColor: string };
 }) {
-  const { connection, join, leave, toggleMute, toggleDeafen } = useVoice();
+  const { connection, leftChannelId, join, leave, toggleMute, toggleDeafen } = useVoice();
   const joined = connection?.channelId === channelId;
   const muted = joined ? connection.muted : false;
   const deafened = joined ? connection.deafened : false;
 
-  // このチャンネルに入ったら自動参加する（再入場・StrictMode の二重実行は冪等にする）。
-  // 一度入ったチャンネルは記録しておき、「切断」後に勝手に再参加しない。
-  const autoJoinedChannelId = useRef<string | null>(null);
+  // 表示中のページだけが自動参加する（ルートキャッシュで裏に残った画面が奪わないように）
+  const pathname = usePathname();
+  const active = pathname === `/servers/${guildId}/channels/${channelId}`;
+
+  // このチャンネルに入ったら自動参加する。
+  // 「一度処理したか」ではなく実際の接続状態で判定するので、
+  // 往復で戻ってきたとき（route cache で裏に残っていた場合）も参加し直せる。
+  // ユーザーがこのチャンネルで「切断」したときだけ抑止する（印は context 側で管理）。
   useEffect(() => {
-    if (autoJoinedChannelId.current === channelId) {
+    if (!active || connection?.channelId === channelId || leftChannelId === channelId) {
       return;
     }
-    autoJoinedChannelId.current = channelId;
     join({ guildId, channelId, channelName });
-  }, [channelId, channelName, guildId, join]);
+  }, [active, channelId, channelName, connection?.channelId, guildId, join, leftChannelId]);
 
   return (
     <main id="app-main" className="app-main" aria-label={channelName}>
