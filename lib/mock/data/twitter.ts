@@ -90,7 +90,7 @@ export const twitterPosts: Post[] = [
     body: "例のゲームを始めて、今日でちょうど半年。最初はフィールドから出られない新規だった。",
     replyCount: 4,
     repostCount: 21,
-    likeCount: 187,
+    likeCount: 96,
   },
   {
     id: "post-003",
@@ -99,7 +99,7 @@ export const twitterPosts: Post[] = [
     body: "はじめて話したのは夜のフィールド。道に迷ってた私を、何十分も案内してくれた人がいた。",
     replyCount: 2,
     repostCount: 15,
-    likeCount: 142,
+    likeCount: 58,
   },
   {
     id: "post-004",
@@ -109,7 +109,7 @@ export const twitterPosts: Post[] = [
     replyToId: "post-003",
     replyCount: 1,
     repostCount: 0,
-    likeCount: 88,
+    likeCount: 41,
   },
   {
     id: "post-005",
@@ -119,7 +119,7 @@ export const twitterPosts: Post[] = [
     replyToId: "post-004",
     replyCount: 0,
     repostCount: 0,
-    likeCount: 74,
+    likeCount: 29,
   },
   {
     id: "post-006",
@@ -128,7 +128,7 @@ export const twitterPosts: Post[] = [
     body: "週末レイドの募集出しといた。今週こそ討伐いきたい。盾役あと1名。",
     replyCount: 3,
     repostCount: 7,
-    likeCount: 34,
+    likeCount: 18,
   },
   {
     id: "post-007",
@@ -137,7 +137,7 @@ export const twitterPosts: Post[] = [
     body: "紅葉の谷、夕方の光がきれい。しばらく座って眺めてただけで終わった日。",
     replyCount: 5,
     repostCount: 18,
-    likeCount: 203,
+    likeCount: 87,
   },
   {
     id: "post-008",
@@ -146,7 +146,7 @@ export const twitterPosts: Post[] = [
     body: "休日の朝から仕事の電話。今週こそは休ませてほしい。",
     replyCount: 6,
     repostCount: 4,
-    likeCount: 96,
+    likeCount: 38,
   },
   {
     id: "post-009",
@@ -155,7 +155,7 @@ export const twitterPosts: Post[] = [
     body: "駅前のカフェ、栗のラテが始まってた。今年もこの季節。",
     replyCount: 2,
     repostCount: 1,
-    likeCount: 41,
+    likeCount: 16,
   },
   {
     id: "post-010",
@@ -164,7 +164,7 @@ export const twitterPosts: Post[] = [
     body: "平日はインできない日が続いた。週末は必ずログインする。約束だから。",
     replyCount: 1,
     repostCount: 9,
-    likeCount: 120,
+    likeCount: 74,
   },
   {
     id: "post-011",
@@ -174,7 +174,7 @@ export const twitterPosts: Post[] = [
     replyToId: "post-010",
     replyCount: 0,
     repostCount: 0,
-    likeCount: 67,
+    likeCount: 33,
   },
   {
     id: "post-012",
@@ -192,7 +192,7 @@ export const twitterPosts: Post[] = [
     body: "新規が迷子になってるのを見ると、つい拾いたくなる。昔の自分を見てるみたいで。",
     replyCount: 2,
     repostCount: 5,
-    likeCount: 53,
+    likeCount: 24,
   },
   {
     id: "post-014",
@@ -201,7 +201,7 @@ export const twitterPosts: Post[] = [
     body: "決まった。来週末、半年越しにはじめて会う。顔も名前も知らないままの、半年。",
     replyCount: 9,
     repostCount: 25,
-    likeCount: 233,
+    likeCount: 168,
   },
   {
     id: "post-015",
@@ -211,7 +211,7 @@ export const twitterPosts: Post[] = [
     replyToId: "post-014",
     replyCount: 1,
     repostCount: 0,
-    likeCount: 36,
+    likeCount: 19,
   },
   {
     id: "post-016",
@@ -220,7 +220,7 @@ export const twitterPosts: Post[] = [
     body: "相談したら、初対面でかける言葉まで考えてくれた。「これなら絶対に伝わる」って。頼りになる人だ。",
     replyCount: 1,
     repostCount: 3,
-    likeCount: 98,
+    likeCount: 52,
   },
   {
     id: "post-017",
@@ -229,7 +229,7 @@ export const twitterPosts: Post[] = [
     body: "週末は紅葉を見に行く予定。リアルの紅葉も、ゲームの紅葉も。",
     replyCount: 3,
     repostCount: 6,
-    likeCount: 58,
+    likeCount: 27,
   },
   {
     id: "post-018",
@@ -238,7 +238,7 @@ export const twitterPosts: Post[] = [
     body: "朝までみんなとレイドしてしまった。今日は眠い。",
     replyCount: 2,
     repostCount: 1,
-    likeCount: 45,
+    likeCount: 22,
   },
   {
     id: "post-019",
@@ -257,7 +257,7 @@ export const twitterPosts: Post[] = [
     replyToId: "post-016",
     replyCount: 0,
     repostCount: 0,
-    likeCount: 12,
+    likeCount: 9,
   },
   {
     id: "post-021",
@@ -266,7 +266,7 @@ export const twitterPosts: Post[] = [
     body: "当日の服はもう決めた。相手が見つけやすいように、色だけ先に伝えてある。",
     replyCount: 1,
     repostCount: 2,
-    likeCount: 88,
+    likeCount: 47,
   },
   {
     id: "post-022",
@@ -276,7 +276,7 @@ export const twitterPosts: Post[] = [
     replyToId: "post-021",
     replyCount: 0,
     repostCount: 0,
-    likeCount: 15,
+    likeCount: 11,
   },
   {
     id: "post-023",
@@ -285,7 +285,7 @@ export const twitterPosts: Post[] = [
     body: "あと5日。緊張して、夜ちゃんと眠れなくなってきた。",
     replyCount: 2,
     repostCount: 6,
-    likeCount: 121,
+    likeCount: 83,
   },
 ];
 
