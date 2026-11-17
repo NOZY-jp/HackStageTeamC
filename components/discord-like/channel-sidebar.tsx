@@ -2,7 +2,6 @@ import { SELF_USER_ID } from "@/app/(discord-like)/_components/self-user";
 import { getGuild, getUser, listChannels, listVoiceStates } from "@/lib/discord-like";
 import { ChannelTree, type SidebarSection } from "./channel-tree";
 import { SidebarPane } from "./sidebar-pane";
-import { SidebarUserPanel } from "./sidebar-user-panel";
 
 /**
  * チャンネル一覧の中ペイン（サーバー画面用）。
@@ -13,11 +12,7 @@ export function ChannelSidebar({ guildId, channelId }: { guildId: string; channe
 
   if (!guild) {
     return (
-      <SidebarPane
-        label="チャンネル一覧"
-        title="サーバー"
-        footer={<SidebarUserPanel userId={SELF_USER_ID} />}
-      >
+      <SidebarPane label="チャンネル一覧" title="サーバー">
         <p className="sidebar-empty">このサーバーは見つかりませんでした。</p>
       </SidebarPane>
     );
@@ -54,11 +49,7 @@ export function ChannelSidebar({ guildId, channelId }: { guildId: string; channe
   }
 
   return (
-    <SidebarPane
-      label="チャンネル一覧"
-      title={guild.name}
-      footer={<SidebarUserPanel userId={SELF_USER_ID} />}
-    >
+    <SidebarPane label="チャンネル一覧" title={guild.name}>
       <ChannelTree
         guildId={guildId}
         activeChannelId={channelId}

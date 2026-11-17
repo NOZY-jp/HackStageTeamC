@@ -1,6 +1,5 @@
 import Link from "next/link";
 import { SidebarPane } from "@/components/discord-like/sidebar-pane";
-import { SidebarUserPanel } from "@/components/discord-like/sidebar-user-panel";
 import { getUser, listDMMessages, listDMThreads } from "@/lib/discord-like";
 import { EmptyState } from "./empty-state";
 import { SELF_USER_ID } from "./self-user";
@@ -38,11 +37,7 @@ export function DmList({ activeThreadId }: { activeThreadId?: string }) {
   });
 
   return (
-    <SidebarPane
-      label="ダイレクトメッセージ"
-      title="ダイレクトメッセージ"
-      footer={<SidebarUserPanel userId={SELF_USER_ID} />}
-    >
+    <SidebarPane label="ダイレクトメッセージ" title="ダイレクトメッセージ">
       {/* 検索欄は見た目のみ（検索は #10 の非対象） */}
       <div className="dm-search">
         <input
