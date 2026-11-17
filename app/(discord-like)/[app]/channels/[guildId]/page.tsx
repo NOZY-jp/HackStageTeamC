@@ -1,8 +1,19 @@
+import { notFound } from "next/navigation";
 import { DmList } from "@/app/(discord-like)/_components/dm-list";
 import { MainPane } from "@/components/discord-like/main-pane";
 import { PlaceholderNotice } from "@/components/discord-like/placeholder-notice";
 
-export default function DmPage() {
+/** DM のホームセグメント（Discord と同じ `@me`）。 */
+const DM_HOME = "@me";
+
+/** DM一覧（スレッド未選択）。`/<app>/channels/@me` だけを受け付ける。 */
+export default async function ChannelsPage({ params }: { params: Promise<{ guildId: string }> }) {
+  const { guildId } = await params;
+  // 動的セグメントは URL エンコードされたまま渡ることがある（"@me" → "%40me"）
+  if (decodeURIComponent(guildId) !== DM_HOME) {
+    notFound();
+  }
+
   return (
     <>
       <DmList />

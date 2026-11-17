@@ -3,6 +3,7 @@ import type { Guild } from "../../types";
 /** 開発ラボ（ダミー）。カテゴリ3・テキスト8・ボイス3。 */
 export const s1: Guild = {
   id: "s1",
+  urlId: "1074210658438352001",
   name: "開発ラボ",
   iconColor: "#5865f2",
   initials: "DL",
@@ -29,6 +30,7 @@ export const s1: Guild = {
   channels: [
     {
       id: "s1-general",
+      urlId: "1074210658438352101",
       guildId: "s1",
       name: "一般",
       kind: "text",
@@ -38,6 +40,7 @@ export const s1: Guild = {
     },
     {
       id: "s1-notices",
+      urlId: "1074210658438352102",
       guildId: "s1",
       name: "お知らせ",
       kind: "text",
@@ -49,6 +52,7 @@ export const s1: Guild = {
     },
     {
       id: "s1-random",
+      urlId: "1074210658438352103",
       guildId: "s1",
       name: "雑談",
       kind: "text",
@@ -58,6 +62,7 @@ export const s1: Guild = {
     },
     {
       id: "s1-design",
+      urlId: "1074210658438352104",
       guildId: "s1",
       name: "デザイン",
       kind: "text",
@@ -67,6 +72,7 @@ export const s1: Guild = {
     },
     {
       id: "s1-frontend",
+      urlId: "1074210658438352105",
       guildId: "s1",
       name: "フロントエンド",
       kind: "text",
@@ -76,6 +82,7 @@ export const s1: Guild = {
     },
     {
       id: "s1-backend",
+      urlId: "1074210658438352106",
       guildId: "s1",
       name: "バックエンド",
       kind: "text",
@@ -85,6 +92,7 @@ export const s1: Guild = {
     },
     {
       id: "s1-review",
+      urlId: "1074210658438352107",
       guildId: "s1",
       name: "レビュー",
       kind: "text",
@@ -94,6 +102,7 @@ export const s1: Guild = {
     },
     {
       id: "s1-questions",
+      urlId: "1074210658438352108",
       guildId: "s1",
       name: "質問",
       kind: "text",
@@ -103,6 +112,7 @@ export const s1: Guild = {
     },
     {
       id: "s1-vc-1",
+      urlId: "1074210658438352109",
       guildId: "s1",
       name: "ボイス 1",
       kind: "voice",
@@ -111,6 +121,7 @@ export const s1: Guild = {
     },
     {
       id: "s1-vc-2",
+      urlId: "1074210658438352110",
       guildId: "s1",
       name: "ボイス 2",
       kind: "voice",
@@ -119,6 +130,7 @@ export const s1: Guild = {
     },
     {
       id: "s1-vc-3",
+      urlId: "1074210658438352111",
       guildId: "s1",
       name: "作業通話",
       kind: "voice",

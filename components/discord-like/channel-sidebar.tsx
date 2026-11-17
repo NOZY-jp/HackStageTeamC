@@ -51,7 +51,7 @@ export function ChannelSidebar({ guildId, channelId }: { guildId: string; channe
   return (
     <SidebarPane label="チャンネル一覧" title={guild.name}>
       <ChannelTree
-        guildId={guildId}
+        guildUrlId={guild.urlId}
         activeChannelId={channelId}
         sections={sections}
         currentUser={currentUser}
@@ -62,6 +62,7 @@ export function ChannelSidebar({ guildId, channelId }: { guildId: string; channe
   function toSidebarChannel(channel: (typeof channels)[number]) {
     return {
       id: channel.id,
+      urlId: channel.urlId,
       name: channel.name,
       kind: channel.kind,
       unread: (channel.unreadCount ?? 0) > 0,

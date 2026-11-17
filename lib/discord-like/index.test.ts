@@ -54,6 +54,7 @@ describe("lib/discord-like のアクセサ", () => {
     const channelCount = listChannels("s1").length;
     guild?.channels.push({
       id: "injected",
+      urlId: "1099999999999999999",
       guildId: "s1",
       name: "注入",
       kind: "text",
