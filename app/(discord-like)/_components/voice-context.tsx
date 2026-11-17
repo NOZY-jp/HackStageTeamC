@@ -1,6 +1,14 @@
 "use client";
 
-import { createContext, type ReactNode, useCallback, useContext, useMemo, useState } from "react";
+import {
+  createContext,
+  type ReactNode,
+  useCallback,
+  useContext,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 
 export type VoiceConnection = {
   guildId: string;
@@ -13,6 +21,8 @@ export type VoiceConnection = {
 
 type VoiceControls = {
   connection: VoiceConnection | null;
+  /** ユーザーが明示的に「切断」したチャンネル（自動参加の抑止にだけ使う） */
+  leftChannelId: string | null;
   join: (target: { guildId: string; channelId: string; channelName: string }) => void;
   leave: () => void;
   toggleMute: () => void;
@@ -36,9 +46,14 @@ export function useVoice(): VoiceControls {
  */
 export function VoiceProvider({ children }: { children: ReactNode }) {
   const [connection, setConnection] = useState<VoiceConnection | null>(null);
+  const [leftChannelId, setLeftChannelId] = useState<string | null>(null);
+  const connectionRef = useRef<VoiceConnection | null>(null);
+  connectionRef.current = connection;
 
   const join = useCallback(
     (target: { guildId: string; channelId: string; channelName: string }) => {
+      // 参加できた時点で「切断」の印は役目を終える（同じチャンネルなら呼ばれない）
+      setLeftChannelId(null);
       setConnection({
         guildId: target.guildId,
         channelId: target.channelId,
@@ -51,6 +66,8 @@ export function VoiceProvider({ children }: { children: ReactNode }) {
   );
 
   const leave = useCallback(() => {
+    // 明示的な切断はチャンネル単位で記録する（自動参加の抑止に使う）
+    setLeftChannelId(connectionRef.current?.channelId ?? null);
     setConnection(null);
   }, []);
 
@@ -63,8 +80,8 @@ export function VoiceProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const controls = useMemo<VoiceControls>(
-    () => ({ connection, join, leave, toggleMute, toggleDeafen }),
-    [connection, join, leave, toggleMute, toggleDeafen],
+    () => ({ connection, leftChannelId, join, leave, toggleMute, toggleDeafen }),
+    [connection, leftChannelId, join, leave, toggleMute, toggleDeafen],
   );
 
   return <VoiceContext.Provider value={controls}>{children}</VoiceContext.Provider>;

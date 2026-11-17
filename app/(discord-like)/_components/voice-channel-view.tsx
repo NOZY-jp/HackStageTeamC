@@ -1,5 +1,7 @@
 "use client";
 
+import { usePathname } from "next/navigation";
+import { useEffect } from "react";
 import { PaneToggles } from "@/components/discord-like/pane-toggles";
 import { EmptyState } from "./empty-state";
 import { useVoice } from "./voice-context";
@@ -14,7 +16,8 @@ type VoiceParticipant = {
 };
 
 /**
- * VC画面。参加者タイルと参加/切断・トグルのみ。
+ * VC画面。参加者タイルと切断・トグルのみ。
+ * VCを開いた時点で自動参加する（Discord と同じ）。退出は「切断」。
  * 実音声・マイク権限・WebRTC は使わない（音は出ないのが仕様）。
  */
 export function VoiceChannelView({
@@ -30,10 +33,25 @@ export function VoiceChannelView({
   participants: VoiceParticipant[];
   currentUser: { id: string; displayName: string; avatarColor: string };
 }) {
-  const { connection, join, leave, toggleMute, toggleDeafen } = useVoice();
+  const { connection, leftChannelId, join, leave, toggleMute, toggleDeafen } = useVoice();
   const joined = connection?.channelId === channelId;
   const muted = joined ? connection.muted : false;
   const deafened = joined ? connection.deafened : false;
+
+  // 表示中のページだけが自動参加する（ルートキャッシュで裏に残った画面が奪わないように）
+  const pathname = usePathname();
+  const active = pathname === `/servers/${guildId}/channels/${channelId}`;
+
+  // このチャンネルに入ったら自動参加する。
+  // 「一度処理したか」ではなく実際の接続状態で判定するので、
+  // 往復で戻ってきたとき（route cache で裏に残っていた場合）も参加し直せる。
+  // ユーザーがこのチャンネルで「切断」したときだけ抑止する（印は context 側で管理）。
+  useEffect(() => {
+    if (!active || connection?.channelId === channelId || leftChannelId === channelId) {
+      return;
+    }
+    join({ guildId, channelId, channelName });
+  }, [active, channelId, channelName, connection?.channelId, guildId, join, leftChannelId]);
 
   return (
     <main id="app-main" className="app-main" aria-label={channelName}>
@@ -63,7 +81,7 @@ export function VoiceChannelView({
             <EmptyState
               kind="voice"
               title="参加者はいません"
-              description="「参加」でこのチャンネルに入れます。"
+              description="まだ誰も接続していません。"
             />
           ) : null}
           {participants.map((participant) => (
@@ -113,18 +131,8 @@ export function VoiceChannelView({
                 {deafened ? "スピーカーオフ" : "スピーカー"}
               </button>
             </>
-          ) : (
-            <button
-              type="button"
-              className="voice-button voice-button-primary"
-              onClick={() => join({ guildId, channelId, channelName })}
-            >
-              参加
-            </button>
-          )}
+          ) : null}
         </div>
-
-        <p className="voice-note">この画面は見た目だけの疑似参加です。音声の送受信は行いません。</p>
       </div>
     </main>
   );
