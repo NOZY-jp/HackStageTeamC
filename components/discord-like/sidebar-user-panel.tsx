@@ -1,4 +1,4 @@
-import { getUser } from "@/lib/mock";
+import { getUser } from "@/lib/discord-like";
 
 const STATUS_LABELS: Record<string, string> = {
   online: "オンライン",

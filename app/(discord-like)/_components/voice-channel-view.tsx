@@ -1,6 +1,6 @@
 "use client";
 
-import { PaneToggles } from "@/components/pane-toggles";
+import { PaneToggles } from "@/components/discord-like/pane-toggles";
 import { EmptyState } from "./empty-state";
 import { useVoice } from "./voice-context";
 

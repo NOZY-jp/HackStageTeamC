@@ -1,4 +1,4 @@
-import { listChannels, listGuilds } from "@/lib/mock";
+import { listChannels, listGuilds } from "@/lib/discord-like";
 import { type RailGuild, ServerRailNav } from "./server-rail-nav";
 
 const HREF_FALLBACK = "#";

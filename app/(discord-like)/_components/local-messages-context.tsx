@@ -9,7 +9,7 @@ import {
   useRef,
   useState,
 } from "react";
-import type { Message } from "@/lib/mock/types";
+import type { Message } from "@/lib/discord-like/types";
 import { SELF_USER_ID } from "./self-user";
 
 type LocalMessages = {
@@ -29,7 +29,7 @@ export function useLocalMessages(): LocalMessages {
 
 /**
  * 送信したメッセージをチャンネル／DMスレッド単位で保持する（クライアントのみ）。
- * lib/mock の配列は書き換えない。リロードで消える。
+ * lib/discord-like の配列は書き換えない。リロードで消える。
  */
 export function LocalMessagesProvider({ children }: { children: ReactNode }) {
   const [byKey, setByKey] = useState<Record<string, Message[]>>({});

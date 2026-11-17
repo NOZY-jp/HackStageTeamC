@@ -9,7 +9,7 @@ import {
   listMessages,
 } from "./index";
 
-describe("lib/mock のアクセサ", () => {
+describe("lib/discord-like のアクセサ", () => {
   it("listMessages は sentAt 昇順で返す", () => {
     const messages = listMessages("s1-general");
     expect(messages.length).toBeGreaterThan(0);

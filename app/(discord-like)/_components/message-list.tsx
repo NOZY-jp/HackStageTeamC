@@ -1,8 +1,8 @@
 "use client";
 
 import { type ReactNode, useEffect, useRef } from "react";
-import { PaneToggles } from "@/components/pane-toggles";
-import type { Message } from "@/lib/mock/types";
+import { PaneToggles } from "@/components/discord-like/pane-toggles";
+import type { Message } from "@/lib/discord-like/types";
 import { EmptyState } from "./empty-state";
 import { MessageRow } from "./message-row";
 

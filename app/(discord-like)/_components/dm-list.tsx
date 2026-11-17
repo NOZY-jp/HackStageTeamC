@@ -1,7 +1,7 @@
 import Link from "next/link";
-import { SidebarPane } from "@/components/sidebar-pane";
-import { SidebarUserPanel } from "@/components/sidebar-user-panel";
-import { getUser, listDMMessages, listDMThreads } from "@/lib/mock";
+import { SidebarPane } from "@/components/discord-like/sidebar-pane";
+import { SidebarUserPanel } from "@/components/discord-like/sidebar-user-panel";
+import { getUser, listDMMessages, listDMThreads } from "@/lib/discord-like";
 import { EmptyState } from "./empty-state";
 import { SELF_USER_ID } from "./self-user";
 
