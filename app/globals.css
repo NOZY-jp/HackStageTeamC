@@ -773,6 +773,734 @@
   line-height: 1.6;
 }
 
+/* ---- メッセージログ（#8） ---- */
+
+.message-header {
+  gap: 12px;
+}
+
+.message-header-text {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  line-height: 1.25;
+}
+
+.message-header-title {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  min-width: 0;
+  color: var(--color-text);
+  font-size: 15px;
+  font-weight: 700;
+}
+
+.message-header-hash {
+  color: var(--color-text-muted);
+}
+
+.message-header-topic {
+  overflow: hidden;
+  color: var(--color-text-muted);
+  font-size: 12px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.message-header-actions {
+  display: flex;
+  flex: none;
+  gap: 2px;
+  margin-left: auto;
+}
+
+.message-header-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  color: var(--color-text-muted);
+}
+
+.message-scroll {
+  display: flex;
+  flex-direction: column;
+  overscroll-behavior: contain;
+}
+
+.message-list-inner {
+  display: flex;
+  flex-direction: column;
+  padding: 16px 0 24px;
+}
+
+.message-empty {
+  display: flex;
+  flex: 1;
+  align-items: center;
+  justify-content: center;
+  padding: 32px;
+  color: var(--color-text-muted);
+  font-size: 14px;
+}
+
+/* 日付区切り（細い横線＋中央ラベル） */
+.message-date {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin: 12px 16px 8px;
+  color: var(--color-text-muted);
+  font-size: 12px;
+  white-space: nowrap;
+}
+
+.message-date::before,
+.message-date::after {
+  content: "";
+  flex: 1;
+  height: 1px;
+  background-color: var(--color-divider);
+}
+
+.message {
+  display: flex;
+  gap: 12px;
+  padding: 4px 16px;
+}
+
+/* 連続発言は本文だけをインデント（16 + アバター40 + gap12 = 68） */
+.message[data-grouped="true"] {
+  padding-left: 68px;
+}
+
+.message-avatar {
+  flex: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  color: var(--color-text-on-danger);
+  font-size: 15px;
+  font-weight: 700;
+}
+
+.message-main {
+  min-width: 0;
+  flex: 1;
+}
+
+.message-meta {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+}
+
+.message-author {
+  color: var(--color-text);
+  font-size: 16px;
+  font-weight: 700;
+}
+
+.message-time {
+  color: var(--color-text-muted);
+  font-size: 12px;
+}
+
+.message-edited {
+  color: var(--color-text-muted);
+  font-size: 11px;
+}
+
+.message-body {
+  color: var(--color-text);
+  /* 本文は 16px / 行間 1.375（Discord 基準） */
+  font-size: 16px;
+  line-height: 1.375;
+  overflow-wrap: anywhere;
+  white-space: pre-wrap;
+}
+
+.message-body[data-system="true"] {
+  color: var(--color-text-muted);
+  font-size: 13px;
+}
+
+.message-reply {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  min-width: 0;
+  margin-bottom: 2px;
+  color: var(--color-text-muted);
+  font-size: 13px;
+}
+
+.message-reply-author {
+  flex: none;
+  color: var(--color-text);
+  font-weight: 700;
+}
+
+.message-reply-body {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.message-reply-missing {
+  font-style: italic;
+}
+
+.message-attachments {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 8px;
+  max-width: 560px;
+  margin-top: 6px;
+}
+
+.message-attachments[data-count="2"] {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.message-attachments > * {
+  min-width: 0;
+}
+
+.message-image {
+  display: block;
+  width: auto;
+  height: auto;
+  max-width: 100%;
+  max-height: 360px;
+  border-radius: 4px;
+  object-fit: contain;
+}
+
+.message-image-fallback {
+  display: inline-block;
+  padding: 8px 12px;
+  border-radius: 4px;
+  background-color: var(--color-bg-input);
+  color: var(--color-text-muted);
+  font-size: 13px;
+}
+
+.message-files {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-top: 6px;
+}
+
+.message-file {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  max-width: 320px;
+  padding: 8px 12px;
+  border-radius: 4px;
+  background-color: var(--color-bg-input);
+  color: var(--color-text);
+  font-size: 13px;
+}
+
+.message-file-size {
+  flex: none;
+  color: var(--color-text-muted);
+  font-size: 12px;
+}
+
+.message-reactions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 6px;
+}
+
+.reaction {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 1px 8px;
+  border: 1px solid transparent;
+  border-radius: 8px;
+  background-color: var(--color-bg-input);
+  color: var(--color-text-muted);
+  font-size: 13px;
+}
+
+.reaction[data-me="true"] {
+  border-color: var(--color-accent-fg);
+  color: var(--color-text);
+}
+
+/* ---- VC画面（#9） ---- */
+
+.voice-header {
+  gap: 8px;
+}
+
+.voice-header-icon {
+  flex: none;
+  color: var(--color-text-muted);
+}
+
+.voice-header-title {
+  overflow: hidden;
+  color: var(--color-text);
+  font-size: 15px;
+  font-weight: 700;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.voice-body {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  padding: 24px 16px;
+}
+
+.voice-participants {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+  align-content: flex-start;
+}
+
+.voice-tile {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  width: 112px;
+  padding: 12px 8px;
+  border: 2px solid transparent;
+  border-radius: 10px;
+  background-color: var(--color-bg-app);
+}
+
+.voice-tile[data-speaking="true"] {
+  border-color: var(--color-status-online);
+}
+
+.voice-tile-avatar {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  color: var(--color-text-on-danger);
+  font-size: 22px;
+  font-weight: 700;
+}
+
+.voice-tile-name {
+  max-width: 100%;
+  overflow: hidden;
+  color: var(--color-text);
+  font-size: 13px;
+  font-weight: 700;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.voice-tile-status {
+  color: var(--color-text-muted);
+  font-size: 11px;
+}
+
+.voice-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.voice-button {
+  height: 36px;
+  padding: 0 16px;
+  border-radius: 6px;
+  background-color: var(--color-bg-input);
+  color: var(--color-text);
+  font-size: 14px;
+  font-weight: 700;
+}
+
+.voice-button:hover,
+.voice-button:focus-visible {
+  background-color: var(--color-hover);
+}
+
+.voice-button[aria-pressed="true"] {
+  outline: 2px solid var(--color-divider);
+  color: var(--color-text);
+}
+
+.voice-button-primary {
+  background-color: var(--color-accent);
+  color: var(--color-text);
+}
+
+.voice-button-danger {
+  background-color: var(--color-danger);
+  color: var(--color-text-on-danger);
+}
+
+.voice-note {
+  color: var(--color-text-muted);
+  font-size: 12px;
+}
+
+/* ---- DM一覧（#10） ---- */
+
+.dm-search {
+  padding: 8px 8px 4px;
+}
+
+.dm-search-input {
+  width: 100%;
+  height: 30px;
+  padding: 0 8px;
+  border-radius: 4px;
+  background-color: var(--color-bg-app);
+  color: var(--color-text);
+  font-size: 13px;
+}
+
+/* まだ使えない入力欄は淡色＋操作不可のカーソルで「準備中」と分かるようにする */
+.dm-search-input:disabled {
+  background-color: var(--color-bg-main);
+  color: var(--color-text-muted);
+  cursor: not-allowed;
+  opacity: 1;
+}
+
+.dm-search-input::placeholder {
+  color: var(--color-text-muted);
+}
+
+.dm-item {
+  gap: 10px;
+  padding: 6px 8px;
+  align-items: center;
+}
+
+.dm-avatar-wrap {
+  position: relative;
+  flex: none;
+  display: inline-flex;
+}
+
+.dm-avatar {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  color: var(--color-text-on-danger);
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.dm-avatar-wrap .status-dot {
+  right: -2px;
+  bottom: -2px;
+  border-color: var(--color-bg-sidebar);
+}
+
+.dm-text {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-width: 0;
+  line-height: 1.25;
+}
+
+.dm-name {
+  overflow: hidden;
+  color: var(--color-text);
+  font-size: 14px;
+  font-weight: 700;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.dm-preview {
+  overflow: hidden;
+  color: var(--color-text-muted);
+  font-size: 12px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.dm-meta {
+  display: flex;
+  flex: none;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 2px;
+}
+
+.dm-time {
+  color: var(--color-text-muted);
+  font-size: 11px;
+}
+
+.dm-badge {
+  min-width: 16px;
+  height: 16px;
+  padding: 0 4px;
+  border-radius: 8px;
+  background-color: var(--color-danger);
+  color: var(--color-text-on-danger);
+  font-size: 11px;
+  font-weight: 700;
+  line-height: 16px;
+  text-align: center;
+}
+
+/* DMヘッダの相手アバター */
+.message-header-avatar {
+  flex: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  color: var(--color-text-on-danger);
+  font-size: 12px;
+  font-weight: 700;
+}
+
+/* ---- メッセージ入力欄（#11） ---- */
+
+.message-composer-area {
+  flex: none;
+  padding: 8px 16px 16px;
+}
+
+.message-composer {
+  display: flex;
+  align-items: flex-end;
+  gap: 8px;
+  padding: 6px 8px;
+  border-radius: 8px;
+  background-color: var(--color-bg-input);
+}
+
+.message-composer-input {
+  flex: 1;
+  min-width: 0;
+  min-height: 22px;
+  max-height: 120px;
+  padding: 4px 0;
+  border: 0;
+  background-color: transparent;
+  color: var(--color-text);
+  font: inherit;
+  font-size: 15px;
+  line-height: 1.5;
+  resize: none;
+  overflow-y: auto;
+}
+
+.message-composer-input::placeholder {
+  color: var(--color-text-muted);
+}
+
+.message-composer-input:disabled {
+  opacity: 0.6;
+}
+
+/* 入力欄左の＋（見た目のみ。ホバーは控えめに） */
+.message-composer-attach {
+  flex: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border-radius: 6px;
+  color: var(--color-text-muted);
+}
+
+.message-composer-attach:hover,
+.message-composer-attach:focus-visible {
+  background-color: var(--color-hover);
+  color: var(--color-text);
+}
+
+.message-composer-send {
+  flex: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border-radius: 6px;
+  color: var(--color-text-muted);
+}
+
+.message-composer-send:hover:enabled {
+  background-color: var(--color-hover);
+  color: var(--color-accent-fg);
+}
+
+.message-composer-send:disabled {
+  opacity: 0.4;
+}
+
+/* ---- 未検出・エラー・空・読み込み（#12） ---- */
+
+/* 未検出／エラーはレール以外の領域を使う（3ペインの骨格は保つ） */
+.route-state {
+  grid-column: 2 / -1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 32px;
+  background-color: var(--color-bg-main);
+  text-align: center;
+}
+
+.route-state-code {
+  color: var(--color-text-muted);
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+}
+
+.route-state-title {
+  color: var(--color-text);
+  font-size: 20px;
+  font-weight: 700;
+}
+
+.route-state-description {
+  color: var(--color-text-muted);
+  font-size: 14px;
+}
+
+.route-state-link {
+  margin-top: 8px;
+  padding: 8px 16px;
+  border-radius: 6px;
+  background-color: var(--color-accent);
+  color: var(--color-text);
+  font-size: 14px;
+  font-weight: 700;
+}
+
+.route-state-link:hover,
+.route-state-link:focus-visible {
+  background-color: var(--color-hover);
+}
+
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  width: 100%;
+  padding: 24px 16px;
+  text-align: center;
+}
+
+.empty-state-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 48px;
+  height: 48px;
+  margin-bottom: 4px;
+  border-radius: 50%;
+  background-color: var(--color-bg-app);
+  color: var(--color-text-muted);
+}
+
+.empty-state-title {
+  color: var(--color-text);
+  font-size: 15px;
+  font-weight: 700;
+}
+
+.empty-state-description {
+  color: var(--color-text-muted);
+  font-size: 13px;
+}
+
+/* メッセージログの空状態は残りの高さで中央に置く */
+.message-scroll > .empty-state {
+  flex: 1;
+}
+
+.skeleton-pane {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 12px;
+}
+
+.skeleton-block {
+  display: block;
+  border-radius: 6px;
+  background-color: var(--color-bg-input);
+}
+
+.skeleton-header {
+  width: 40%;
+  height: 14px;
+  margin-left: 12px;
+}
+
+.skeleton-row {
+  max-width: 100%;
+  height: 28px;
+}
+
+.skeleton-line {
+  max-width: 100%;
+  height: 16px;
+}
+
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+/* 640px 未満は1カラムになるので全幅に広げる */
+@media (max-width: 639.98px) {
+  .route-state {
+    grid-column: 1 / -1;
+  }
+}
+
+/* モーション無効化。@layer の外に置く（レイヤー内だと未レイヤーの :root に負ける） */
+@media (prefers-reduced-motion: reduce) {
+  :root {
+    --motion-fast: 0ms;
+    --motion-normal: 0ms;
+  }
+}
+
 /* ---- Twitter-like UI（/twitter 配下）。現行 X のダーク表示に寄せた専用の配色 ---- */
 
 .tw-shell {
@@ -2142,576 +2870,5 @@ a.tw-dm-item:focus-visible {
     flex-direction: row;
     justify-content: space-around;
     width: 100%;
-  }
-}
-
-.message-reply {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  min-width: 0;
-  margin-bottom: 2px;
-  color: var(--color-text-muted);
-  font-size: 13px;
-}
-
-.message-reply-author {
-  flex: none;
-  color: var(--color-text);
-  font-weight: 700;
-}
-
-.message-reply-body {
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-.message-reply-missing {
-  font-style: italic;
-}
-
-.message-attachments {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr);
-  gap: 8px;
-  max-width: 560px;
-  margin-top: 6px;
-}
-
-.message-attachments[data-count="2"] {
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-}
-
-.message-attachments > * {
-  min-width: 0;
-}
-
-.message-image {
-  display: block;
-  width: auto;
-  height: auto;
-  max-width: 100%;
-  max-height: 360px;
-  border-radius: 4px;
-  object-fit: contain;
-}
-
-.message-image-fallback {
-  display: inline-block;
-  padding: 8px 12px;
-  border-radius: 4px;
-  background-color: var(--color-bg-input);
-  color: var(--color-text-muted);
-  font-size: 13px;
-}
-
-.message-files {
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-  margin-top: 6px;
-}
-
-.message-file {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  max-width: 320px;
-  padding: 8px 12px;
-  border-radius: 4px;
-  background-color: var(--color-bg-input);
-  color: var(--color-text);
-  font-size: 13px;
-}
-
-.message-file-size {
-  flex: none;
-  color: var(--color-text-muted);
-  font-size: 12px;
-}
-
-.message-reactions {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 6px;
-  margin-top: 6px;
-}
-
-.reaction {
-  display: inline-flex;
-  align-items: center;
-  gap: 4px;
-  padding: 1px 8px;
-  border: 1px solid transparent;
-  border-radius: 8px;
-  background-color: var(--color-bg-input);
-  color: var(--color-text-muted);
-  font-size: 13px;
-}
-
-.reaction[data-me="true"] {
-  border-color: var(--color-accent-fg);
-  color: var(--color-text);
-}
-
-/* ---- VC画面（#9） ---- */
-
-.voice-header {
-  gap: 8px;
-}
-
-.voice-header-icon {
-  flex: none;
-  color: var(--color-text-muted);
-}
-
-.voice-header-title {
-  overflow: hidden;
-  color: var(--color-text);
-  font-size: 15px;
-  font-weight: 700;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-.voice-body {
-  display: flex;
-  flex-direction: column;
-  gap: 20px;
-  padding: 24px 16px;
-}
-
-.voice-participants {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 16px;
-  align-content: flex-start;
-}
-
-.voice-tile {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 6px;
-  width: 112px;
-  padding: 12px 8px;
-  border: 2px solid transparent;
-  border-radius: 10px;
-  background-color: var(--color-bg-app);
-}
-
-.voice-tile[data-speaking="true"] {
-  border-color: var(--color-status-online);
-}
-
-.voice-tile-avatar {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 64px;
-  height: 64px;
-  border-radius: 50%;
-  color: var(--color-text-on-danger);
-  font-size: 22px;
-  font-weight: 700;
-}
-
-.voice-tile-name {
-  max-width: 100%;
-  overflow: hidden;
-  color: var(--color-text);
-  font-size: 13px;
-  font-weight: 700;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-.voice-tile-status {
-  color: var(--color-text-muted);
-  font-size: 11px;
-}
-
-.voice-actions {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-}
-
-.voice-button {
-  height: 36px;
-  padding: 0 16px;
-  border-radius: 6px;
-  background-color: var(--color-bg-input);
-  color: var(--color-text);
-  font-size: 14px;
-  font-weight: 700;
-}
-
-.voice-button:hover,
-.voice-button:focus-visible {
-  background-color: var(--color-hover);
-}
-
-.voice-button[aria-pressed="true"] {
-  outline: 2px solid var(--color-divider);
-  color: var(--color-text);
-}
-
-.voice-button-primary {
-  background-color: var(--color-accent);
-  color: var(--color-text);
-}
-
-.voice-button-danger {
-  background-color: var(--color-danger);
-  color: var(--color-text-on-danger);
-}
-
-.voice-note {
-  color: var(--color-text-muted);
-  font-size: 12px;
-}
-
-/* ---- DM一覧（#10） ---- */
-
-.dm-search {
-  padding: 8px 8px 4px;
-}
-
-.dm-search-input {
-  width: 100%;
-  height: 30px;
-  padding: 0 8px;
-  border-radius: 4px;
-  background-color: var(--color-bg-app);
-  color: var(--color-text);
-  font-size: 13px;
-}
-
-/* まだ使えない入力欄は淡色＋操作不可のカーソルで「準備中」と分かるようにする */
-.dm-search-input:disabled {
-  background-color: var(--color-bg-main);
-  color: var(--color-text-muted);
-  cursor: not-allowed;
-  opacity: 1;
-}
-
-.dm-search-input::placeholder {
-  color: var(--color-text-muted);
-}
-
-.dm-item {
-  gap: 10px;
-  padding: 6px 8px;
-  align-items: center;
-}
-
-.dm-avatar-wrap {
-  position: relative;
-  flex: none;
-  display: inline-flex;
-}
-
-.dm-avatar {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 32px;
-  height: 32px;
-  border-radius: 50%;
-  color: var(--color-text-on-danger);
-  font-size: 13px;
-  font-weight: 700;
-}
-
-.dm-avatar-wrap .status-dot {
-  right: -2px;
-  bottom: -2px;
-  border-color: var(--color-bg-sidebar);
-}
-
-.dm-text {
-  display: flex;
-  flex-direction: column;
-  flex: 1;
-  min-width: 0;
-  line-height: 1.25;
-}
-
-.dm-name {
-  overflow: hidden;
-  color: var(--color-text);
-  font-size: 14px;
-  font-weight: 700;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-.dm-preview {
-  overflow: hidden;
-  color: var(--color-text-muted);
-  font-size: 12px;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-.dm-meta {
-  display: flex;
-  flex: none;
-  flex-direction: column;
-  align-items: flex-end;
-  gap: 2px;
-}
-
-.dm-time {
-  color: var(--color-text-muted);
-  font-size: 11px;
-}
-
-.dm-badge {
-  min-width: 16px;
-  height: 16px;
-  padding: 0 4px;
-  border-radius: 8px;
-  background-color: var(--color-danger);
-  color: var(--color-text-on-danger);
-  font-size: 11px;
-  font-weight: 700;
-  line-height: 16px;
-  text-align: center;
-}
-
-/* DMヘッダの相手アバター */
-.message-header-avatar {
-  flex: none;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 24px;
-  height: 24px;
-  border-radius: 50%;
-  color: var(--color-text-on-danger);
-  font-size: 12px;
-  font-weight: 700;
-}
-
-/* ---- メッセージ入力欄（#11） ---- */
-
-.message-composer-area {
-  flex: none;
-  padding: 8px 16px 16px;
-}
-
-.message-composer {
-  display: flex;
-  align-items: flex-end;
-  gap: 8px;
-  padding: 6px 8px;
-  border-radius: 8px;
-  background-color: var(--color-bg-input);
-}
-
-.message-composer-input {
-  flex: 1;
-  min-width: 0;
-  min-height: 22px;
-  max-height: 120px;
-  padding: 4px 0;
-  border: 0;
-  background-color: transparent;
-  color: var(--color-text);
-  font: inherit;
-  font-size: 15px;
-  line-height: 1.5;
-  resize: none;
-  overflow-y: auto;
-}
-
-.message-composer-input::placeholder {
-  color: var(--color-text-muted);
-}
-
-.message-composer-input:disabled {
-  opacity: 0.6;
-}
-
-/* 入力欄左の＋（見た目のみ。ホバーは控えめに） */
-.message-composer-attach {
-  flex: none;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 32px;
-  height: 32px;
-  border-radius: 6px;
-  color: var(--color-text-muted);
-}
-
-.message-composer-attach:hover,
-.message-composer-attach:focus-visible {
-  background-color: var(--color-hover);
-  color: var(--color-text);
-}
-
-.message-composer-send {
-  flex: none;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 32px;
-  height: 32px;
-  border-radius: 6px;
-  color: var(--color-text-muted);
-}
-
-.message-composer-send:hover:enabled {
-  background-color: var(--color-hover);
-  color: var(--color-accent-fg);
-}
-
-.message-composer-send:disabled {
-  opacity: 0.4;
-}
-
-/* ---- 未検出・エラー・空・読み込み（#12） ---- */
-
-/* 未検出／エラーはレール以外の領域を使う（3ペインの骨格は保つ） */
-.route-state {
-  grid-column: 2 / -1;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
-  padding: 32px;
-  background-color: var(--color-bg-main);
-  text-align: center;
-}
-
-.route-state-code {
-  color: var(--color-text-muted);
-  font-size: 12px;
-  font-weight: 700;
-  letter-spacing: 0.08em;
-}
-
-.route-state-title {
-  color: var(--color-text);
-  font-size: 20px;
-  font-weight: 700;
-}
-
-.route-state-description {
-  color: var(--color-text-muted);
-  font-size: 14px;
-}
-
-.route-state-link {
-  margin-top: 8px;
-  padding: 8px 16px;
-  border-radius: 6px;
-  background-color: var(--color-accent);
-  color: var(--color-text);
-  font-size: 14px;
-  font-weight: 700;
-}
-
-.route-state-link:hover,
-.route-state-link:focus-visible {
-  background-color: var(--color-hover);
-}
-
-.empty-state {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 6px;
-  width: 100%;
-  padding: 24px 16px;
-  text-align: center;
-}
-
-.empty-state-icon {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 48px;
-  height: 48px;
-  margin-bottom: 4px;
-  border-radius: 50%;
-  background-color: var(--color-bg-app);
-  color: var(--color-text-muted);
-}
-
-.empty-state-title {
-  color: var(--color-text);
-  font-size: 15px;
-  font-weight: 700;
-}
-
-.empty-state-description {
-  color: var(--color-text-muted);
-  font-size: 13px;
-}
-
-/* メッセージログの空状態は残りの高さで中央に置く */
-.message-scroll > .empty-state {
-  flex: 1;
-}
-
-.skeleton-pane {
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-  padding: 12px;
-}
-
-.skeleton-block {
-  display: block;
-  border-radius: 6px;
-  background-color: var(--color-bg-input);
-}
-
-.skeleton-header {
-  width: 40%;
-  height: 14px;
-  margin-left: 12px;
-}
-
-.skeleton-row {
-  max-width: 100%;
-  height: 28px;
-}
-
-.skeleton-line {
-  max-width: 100%;
-  height: 16px;
-}
-
-.visually-hidden {
-  position: absolute;
-  width: 1px;
-  height: 1px;
-  margin: -1px;
-  padding: 0;
-  overflow: hidden;
-  clip-path: inset(50%);
-  white-space: nowrap;
-}
-
-/* 640px 未満は1カラムになるので全幅に広げる */
-@media (max-width: 639.98px) {
-  .route-state {
-    grid-column: 1 / -1;
-  }
-}
-
-/* モーション無効化。@layer の外に置く（レイヤー内だと未レイヤーの :root に負ける） */
-@media (prefers-reduced-motion: reduce) {
-  :root {
-    --motion-fast: 0ms;
-    --motion-normal: 0ms;
   }
 }
