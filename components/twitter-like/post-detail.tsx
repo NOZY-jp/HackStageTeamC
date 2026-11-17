@@ -9,7 +9,8 @@ import { PostStats } from "./post-card";
 
 /**
  * 個別投稿ページの主役カード。大きめの本文と絶対時刻・表示数、件数の行を表示する。
- * thread に "up" / "down" / "updown" を渡すと avatar をつなぐ縦線を描く。
+ * thread に "up" を渡すと親の縦線を avatar へ繋ぐ。本文以下が全幅なので "down" は
+ * 指定しても線を引かない（文字やアイコンと重なるため。本家も同じ扱い）。
  */
 export function PostDetail({
   post,

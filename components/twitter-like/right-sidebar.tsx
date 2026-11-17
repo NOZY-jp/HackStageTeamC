@@ -66,7 +66,7 @@ export function RightSidebar() {
           さらに表示
         </span>
       </section>
-      <p className="tw-footer">HackStage のデモ画面 · データはすべて架空です</p>
+      <p className="tw-footer">Twixer デモ画面 · データはすべて架空です</p>
     </aside>
   );
 }

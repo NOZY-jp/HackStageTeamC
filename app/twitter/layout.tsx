@@ -3,8 +3,8 @@ import type { ReactNode } from "react";
 import { TwitterNav } from "@/components/twitter-like/nav";
 
 export const metadata: Metadata = {
-  title: { default: "HackStage タイムライン", template: "%s | HackStage" },
-  description: "HackStage の Twitter 風タイムライン（ダミーデータ）",
+  title: { default: "Twixer", template: "%s | Twixer" },
+  description: "HackStage 作中の SNS「Twixer」タイムライン（ダミーデータ）",
 };
 
 export default function TwitterLayout({ children }: { children: ReactNode }) {

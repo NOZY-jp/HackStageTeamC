@@ -61,7 +61,7 @@ export default async function TwitterPostPage({ params }: Props) {
     <>
       <main className="tw-main">
         <PageHeader title="ポスト" backHref="/twitter" />
-        {ancestors.map((ancestor) => {
+        {ancestors.map((ancestor, i) => {
           const ancestorAuthor = users.get(ancestor.authorId);
           return ancestorAuthor ? (
             <PostCard
@@ -69,7 +69,7 @@ export default async function TwitterPostPage({ params }: Props) {
               post={ancestor}
               author={ancestorAuthor}
               replyTo={replyTargetAuthor(ancestor, getPost, users)}
-              thread="down"
+              thread={i === 0 ? "down" : "updown"}
             />
           ) : null;
         })}
@@ -79,7 +79,7 @@ export default async function TwitterPostPage({ params }: Props) {
           replyTo={replyTargetAuthor(post, getPost, users)}
           thread={detailThread || undefined}
         />
-        {me ? <ReplyComposer user={me} thread={replies.length > 0 ? "updown" : undefined} /> : null}
+        {me ? <ReplyComposer user={me} thread={replies.length > 0 ? "down" : undefined} /> : null}
         <section aria-label="返信">
           {replies.length === 0 ? <p className="tw-empty">まだ返信はありません。</p> : null}
           {replies.map((reply, i) => {

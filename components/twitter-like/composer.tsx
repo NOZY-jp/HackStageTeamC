@@ -41,7 +41,13 @@ export function Composer({ user }: { user: TwitterUser }) {
 }
 
 /** 個別投稿ページの返信欄。こちらも表示専用で disabled。 */
-export function ReplyComposer({ user, thread }: { user: TwitterUser; thread?: "up" | "updown" }) {
+export function ReplyComposer({
+  user,
+  thread,
+}: {
+  user: TwitterUser;
+  thread?: "up" | "down" | "updown";
+}) {
   return (
     <section className="tw-reply-composer" data-thread={thread} aria-label="返信の作成（表示のみ）">
       <Avatar user={user} />
