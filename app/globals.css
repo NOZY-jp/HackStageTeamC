@@ -489,8 +489,11 @@
   color: var(--color-text);
 }
 
+/* カテゴリ見出しのチューザ（名前の右・展開=下 / 折りたたみ=右） */
 .sidebar-caret {
-  display: inline-block;
+  display: inline-flex;
+  align-items: center;
+  flex: none;
   transition: transform var(--motion-fast) ease;
 }
 
