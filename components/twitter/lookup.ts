@@ -6,6 +6,11 @@ export function usersById(): Map<string, User> {
   return new Map(listUsers().map((user) => [user.id, user]));
 }
 
+/** 認証バッジを付けるのは公式の game-info アカウントだけ。 */
+export function isVerified(user: User): boolean {
+  return user.handle === "game-info";
+}
+
 /** 返信先投稿の作者。返信でなければ undefined。 */
 export function replyTargetAuthor(
   post: Post,

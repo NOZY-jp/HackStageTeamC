@@ -1,7 +1,7 @@
 import type { User } from "@/lib/mock/types";
 
 /** 画像を使わず、地色とイニシャルだけで描くアバター。装飾なので読み上げ対象外。 */
-export function Avatar({ user, size = "md" }: { user: User; size?: "md" | "lg" | "xl" }) {
+export function Avatar({ user, size = "md" }: { user: User; size?: "sm" | "md" | "lg" | "xl" }) {
   return (
     <span
       className="tw-avatar"

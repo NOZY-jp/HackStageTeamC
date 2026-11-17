@@ -289,6 +289,33 @@ export const twitterPosts: Post[] = [
   },
 ];
 
+/** ポストの表示数（インプレッション）のダミー値。Post.id → 件数。 */
+export const twitterViewCounts: Record<string, number> = {
+  "post-001": 48200,
+  "post-002": 2400,
+  "post-003": 1980,
+  "post-004": 1210,
+  "post-005": 1150,
+  "post-006": 870,
+  "post-007": 2650,
+  "post-008": 1320,
+  "post-009": 780,
+  "post-010": 1560,
+  "post-011": 1040,
+  "post-012": 21800,
+  "post-013": 910,
+  "post-014": 3100,
+  "post-015": 980,
+  "post-016": 1450,
+  "post-017": 720,
+  "post-018": 640,
+  "post-019": 560,
+  "post-020": 430,
+  "post-021": 1120,
+  "post-022": 460,
+  "post-023": 1690,
+};
+
 export const twitterTrends: Trend[] = [
   { id: "trend-1", category: "ゲーム · トレンド", name: "#紅葉の谷", postCount: 12400 },
   { id: "trend-2", category: "ゲーム · トレンド", name: "週末レイド", postCount: 8921 },

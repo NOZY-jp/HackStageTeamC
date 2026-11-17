@@ -3,11 +3,13 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import type { ReactNode } from "react";
-import { BellIcon, HomeIcon, MailIcon, SearchIcon, UserIcon } from "./icons";
+import { getUserByHandle } from "@/lib/mock";
+import { Avatar } from "./avatar";
+import { BrandIcon, ComposeIcon, HomeIcon, MailIcon, MoreIcon, UserIcon } from "./icons";
 
-type Item = { label: string; href?: string; icon: ReactNode; match: (path: string) => boolean };
+type Item = { label: string; href: string; icon: ReactNode; match: (path: string) => boolean };
 
-/** プロフィールは「自分」として hal を使う。未実装の項目は href を持たず disabled 表示。 */
+/** 左ナビは現行 X の構成に合わせて3項目だけ。プロフィールは「自分」として hal を使う。 */
 const ME_HANDLE = "hal";
 
 const items: Item[] = [
@@ -17,9 +19,12 @@ const items: Item[] = [
     icon: <HomeIcon />,
     match: (path) => path === "/twitter" || path.startsWith("/twitter/post/"),
   },
-  { label: "話題を検索", icon: <SearchIcon />, match: () => false },
-  { label: "通知", icon: <BellIcon />, match: () => false },
-  { label: "メッセージ", icon: <MailIcon />, match: () => false },
+  {
+    label: "メッセージ",
+    href: "/twitter/messages",
+    icon: <MailIcon />,
+    match: (path) => path.startsWith("/twitter/messages"),
+  },
   {
     label: "プロフィール",
     href: `/twitter/profile/${ME_HANDLE}`,
@@ -30,41 +35,41 @@ const items: Item[] = [
 
 export function TwitterNav() {
   const pathname = usePathname();
+  const me = getUserByHandle(ME_HANDLE);
   return (
-    <nav className="tw-nav" aria-label="メインナビゲーション">
-      {items.map((item) => {
-        const content = (
-          <>
-            {item.icon}
-            <span className="tw-nav-label">{item.label}</span>
-          </>
-        );
-        if (!item.href) {
-          return (
-            <span
-              key={item.label}
-              className="tw-nav-item"
-              aria-disabled="true"
-              title="この機能はデモでは未実装です"
-            >
-              {content}
-              <span className="tw-nav-badge" aria-hidden="true">
-                準備中
-              </span>
-            </span>
-          );
-        }
-        return (
+    <header className="tw-left">
+      <Link href="/twitter" className="tw-logo" aria-label="ホームへ">
+        <BrandIcon />
+      </Link>
+      <nav className="tw-nav" aria-label="メインナビゲーション">
+        {items.map((item) => (
           <Link
             key={item.label}
             href={item.href}
             className="tw-nav-item"
             aria-current={item.match(pathname) ? "page" : undefined}
           >
-            {content}
+            {item.icon}
+            <span className="tw-nav-label">{item.label}</span>
           </Link>
-        );
-      })}
-    </nav>
+        ))}
+      </nav>
+      <button type="button" className="tw-post-button" disabled title="このデモでは投稿できません">
+        <span className="tw-post-button-label">ポストする</span>
+        <span className="tw-post-button-icon" aria-hidden="true">
+          <ComposeIcon />
+        </span>
+      </button>
+      {me ? (
+        <Link href={`/twitter/profile/${ME_HANDLE}`} className="tw-account">
+          <Avatar user={me} />
+          <span className="tw-account-text">
+            <span className="tw-account-name">{me.displayName}</span>
+            <span className="tw-account-handle">@{me.handle}</span>
+          </span>
+          <MoreIcon />
+        </Link>
+      ) : null}
+    </header>
   );
 }

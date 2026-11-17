@@ -1,13 +1,14 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
-import { Avatar } from "@/components/twitter/avatar";
-import { formatCount, formatJoinedAt } from "@/components/twitter/format";
 import { replyTargetAuthor, usersById } from "@/components/twitter/lookup";
-import { PageHeader } from "@/components/twitter/page-header";
 import { PostCard } from "@/components/twitter/post-card";
+import { ProfileEmpty, ProfileShell } from "@/components/twitter/profile-shell";
+import { RightSidebar } from "@/components/twitter/right-sidebar";
 import { getPost, getProfile, getUserByHandle, listPostsByAuthor, listUsers } from "@/lib/mock";
 
 type Props = { params: Promise<{ handle: string }> };
+
+export const instant = false;
 
 export function generateStaticParams() {
   return listUsers().map((user) => ({ handle: user.handle }));
@@ -29,52 +30,32 @@ export default async function TwitterProfilePage({ params }: Props) {
     notFound();
   }
   const users = usersById();
-  const posts = listPostsByAuthor(user.id);
+  const allPosts = listPostsByAuthor(user.id);
+  const posts = allPosts.filter((post) => !post.replyToId);
 
   return (
     <>
-      <PageHeader
-        title={user.displayName}
-        subtitle={`${posts.length} 件のポスト`}
-        backHref="/twitter"
-      />
-      <section className="tw-profile" aria-label="プロフィール">
-        <div
-          className="tw-banner"
-          style={{ backgroundColor: user.avatarColor }}
-          aria-hidden="true"
-        />
-        <div className="tw-profile-body">
-          <div className="tw-profile-avatar">
-            <Avatar user={user} size="xl" />
-          </div>
-          <h2 className="tw-profile-name">{user.displayName}</h2>
-          <p className="tw-handle">@{user.handle}</p>
-          <p className="tw-profile-bio">{profile.bio}</p>
-          <p className="tw-profile-meta">
-            {profile.location ? <span>{profile.location}</span> : null}
-            <span>{formatJoinedAt(profile.joinedAt)}から利用</span>
-          </p>
-          <p className="tw-profile-counts">
-            <span>
-              <strong>{formatCount(profile.followingCount)}</strong> フォロー中
-            </span>
-            <span>
-              <strong>{formatCount(profile.followersCount)}</strong> フォロワー
-            </span>
-          </p>
-        </div>
-      </section>
-      <section aria-label="ポスト">
-        {posts.map((post) => (
-          <PostCard
-            key={post.id}
-            post={post}
-            author={user}
-            replyTo={replyTargetAuthor(post, getPost, users)}
-          />
-        ))}
-      </section>
+      <main className="tw-main">
+        <ProfileShell user={user} profile={profile} postCount={allPosts.length} active="posts">
+          <section aria-label="ポスト">
+            {posts.length === 0 ? (
+              <ProfileEmpty
+                title="まだポストはありません"
+                description="ポストすると、ここに表示されます。"
+              />
+            ) : null}
+            {posts.map((post) => (
+              <PostCard
+                key={post.id}
+                post={post}
+                author={user}
+                replyTo={replyTargetAuthor(post, getPost, users)}
+              />
+            ))}
+          </section>
+        </ProfileShell>
+      </main>
+      <RightSidebar />
     </>
   );
 }

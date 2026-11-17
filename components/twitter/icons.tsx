@@ -21,16 +21,44 @@ function Icon({ children }: { children: ReactNode }) {
   );
 }
 
+/**
+ * 現行の X 風の自作の印。太い斜線と細い斜線を重ねただけの自作 SVG パスで、
+ * 公式のロゴデータは複製していない。
+ */
 export const BrandIcon = () => (
   <svg
+    className="tw-brand-icon"
     viewBox="0 0 24 24"
-    width="28"
-    height="28"
+    width="26"
+    height="26"
     fill="currentColor"
     aria-hidden="true"
     focusable="false"
   >
-    <path d="M12 2.5 21 7.75v8.5L12 21.5 3 16.25v-8.5L12 2.5Zm-3.2 5.6v7.8h1.7v-3.1h3v3.1h1.7V8.1h-1.7v3.1h-3V8.1H8.8Z" />
+    <path d="M3 2.5h5.5l12.5 19h-5.5L3 2.5Z" />
+    <path d="M2.5 21.5h4l15-19h-4l-15 19Z" />
+  </svg>
+);
+
+/** 認証バッジ（game-info 公式アカウントのみ）。青丸＋抜きのチェック。 */
+export const VerifiedBadge = () => (
+  <svg
+    className="tw-badge"
+    viewBox="0 0 22 22"
+    width="18"
+    height="18"
+    aria-hidden="true"
+    focusable="false"
+  >
+    <circle cx="11" cy="11" r="10" style={{ fill: "var(--tw-accent)" }} />
+    <path
+      d="m6.4 11.5 3 3 6.2-7"
+      fill="none"
+      style={{ stroke: "var(--tw-bg)" }}
+      strokeWidth="2.4"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    />
   </svg>
 );
 
@@ -85,5 +113,101 @@ export const BackIcon = () => (
   <Icon>
     <path d="M19 12H5" />
     <path d="m11 6-6 6 6 6" />
+  </Icon>
+);
+/** 表示数（棒グラフ）。 */
+export const ViewsIcon = () => (
+  <Icon>
+    <path d="M4 20v-6" />
+    <path d="M10 20V5" />
+    <path d="M16 20v-9" />
+    <path d="M22 20V8" />
+    <path d="M2 20h20" strokeWidth="0" opacity="0" />
+  </Icon>
+);
+export const BookmarkIcon = () => (
+  <Icon>
+    <path d="M6 3.5h12V21l-6-4.7L6 21V3.5Z" />
+  </Icon>
+);
+export const ShareIcon = () => (
+  <Icon>
+    <path d="M12 3.5v11" />
+    <path d="m7.5 7 4.5-4.5L16.5 7" />
+    <path d="M5 12v6.5a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V12" />
+  </Icon>
+);
+/** 「…」の三点。 */
+export const MoreIcon = () => (
+  <Icon>
+    <circle cx="6" cy="12" r="1.4" fill="currentColor" stroke="none" />
+    <circle cx="12" cy="12" r="1.4" fill="currentColor" stroke="none" />
+    <circle cx="18" cy="12" r="1.4" fill="currentColor" stroke="none" />
+  </Icon>
+);
+export const MediaIcon = () => (
+  <Icon>
+    <rect x="3.5" y="4.5" width="17" height="15" rx="2" />
+    <circle cx="9" cy="9.5" r="1.6" />
+    <path d="m4.5 17.5 4.5-4.5 3 3 3.5-3.5 4 4" />
+  </Icon>
+);
+export const GifIcon = () => (
+  <Icon>
+    <rect x="3.5" y="5.5" width="17" height="13" rx="2" />
+    <text
+      x="12"
+      y="15.2"
+      textAnchor="middle"
+      fontSize="7"
+      fontWeight="700"
+      fill="currentColor"
+      stroke="none"
+    >
+      GIF
+    </text>
+  </Icon>
+);
+export const PollIcon = () => (
+  <Icon>
+    <path d="M4 7h10" />
+    <path d="M4 12h15" />
+    <path d="M4 17h6" />
+  </Icon>
+);
+export const EmojiIcon = () => (
+  <Icon>
+    <circle cx="12" cy="12" r="8.5" />
+    <circle cx="9" cy="10" r="1" fill="currentColor" stroke="none" />
+    <circle cx="15" cy="10" r="1" fill="currentColor" stroke="none" />
+    <path d="M8.5 14.5a4.8 4.8 0 0 0 7 0" />
+  </Icon>
+);
+export const CalendarIcon = () => (
+  <Icon>
+    <rect x="3.5" y="5" width="17" height="16" rx="2" />
+    <path d="M8 3v4" />
+    <path d="M16 3v4" />
+    <path d="M3.5 10h17" />
+  </Icon>
+);
+export const SendIcon = () => (
+  <Icon>
+    <path d="M3.5 11.2 20.5 4 14.8 20.5l-3.5-6.5-7.8-2.8Z" />
+    <path d="m11.3 14 9.2-10" />
+  </Icon>
+);
+export const InfoIcon = () => (
+  <Icon>
+    <circle cx="12" cy="12" r="8.5" />
+    <circle cx="12" cy="8" r="1" fill="currentColor" stroke="none" />
+    <path d="M12 11.5V17" />
+  </Icon>
+);
+/** 細幅時の「ポストする」ボタンに出す羽ペン。 */
+export const ComposeIcon = () => (
+  <Icon>
+    <path d="M4.5 19.5c1-5.5 3.8-11 7.8-13.5 2.8-1.7 6.4-2.2 8.2-2.5-.3 1.9-1 5.4-3.3 8-3 3.4-8.3 6-12.7 8Z" />
+    <path d="M4.5 19.5 15 9" />
   </Icon>
 );
