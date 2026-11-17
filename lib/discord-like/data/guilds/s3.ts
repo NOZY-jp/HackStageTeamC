@@ -3,6 +3,7 @@ import type { Guild } from "../../types";
 /** ゲーム部（ダミー）。カテゴリ3・テキスト7・ボイス3。 */
 export const s3: Guild = {
   id: "s3",
+  urlId: "1074210658438352003",
   name: "ゲーム部",
   iconColor: "#c2255c",
   initials: "GB",
@@ -29,6 +30,7 @@ export const s3: Guild = {
   channels: [
     {
       id: "s3-announcements",
+      urlId: "1074210658438352301",
       guildId: "s3",
       name: "全体連絡",
       kind: "text",
@@ -38,6 +40,7 @@ export const s3: Guild = {
     },
     {
       id: "s3-schedule",
+      urlId: "1074210658438352302",
       guildId: "s3",
       name: "スケジュール",
       kind: "text",
@@ -49,6 +52,7 @@ export const s3: Guild = {
     },
     {
       id: "s3-rules",
+      urlId: "1074210658438352303",
       guildId: "s3",
       name: "ルール",
       kind: "text",
@@ -58,6 +62,7 @@ export const s3: Guild = {
     },
     {
       id: "s3-minutes",
+      urlId: "1074210658438352304",
       guildId: "s3",
       name: "議事録",
       kind: "text",
@@ -67,6 +72,7 @@ export const s3: Guild = {
     },
     {
       id: "s3-review",
+      urlId: "1074210658438352305",
       guildId: "s3",
       name: "レビュー",
       kind: "text",
@@ -76,6 +82,7 @@ export const s3: Guild = {
     },
     {
       id: "s3-questions",
+      urlId: "1074210658438352306",
       guildId: "s3",
       name: "質問",
       kind: "text",
@@ -85,6 +92,7 @@ export const s3: Guild = {
     },
     {
       id: "s3-random",
+      urlId: "1074210658438352307",
       guildId: "s3",
       name: "雑談",
       kind: "text",
@@ -94,6 +102,7 @@ export const s3: Guild = {
     },
     {
       id: "s3-vc-1",
+      urlId: "1074210658438352308",
       guildId: "s3",
       name: "定例",
       kind: "voice",
@@ -102,6 +111,7 @@ export const s3: Guild = {
     },
     {
       id: "s3-vc-2",
+      urlId: "1074210658438352309",
       guildId: "s3",
       name: "作業通話",
       kind: "voice",
@@ -110,6 +120,7 @@ export const s3: Guild = {
     },
     {
       id: "s3-vc-3",
+      urlId: "1074210658438352310",
       guildId: "s3",
       name: "雑談",
       kind: "voice",

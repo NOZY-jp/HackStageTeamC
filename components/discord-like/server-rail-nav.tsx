@@ -3,10 +3,13 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { type KeyboardEvent, useEffect, useRef } from "react";
+import { APP_PREFIX, dmListPath } from "@/lib/platform/app-prefix";
 import { useShellControls } from "./app-shell";
 
 export type RailGuild = {
   id: string;
+  /** URL に出す数値ID（guild の urlId） */
+  urlId: string;
   name: string;
   iconColor: string;
   initials: string;
@@ -27,7 +30,8 @@ export function ServerRailNav({ guilds }: { guilds: RailGuild[] }) {
   const pathname = usePathname();
   const { closeOverlays } = useShellControls();
   const navRef = useRef<HTMLElement>(null);
-  const dmActive = pathname === "/dm" || pathname.startsWith("/dm/");
+  const dmHome = dmListPath();
+  const dmActive = pathname === dmHome || pathname.startsWith(`${dmHome}/`);
 
   // 画面遷移したときだけ、開いたままのオーバーレイを閉じる（初回マウントでは閉じない）
   const previousPathname = useRef(pathname);
@@ -79,7 +83,7 @@ export function ServerRailNav({ guilds }: { guilds: RailGuild[] }) {
       onKeyDown={handleKeyDown}
     >
       <Link
-        href="/dm"
+        href={dmHome}
         className="rail-button rail-button-dm"
         aria-label="ダイレクトメッセージ"
         aria-current={dmActive ? "page" : undefined}
@@ -105,7 +109,8 @@ export function ServerRailNav({ guilds }: { guilds: RailGuild[] }) {
 
       {guilds.map((guild) => {
         const active =
-          pathname === `/servers/${guild.id}` || pathname.startsWith(`/servers/${guild.id}/`);
+          pathname === `/${APP_PREFIX}/channels/${guild.urlId}` ||
+          pathname.startsWith(`/${APP_PREFIX}/channels/${guild.urlId}/`);
         const unread = guild.unreadCount > 0;
         const mention = guild.mentionCount > 0;
         const label = [

@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { dmListPath } from "@/lib/platform/app-prefix";
 
 export default function NotFound() {
   return (
@@ -7,8 +8,8 @@ export default function NotFound() {
         404
       </p>
       <h1 className="route-state-title">チャンネルが見つかりません</h1>
-      <p className="route-state-description">サーバーの一覧から選び直してください。</p>
-      <Link href="/dm" className="route-state-link">
+      <p className="route-state-description">URLを確認するか、一覧から選び直してください。</p>
+      <Link href={dmListPath()} className="route-state-link">
         DMへ戻る
       </Link>
     </div>

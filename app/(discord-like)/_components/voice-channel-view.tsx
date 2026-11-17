@@ -3,6 +3,7 @@
 import { usePathname } from "next/navigation";
 import { useEffect } from "react";
 import { PaneToggles } from "@/components/discord-like/pane-toggles";
+import { guildChannelPath } from "@/lib/platform/app-prefix";
 import { EmptyState } from "./empty-state";
 import { useVoice } from "./voice-context";
 
@@ -22,13 +23,19 @@ type VoiceParticipant = {
  */
 export function VoiceChannelView({
   guildId,
+  guildUrlId,
   channelId,
+  channelUrlId,
   channelName,
   participants,
   currentUser,
 }: {
   guildId: string;
+  /** URL に出す guild の数値ID */
+  guildUrlId: string;
   channelId: string;
+  /** URL に出す channel の数値ID */
+  channelUrlId: string;
   channelName: string;
   participants: VoiceParticipant[];
   currentUser: { id: string; displayName: string; avatarColor: string };
@@ -40,7 +47,7 @@ export function VoiceChannelView({
 
   // 表示中のページだけが自動参加する（ルートキャッシュで裏に残った画面が奪わないように）
   const pathname = usePathname();
-  const active = pathname === `/servers/${guildId}/channels/${channelId}`;
+  const active = pathname === guildChannelPath(guildUrlId, channelUrlId);
 
   // このチャンネルに入ったら自動参加する。
   // 「一度処理したか」ではなく実際の接続状態で判定するので、

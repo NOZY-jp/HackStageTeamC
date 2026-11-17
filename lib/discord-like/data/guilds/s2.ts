@@ -3,6 +3,7 @@ import type { Guild } from "../../types";
 /** 創作サークル（ダミー）。カテゴリ2・テキスト6・ボイス2。 */
 export const s2: Guild = {
   id: "s2",
+  urlId: "1074210658438352002",
   name: "創作サークル",
   iconColor: "#2f9e44",
   initials: "CS",
@@ -23,6 +24,7 @@ export const s2: Guild = {
   channels: [
     {
       id: "s2-general",
+      urlId: "1074210658438352201",
       guildId: "s2",
       name: "一般",
       kind: "text",
@@ -34,6 +36,7 @@ export const s2: Guild = {
     },
     {
       id: "s2-contact",
+      urlId: "1074210658438352202",
       guildId: "s2",
       name: "連絡",
       kind: "text",
@@ -43,6 +46,7 @@ export const s2: Guild = {
     },
     {
       id: "s2-planning",
+      urlId: "1074210658438352203",
       guildId: "s2",
       name: "企画",
       kind: "text",
@@ -52,6 +56,7 @@ export const s2: Guild = {
     },
     {
       id: "s2-assets",
+      urlId: "1074210658438352204",
       guildId: "s2",
       name: "素材",
       kind: "text",
@@ -61,6 +66,7 @@ export const s2: Guild = {
     },
     {
       id: "s2-questions",
+      urlId: "1074210658438352205",
       guildId: "s2",
       name: "質問",
       kind: "text",
@@ -70,6 +76,7 @@ export const s2: Guild = {
     },
     {
       id: "s2-random",
+      urlId: "1074210658438352206",
       guildId: "s2",
       name: "雑談",
       kind: "text",
@@ -79,6 +86,7 @@ export const s2: Guild = {
     },
     {
       id: "s2-vc-1",
+      urlId: "1074210658438352207",
       guildId: "s2",
       name: "ミーティング",
       kind: "voice",
@@ -87,6 +95,7 @@ export const s2: Guild = {
     },
     {
       id: "s2-vc-2",
+      urlId: "1074210658438352208",
       guildId: "s2",
       name: "雑談",
       kind: "voice",
