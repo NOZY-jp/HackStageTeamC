@@ -284,7 +284,7 @@
   }
 }
 
-/* レール内のアイコン: 通常16px角丸 → ホバー/選択で12px角丸 */
+/* レール内のアイコン: 形（16px角丸）は状態で変えない（現行 Discord と同じ） */
 .rail-button {
   position: relative;
   display: flex;
@@ -297,15 +297,8 @@
   color: var(--color-text);
   background-color: var(--color-bg-input);
   transition:
-    border-radius var(--motion-fast) ease,
     background-color var(--motion-fast) ease,
     color var(--motion-fast) ease;
-}
-
-.rail-button:hover,
-.rail-button:focus-visible,
-.rail-button[aria-current="page"] {
-  border-radius: 12px;
 }
 
 /* DM ホームだけアクセント色で塗る（サーバーは iconColor をそのまま使う） */
@@ -336,7 +329,11 @@
   color: var(--color-text-on-danger);
 }
 
-/* 左端のインジケータ（未読=短い白丸 / 選択中=長い白い縦棒） */
+/*
+ * 左端のインジケータ（pill）。長さで状態を示す:
+ * 未読=8px の点 / ホバー・フォーカス=20px の短いバー / 選択中=40px（アイコン48px相当）
+ * 幅・位置・角丸は共通。:hover を [aria-current] より前に置き、選択中は短くならないようにする。
+ */
 .rail-button::before {
   content: "";
   position: absolute;
@@ -352,8 +349,14 @@
   height: 8px;
 }
 
+.rail-button:hover::before,
+.rail-button:focus-visible::before {
+  height: 20px;
+}
+
+/* 未読やホバーより後に置いて、選択中は常に一番長くする */
 .rail-button[aria-current="page"]::before {
-  height: 24px;
+  height: 40px;
 }
 
 /* メンションの赤バッジ（右下） */
