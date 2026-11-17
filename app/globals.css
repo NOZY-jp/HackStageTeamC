@@ -513,7 +513,8 @@
   display: flex;
   align-items: center;
   gap: 8px;
-  min-height: 24px;
+  /* 行の高さで間隔を作る（アバター24px + 上下4px）。行間 gap は 2px のまま */
+  min-height: 32px;
   color: var(--color-text-muted);
   font-size: 14px;
   line-height: 1.3;
