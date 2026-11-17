@@ -1,20 +1,20 @@
 import { notFound } from "next/navigation";
 import { DmList } from "@/app/(discord-like)/_components/dm-list";
+import { DmNotFound } from "@/app/(discord-like)/_components/dm-not-found";
 import { MessagePane } from "@/app/(discord-like)/_components/message-pane";
 import { SELF_USER_ID } from "@/app/(discord-like)/_components/self-user";
 import { VoiceChannelView } from "@/app/(discord-like)/_components/voice-channel-view";
 import { ChannelSidebar } from "@/components/discord-like/channel-sidebar";
 import {
-  getChannelByUrlId,
-  getDMThreadByUrlId,
-  getGuildByUrlId,
+  getChannel,
+  getDMThread,
+  getGuild,
   getUser,
   listDMMessages,
   listMessages,
   listVoiceStates,
 } from "@/lib/discord-like";
-
-const DM_HOME = "@me";
+import { resolveChannelRoute } from "@/lib/discord-like/route-resolution";
 
 /**
  * Discord と同じ2セグメント構成。
@@ -27,19 +27,25 @@ export default async function ChannelPage({
   params: Promise<{ guildId: string; channelId: string }>;
 }) {
   const { guildId, channelId } = await params;
+  const route = resolveChannelRoute(guildId, channelId);
 
-  // 動的セグメントは URL エンコードされたまま渡ることがある（"@me" → "%40me"）
-  const decodedGuildId = decodeURIComponent(guildId);
-  if (decodedGuildId === DM_HOME) {
-    return <DmThread urlId={channelId} />;
+  switch (route.kind) {
+    case "dm":
+      return <DmThread threadId={route.threadId} />;
+    case "dm-missing":
+      // DM は旧画面と同じ専用の未検出UI（not-found.tsx は動的パラメータを受け取れない）
+      return <DmNotFound />;
+    case "channel":
+      return <GuildChannel guildId={route.guildId} channelId={route.channelId} />;
+    default:
+      notFound();
   }
-  return <GuildChannel guildUrlId={decodedGuildId} channelUrlId={channelId} />;
 }
 
-async function DmThread({ urlId }: { urlId: string }) {
-  const thread = getDMThreadByUrlId(urlId);
+async function DmThread({ threadId }: { threadId: string }) {
+  const thread = getDMThread(threadId);
   if (!thread) {
-    notFound();
+    return <DmNotFound />;
   }
 
   const otherId =
@@ -62,18 +68,11 @@ async function DmThread({ urlId }: { urlId: string }) {
   );
 }
 
-async function GuildChannel({
-  guildUrlId,
-  channelUrlId,
-}: {
-  guildUrlId: string;
-  channelUrlId: string;
-}) {
-  const guild = getGuildByUrlId(guildUrlId);
-  const channel = getChannelByUrlId(channelUrlId);
+async function GuildChannel({ guildId, channelId }: { guildId: string; channelId: string }) {
+  const guild = getGuild(guildId);
+  const channel = getChannel(channelId);
 
-  // チャンネルが別のサーバーのものだった場合も未検出にする
-  if (!guild || !channel || channel.guildId !== guild.id) {
+  if (!guild || !channel) {
     notFound();
   }
 
