@@ -5,7 +5,7 @@ import { type ReactNode, useState } from "react";
 type Tab = "forYou" | "following";
 
 /**
- * ホーム上部のタブ行（おすすめ・フォロー中）。現行 X に合わせて
+ * ホーム上部のタブ行（おすすめ・フォロー中）。本家に合わせて
  * タブの切り替えだけは画面内で動く（中身はサーバーで描いたリスト）。
  */
 export function HomeTabs({ forYou, following }: { forYou: ReactNode; following: ReactNode }) {

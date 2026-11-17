@@ -9,7 +9,7 @@ import { BrandIcon, ComposeIcon, HomeIcon, MailIcon, MoreIcon, UserIcon } from "
 
 type Item = { label: string; href: string; icon: ReactNode; match: (path: string) => boolean };
 
-/** 左ナビは現行 X の構成に合わせて3項目だけ。プロフィールは「自分」として hal を使う。 */
+/** 左ナビは本家の構成に合わせて3項目だけ。プロフィールは「自分」として hal を使う。 */
 const ME_HANDLE = "hal";
 
 const items: Item[] = [
@@ -38,8 +38,9 @@ export function TwitterNav() {
   const me = getUserByHandle(ME_HANDLE);
   return (
     <header className="tw-left">
-      <Link href="/twitter" className="tw-logo" aria-label="ホームへ">
+      <Link href="/twitter" className="tw-logo" aria-label="Twixer ホームへ">
         <BrandIcon />
+        <span className="tw-logo-text">Twixer</span>
       </Link>
       <nav className="tw-nav" aria-label="メインナビゲーション">
         {items.map((item) => (

@@ -6,7 +6,7 @@ import { RightSidebar } from "@/components/twitter-like/right-sidebar";
 import { getPost, listPosts } from "@/lib/twitter-like";
 import type { Post, TwitterUser } from "@/lib/twitter-like/types";
 
-export const metadata = { title: "ホーム" };
+export const metadata = { title: { absolute: "ホーム | Twixer" } };
 
 /** タイムラインはトップレベルの投稿のみ。返信は個別投稿ページとプロフィールに出す。 */
 export default function TwitterTimelinePage() {

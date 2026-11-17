@@ -18,7 +18,7 @@ const tabs: { key: ProfileTab; label: string; suffix: string }[] = [
 
 /**
  * プロフィール画面の共通の骨格（見出し・バナー・情報・タブ行）。
- * タブは現行 X と同じくタブごとの URL（/{handle}、/with_replies、/media、/likes）。
+ * タブは本家と同じくタブごとの URL（/{handle}、/with_replies、/media、/likes）。
  */
 export function ProfileShell({
   user,

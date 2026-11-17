@@ -1501,7 +1501,7 @@
   }
 }
 
-/* ---- Twitter-like UI（/twitter 配下）。現行 X のダーク表示に寄せた専用の配色 ---- */
+/* ---- Twitter-like UI（/twitter 配下）。本家のダーク表示に寄せた専用の配色 ---- */
 
 .tw-shell {
   --tw-bg: #000000;
@@ -1551,9 +1551,10 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 50px;
+  gap: 10px;
   height: 50px;
   margin: 2px 0;
+  padding: 0 12px;
   border-radius: 999px;
   color: var(--tw-text);
 }
@@ -1564,8 +1565,15 @@ a.tw-logo:focus-visible {
 }
 
 .tw-brand-icon {
+  flex: none;
   width: 26px;
   height: 26px;
+}
+
+.tw-logo-text {
+  font-size: 21px;
+  font-weight: 800;
+  letter-spacing: -0.02em;
 }
 
 .tw-icon {
@@ -2191,7 +2199,7 @@ a.tw-time:hover {
   gap: 16px;
 }
 
-/* アイコンは弱い色で、hover で初めて種類ごとの色になる（現行 X 準拠） */
+/* アイコンは弱い色で、hover で初めて種類ごとの色になる（本家準拠） */
 .tw-stat[data-kind="reply"]:hover {
   color: var(--tw-accent);
 }
@@ -2258,13 +2266,14 @@ a.tw-time:hover {
   margin-top: 8px;
 }
 
-/* スレッドの接続線（親子 avatar をつなぐ縦線。avatar の中心 x=36px 上に引く） */
-.tw-post[data-thread~="up"]::before,
-.tw-post[data-thread~="down"]::after,
-.tw-detail[data-thread~="up"]::before,
-.tw-detail[data-thread~="down"]::after,
-.tw-reply-composer[data-thread~="up"]::before,
-.tw-reply-composer[data-thread~="down"]::after {
+/* スレッドの接続線（親子 avatar をつなぐ縦線。avatar の中心 x=36px 上に引く）
+   詳細カード .tw-detail は本文・日時・カウントが全幅のため下向きの線は引かない
+   （引くと文字やアイコンを縦断する。本家も詳細ポストには下線を引かない）。 */
+.tw-post[data-thread*="up"]::before,
+.tw-post[data-thread*="down"]::after,
+.tw-detail[data-thread*="up"]::before,
+.tw-reply-composer[data-thread*="up"]::before,
+.tw-reply-composer[data-thread*="down"]::after {
   content: "";
   position: absolute;
   left: 35px;
@@ -2272,16 +2281,15 @@ a.tw-time:hover {
   background-color: var(--tw-border);
 }
 
-.tw-post[data-thread~="up"]::before,
-.tw-detail[data-thread~="up"]::before,
-.tw-reply-composer[data-thread~="up"]::before {
+.tw-post[data-thread*="up"]::before,
+.tw-detail[data-thread*="up"]::before,
+.tw-reply-composer[data-thread*="up"]::before {
   top: 0;
   height: 12px;
 }
 
-.tw-post[data-thread~="down"]::after,
-.tw-detail[data-thread~="down"]::after,
-.tw-reply-composer[data-thread~="down"]::after {
+.tw-post[data-thread*="down"]::after,
+.tw-reply-composer[data-thread*="down"]::after {
   top: 52px;
   bottom: 0;
 }
@@ -2654,6 +2662,7 @@ a.tw-dm-item:focus-visible {
     padding: 0 4px;
   }
 
+  .tw-logo-text,
   .tw-nav-label,
   .tw-account-text,
   .tw-account > .tw-icon {
