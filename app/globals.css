@@ -1429,3 +1429,619 @@
     --motion-normal: 0ms;
   }
 }
+
+/* ---- Note like UI（/note 配下） ---- */
+
+/*
+ * 長文を読む画面なのでライトテーマにする。上の配色トークン（ダーク）は使えないため、
+ * Note like UI の色は .note-shell の中だけで定義し、外へは漏らさない。
+ * body はスクロールしないので、.note-shell が自前でスクロールする。
+ */
+.note-shell {
+  color-scheme: light;
+
+  --note-bg: #ffffff;
+  --note-bg-subtle: #f7f7f5;
+  --note-text: #22262b;
+  --note-text-muted: #6b7078;
+  --note-line: #e6e6e3;
+  --note-accent: #24786e;
+  --note-like: #d43d68;
+  --note-text-on-avatar: #ffffff;
+
+  --note-width-wide: 1024px;
+  --note-width-list: 768px;
+  --note-width-article: 620px;
+
+  height: 100dvh;
+  overflow-y: auto;
+  background-color: var(--note-bg);
+  color: var(--note-text);
+}
+
+.note-shell :focus-visible {
+  outline-color: var(--note-accent);
+}
+
+.note-header {
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  background-color: var(--note-bg);
+  border-bottom: var(--pane-border) solid var(--note-line);
+}
+
+.note-header-inner {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  max-width: var(--note-width-wide);
+  height: 56px;
+  margin: 0 auto;
+  padding: 0 16px;
+}
+
+.note-brand {
+  font-size: 24px;
+  font-weight: 700;
+  letter-spacing: -0.025em;
+}
+
+.note-search {
+  flex: 1;
+  min-width: 0;
+  max-width: 320px;
+}
+
+.note-search-form {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  height: 36px;
+  padding: 0 12px;
+  border-radius: 999px;
+  background-color: var(--note-bg-subtle);
+  color: var(--note-text-muted);
+}
+
+.note-search-form:focus-within {
+  outline: 2px solid var(--note-accent);
+  outline-offset: 2px;
+}
+
+.note-search-input {
+  width: 100%;
+  min-width: 0;
+  background: transparent;
+  color: var(--note-text);
+  font-size: 14px;
+}
+
+.note-search-input:focus-visible {
+  /* 枠は外側の .note-search-form に出す */
+  outline: none;
+}
+
+.note-search-input::placeholder {
+  color: var(--note-text-muted);
+}
+
+.note-footer {
+  margin-top: 64px;
+  padding: 32px 0;
+  border-top: var(--pane-border) solid var(--note-line);
+  color: var(--note-text-muted);
+  font-size: 12px;
+  text-align: center;
+}
+
+.note-icon {
+  flex: none;
+  width: 20px;
+  height: 20px;
+}
+
+.note-icon[data-size="sm"] {
+  width: 16px;
+  height: 16px;
+}
+
+/* ページの器。幅は data-width で切り替える（既定はグリッド用の広い幅） */
+.note-page {
+  position: relative;
+  max-width: var(--note-width-wide);
+  margin: 0 auto;
+  padding: 32px 16px;
+}
+
+.note-page[data-width="list"] {
+  max-width: var(--note-width-list);
+}
+
+.note-page[data-width="article"] {
+  max-width: var(--note-width-article);
+}
+
+.note-page-title {
+  margin-bottom: 24px;
+  font-size: 20px;
+  font-weight: 700;
+}
+
+.note-page-title[data-tight="true"] {
+  margin-bottom: 8px;
+}
+
+.note-empty {
+  color: var(--note-text-muted);
+  font-size: 14px;
+}
+
+.note-empty[data-spaced="true"] {
+  padding: 32px 0;
+}
+
+/* アバター。画像でも頭文字でも同じ寸法にする */
+.note-avatar {
+  flex: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  object-fit: cover;
+  color: var(--note-text-on-avatar);
+  font-size: 16px;
+  font-weight: 700;
+}
+
+.note-avatar[data-size="sm"] {
+  width: 24px;
+  height: 24px;
+  font-size: 12px;
+}
+
+.note-avatar[data-size="lg"] {
+  width: 80px;
+  height: 80px;
+  font-size: 30px;
+}
+
+/* 見出し画像（1.91:1） */
+.note-cover {
+  display: block;
+  width: 100%;
+  height: auto;
+  aspect-ratio: 1.91 / 1;
+  border-radius: 8px;
+  object-fit: cover;
+}
+
+.note-cover-empty {
+  aspect-ratio: 1.91 / 1;
+  border-radius: 8px;
+  background-color: var(--note-bg-subtle);
+}
+
+.note-like-count {
+  flex: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-variant-numeric: tabular-nums;
+}
+
+.note-like-count[data-align="end"] {
+  margin-left: auto;
+}
+
+/* 記事カードのグリッド（トップ） */
+.note-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 40px 24px;
+}
+
+.note-card {
+  display: flex;
+  flex-direction: column;
+}
+
+.note-card-link {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.note-card-link .note-cover {
+  transition: opacity var(--motion-fast);
+}
+
+.note-card-link:hover .note-cover {
+  opacity: 0.85;
+}
+
+.note-card-title {
+  display: -webkit-box;
+  min-height: 2.75em;
+  overflow: hidden;
+  font-size: 16px;
+  font-weight: 700;
+  line-height: 1.375;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+}
+
+.note-card-meta {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 12px;
+  color: var(--note-text-muted);
+  font-size: 12px;
+}
+
+.note-card-creator {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+}
+
+.note-card-creator:hover {
+  text-decoration: underline;
+}
+
+.note-card-creator-name {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* 記事の行表示（クリエイターページ・検索結果・記事下） */
+.note-row {
+  padding: 24px 0;
+  border-bottom: var(--pane-border) solid var(--note-line);
+}
+
+.note-row-link {
+  display: flex;
+  align-items: flex-start;
+  gap: 16px;
+}
+
+.note-row-text {
+  flex: 1;
+  min-width: 0;
+}
+
+.note-row-title {
+  display: -webkit-box;
+  overflow: hidden;
+  font-size: 18px;
+  font-weight: 700;
+  line-height: 1.375;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+}
+
+.note-row-link:hover .note-row-title {
+  text-decoration: underline;
+}
+
+.note-row-excerpt {
+  display: -webkit-box;
+  margin-top: 8px;
+  overflow: hidden;
+  color: var(--note-text-muted);
+  font-size: 14px;
+  line-height: 1.625;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+}
+
+.note-row-cover {
+  flex: none;
+  width: 112px;
+  border-radius: 6px;
+}
+
+.note-row-meta {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-top: 12px;
+  color: var(--note-text-muted);
+  font-size: 12px;
+}
+
+/* クリエイターページ */
+.note-profile-name {
+  margin-top: 16px;
+  font-size: 24px;
+  font-weight: 700;
+}
+
+.note-profile-bio {
+  margin-top: 12px;
+  font-size: 14px;
+  line-height: 1.625;
+}
+
+.note-section-title {
+  margin-top: 32px;
+  padding-bottom: 12px;
+  border-bottom: var(--pane-border) solid var(--note-line);
+  font-size: 14px;
+  font-weight: 700;
+}
+
+/* 記事ページ */
+.note-article-cover {
+  margin-bottom: 32px;
+}
+
+.note-article-title {
+  font-size: 28px;
+  font-weight: 700;
+  line-height: 1.5;
+}
+
+.note-byline {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-top: 24px;
+}
+
+.note-byline-text {
+  min-width: 0;
+  font-size: 14px;
+}
+
+.note-byline-name {
+  font-weight: 700;
+}
+
+.note-byline-name:hover {
+  text-decoration: underline;
+}
+
+.note-byline-date {
+  color: var(--note-text-muted);
+}
+
+/* 本文。ブロックは素の要素で出し、ここで体裁を決める */
+.note-body {
+  margin-top: 40px;
+  font-size: 18px;
+  line-height: 2;
+}
+
+.note-body p {
+  margin: 24px 0;
+}
+
+.note-body h2 {
+  margin: 48px 0 16px;
+  font-size: 20px;
+  font-weight: 700;
+  line-height: 1.375;
+}
+
+.note-body blockquote {
+  margin: 32px 0;
+  padding: 4px 0 4px 20px;
+  border-left: 4px solid var(--note-line);
+  color: var(--note-text-muted);
+}
+
+.note-body hr {
+  width: 96px;
+  margin: 40px auto;
+  border-color: var(--note-line);
+}
+
+.note-body figure {
+  margin: 32px 0;
+}
+
+.note-body figure img {
+  width: 100%;
+  height: auto;
+  border-radius: 6px;
+}
+
+.note-body figcaption {
+  margin-top: 8px;
+  color: var(--note-text-muted);
+  font-size: 14px;
+  line-height: 1.625;
+  text-align: center;
+}
+
+.note-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 48px;
+}
+
+.note-tag {
+  display: block;
+  padding: 6px 12px;
+  border-radius: 999px;
+  background-color: var(--note-bg-subtle);
+  color: var(--note-text-muted);
+  font-size: 14px;
+}
+
+.note-tag:hover {
+  color: var(--note-text);
+}
+
+/* スキ。狭い画面は本文の下、広い画面は本文の左に浮かせる（どちらか一方だけ出す） */
+.note-article-side {
+  display: none;
+}
+
+.note-article-actions {
+  margin-top: 32px;
+}
+
+.note-like {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.note-like[data-layout="column"] {
+  flex-direction: column;
+}
+
+.note-like-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  border: var(--pane-border) solid var(--note-line);
+  border-radius: 50%;
+  color: var(--note-text-muted);
+  transition:
+    color var(--motion-fast),
+    border-color var(--motion-fast);
+}
+
+.note-like-button:hover,
+.note-like-button[aria-pressed="true"] {
+  border-color: var(--note-like);
+  color: var(--note-like);
+}
+
+.note-like-total {
+  color: var(--note-text-muted);
+  font-size: 14px;
+  font-variant-numeric: tabular-nums;
+}
+
+.note-author {
+  display: flex;
+  align-items: flex-start;
+  gap: 16px;
+  margin-top: 48px;
+  padding-top: 32px;
+  border-top: var(--pane-border) solid var(--note-line);
+}
+
+.note-author-text {
+  flex: 1;
+  min-width: 0;
+}
+
+.note-author-bio {
+  margin-top: 4px;
+  color: var(--note-text-muted);
+  font-size: 14px;
+  line-height: 1.625;
+}
+
+.note-related {
+  margin-top: 48px;
+}
+
+.note-related-title {
+  font-size: 18px;
+  font-weight: 700;
+}
+
+/* 未検出・エラー・読み込み */
+.note-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  padding: 96px 16px;
+  text-align: center;
+}
+
+.note-state-code {
+  color: var(--note-text-muted);
+  font-size: 40px;
+  font-weight: 700;
+}
+
+.note-state-title {
+  font-size: 20px;
+  font-weight: 700;
+}
+
+.note-state-description {
+  color: var(--note-text-muted);
+  font-size: 14px;
+}
+
+.note-state-link {
+  margin-top: 16px;
+  padding: 8px 20px;
+  border: var(--pane-border) solid var(--note-line);
+  border-radius: 999px;
+  font-size: 14px;
+  font-weight: 700;
+}
+
+.note-state-link:hover {
+  background-color: var(--note-bg-subtle);
+}
+
+.note-skeleton {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.note-skeleton-line {
+  display: block;
+  height: 18px;
+  border-radius: 6px;
+  background-color: var(--note-bg-subtle);
+}
+
+@media (min-width: 640px) {
+  .note-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .note-row-cover {
+    width: 176px;
+  }
+
+  .note-article-title {
+    font-size: 32px;
+  }
+}
+
+@media (min-width: 1024px) {
+  .note-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  .note-article-side {
+    position: absolute;
+    top: 32px;
+    right: 100%;
+    bottom: 0;
+    display: block;
+    padding-right: 24px;
+  }
+
+  .note-article-side-inner {
+    position: sticky;
+    top: 88px;
+  }
+
+  .note-article-actions {
+    display: none;
+  }
+}

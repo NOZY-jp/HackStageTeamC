@@ -1,5 +1,5 @@
 /**
- * Note風（長文ブログ）UI が使うドメイン型。値は lib/note/data.ts に置く。
+ * Note風（長文ブログ）UI が使うドメイン型。値は lib/note-like/data/*.ts に置く。
  * ID は URL に入る安全な文字（英小文字 / 数字 / ハイフン / アンダースコア）。
  * 時刻は "+09:00" 付きの ISO 8601 固定文字列。
  */
@@ -9,16 +9,18 @@ export type Creator = {
   id: string;
   displayName: string;
   bio: string;
-  /** アバターの地色（HEX） */
+  /** アバター画像（public からのパス。例: "/note-like/avatars/mai.svg"）。無ければ頭文字で描く */
+  avatar?: string;
+  /** 画像が無いときのアバターの地色（HEX） */
   avatarColor: string;
-  followerCount: number;
-  followingCount: number;
 };
 
 export type ArticleBlock =
   | { kind: "paragraph"; text: string }
   | { kind: "heading"; text: string }
   | { kind: "quote"; text: string }
+  /** 本文中の画像。alt は内容の説明、caption は画像の下に出す一言 */
+  | { kind: "image"; src: string; alt: string; width: number; height: number; caption?: string }
   | { kind: "divider" };
 
 export type Article = {
@@ -28,8 +30,8 @@ export type Article = {
   title: string;
   /** 一覧カードに出す要約 */
   excerpt: string;
-  /** 見出し画像の代わりに敷くグラデーションの2色（HEX） */
-  coverColors: [string, string];
+  /** 見出し画像（public からのパス。横長 1.91:1）。無い記事もある */
+  cover?: string;
   publishedAt: string;
   tags: string[];
   likeCount: number;
