@@ -36,14 +36,11 @@ export function AppShell({
   rail,
   children,
   leftFooter,
-  footer,
 }: {
   rail: ReactNode;
   children: ReactNode;
   /** 左ペイン（レール＋サイドバー）の下端に置く領域。ユーザー情報パネルなど。 */
   leftFooter?: ReactNode;
-  /** シェル最下端に固定する領域（VCの接続パネルなど）。無いときは描画しない。 */
-  footer?: ReactNode;
 }) {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [railOpen, setRailOpen] = useState(false);
@@ -91,7 +88,6 @@ export function AppShell({
         {rail}
         {children}
         {leftFooter}
-        {footer}
       </div>
     </ShellContext.Provider>
   );
