@@ -54,14 +54,27 @@ export function ChannelTree({
                     setCollapsed((previous) => ({ ...previous, [section.id]: !isCollapsed }));
                   }}
                 >
+                  <span>{section.name}</span>
+                  {/* チューザは名前の右（展開=下向き / 折りたたみ=右向き） */}
                   <span
                     aria-hidden="true"
                     className="sidebar-caret"
                     data-collapsed={isCollapsed ? "true" : undefined}
                   >
-                    ▾
+                    <svg
+                      aria-hidden="true"
+                      viewBox="0 0 12 12"
+                      width="12"
+                      height="12"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="1.8"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    >
+                      <path d="m3 4.5 3 3 3-3" />
+                    </svg>
                   </span>
-                  <span>{section.name}</span>
                 </button>
               </h3>
             ) : null}
