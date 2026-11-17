@@ -74,6 +74,27 @@ export function listDMMessages(threadId: string): Message[] {
   return copyOf([...(dmMessages[threadId] ?? [])].sort(bySentAt));
 }
 
+/** URL の数値ID（urlId）から引く。見つからなければ undefined。 */
+export function getGuildByUrlId(urlId: string): Guild | undefined {
+  const guild = guilds.find((candidate) => candidate.urlId === urlId);
+  return guild ? copyOf(guild) : undefined;
+}
+
+export function getChannelByUrlId(urlId: string): Channel | undefined {
+  for (const guild of guilds) {
+    const channel = guild.channels.find((candidate) => candidate.urlId === urlId);
+    if (channel) {
+      return copyOf(channel);
+    }
+  }
+  return undefined;
+}
+
+export function getDMThreadByUrlId(urlId: string): DMThread | undefined {
+  const thread = dmThreads.find((candidate) => candidate.urlId === urlId);
+  return thread ? copyOf(thread) : undefined;
+}
+
 export function listVoiceStates(channelId: string): VoiceState[] {
   return copyOf(voiceStates.filter((state) => state.channelId === channelId));
 }

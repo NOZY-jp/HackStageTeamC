@@ -23,6 +23,8 @@ export type Category = {
 
 export type Channel = {
   id: string;
+  /** URL に出す Discord 風の数値ID（17〜19桁・グローバル一意）。内部 id とは別。 */
+  urlId: string;
   guildId: string;
   name: string;
   kind: "text" | "voice";
@@ -35,6 +37,8 @@ export type Channel = {
 
 export type Guild = {
   id: string;
+  /** URL に出す Discord 風の数値ID（17〜19桁・グローバル一意）。内部 id とは別。 */
+  urlId: string;
   name: string;
   /** アイコンの地色（HEX） */
   iconColor: string;
@@ -72,6 +76,8 @@ export type Message = {
 
 export type DMThread = {
   id: string;
+  /** URL に出す Discord 風の数値ID（17〜19桁・グローバル一意）。内部 id とは別。 */
+  urlId: string;
   /** DM の参加者2人（グローバル一意な User.id） */
   participantIds: [string, string];
   lastMessageAt: string;

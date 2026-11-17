@@ -2,8 +2,9 @@ import type { ReactNode } from "react";
 import { Suspense } from "react";
 import { AppShell } from "@/components/discord-like/app-shell";
 import { ServerRail } from "@/components/discord-like/server-rail";
+import { SidebarUserPanel } from "@/components/discord-like/sidebar-user-panel";
 import { LocalMessagesProvider } from "./_components/local-messages-context";
-import { VoiceConnectionPanel } from "./_components/voice-connection-panel";
+import { SELF_USER_ID } from "./_components/self-user";
 import { VoiceProvider } from "./_components/voice-context";
 
 export default function AppLayout({ children }: { children: ReactNode }) {
@@ -18,7 +19,7 @@ export default function AppLayout({ children }: { children: ReactNode }) {
               <ServerRail />
             </Suspense>
           }
-          footer={<VoiceConnectionPanel />}
+          leftFooter={<SidebarUserPanel userId={SELF_USER_ID} />}
         >
           {children}
         </AppShell>

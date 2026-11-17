@@ -3,9 +3,12 @@
 import Link from "next/link";
 import { useState } from "react";
 import { useVoice } from "@/app/(discord-like)/_components/voice-context";
+import { guildChannelPath } from "@/lib/platform/app-prefix";
 
 export type SidebarChannel = {
   id: string;
+  /** URL に出す数値ID（channel の urlId） */
+  urlId: string;
   name: string;
   kind: "text" | "voice";
   unread: boolean;
@@ -25,12 +28,13 @@ export type SidebarSection = {
  * （リロードで初期状態＝すべて開いた状態に戻る）。
  */
 export function ChannelTree({
-  guildId,
+  guildUrlId,
   activeChannelId,
   sections,
   currentUser,
 }: {
-  guildId: string;
+  /** URL に出す guild の数値ID */
+  guildUrlId: string;
   activeChannelId: string;
   sections: SidebarSection[];
   currentUser: { id: string; displayName: string; avatarColor: string };
@@ -54,14 +58,27 @@ export function ChannelTree({
                     setCollapsed((previous) => ({ ...previous, [section.id]: !isCollapsed }));
                   }}
                 >
+                  <span>{section.name}</span>
+                  {/* チューザは名前の右（展開=下向き / 折りたたみ=右向き） */}
                   <span
                     aria-hidden="true"
                     className="sidebar-caret"
                     data-collapsed={isCollapsed ? "true" : undefined}
                   >
-                    ▾
+                    <svg
+                      aria-hidden="true"
+                      viewBox="0 0 12 12"
+                      width="12"
+                      height="12"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="1.8"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    >
+                      <path d="m3 4.5 3 3 3-3" />
+                    </svg>
                   </span>
-                  <span>{section.name}</span>
                 </button>
               </h3>
             ) : null}
@@ -73,7 +90,7 @@ export function ChannelTree({
                   return (
                     <li key={channel.id}>
                       <ChannelLink
-                        guildId={guildId}
+                        guildUrlId={guildUrlId}
                         channel={shown}
                         active={channel.id === activeChannelId}
                       />
@@ -124,11 +141,11 @@ function selfParticipant(currentUser: { id: string; displayName: string; avatarC
 }
 
 function ChannelLink({
-  guildId,
+  guildUrlId,
   channel,
   active,
 }: {
-  guildId: string;
+  guildUrlId: string;
   channel: SidebarChannel;
   active: boolean;
 }) {
@@ -144,7 +161,7 @@ function ChannelLink({
 
   return (
     <Link
-      href={`/servers/${guildId}/channels/${channel.id}`}
+      href={guildChannelPath(guildUrlId, channel.urlId)}
       className="sidebar-item"
       aria-label={label}
       aria-current={active ? "page" : undefined}

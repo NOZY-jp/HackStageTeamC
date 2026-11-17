@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { SidebarPane } from "@/components/discord-like/sidebar-pane";
-import { SidebarUserPanel } from "@/components/discord-like/sidebar-user-panel";
 import { getUser, listDMMessages, listDMThreads } from "@/lib/discord-like";
+import { dmThreadPath } from "@/lib/platform/app-prefix";
 import { EmptyState } from "./empty-state";
 import { SELF_USER_ID } from "./self-user";
 
@@ -13,7 +13,7 @@ const STATUS_LABELS: Record<string, string> = {
 };
 
 /**
- * DM一覧（中ペイン）。/dm と /dm/[threadId] で使う。
+ * DM一覧（中ペイン）。/<app>/channels/@me と /<app>/channels/@me/<dmChannelId> で使う。
  * 相手は participantIds から自分（SELF_USER_ID）以外を選ぶ。
  * データ上どのスレッドにも自分が入っていない場合は先頭の参加者を相手として扱う。
  */
@@ -28,6 +28,7 @@ export function DmList({ activeThreadId }: { activeThreadId?: string }) {
 
     return {
       id: thread.id,
+      urlId: thread.urlId,
       name: user?.displayName ?? otherId,
       avatarColor: user?.avatarColor ?? "transparent",
       status: user?.status ?? "offline",
@@ -38,11 +39,7 @@ export function DmList({ activeThreadId }: { activeThreadId?: string }) {
   });
 
   return (
-    <SidebarPane
-      label="ダイレクトメッセージ"
-      title="ダイレクトメッセージ"
-      footer={<SidebarUserPanel userId={SELF_USER_ID} />}
-    >
+    <SidebarPane label="ダイレクトメッセージ" title="ダイレクトメッセージ">
       {/* 検索欄は見た目のみ（検索は #10 の非対象） */}
       <div className="dm-search">
         <input
@@ -77,7 +74,7 @@ export function DmList({ activeThreadId }: { activeThreadId?: string }) {
           return (
             <li key={thread.id}>
               <Link
-                href={`/dm/${thread.id}`}
+                href={dmThreadPath(thread.urlId)}
                 className="sidebar-item dm-item"
                 aria-label={label}
                 aria-current={activeThreadId === thread.id ? "page" : undefined}

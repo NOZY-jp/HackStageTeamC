@@ -35,12 +35,12 @@ export function useShellControls(): ShellControls {
 export function AppShell({
   rail,
   children,
-  footer,
+  leftFooter,
 }: {
   rail: ReactNode;
   children: ReactNode;
-  /** シェル下端に固定する領域（VCの接続パネルなど）。無いときは描画しない。 */
-  footer?: ReactNode;
+  /** 左ペイン（レール＋サイドバー）の下端に置く領域。ユーザー情報パネルなど。 */
+  leftFooter?: ReactNode;
 }) {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [railOpen, setRailOpen] = useState(false);
@@ -87,7 +87,7 @@ export function AppShell({
         />
         {rail}
         {children}
-        {footer}
+        {leftFooter}
       </div>
     </ShellContext.Provider>
   );

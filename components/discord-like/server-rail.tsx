@@ -1,4 +1,5 @@
 import { listChannels, listGuilds } from "@/lib/discord-like";
+import { guildChannelPath } from "@/lib/platform/app-prefix";
 import { type RailGuild, ServerRailNav } from "./server-rail-nav";
 
 const HREF_FALLBACK = "#";
@@ -39,7 +40,8 @@ export function ServerRail() {
       iconColor: guild.iconColor,
       initials: guild.initials,
       initialsTone: initialsTone(guild.iconColor),
-      href: firstChannel ? `/servers/${guild.id}/channels/${firstChannel.id}` : HREF_FALLBACK,
+      urlId: guild.urlId,
+      href: firstChannel ? guildChannelPath(guild.urlId, firstChannel.urlId) : HREF_FALLBACK,
       unreadCount: guild.channels.reduce((sum, channel) => sum + (channel.unreadCount ?? 0), 0),
       mentionCount: guild.channels.reduce((sum, channel) => sum + (channel.mentionCount ?? 0), 0),
     };

@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { dmListPath } from "@/lib/platform/app-prefix";
 
 export default function NotFound() {
   return (
@@ -8,7 +9,7 @@ export default function NotFound() {
       </p>
       <h1 className="route-state-title">ページが見つかりません</h1>
       <p className="route-state-description">URLを確認してください。</p>
-      <Link href="/dm" className="route-state-link">
+      <Link href={dmListPath()} className="route-state-link">
         DMへ戻る
       </Link>
     </div>
