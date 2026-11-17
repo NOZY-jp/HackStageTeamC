@@ -656,6 +656,15 @@
   transform: none;
 }
 
+/* ボイス操作の5要素。右端に寄せる */
+.sidebar-user-actions {
+  display: flex;
+  flex: none;
+  align-items: center;
+  gap: 2px;
+  margin-left: auto;
+}
+
 .sidebar-user-action {
   flex: none;
   display: inline-flex;
@@ -663,7 +672,22 @@
   justify-content: center;
   width: 24px;
   height: 24px;
+  border-radius: 4px;
   color: var(--color-text-muted);
+}
+
+.sidebar-user-action:hover,
+.sidebar-user-action:focus-visible {
+  background-color: var(--color-hover);
+  color: var(--color-text);
+}
+
+/* 選択系（⌄）は本体アイコンより小さいチューザとして下端に寄せる */
+.sidebar-user-action-chooser {
+  width: 14px;
+  height: 16px;
+  align-self: flex-end;
+  margin-bottom: 3px;
 }
 
 .sidebar-empty {

@@ -49,38 +49,108 @@ export function SidebarUserPanel({ userId }: { userId: string }) {
         </span>
       </span>
 
-      {/* 見た目のみ（操作不可）。実機能は #7 の非対象 */}
-      <span className="sidebar-user-action">
-        <svg
-          aria-hidden="true"
-          viewBox="0 0 24 24"
-          width="16"
-          height="16"
-          fill="none"
-          stroke="currentColor"
-          strokeWidth="2"
-          strokeLinecap="round"
-          strokeLinejoin="round"
+      {/*
+       * ボイス操作は5要素（マイク / マイク選択 / ヘッドホン / ヘッドホン選択 / 設定）を右揃え。
+       * すべて見た目のみで、押しても何も起きない（実デバイス・音声APIは扱わない）。
+       * 選択系は小さなチューザとして本体アイコンと階層を分ける。
+       */}
+      <span className="sidebar-user-actions">
+        <button
+          type="button"
+          className="sidebar-user-action"
+          aria-label="マイクをミュート"
+          aria-pressed={false}
         >
-          <path d="M12 3a3 3 0 0 0-3 3v5a3 3 0 0 0 6 0V6a3 3 0 0 0-3-3Z" />
-          <path d="M5 11a7 7 0 0 0 14 0M12 18v3" />
-        </svg>
-      </span>
-      <span className="sidebar-user-action">
-        <svg
-          aria-hidden="true"
-          viewBox="0 0 24 24"
-          width="16"
-          height="16"
-          fill="none"
-          stroke="currentColor"
-          strokeWidth="2"
-          strokeLinecap="round"
-          strokeLinejoin="round"
+          <svg
+            aria-hidden="true"
+            viewBox="0 0 24 24"
+            width="16"
+            height="16"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          >
+            <path d="M12 3a3 3 0 0 0-3 3v5a3 3 0 0 0 6 0V6a3 3 0 0 0-3-3Z" />
+            <path d="M5 11a7 7 0 0 0 14 0M12 18v3" />
+          </svg>
+        </button>
+        <button
+          type="button"
+          className="sidebar-user-action sidebar-user-action-chooser"
+          aria-label="入力デバイスを選択"
         >
-          <circle cx="12" cy="12" r="3" />
-          <path d="M19.4 15a7.9 7.9 0 0 0 .1-1 7.9 7.9 0 0 0-.1-1l2-1.6-2-3.4-2.4 1a8 8 0 0 0-1.7-1L15 4.5h-4l-.3 2.5a8 8 0 0 0-1.7 1l-2.4-1-2 3.4L6.6 13a7.9 7.9 0 0 0 0 2l-2 1.6 2 3.4 2.4-1a8 8 0 0 0 1.7 1l.3 2.5h4l.3-2.5a8 8 0 0 0 1.7-1l2.4 1 2-3.4-2-1.6Z" />
-        </svg>
+          <svg
+            aria-hidden="true"
+            viewBox="0 0 24 24"
+            width="10"
+            height="10"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="3"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          >
+            <path d="m6 9 6 6 6-6" />
+          </svg>
+        </button>
+        <button
+          type="button"
+          className="sidebar-user-action"
+          aria-label="ヘッドホンをミュート"
+          aria-pressed={false}
+        >
+          <svg
+            aria-hidden="true"
+            viewBox="0 0 24 24"
+            width="16"
+            height="16"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          >
+            <path d="M4 14v-2a8 8 0 0 1 16 0v2" />
+            <path d="M4 14h3v6H5a1 1 0 0 1-1-1v-5ZM20 14h-3v6h2a1 1 0 0 0 1-1v-5Z" />
+          </svg>
+        </button>
+        <button
+          type="button"
+          className="sidebar-user-action sidebar-user-action-chooser"
+          aria-label="出力デバイスを選択"
+        >
+          <svg
+            aria-hidden="true"
+            viewBox="0 0 24 24"
+            width="10"
+            height="10"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="3"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          >
+            <path d="m6 9 6 6 6-6" />
+          </svg>
+        </button>
+        <button type="button" className="sidebar-user-action" aria-label="ユーザー設定">
+          <svg
+            aria-hidden="true"
+            viewBox="0 0 24 24"
+            width="16"
+            height="16"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          >
+            <circle cx="12" cy="12" r="3" />
+            <path d="M19.4 15a7.9 7.9 0 0 0 .1-1 7.9 7.9 0 0 0-.1-1l2-1.6-2-3.4-2.4 1a8 8 0 0 0-1.7-1L15 4.5h-4l-.3 2.5a8 8 0 0 0-1.7 1l-2.4-1-2 3.4L6.6 13a7.9 7.9 0 0 0 0 2l-2 1.6 2 3.4 2.4-1a8 8 0 0 0 1.7 1l.3 2.5h4l.3-2.5a8 8 0 0 0 1.7-1l2.4 1 2-3.4-2-1.6Z" />
+          </svg>
+        </button>
       </span>
 
       {/* 既定では隠しておき、行のホバー／フォーカスでスロット状に下から出す */}
