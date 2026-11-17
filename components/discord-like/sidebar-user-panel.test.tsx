@@ -17,4 +17,14 @@ describe("SidebarUserPanel", () => {
     expect(screen.getByText("member01")).toBeInTheDocument();
     expect(container.textContent).not.toContain("@member01");
   });
+
+  it("ボイス操作のアイコンボタンが5つあり、すべてにアクセシブル名がある", () => {
+    render(<SidebarUserPanel userId="u4" />);
+
+    const buttons = screen.getAllByRole("button");
+    expect(buttons).toHaveLength(5);
+    for (const button of buttons) {
+      expect(button).toHaveAccessibleName();
+    }
+  });
 });
