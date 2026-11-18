@@ -14,7 +14,7 @@ export function FacebookLeftSidebar() {
     <aside className="fb-left-col" aria-label="ショートカット">
       <ul className="space-y-1">
         <li>
-          <Link href={`/facebook/profile/${selfUser.handle}`} className="fb-sidebar-link">
+          <Link href={`/talkup/profile/${selfUser.handle}`} className="fb-sidebar-link">
             <FbAvatar
               displayName={selfUser.displayName}
               avatarColor={selfUser.avatarColor}
@@ -26,16 +26,16 @@ export function FacebookLeftSidebar() {
           </Link>
         </li>
         <li>
-          <Link href="/facebook" className="fb-sidebar-link">
-            <span className="fb-sidebar-icon text-[#1877f2]">
+          <Link href="/talkup" className="fb-sidebar-link">
+            <span className="fb-sidebar-icon text-[#7c3aed]">
               <HomeIcon className="w-5 h-5" />
             </span>
             <span className="font-medium text-sm">ニュースフィード</span>
           </Link>
         </li>
         <li>
-          <Link href={`/facebook/profile/${selfUser.handle}#friends`} className="fb-sidebar-link">
-            <span className="fb-sidebar-icon text-[#1877f2]">
+          <Link href={`/talkup/profile/${selfUser.handle}#friends`} className="fb-sidebar-link">
+            <span className="fb-sidebar-icon text-[#7c3aed]">
               <UsersIcon className="w-5 h-5" />
             </span>
             <span className="font-medium text-sm">友達（{friends.length}人）</span>

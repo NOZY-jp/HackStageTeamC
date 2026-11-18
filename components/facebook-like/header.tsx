@@ -6,7 +6,7 @@ import { useMemo, useState } from "react";
 import { searchFacebook } from "@/lib/facebook-like";
 import { FbAvatar } from "./avatar";
 import { useFacebook } from "./facebook-context";
-import { FbLogoIcon, HomeIcon, SearchIcon, UserCircleIcon } from "./icons";
+import { HomeIcon, SearchIcon, TalkupLogoIcon, UserCircleIcon } from "./icons";
 
 export function FacebookHeader() {
   const pathname = usePathname();
@@ -21,14 +21,15 @@ export function FacebookHeader() {
     return searchFacebook(searchQuery).users.slice(0, 5);
   }, [searchQuery]);
 
-  const isFeed = pathname === "/facebook";
-  const isSelfProfile = pathname === `/facebook/profile/${selfUser.handle}`;
+  const isFeed = pathname === "/talkup";
+  const isSelfProfile = pathname === `/talkup/profile/${selfUser.handle}`;
 
   return (
     <header className="fb-header">
       <div className="fb-header-left">
-        <Link href="/facebook" className="fb-logo-link" aria-label="Facebook風ホーム">
-          <FbLogoIcon className="w-10 h-10 text-[#1877f2]" />
+        <Link href="/talkup" className="fb-logo-link" aria-label="talkup ホーム">
+          <TalkupLogoIcon className="w-10 h-10 text-[#7c3aed]" />
+          <span className="text-lg font-bold text-[#7c3aed]">talkup</span>
         </Link>
         <div className="fb-search-box">
           <SearchIcon className="w-4 h-4 text-[var(--fb-muted)] shrink-0" />
@@ -53,7 +54,7 @@ export function FacebookHeader() {
                     e.preventDefault();
                     setSearchQuery("");
                     setFocused(false);
-                    router.push(`/facebook/profile/${user.handle}`);
+                    router.push(`/talkup/profile/${user.handle}`);
                   }}
                 >
                   <FbAvatar
@@ -76,7 +77,7 @@ export function FacebookHeader() {
 
       <nav className="fb-header-nav" aria-label="メインナビゲーション">
         <Link
-          href="/facebook"
+          href="/talkup"
           className={`fb-nav-tab ${isFeed ? "is-active" : ""}`}
           aria-current={isFeed ? "page" : undefined}
           title="ニュースフィード"
@@ -85,7 +86,7 @@ export function FacebookHeader() {
           <span className="sr-only">ニュースフィード</span>
         </Link>
         <Link
-          href={`/facebook/profile/${selfUser.handle}`}
+          href={`/talkup/profile/${selfUser.handle}`}
           className={`fb-nav-tab ${isSelfProfile ? "is-active" : ""}`}
           aria-current={isSelfProfile ? "page" : undefined}
           title="プロフィール"
@@ -96,7 +97,7 @@ export function FacebookHeader() {
       </nav>
 
       <div className="fb-header-right">
-        <Link href={`/facebook/profile/${selfUser.handle}`} className="fb-profile-chip">
+        <Link href={`/talkup/profile/${selfUser.handle}`} className="fb-profile-chip">
           <FbAvatar
             displayName={selfUser.displayName}
             avatarColor={selfUser.avatarColor}

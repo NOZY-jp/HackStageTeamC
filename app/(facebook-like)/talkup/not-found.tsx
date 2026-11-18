@@ -9,7 +9,7 @@ export default function FacebookNotFound() {
           指定された投稿またはプロフィールが見つかりませんでした。
         </p>
         <div className="pt-2">
-          <Link href="/facebook" className="fb-primary-btn inline-block">
+          <Link href="/talkup" className="fb-primary-btn inline-block">
             ニュースフィードに戻る
           </Link>
         </div>

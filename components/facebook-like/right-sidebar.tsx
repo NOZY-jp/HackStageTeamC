@@ -14,7 +14,7 @@ export function FacebookRightSidebar() {
       <ul className="space-y-1">
         {users.map((user) => (
           <li key={user.id}>
-            <Link href={`/facebook/profile/${user.handle}`} className="fb-sidebar-link">
+            <Link href={`/talkup/profile/${user.handle}`} className="fb-sidebar-link">
               <FbAvatar
                 displayName={user.displayName}
                 avatarColor={user.avatarColor}

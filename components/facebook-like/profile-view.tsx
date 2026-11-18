@@ -57,7 +57,7 @@ export function ProfileView({ user, friends }: ProfileViewProps) {
               </p>
             </div>
             <div className="pb-1">
-              <Link href="/facebook" className="fb-secondary-btn">
+              <Link href="/talkup" className="fb-secondary-btn">
                 フィードに戻る
               </Link>
             </div>
@@ -124,7 +124,7 @@ export function ProfileView({ user, friends }: ProfileViewProps) {
                 {friends.slice(0, 6).map((friend) => (
                   <Link
                     key={friend.id}
-                    href={`/facebook/profile/${friend.handle}`}
+                    href={`/talkup/profile/${friend.handle}`}
                     className="group block text-center"
                   >
                     <div
@@ -179,7 +179,7 @@ export function ProfileView({ user, friends }: ProfileViewProps) {
             {friends.map((friend) => (
               <Link
                 key={friend.id}
-                href={`/facebook/profile/${friend.handle}`}
+                href={`/talkup/profile/${friend.handle}`}
                 className="flex items-center gap-3 p-3 rounded-lg border border-[var(--fb-border)] hover:bg-[var(--fb-hover)] transition-colors"
               >
                 <FbAvatar

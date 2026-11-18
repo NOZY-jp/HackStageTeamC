@@ -13,7 +13,7 @@ export default async function FacebookProfilePage({
   try {
     decodedHandle = decodeURIComponent(handle);
   } catch {
-    // 不正な URL セグメント（例: /facebook/profile/100%）は 404 として扱う
+    // 不正な URL セグメント（例: /talkup/profile/100%）は 404 として扱う
     notFound();
   }
 

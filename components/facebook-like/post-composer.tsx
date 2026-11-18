@@ -27,7 +27,7 @@ export function PostComposer() {
     <section className="fb-card p-4" aria-label="新規投稿">
       <form onSubmit={handleSubmit} className="space-y-3">
         <div className="flex items-start gap-3">
-          <Link href={`/facebook/profile/${selfUser.handle}`} className="shrink-0">
+          <Link href={`/talkup/profile/${selfUser.handle}`} className="shrink-0">
             <FbAvatar
               displayName={selfUser.displayName}
               avatarColor={selfUser.avatarColor}
