@@ -3383,6 +3383,9 @@ a.tw-dm-item:focus-visible {
   top: 0;
   z-index: 40;
   height: 56px;
+  /* .fb-shell が高さ固定の縦並び flex のため、本文が長いページで
+     ヘッダーが 48px 程に縮むのを防ぐ（全ページで 56px を維持） */
+  flex-shrink: 0;
   padding: 0 16px;
   display: grid;
   grid-template-columns: 1fr auto 1fr;

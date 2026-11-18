@@ -36,7 +36,16 @@ export function FacebookHeader() {
           <input
             type="search"
             value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
+            onChange={(e) => {
+              const next = e.target.value;
+              // 検索絞り込みはフィード（/facebook）でのみ機能するため、
+              // 検索語が 空→非空 に変わった瞬間だけフィードへ遷移する。
+              // 毎キー入力で push しないよう、遷移はこの1回のみとする。
+              if (!searchQuery && next.trim() && !isFeed) {
+                router.push("/facebook");
+              }
+              setSearchQuery(next);
+            }}
             onFocus={() => setFocused(true)}
             onBlur={() => setTimeout(() => setFocused(false), 150)}
             placeholder="投稿やメンバーを検索"
