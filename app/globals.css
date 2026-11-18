@@ -2326,6 +2326,18 @@ a.tw-time:hover {
   font-size: 15px;
 }
 
+/* 鍵アカウントの非公開表示（.tw-empty を中央寄せにしたもの） */
+.tw-private {
+  text-align: center;
+}
+
+.tw-private .tw-icon {
+  display: inline-block;
+  width: 28px;
+  height: 28px;
+  margin-bottom: 8px;
+}
+
 /* ---- プロフィール ---- */
 
 .tw-banner {
@@ -2348,6 +2360,12 @@ a.tw-time:hover {
   font-size: 20px;
   font-weight: 800;
   line-height: 1.2;
+}
+
+.tw-profile-name .tw-icon {
+  width: 18px;
+  height: 18px;
+  color: var(--tw-muted);
 }
 
 .tw-profile-bio {

@@ -19,6 +19,13 @@ export const twitterUsers: TwitterUser[] = [
     handle: "game-info",
     avatarColor: "#5865f2",
   },
+  {
+    id: "tw-nagi",
+    displayName: "なぎ",
+    handle: "nagi",
+    avatarColor: "#5c677d",
+    protected: true,
+  },
 ];
 
 export const twitterProfiles: Profile[] = [
@@ -70,6 +77,13 @@ export const twitterProfiles: Profile[] = [
     joinedAt: "2026-11-01",
     followingCount: 15,
     followersCount: 3120,
+  },
+  {
+    userId: "tw-nagi",
+    bio: "鍵垢。フォロバは知り合いのみ。例のゲームは休止中で、オフ会の話題だけ眺めてる。",
+    joinedAt: "2026-11-06",
+    followingCount: 27,
+    followersCount: 34,
   },
 ];
 
@@ -287,6 +301,24 @@ export const twitterPosts: Post[] = [
     repostCount: 6,
     likeCount: 83,
   },
+  {
+    id: "post-024",
+    authorId: "tw-nagi",
+    postedAt: "2026-11-15T07:50:00+09:00",
+    body: "こっちは記録用。TLを眺めるだけの日が続く。",
+    replyCount: 0,
+    repostCount: 0,
+    likeCount: 3,
+  },
+  {
+    id: "post-025",
+    authorId: "tw-nagi",
+    postedAt: "2026-11-17T23:10:00+09:00",
+    body: "週末は人が多いところに出る予定。混むのは苦手だけど。",
+    replyCount: 1,
+    repostCount: 0,
+    likeCount: 5,
+  },
 ];
 
 /** ポストの表示数（インプレッション）のダミー値。Post.id → 件数。 */
@@ -314,6 +346,8 @@ export const twitterViewCounts: Record<string, number> = {
   "post-021": 1120,
   "post-022": 460,
   "post-023": 1690,
+  "post-024": 95,
+  "post-025": 61,
 };
 
 export const twitterTrends: Trend[] = [
