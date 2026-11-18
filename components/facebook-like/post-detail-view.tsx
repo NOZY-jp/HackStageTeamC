@@ -17,7 +17,7 @@ export function PostDetailView({ postId }: { postId: string }) {
     <div className="max-w-[680px] mx-auto px-4 py-6 space-y-4">
       <div>
         <Link
-          href="/facebook"
+          href="/talkup"
           className="text-sm font-semibold text-[var(--fb-accent)] hover:underline"
         >
           ← ニュースフィードに戻る

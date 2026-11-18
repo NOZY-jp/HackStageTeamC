@@ -49,7 +49,7 @@ export function PostCard({ post, showAllComments = false }: PostCardProps) {
   return (
     <article className="fb-card" aria-label={`${author.displayName}の投稿`}>
       <div className="p-4 pb-3 flex items-start gap-3">
-        <Link href={`/facebook/profile/${author.handle}`} className="shrink-0">
+        <Link href={`/talkup/profile/${author.handle}`} className="shrink-0">
           <FbAvatar
             displayName={author.displayName}
             avatarColor={author.avatarColor}
@@ -61,7 +61,7 @@ export function PostCard({ post, showAllComments = false }: PostCardProps) {
         <div className="min-w-0 flex-1">
           <div className="flex flex-wrap items-center gap-1.5 text-sm">
             <Link
-              href={`/facebook/profile/${author.handle}`}
+              href={`/talkup/profile/${author.handle}`}
               className="font-semibold hover:underline"
             >
               {author.displayName}
@@ -72,7 +72,7 @@ export function PostCard({ post, showAllComments = false }: PostCardProps) {
             ) : null}
           </div>
           <div className="flex items-center gap-1.5 text-xs text-[var(--fb-muted)] mt-0.5">
-            <Link href={`/facebook/post/${post.id}`} className="hover:underline">
+            <Link href={`/talkup/post/${post.id}`} className="hover:underline">
               <time dateTime={post.createdAt}>{formatFbDateTime(post.createdAt)}</time>
             </Link>
             <span aria-hidden="true">·</span>
@@ -120,7 +120,7 @@ export function PostCard({ post, showAllComments = false }: PostCardProps) {
           </span>
         </div>
         <div className="flex items-center gap-3">
-          <Link href={`/facebook/post/${post.id}`} className="hover:underline">
+          <Link href={`/talkup/post/${post.id}`} className="hover:underline">
             コメント {post.comments.length}件
           </Link>
           <span>シェア {post.shares}件</span>
@@ -173,7 +173,7 @@ export function PostCard({ post, showAllComments = false }: PostCardProps) {
           </button>
         </fieldset>
 
-        <Link href={`/facebook/post/${post.id}`} className="fb-action-btn">
+        <Link href={`/talkup/post/${post.id}`} className="fb-action-btn">
           <CommentIcon className="w-4 h-4" />
           <span>コメントする</span>
         </Link>
@@ -187,7 +187,7 @@ export function PostCard({ post, showAllComments = false }: PostCardProps) {
       <div className="px-4 pt-2 pb-3 border-t border-[var(--fb-border)] space-y-2.5">
         {!showAllComments && post.comments.length > 2 ? (
           <Link
-            href={`/facebook/post/${post.id}`}
+            href={`/talkup/post/${post.id}`}
             className="text-xs font-semibold text-[var(--fb-muted)] hover:underline block"
           >
             すべてのコメント（{post.comments.length}件）を表示
@@ -201,7 +201,7 @@ export function PostCard({ post, showAllComments = false }: PostCardProps) {
           }
           return (
             <div key={comment.id} className="flex items-start gap-2">
-              <Link href={`/facebook/profile/${commentAuthor.handle}`} className="shrink-0 mt-0.5">
+              <Link href={`/talkup/profile/${commentAuthor.handle}`} className="shrink-0 mt-0.5">
                 <FbAvatar
                   displayName={commentAuthor.displayName}
                   avatarColor={commentAuthor.avatarColor}
@@ -211,7 +211,7 @@ export function PostCard({ post, showAllComments = false }: PostCardProps) {
               <div className="min-w-0">
                 <div className="fb-comment-bubble">
                   <Link
-                    href={`/facebook/profile/${commentAuthor.handle}`}
+                    href={`/talkup/profile/${commentAuthor.handle}`}
                     className="font-semibold text-xs hover:underline block"
                   >
                     {commentAuthor.displayName}

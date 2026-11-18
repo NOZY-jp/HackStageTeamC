@@ -5,10 +5,10 @@ import { FacebookHeader } from "@/components/facebook-like/header";
 
 export const metadata: Metadata = {
   title: {
-    default: "HackStage フィード",
-    template: "%s | HackStage Facebook風",
+    default: "talkup",
+    template: "%s | talkup",
   },
-  description: "HackStage TeamC の Facebook 風プラットフォーム UI（モックデータ）",
+  description: "HackStage TeamC の架空SNS「talkup」のフィードUI（モックデータ）",
 };
 
 export default function FacebookLayout({ children }: { children: ReactNode }) {

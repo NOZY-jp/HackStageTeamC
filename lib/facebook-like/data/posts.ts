@@ -4,7 +4,7 @@ export const fbPosts: FbPost[] = [
   {
     id: "fbp-101",
     authorId: "u4",
-    body: "HackStage TeamC の新しいポータル画面、Discord 風に続いて Facebook 風タイムラインの試作が始まりました！\n各プラットフォームで同じメンバーたちが登場する構成なので、プロフィールの繋がりもぜひ見てみてください。",
+    body: "HackStage TeamC の新しいポータル画面、Discord 風に続いて talkup のタイムラインの試作が始まりました！\n各プラットフォームで同じメンバーたちが登場する構成なので、プロフィールの繋がりもぜひ見てみてください。",
     createdAt: "2026-11-16T09:15:00Z",
     feeling: "ワクワク",
     audience: "public",
@@ -12,7 +12,7 @@ export const fbPosts: FbPost[] = [
       kind: "link",
       title: "HackStage TeamC マルチプラットフォーム設計メモ",
       subtitle: "hackstage.local / docs / architecture",
-      accentColor: "#1877f2",
+      accentColor: "#7c3aed",
     },
     reactions: { like: 12, love: 5, wow: 2 },
     myReaction: "like",
@@ -65,7 +65,7 @@ export const fbPosts: FbPost[] = [
     attachment: {
       kind: "photo",
       title: "UI トークン・カラーパレット確認ボード",
-      subtitle: "Primary #1877F2 / Surface #FFFFFF / Canvas #F0F2F5",
+      subtitle: "Primary #7C3AED / Surface #FFFFFF / Canvas #F0F2F5",
       accentColor: "#eb459e",
     },
     reactions: { like: 9, love: 4 },
@@ -84,7 +84,7 @@ export const fbPosts: FbPost[] = [
   {
     id: "fbp-104",
     authorId: "u5",
-    body: "シナリオ用の小ネタを仕込み中。同じ出来事でも Discord のログと Facebook の近況投稿だと、同じメンバーでも語り口が変わって見えて面白い。",
+    body: "シナリオ用の小ネタを仕込み中。同じ出来事でも Discord のログと talkup の近況投稿だと、同じメンバーでも語り口が変わって見えて面白い。",
     createdAt: "2026-11-15T12:10:00Z",
     audience: "public",
     reactions: { like: 7, haha: 3, love: 2 },

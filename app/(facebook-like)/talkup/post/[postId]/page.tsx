@@ -27,7 +27,7 @@ async function PostDetailContent({ params }: { params: Promise<{ postId: string 
   try {
     decodedPostId = decodeURIComponent(postId);
   } catch {
-    // 不正な URL セグメント（例: /facebook/post/100%）は 404 として扱う
+    // 不正な URL セグメント（例: /talkup/post/100%）は 404 として扱う
     notFound();
   }
 

@@ -1,13 +1,13 @@
 import type { SVGProps } from "react";
 
-export function FbLogoIcon(props: SVGProps<SVGSVGElement>) {
+export function TalkupLogoIcon(props: SVGProps<SVGSVGElement>) {
   return (
     <svg viewBox="0 0 36 36" fill="none" aria-hidden="true" {...props}>
-      <circle cx="18" cy="18" r="18" fill="currentColor" />
       <path
-        d="M25 23l.8-5.2h-5v-3.4c0-1.4.7-2.8 2.9-2.8H26V7.2s-2-.3-4-.3c-4.1 0-6.8 2.5-6.8 7v3.9h-4.6V23h4.6v12.6a18.2 18.2 0 005.6 0V23H25z"
-        fill="#ffffff"
+        d="M10 4h16a7 7 0 017 7v9a7 7 0 01-7 7h-2.5l-6 5v-5H10a7 7 0 01-7-7v-9a7 7 0 017-7z"
+        fill="currentColor"
       />
+      <path d="M18 7.6l6.9 7.8h-3.9v6.9h-6v-6.9h-3.9L18 7.6z" fill="#ffffff" />
     </svg>
   );
 }
