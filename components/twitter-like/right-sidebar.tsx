@@ -12,16 +12,16 @@ export function RightSidebar() {
     .slice(0, 3);
   return (
     <aside className="tw-right" aria-label="サイドバー">
-      <div className="tw-search">
+      <form className="tw-search" action="/twitter/search">
         <SearchIcon />
         <input
           type="search"
+          name="q"
           className="tw-search-input"
           placeholder="検索"
-          aria-label="検索（無効）"
-          disabled
+          aria-label="検索"
         />
-      </div>
+      </form>
       <section className="tw-card" aria-labelledby="tw-trends-heading">
         <h2 id="tw-trends-heading" className="tw-card-title">
           いま話題
