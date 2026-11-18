@@ -27,7 +27,11 @@ export function MessageRow({
     : null;
 
   return (
-    <article className="message" data-grouped={grouped ? "true" : undefined}>
+    <article
+      className="message"
+      data-message-id={message.id}
+      data-grouped={grouped ? "true" : undefined}
+    >
       {grouped ? null : (
         <span
           aria-hidden="true"

@@ -23,8 +23,8 @@ export function DmList({ activeThreadId }: { activeThreadId?: string }) {
       thread.participantIds.find((participantId) => participantId !== SELF_USER_ID) ??
       thread.participantIds[0];
     const user = getUser(otherId);
-    const messages = listDMMessages(thread.id);
-    const last = messages[messages.length - 1];
+    const oldestFirst = listDMMessages({ threadId: thread.id, limit: 1 }).messages;
+    const last = oldestFirst[oldestFirst.length - 1];
 
     return {
       id: thread.id,

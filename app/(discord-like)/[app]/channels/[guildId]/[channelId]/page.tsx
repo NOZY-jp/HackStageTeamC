@@ -59,7 +59,8 @@ async function DmThread({ threadId }: { threadId: string }) {
       <DmList activeThreadId={thread.id} />
       <MessagePane
         channelKey={thread.id}
-        initialMessages={listDMMessages(thread.id)}
+        mode="dm"
+        initialPage={listDMMessages({ threadId: thread.id })}
         title={otherName}
         showHash={false}
         headerAvatar={{ displayName: otherName, avatarColor: other?.avatarColor ?? "transparent" }}
@@ -90,7 +91,8 @@ async function GuildChannel({ guildId, channelId }: { guildId: string; channelId
       {channel.kind === "text" ? (
         <MessagePane
           channelKey={channel.id}
-          initialMessages={listMessages(channel.id)}
+          mode="channel"
+          initialPage={listMessages({ channelId: channel.id })}
           title={channel.name}
           topic={channel.topic}
           showHash
