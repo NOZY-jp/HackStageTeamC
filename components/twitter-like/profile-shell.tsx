@@ -4,6 +4,7 @@ import type { Profile, TwitterUser } from "@/lib/twitter-like/types";
 import { Avatar } from "./avatar";
 import { formatCount, formatJoinedAt } from "./format";
 import { CalendarIcon, VerifiedBadge } from "./icons";
+import { LinkifiedText } from "./linkify";
 import { isVerified } from "./lookup";
 import { PageHeader } from "./page-header";
 
@@ -57,7 +58,9 @@ export function ProfileShell({
             {isVerified(user) ? <VerifiedBadge /> : null}
           </h2>
           <p className="tw-handle">@{user.handle}</p>
-          <p className="tw-profile-bio">{profile.bio}</p>
+          <p className="tw-profile-bio">
+            <LinkifiedText text={profile.bio} />
+          </p>
           <p className="tw-profile-meta">
             {profile.location ? <span>{profile.location}</span> : null}
             <span>
