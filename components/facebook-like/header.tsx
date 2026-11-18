@@ -38,11 +38,11 @@ export function FacebookHeader() {
             value={searchQuery}
             onChange={(e) => {
               const next = e.target.value;
-              // 検索絞り込みはフィード（/facebook）でのみ機能するため、
+              // 検索絞り込みはフィード（/talkup）でのみ機能するため、
               // 検索語が 空→非空 に変わった瞬間だけフィードへ遷移する。
               // 毎キー入力で push しないよう、遷移はこの1回のみとする。
               if (!searchQuery && next.trim() && !isFeed) {
-                router.push("/facebook");
+                router.push("/talkup");
               }
               setSearchQuery(next);
             }}
