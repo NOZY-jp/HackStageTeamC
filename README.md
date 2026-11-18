@@ -32,11 +32,20 @@ npm run dev   # http://localhost:3000
 
 ## 構成
 
-- `app/` … App Router のルート。`app/(discord-like)/` に Discord like UI の画面を置く（route group なので URL は `/dm` などのまま）
-- `components/` … 画面横断の UI 部品。`components/discord-like/` が Discord like UI 用
-- `lib/` … ドメイン型とデータ。`lib/discord-like/` が Discord like UI 用
+- `app/` … App Router のルート。`app/(discord-like)/` に Discord like UI の画面を置く（route group なので URL は `/dm` などのまま）。`app/(note-like)/` が Note like UI の画面（URL は `/note` 配下）
+- `components/` … 画面横断の UI 部品。`components/discord-like/` が Discord like UI 用、`components/note-like/` が Note like UI 用
+- `lib/` … ドメイン型とデータ。`lib/discord-like/` が Discord like UI 用、`lib/note-like/` が Note like UI 用
+- `public/note-like/` … Note like UI の仮画像（見出し画像・アバター・本文用）。一覧は `public/note-like/README.md`
 - `app/globals.css` … デザイントークンとレイアウトの共通テーマ（唯一の正本）
 - `biome.json` … Biome 設定（`.next` / `node_modules` / `out` は除外）
+
+## Note like UI（leaf）
+
+`/note` 配下の、作中の架空ブログサービス。トップ（新着）・クリエイター・記事・検索の4画面。
+
+- 動くのは検索（タイトル・要約・本文・タグ・書き手の名前とID）、タグからの検索、スキ（押した状態は保存しない）だけ。ログインや投稿は作っていない
+- ライトテーマ。配色は `app/globals.css` の `.note-shell` の中だけで定義する
+- 記事は `lib/note-like/data/articles.ts`、書き手は `lib/note-like/data/creators.ts`。記事はまだ空で、脚本が固まってから入れる
 
 ## ファイル配置（Discord like UI と新プラットフォーム）
 
