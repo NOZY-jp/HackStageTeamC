@@ -13,9 +13,7 @@ type ObserverCallback = (entries: Partial<IntersectionObserverEntry>[]) => void;
 const observers: { callback: ObserverCallback; disconnect: () => void }[] = [];
 
 class MockIntersectionObserver {
-  private callback: ObserverCallback;
   constructor(callback: ObserverCallback) {
-    this.callback = callback;
     observers.push({ callback, disconnect: () => {} });
   }
   observe() {}

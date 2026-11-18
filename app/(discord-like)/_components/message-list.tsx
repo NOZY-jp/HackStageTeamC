@@ -19,7 +19,7 @@ const FIVE_MINUTES = 5 * 60 * 1000;
 const AWAY_FROM_BOTTOM = 320;
 /** 追加読み込みを始める余白（この距離まで上端が近づいたら次を取る） */
 const LOAD_MARGIN = "200px";
-const SKELETON_ROWS = 3;
+const SKELETON_ROWS = ["a", "b", "c"] as const;
 
 /** 表示は固定データの UTC 表記をそのまま使う（相対表記にしない）。 */
 const dateOf = (sentAt: string) => sentAt.slice(0, 10);
@@ -86,7 +86,7 @@ export function MessageList({
   const [awayFromBottom, setAwayFromBottom] = useState(false);
 
   // 初回表示・チャンネル切替時は最下部（最新）へ
-  // biome-ignore lint/correctness/useExhaustiveDependencies: resetKey はチャンネル切替の合図
+  // biome-ignore lint/correctness/useExhaustiveDependencies: resetKey はチャンネル切替の合図。ref は依存にしない
   useLayoutEffect(() => {
     const element = scrollElement.current;
     if (element) {
@@ -96,6 +96,7 @@ export function MessageList({
   }, [resetKey]);
 
   // 上端の sentinel を監視して、古いメッセージを追加で読み込む
+  // biome-ignore lint/correctness/useExhaustiveDependencies: スクロール要素の ref はマウント後も同一
   useEffect(() => {
     const sentinel = sentinelRef.current;
     const root = scrollElement.current;
@@ -117,6 +118,7 @@ export function MessageList({
     return () => observer.disconnect();
   }, [hasMore, onLoadOlder]);
 
+  // biome-ignore lint/correctness/useExhaustiveDependencies: スクロール要素の ref はマウント後も同一
   const handleScroll = useCallback(() => {
     const element = scrollElement.current;
     if (!element) {
@@ -126,6 +128,7 @@ export function MessageList({
     setAwayFromBottom(gap > AWAY_FROM_BOTTOM);
   }, []);
 
+  // biome-ignore lint/correctness/useExhaustiveDependencies: スクロール要素の ref はマウント後も同一
   const scrollToLatest = useCallback(() => {
     const element = scrollElement.current;
     if (!element) {
@@ -232,8 +235,8 @@ export function MessageList({
             <div className="message-history-top" ref={sentinelRef} data-testid="history-sentinel" />
             {loadingOlder ? (
               <div className="message-skeleton" aria-hidden="true">
-                {Array.from({ length: SKELETON_ROWS }, (_, index) => (
-                  <div className="message-skeleton-row" key={`skeleton-${index}`}>
+                {SKELETON_ROWS.map((row) => (
+                  <div className="message-skeleton-row" key={`skeleton-${row}`}>
                     <span className="skeleton-block message-skeleton-avatar" />
                     <span className="message-skeleton-lines">
                       <span

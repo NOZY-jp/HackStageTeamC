@@ -54,6 +54,7 @@ export function MessagePane({
 
   // 古いメッセージを先頭に足した直後、基準にしたメッセージが動いた分だけ scrollTop を戻す。
   // 高さではなく実際の要素位置で測るので、スケルトンの出入りがあってもずれない。
+  // biome-ignore lint/correctness/useExhaustiveDependencies: older の変化（追加読み込み完了）で1回だけ補正する
   useLayoutEffect(() => {
     const anchor = compensationRef.current;
     const element = scrollRef.current;
