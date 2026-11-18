@@ -59,6 +59,7 @@ export function MessageList({
   hasMore = true,
   resetKey,
   scrollRef,
+  contentRef,
 }: {
   messages: Message[];
   title: string;
@@ -79,6 +80,8 @@ export function MessageList({
   resetKey?: string;
   /** スクロール要素の ref（親が位置補正に使う）。 */
   scrollRef?: RefObject<HTMLDivElement | null>;
+  /** 中身のラッパーの ref（高さ変化の監視に使う）。 */
+  contentRef?: RefObject<HTMLDivElement | null>;
 }) {
   const fallbackScrollRef = useRef<HTMLDivElement>(null);
   const scrollElement = scrollRef ?? fallbackScrollRef;
@@ -231,7 +234,7 @@ export function MessageList({
         {messages.length === 0 ? (
           <EmptyState kind="message" title={emptyText} description="下の入力欄から送信できます。" />
         ) : (
-          <div className="message-scroll-content">
+          <div className="message-scroll-content" ref={contentRef}>
             <div className="message-history-top" ref={sentinelRef} data-testid="history-sentinel" />
             {loadingOlder ? (
               <div className="message-skeleton" aria-hidden="true">

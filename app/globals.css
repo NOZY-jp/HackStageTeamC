@@ -974,10 +974,17 @@
   min-width: 0;
 }
 
+.message-image[data-natural="true"] {
+  height: auto;
+  width: auto;
+  max-height: 160px;
+}
+
 .message-image {
   display: block;
+  /* 高さを先に確定させる。デコード前に行が伸びると、追加読み込み直後にスクロール位置が飛ぶ */
+  height: 360px;
   width: auto;
-  height: auto;
   max-width: 100%;
   max-height: 360px;
   border-radius: 4px;
@@ -2658,20 +2665,30 @@ a.tw-dm-item:focus-visible {
 
 /* ---- 段階的読み込み（#71） ---- */
 .message-scroll-content {
+  position: relative;
   display: flex;
   flex: 1 0 auto;
   flex-direction: column;
+  overflow-anchor: none;
 }
 .message-history-top {
   flex: none;
   height: 1px;
 }
 
+/* スクロール高さに影響させない（補正計算からスケルトンの出入りを消す） */
 .message-skeleton {
+  position: absolute;
+  top: 0;
+  right: 0;
+  left: 0;
+  z-index: 2;
   display: flex;
   flex-direction: column;
   gap: 16px;
   padding: 16px;
+  background-color: var(--color-bg-main);
+  overflow-anchor: none;
 }
 
 .message-skeleton-row {

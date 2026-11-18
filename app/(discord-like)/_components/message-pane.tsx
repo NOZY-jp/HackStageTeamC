@@ -6,7 +6,7 @@ import type { Message } from "@/lib/discord-like/types";
 import { useLocalMessages } from "./local-messages-context";
 import { MessageComposer } from "./message-composer";
 import { MessageList } from "./message-list";
-import { compensatedScrollTop, isAtBottom } from "./paging-scroll";
+import { isAtBottom } from "./paging-scroll";
 
 /** 同梱データなので実時間はほぼ0。スケルトンの状態遷移を見せるためだけの待ち。 */
 const PAGING_DELAY_MS = 120;
@@ -68,13 +68,13 @@ export function MessagePane({
   const localMessages = messagesFor(channelKey);
 
   const scrollRef = useRef<HTMLDivElement>(null);
-  /** 追加読み込み開始時のスクロール状態（スケルトンを含めた補正の基準） */
-  const loadBaseRef = useRef<{
-    key: string;
-    requestId: number;
-    scrollTop: number;
-    scrollHeight: number;
-  } | null>(null);
+  const contentRef = useRef<HTMLDivElement>(null);
+  /**
+   * 追加読み込み中だけ有効な補正の基準。
+   * 画像などで高さが後から伸びても基準メッセージの位置が動かないよう、
+   * ResizeObserver で高さ変化のたびに「基準メッセージのずれ」を打ち消す。
+   */
+  const loadAnchorRef = useRef<{ key: string; node: HTMLElement; top: number } | null>(null);
   const wasAtBottomRef = useRef(true);
 
   const [paging, setPaging] = useState<Paging>(() => initialPaging(channelKey, initialPage));
@@ -137,25 +137,41 @@ export function MessagePane({
     }
   }, [channelKey, initialPage, paging.key]);
 
-  // 読み込み完了（またはスケルトン表示）で、増えた高さの分だけ scrollTop を戻す。
-  // 基準は読み込み開始時の scrollHeight なので、スケルトンとメッセージの二段階でもずれない。
-  // biome-ignore lint/correctness/useExhaustiveDependencies: current の変化（スケルトン→追加）で補正する
-  useLayoutEffect(() => {
-    const base = loadBaseRef.current;
+  // 読み込み開始時に決めた基準メッセージが動かないように、高さが変わるたび補正する。
+  // スケルトンは絶対配置（高さ0）なので、画像の読み込みなどで後から伸びる分にも追随できる。
+  useEffect(() => {
+    const content = contentRef.current;
     const element = scrollRef.current;
-    if (!base || !element || base.key !== current.key) {
+    if (!content || !element || typeof ResizeObserver === "undefined") {
       return;
     }
-    element.scrollTop = compensatedScrollTop({
-      prevScrollTop: base.scrollTop,
-      prevScrollHeight: base.scrollHeight,
-      nextScrollHeight: element.scrollHeight,
-      clientHeight: element.clientHeight,
-    });
-    if (!current.loading) {
-      loadBaseRef.current = null;
+    const compensate = () => {
+      const anchor = loadAnchorRef.current;
+      if (!anchor || anchor.key !== channelKey || !anchor.node.isConnected) {
+        return;
+      }
+      const delta = Math.round(anchor.node.getBoundingClientRect().top) - anchor.top;
+      if (delta !== 0) {
+        element.scrollTop += delta;
+        anchor.top = Math.round(anchor.node.getBoundingClientRect().top);
+      }
+    };
+    const observer = new ResizeObserver(compensate);
+    observer.observe(content);
+    return () => observer.disconnect();
+  }, [channelKey]);
+
+  // 追加分の描画が落ち着いたら基準を捨てる（後から届く画像の伸びまでは追う）
+  // biome-ignore lint/correctness/useExhaustiveDependencies: older が増えた時だけタイマーを張り直す
+  useEffect(() => {
+    if (!loadAnchorRef.current) {
+      return;
     }
-  }, [current]);
+    const timer = setTimeout(() => {
+      loadAnchorRef.current = null;
+    }, 2500);
+    return () => clearTimeout(timer);
+  }, [current.older.length]);
 
   const loadOlder = useCallback(async () => {
     if (current.loading || !current.hasMore || current.cursor === null) {
@@ -166,12 +182,15 @@ export function MessagePane({
     const cursor = current.cursor;
     const element = scrollRef.current;
     if (element) {
-      loadBaseRef.current = {
-        key,
-        requestId,
-        scrollTop: element.scrollTop,
-        scrollHeight: element.scrollHeight,
-      };
+      // いま見えている先頭のメッセージを基準にする
+      const box = element.getBoundingClientRect();
+      for (const row of element.querySelectorAll<HTMLElement>(".message")) {
+        const rect = row.getBoundingClientRect();
+        if (rect.bottom > box.top) {
+          loadAnchorRef.current = { key, node: row, top: Math.round(rect.top) };
+          break;
+        }
+      }
     }
 
     setPaging((previous) =>
@@ -256,6 +275,7 @@ export function MessagePane({
       hasMore={current.hasMore}
       resetKey={channelKey}
       scrollRef={scrollRef}
+      contentRef={contentRef}
       composer={<MessageComposer onSend={handleSend} />}
     />
   );
