@@ -8,7 +8,7 @@ import { SidebarUserPanel } from "./sidebar-user-panel";
 function JoinOnMount() {
   const { join } = useVoice();
   useEffect(() => {
-    join({ guildId: "s1", channelId: "s1-vc-1", channelName: "ボイス 1" });
+    join({ guildId: "mhc", channelId: "mhc-vc-1", channelName: "雑談通話" });
   }, [join]);
   return null;
 }
@@ -17,7 +17,7 @@ function renderPanel({ connected = false }: { connected?: boolean } = {}) {
   return render(
     <VoiceProvider>
       {connected ? <JoinOnMount /> : null}
-      <SidebarUserPanel userId="u1" />
+      <SidebarUserPanel userId="hal" />
     </VoiceProvider>,
   );
 }
@@ -26,24 +26,24 @@ describe("SidebarUserPanel", () => {
   it("名前の下は既定でステータス文言を出す", () => {
     render(
       <VoiceProvider>
-        <SidebarUserPanel userId="u4" />
+        <SidebarUserPanel userId="mina" />
       </VoiceProvider>,
     );
 
-    expect(screen.getByText("メンバー04")).toBeInTheDocument();
+    expect(screen.getByText("双剣ミナ")).toBeInTheDocument();
     expect(screen.getByText("オンライン")).toBeInTheDocument();
   });
 
   it("idle は「退席中」と表示し、ハンドルに @ を付けない", () => {
     const { container } = render(
       <VoiceProvider>
-        <SidebarUserPanel userId="u1" />
+        <SidebarUserPanel userId="haruka" />
       </VoiceProvider>,
     );
 
     expect(screen.getByText("退席中")).toBeInTheDocument();
-    expect(screen.getByText("member01")).toBeInTheDocument();
-    expect(container.textContent).not.toContain("@member01");
+    expect(screen.getByText("bow_haruka")).toBeInTheDocument();
+    expect(container.textContent).not.toContain("@bow_haruka");
   });
 
   it("ボイス操作のアイコンボタンが5つあり、すべてにアクセシブル名がある", () => {
@@ -68,15 +68,18 @@ describe("SidebarUserPanel", () => {
     const { container } = renderPanel({ connected: true });
 
     expect(screen.getByText("通話中")).toBeInTheDocument();
-    expect(screen.getByText("ボイス 1 / 開発ラボ")).toBeInTheDocument();
+    expect(screen.getByText("雑談通話 / モンハンコミュニティ")).toBeInTheDocument();
     expect(screen.getByText("Krisp によるノイズ抑制")).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "切断" })).toBeInTheDocument();
 
     // DOM順（上から）: 通話中 → チャンネル/サーバー → Krisp → 切断
     const text = container.textContent ?? "";
-    const order = ["通話中", "ボイス 1 / 開発ラボ", "Krisp によるノイズ抑制", "切断"].map((t) =>
-      text.indexOf(t),
-    );
+    const order = [
+      "通話中",
+      "雑談通話 / モンハンコミュニティ",
+      "Krisp によるノイズ抑制",
+      "切断",
+    ].map((t) => text.indexOf(t));
     expect(order.every((index) => index >= 0)).toBe(true);
     expect([...order].sort((a, b) => a - b)).toEqual(order);
   });
