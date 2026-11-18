@@ -10,15 +10,28 @@ const PAGE_SIZE = 50;
 
 type ObserverCallback = (entries: Partial<IntersectionObserverEntry>[]) => void;
 
-const observers: { callback: ObserverCallback; disconnect: () => void }[] = [];
+type ObserverRecord = {
+  callback: ObserverCallback;
+  targets: Element[];
+  active: boolean;
+};
+
+const observers: ObserverRecord[] = [];
 
 class MockIntersectionObserver {
+  private record: ObserverRecord;
   constructor(callback: ObserverCallback) {
-    observers.push({ callback, disconnect: () => {} });
+    this.record = { callback, targets: [], active: true };
+    observers.push(this.record);
   }
-  observe() {}
+  observe(target: Element) {
+    this.record.active = true;
+    this.record.targets.push(target);
+  }
   unobserve() {}
-  disconnect() {}
+  disconnect() {
+    this.record.active = false;
+  }
   takeRecords() {
     return [];
   }
@@ -27,9 +40,16 @@ class MockIntersectionObserver {
 vi.stubGlobal("IntersectionObserver", MockIntersectionObserver);
 
 const triggerIntersect = async () => {
-  const observer = observers[observers.length - 1];
+  // 上端 sentinel を監視している observer だけを発火させる（他の監視は無関係）
+  const sentinelObservers = observers.filter(
+    (observer) =>
+      observer.active &&
+      observer.targets.some((target) => target.getAttribute("data-testid") === "history-sentinel"),
+  );
   await act(async () => {
-    observer.callback([{ isIntersecting: true }]);
+    for (const observer of sentinelObservers) {
+      observer.callback([{ isIntersecting: true }]);
+    }
   });
 };
 
@@ -92,16 +112,17 @@ describe("MessagePane の段階的読み込み", () => {
     const { container } = renderPane();
     const total = listMessages({ channelId: CHANNEL_ID, limit: 1000 }).messages.length;
 
-    for (let loaded = PAGE_SIZE; loaded < total; loaded += PAGE_SIZE) {
+    for (let attempt = 0; attempt < 8; attempt += 1) {
+      if (screen.queryByText("ここが最初のメッセージです")) break;
+      const before = visibleMessages(container);
       await triggerIntersect();
       await waitFor(
         () => {
-          expect(visibleMessages(container)).toBeGreaterThanOrEqual(
-            Math.min(loaded + PAGE_SIZE, total),
-          );
+          expect(visibleMessages(container)).toBeGreaterThanOrEqual(before);
         },
         { timeout: 3000 },
       );
+      await new Promise((resolve) => setTimeout(resolve, 250));
     }
 
     await waitFor(() => {
@@ -115,6 +136,39 @@ describe("MessagePane の段階的読み込み", () => {
     await triggerIntersect();
     expect(observers.length).toBe(observerCount);
     expect(visibleMessages(container)).toBe(countAtEnd);
+  });
+
+  it("読み込み中に別チャンネルへ切り替えると、前のチャンネルの結果を持ち込まない", async () => {
+    const first = renderPane();
+    const channelA = listMessages({ channelId: CHANNEL_ID, limit: 1000 }).messages.map((m) => m.id);
+
+    await triggerIntersect();
+
+    // 追加読み込みの待ち（120ms）が終わる前に B へ切り替える
+    const otherChannel = listMessages({ channelId: "s1-random", limit: PAGE_SIZE });
+    first.rerender(
+      <AppShell rail={<span />}>
+        <LocalMessagesProvider>
+          <MessagePane
+            channelKey="s1-random"
+            mode="channel"
+            initialPage={otherChannel}
+            title="雑談"
+            topic="テスト"
+          />
+        </LocalMessagesProvider>
+      </AppShell>,
+    );
+
+    await new Promise((resolve) => setTimeout(resolve, 400));
+
+    const ids = Array.from(first.container.querySelectorAll(".message")).map((node) =>
+      node.getAttribute("data-message-id"),
+    );
+    const expected = new Set(otherChannel.messages.map((message) => message.id));
+    expect(ids).toHaveLength(PAGE_SIZE);
+    expect(ids.every((id) => id !== null && expected.has(id))).toBe(true);
+    expect(ids.some((id) => id !== null && channelA.includes(id))).toBe(false);
   });
 
   it("チャンネルが変わると読み込み状態をリセットする", async () => {
