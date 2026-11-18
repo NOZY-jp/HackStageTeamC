@@ -8,7 +8,16 @@ export default async function FacebookProfilePage({
   params: Promise<{ handle: string }>;
 }) {
   const { handle } = await params;
-  const user = getUserByHandle(decodeURIComponent(handle));
+
+  let decodedHandle: string;
+  try {
+    decodedHandle = decodeURIComponent(handle);
+  } catch {
+    // 不正な URL セグメント（例: /facebook/profile/100%）は 404 として扱う
+    notFound();
+  }
+
+  const user = getUserByHandle(decodedHandle);
 
   if (!user) {
     notFound();

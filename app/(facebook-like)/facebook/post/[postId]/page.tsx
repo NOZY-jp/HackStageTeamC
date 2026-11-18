@@ -1,3 +1,4 @@
+import { notFound } from "next/navigation";
 import { PostDetailView } from "@/components/facebook-like/post-detail-view";
 
 export default async function FacebookPostDetailPage({
@@ -6,5 +7,14 @@ export default async function FacebookPostDetailPage({
   params: Promise<{ postId: string }>;
 }) {
   const { postId } = await params;
-  return <PostDetailView postId={decodeURIComponent(postId)} />;
+
+  let decodedPostId: string;
+  try {
+    decodedPostId = decodeURIComponent(postId);
+  } catch {
+    // 不正な URL セグメント（例: /facebook/post/100%）は 404 として扱う
+    notFound();
+  }
+
+  return <PostDetailView postId={decodedPostId} />;
 }

@@ -1,7 +1,9 @@
 import type { FbUser } from "../types";
 
 /**
- * Discord 側の登場人物（u1〜u12, u35, u36）と世界観を揃えたメンバー定義。
+ * Discord 側の登場人物と世界観を揃えたメンバー定義。
+ * 本UIで参照する u1〜u6, u8, u10, u12, u35, u36 のみを定義する
+ * （u7, u9, u11 など未参照の人物は含めない）。
  * 名前空間分離のため lib/discord-like からは import せず独立して定義する。
  */
 export const fbUsers: FbUser[] = [
@@ -95,6 +97,19 @@ export const fbUsers: FbUser[] = [
     location: "東京",
     joinedAt: "2024-04-15T00:00:00Z",
     friendIds: ["u1", "u2", "u4", "u5", "u6", "u12"],
+  },
+  {
+    id: "u10",
+    displayName: "メンバー10",
+    handle: "member10",
+    avatarColor: "#eb459e",
+    coverColor: "#a12d68",
+    status: "dnd",
+    bio: "UI の文言調整とレビュー担当。余白や視線誘導の細部まで見逃しません。",
+    workplace: "HackStage TeamC",
+    location: "京都",
+    joinedAt: "2024-04-20T00:00:00Z",
+    friendIds: ["u1", "u3"],
   },
   {
     id: "u12",

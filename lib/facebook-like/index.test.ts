@@ -6,6 +6,7 @@ import {
   listFriends,
   listPosts,
   listPostsByAuthor,
+  listUsers,
   searchFacebook,
 } from "./index";
 
@@ -44,5 +45,18 @@ describe("lib/facebook-like", () => {
     expect(result.posts.some((p) => p.id === "fbp-105")).toBe(true);
     const botSearch = searchFacebook("notice-bot");
     expect(botSearch.users.some((u) => u.id === "u35")).toBe(true);
+  });
+
+  it("ensures every friendId references an existing user", () => {
+    const users = listUsers();
+    const ids = new Set(users.map((user) => user.id));
+    for (const user of users) {
+      for (const friendId of user.friendIds) {
+        expect(
+          ids.has(friendId),
+          `${user.id} の friendIds が未定義の ${friendId} を参照しています`,
+        ).toBe(true);
+      }
+    }
   });
 });
