@@ -12,6 +12,8 @@ export type User = {
   avatarColor: string;
   status?: "online" | "idle" | "dnd" | "offline";
   bot?: boolean;
+  /** プロフィールに出すリンク（1本だけ）。作中URLでよい。 */
+  profileUrl?: string;
 };
 
 export type Category = {
@@ -107,6 +109,8 @@ export type MessageAuthor = {
   id: string;
   displayName: string;
   avatarColor: string;
+  /** プロフィールのリンク（あれば著者名をリンクにする）。 */
+  profileUrl?: string;
 };
 
 /** 一覧表示に必要なページ＋書き手。サーバー（Server Action / ページ）から渡す。 */
@@ -115,4 +119,14 @@ export type MessageView = {
   hasMore: boolean;
   nextCursor: string | null;
   authors: Record<string, MessageAuthor>;
+};
+
+/** メンバー一覧に出す1人分（ハンドル・状態・プロフィールリンク）。 */
+export type MemberView = {
+  id: string;
+  displayName: string;
+  handle: string;
+  avatarColor: string;
+  status?: "online" | "idle" | "dnd" | "offline";
+  profileUrl?: string;
 };

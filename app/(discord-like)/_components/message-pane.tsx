@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { fetchMessagePage } from "@/app/(discord-like)/_actions/message-page";
-import type { Message, MessageAuthor, MessageView } from "@/lib/discord-like/types";
+import type { MemberView, Message, MessageAuthor, MessageView } from "@/lib/discord-like/types";
 import { useLocalMessages } from "./local-messages-context";
 import { MessageComposer } from "./message-composer";
 import { MessageList } from "./message-list";
@@ -53,6 +53,7 @@ export function MessagePane({
   topic,
   showHash,
   headerAvatar,
+  members = [],
 }: {
   channelKey: string;
   mode: Mode;
@@ -61,6 +62,8 @@ export function MessagePane({
   topic?: string;
   showHash?: boolean;
   headerAvatar?: { displayName: string; avatarColor: string };
+  /** メンバー一覧（サーバー側で作って渡す）。 */
+  members?: MemberView[];
 }) {
   const { messagesFor, addMessage } = useLocalMessages();
   const localMessages = messagesFor(channelKey);
@@ -261,6 +264,7 @@ export function MessagePane({
       topic={topic}
       showHash={showHash}
       headerAvatar={headerAvatar}
+      members={members}
       onLoadOlder={loadOlder}
       loadingOlder={current.loading}
       hasMore={current.hasMore}

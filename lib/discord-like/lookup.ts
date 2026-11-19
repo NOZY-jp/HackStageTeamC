@@ -55,6 +55,10 @@ export function getChannelByUrlId(urlId: string): Channel | undefined {
   return undefined;
 }
 
+export function listUsers(): User[] {
+  return copyOf(users);
+}
+
 export function getUser(id: string): User | undefined {
   const user = users.find((candidate) => candidate.id === id);
   return user ? copyOf(user) : undefined;

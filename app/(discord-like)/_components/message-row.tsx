@@ -63,7 +63,19 @@ export function MessageRow({
 
         {grouped ? null : (
           <p className="message-meta">
-            <span className="message-author">{displayName}</span>
+            {author?.profileUrl ? (
+              // プロフィールのリンクがある書き手だけ、名前をリンクにする（新しい画面は作らない）
+              <a
+                className="message-author"
+                href={author.profileUrl}
+                target="_blank"
+                rel="noreferrer noopener"
+              >
+                {displayName}
+              </a>
+            ) : (
+              <span className="message-author">{displayName}</span>
+            )}
             <time className="message-time" dateTime={message.sentAt}>
               {time}
             </time>

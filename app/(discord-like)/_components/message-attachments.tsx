@@ -10,6 +10,7 @@ const IMAGE_SIZES: Record<string, { width: number; height: number }> = {
   "mock-tall.png": { width: 600, height: 1200 },
   "mock-square.png": { width: 800, height: 800 },
   "mock-small.png": { width: 120, height: 120 },
+  "screenshot-2019.svg": { width: 800, height: 600 },
 };
 const FALLBACK_SIZE = { width: 800, height: 800 };
 
