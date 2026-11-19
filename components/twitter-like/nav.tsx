@@ -43,7 +43,8 @@ const items: Item[] = [
     label: "プロフィール",
     href: `/twitter/profile/${ME_HANDLE}`,
     icon: <UserIcon />,
-    match: (path) => path.startsWith("/twitter/profile/"),
+    match: (path) =>
+      path === `/twitter/profile/${ME_HANDLE}` || path.startsWith(`/twitter/profile/${ME_HANDLE}/`),
   },
 ];
 
