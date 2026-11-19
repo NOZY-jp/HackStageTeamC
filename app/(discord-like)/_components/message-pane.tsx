@@ -10,8 +10,8 @@ import { isAtBottom } from "./paging-scroll";
 
 /** 同梱データなので実時間はほぼ0。スケルトンの状態遷移を見せるためだけの待ち。 */
 const PAGING_DELAY_MS = 120;
-/** 追加読み込み後に位置補正を続ける時間（画像などの遅い伸びに追随する） */
-const COMPENSATE_MS = 2500;
+/** 追加読み込み後、画像などの遅い伸びに追随する最大時間（無操作が続く場合の上限） */
+const COMPENSATE_MS = 1200;
 
 type Mode = "channel" | "dm";
 
@@ -74,6 +74,11 @@ export function MessagePane({
    */
   const loadAnchorRef = useRef<{ key: string; node: HTMLElement; top: number } | null>(null);
   const wasAtBottomRef = useRef(true);
+
+  /** 位置補正の基準を捨てる（送信・「最新へ」・ユーザー操作で呼ぶ）。 */
+  const releaseAnchor = useCallback(() => {
+    loadAnchorRef.current = null;
+  }, []);
 
   const [paging, setPaging] = useState<Paging>(() => initialPaging(channelKey, initialView));
   const pagingRef = useRef(paging);
@@ -139,17 +144,16 @@ export function MessagePane({
     };
   }, [channelKey]);
 
-  // 追加分の描画が落ち着いたら基準を捨てる（後から届く画像の伸びまでは追う）
+  // 読み込みが終わった時点から上限つきで補正を続ける（画像の遅い伸びに備える）。
+  // ユーザー操作（スクロール・送信・最新へ）が入ったら即解除する。
   // biome-ignore lint/correctness/useExhaustiveDependencies: older が増えた時だけタイマーを張り直す
   useEffect(() => {
-    if (!loadAnchorRef.current) {
+    if (current.loading || !loadAnchorRef.current) {
       return;
     }
-    const timer = setTimeout(() => {
-      loadAnchorRef.current = null;
-    }, COMPENSATE_MS);
+    const timer = setTimeout(releaseAnchor, COMPENSATE_MS);
     return () => clearTimeout(timer);
-  }, [current.older.length]);
+  }, [current.loading, current.older.length, releaseAnchor]);
 
   const loadOlder = useCallback(async () => {
     if (current.loading || !current.hasMore || current.cursor === null) {
@@ -210,6 +214,8 @@ export function MessagePane({
 
   const handleSend = useCallback(
     (body: string) => {
+      // 送信はユーザー操作。追加読み込みの補正基準は捨てて、最下部追従の判定に任せる
+      releaseAnchor();
       const element = scrollRef.current;
       wasAtBottomRef.current = element
         ? isAtBottom({
@@ -220,7 +226,7 @@ export function MessagePane({
         : true;
       addMessage(channelKey, body);
     },
-    [addMessage, channelKey],
+    [addMessage, channelKey, releaseAnchor],
   );
 
   // 送信で末尾に増えたとき、送信前に最下部にいたなら最下部へ追従する
@@ -261,6 +267,7 @@ export function MessagePane({
       resetKey={channelKey}
       scrollRef={scrollRef}
       contentRef={contentRef}
+      onJumpToLatest={releaseAnchor}
       composer={<MessageComposer onSend={handleSend} />}
     />
   );

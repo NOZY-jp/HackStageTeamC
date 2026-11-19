@@ -61,6 +61,7 @@ export function MessageList({
   resetKey,
   scrollRef,
   contentRef,
+  onJumpToLatest,
 }: {
   messages: Message[];
   /** 書き手情報（サーバーから渡される）。 */
@@ -85,6 +86,8 @@ export function MessageList({
   scrollRef?: RefObject<HTMLDivElement | null>;
   /** 中身のラッパーの ref（高さ変化の監視に使う）。 */
   contentRef?: RefObject<HTMLDivElement | null>;
+  /** 「最新へ」を押したとき（位置補正の基準を捨てるために親へ知らせる）。 */
+  onJumpToLatest?: () => void;
 }) {
   const fallbackScrollRef = useRef<HTMLDivElement>(null);
   const scrollElement = scrollRef ?? fallbackScrollRef;
@@ -140,9 +143,11 @@ export function MessageList({
     if (!element) {
       return;
     }
+    // 利用者の操作なので、追加読み込みの位置補正はここで打ち切る
+    onJumpToLatest?.();
     element.scrollTop = element.scrollHeight;
     setAwayFromBottom(false);
-  }, []);
+  }, [onJumpToLatest]);
 
   const byId = new Map(messages.map((message) => [message.id, message]));
   const rows: Row[] = [];

@@ -64,6 +64,28 @@ class MockIntersectionObserver {
 
 vi.stubGlobal("IntersectionObserver", MockIntersectionObserver);
 
+const resizeObservers: { callback: () => void; targets: Element[] }[] = [];
+class MockResizeObserver {
+  private record: { callback: () => void; targets: Element[] };
+  constructor(callback: () => void) {
+    this.record = { callback, targets: [] };
+    resizeObservers.push(this.record);
+  }
+  observe(target: Element) {
+    this.record.targets.push(target);
+  }
+  unobserve() {}
+  disconnect() {}
+}
+vi.stubGlobal("ResizeObserver", MockResizeObserver);
+
+/** 高さが変わったときの補正を手動で起こす */
+const triggerResize = () => {
+  for (const observer of resizeObservers) {
+    observer.callback();
+  }
+};
+
 const triggerIntersect = async () => {
   // 上端 sentinel を監視している observer だけを発火させる（他の監視は無関係）
   const sentinelObservers = observers.filter(
@@ -194,6 +216,31 @@ describe("MessagePane の段階的読み込み", () => {
     expect(ids).toHaveLength(PAGE_SIZE);
     expect(ids.every((id) => id !== null && expected.has(id))).toBe(true);
     expect(ids.some((id) => id !== null && channelA.includes(id))).toBe(false);
+  });
+
+  it("送信すると位置補正の基準が解除され、その後の高さ変化で勝手にスクロールしない", async () => {
+    const { container } = renderPane();
+    await triggerIntersect();
+    await new Promise((resolve) => setTimeout(resolve, 300));
+
+    const scroller = container.querySelector(".message-scroll") as HTMLDivElement;
+    scroller.scrollTop = 500;
+
+    const textarea = container.querySelector("textarea") as HTMLTextAreaElement;
+    const setter = Object.getOwnPropertyDescriptor(HTMLTextAreaElement.prototype, "value")?.set;
+    setter?.call(textarea, "補正解除の確認");
+    textarea.dispatchEvent(new Event("input", { bubbles: true }));
+    await new Promise((resolve) => setTimeout(resolve, 50));
+    const send = Array.from(container.querySelectorAll("button")).find(
+      (button) => button.textContent?.trim() === "送信",
+    ) as HTMLButtonElement | undefined;
+    send?.click();
+    await new Promise((resolve) => setTimeout(resolve, 80));
+
+    // 送信後に高さが変わっても、補正で scrollTop を持ち上げない
+    scroller.scrollTop = 300;
+    triggerResize();
+    expect(scroller.scrollTop).toBe(300);
   });
 
   it("A→B→A と戻ると、読み込み済みの続きがそのまま残る（空にならない）", async () => {
