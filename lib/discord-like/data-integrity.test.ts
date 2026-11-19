@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { SELF_USER_ID } from "@/app/(discord-like)/_components/self-user";
+import { KAI_NAME, OLD_BLOG_ARCHIVE_URL, OLD_DISPLAY_NAME, OLD_HANDLE } from "./data/names";
 import {
   getChannel,
   getGuild,
@@ -264,5 +265,88 @@ describe("ダミーデータの整合性", () => {
     ].join("\n");
     expect(texts).not.toMatch(/(^|\s)(u1|u2|s1|s2|s3|t1|t2)("|,|\s|$)/);
     expect(texts).not.toMatch(/s1-general|s1-vc|t1-\d/);
+  });
+});
+
+describe("謎解きの手がかり（順序1・4・5・6・9・11）", () => {
+  it("旧ハンドルと完全一致するユーザーが、ずっとオフラインで存在する（順序5）", () => {
+    const users = [
+      "hal",
+      "maimai",
+      "gunlance",
+      "mina",
+      "haruka",
+      "slime",
+      "jijii",
+      "master",
+      "kai",
+      "shiro",
+    ];
+    const old = users.map((id) => getUser(id)).find((user) => user?.handle === OLD_HANDLE);
+    expect(old).toBeDefined();
+    expect(old?.displayName).toBe(OLD_DISPLAY_NAME);
+    expect(old?.status).toBe("offline");
+    // 現在の自分のハンドルとは別（同じIDではない）
+    expect(getUser(SELF_USER_ID)?.handle).not.toBe(OLD_HANDLE);
+  });
+
+  it("そのユーザーのプロフィールは記事一覧URL（トップではない）（順序6）", () => {
+    const old = [
+      "hal",
+      "maimai",
+      "gunlance",
+      "mina",
+      "haruka",
+      "slime",
+      "jijii",
+      "master",
+      "kai",
+      "shiro",
+    ]
+      .map((id) => getUser(id))
+      .find((user) => user?.handle === OLD_HANDLE);
+    expect(old?.profileUrl).toBe(OLD_BLOG_ARCHIVE_URL);
+    expect(old?.profileUrl?.endsWith("/")).toBe(false);
+    expect(old?.profileUrl).toContain("archive");
+  });
+
+  it("中2の頃の攻略ブログの話が会話にあり、検索語を含む（順序1）", () => {
+    const messages = dmMessages();
+    const haystack = messages.map((message) => message.body).join(" / ");
+    expect(haystack).toContain("中2");
+    expect(haystack).toContain("攻略ブログ");
+    expect(haystack).toMatch(/note/);
+  });
+
+  it("IDが違うスクショが添付されている（順序4・本文で説明しない）", () => {
+    const messages = dmMessages();
+    const withImage = messages.filter((message) =>
+      (message.attachments ?? []).some((attachment) => attachment.kind === "image"),
+    );
+    expect(withImage.length).toBeGreaterThan(0);
+    const explained = messages.filter((message) =>
+      /古いアカウント|別のアカウント|IDが違/.test(message.body),
+    );
+    expect(explained).toEqual([]);
+  });
+
+  it("カイからの進捗連絡があり、カイは実在する（順序9）", () => {
+    const kai = getUser("kai");
+    expect(kai?.displayName).toBe(KAI_NAME);
+    const fromKai = serverMessages().filter(
+      (message) => message.authorId === "kai" && message.body.includes("進んだ"),
+    );
+    expect(fromKai.length).toBeGreaterThan(0);
+    // 「黒幕」などの答えは書かない
+    expect(serverMessages().some((message) => message.body.includes("黒幕"))).toBe(false);
+  });
+
+  it("最後のメッセージは「住所を特定しました」で、住所そのものは書かない（順序11）", () => {
+    const all = [...serverMessages(), ...dmMessages()].sort((a, b) =>
+      a.sentAt.localeCompare(b.sentAt),
+    );
+    const last = all[all.length - 1];
+    expect(last.body).toBe("住所を特定しました");
+    expect(all.some((message) => /丁目|番地|号室/.test(message.body))).toBe(false);
   });
 });

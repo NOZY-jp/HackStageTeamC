@@ -1,18 +1,29 @@
 import type { User } from "../types";
+import {
+  HAL_HANDLE,
+  HAL_NAME,
+  KAI_HANDLE,
+  KAI_NAME,
+  MAIMAI_HANDLE,
+  MAIMAI_NAME,
+  OLD_BLOG_ARCHIVE_URL,
+  OLD_DISPLAY_NAME,
+  OLD_HANDLE,
+} from "./names";
 
 /** モンハンコミュニティのメンバー。hal が自分（ログインユーザー）。 */
 export const users: User[] = [
   {
     id: "hal",
-    displayName: "Hal",
-    handle: "skill5hot1202",
+    displayName: HAL_NAME,
+    handle: HAL_HANDLE,
     avatarColor: "#5865f2",
     status: "online",
   },
   {
     id: "maimai",
-    displayName: "MaiMai",
-    handle: "maimai1110",
+    displayName: MAIMAI_NAME,
+    handle: MAIMAI_HANDLE,
     avatarColor: "#eb459e",
     status: "online",
   },
@@ -57,5 +68,21 @@ export const users: User[] = [
     handle: "shuukai_master",
     avatarColor: "#95a5a6",
     status: "online",
+  },
+  {
+    id: "kai",
+    displayName: KAI_NAME,
+    handle: KAI_HANDLE,
+    avatarColor: "#3ba55d",
+    status: "online",
+  },
+  {
+    // 昔のゲーム内ハンドルと完全一致するアカウント。ずっとオフラインのまま。
+    id: "shiro",
+    displayName: OLD_DISPLAY_NAME,
+    handle: OLD_HANDLE,
+    avatarColor: "#7289da",
+    status: "offline",
+    profileUrl: OLD_BLOG_ARCHIVE_URL,
   },
 ];

@@ -902,6 +902,11 @@
   gap: 8px;
 }
 
+.message-author:is(a) {
+  color: inherit;
+  text-decoration: underline dotted;
+}
+
 .message-author {
   color: var(--color-text);
   font-size: 16px;
