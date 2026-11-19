@@ -18,25 +18,45 @@ const copyOf = <T>(value: T): T => structuredClone(value);
 
 const byPostedAtDesc = (a: Post, b: Post): number => b.postedAt.localeCompare(a.postedAt);
 
-/** 全投稿（返信を含む）を新しい順で返す。 */
+/**
+ * 鍵アカウントの判定。プロフィール情報は公開のまま、投稿一覧だけを隠す。
+ * 公開面のフィルタとプロフィールの非公開表示で共有する唯一の判定場所にし、
+ * あとで閲覧可否（canView 相当）へ差し替えるときはこの関数だけを変える。
+ */
+export function isProtected(user: TwitterUser | undefined): boolean {
+  return user?.protected === true;
+}
+
+/**
+ * 鍵アカウントの投稿は公開面（タイムライン・返信・個別ページ）に出さない。
+ * listPostsByAuthor だけは件数表示のためフィルタしない。
+ */
+const isVisiblePost = (post: Post): boolean => {
+  const author = twitterUsers.find((candidate) => candidate.id === post.authorId);
+  return !isProtected(author);
+};
+
+/** 全投稿（返信を含む）を新しい順で返す。鍵アカウントの投稿は除く。 */
 export function listPosts(): Post[] {
-  return copyOf([...twitterPosts].sort(byPostedAtDesc));
+  return copyOf([...twitterPosts].filter(isVisiblePost).sort(byPostedAtDesc));
 }
 
 export function getPost(id: string): Post | undefined {
   const post = twitterPosts.find((candidate) => candidate.id === id);
-  return post ? copyOf(post) : undefined;
+  return post && isVisiblePost(post) ? copyOf(post) : undefined;
 }
 
-/** authorId は TwitterUser.id。返信も含め新しい順。 */
+/** authorId は TwitterUser.id。返信も含め新しい順。鍵アカウント自身の投稿も含む。 */
 export function listPostsByAuthor(authorId: string): Post[] {
   return copyOf(twitterPosts.filter((post) => post.authorId === authorId).sort(byPostedAtDesc));
 }
 
-/** 指定投稿への返信を古い順で返す。 */
+/** 指定投稿への返信を古い順で返す。鍵アカウントの返信は除く。 */
 export function listReplies(postId: string): Post[] {
   return copyOf(
-    twitterPosts.filter((post) => post.replyToId === postId).sort((a, b) => -byPostedAtDesc(a, b)),
+    twitterPosts
+      .filter((post) => post.replyToId === postId && isVisiblePost(post))
+      .sort((a, b) => -byPostedAtDesc(a, b)),
   );
 }
 
@@ -62,6 +82,55 @@ export function getProfile(userId: string): Profile | undefined {
 
 export function listTrends(): Trend[] {
   return copyOf(twitterTrends);
+}
+
+/** 検索語を小文字の語に分ける。先頭の # と @ は無視する。 */
+function toTerms(query: string): string[] {
+  return query
+    .toLowerCase()
+    .split(/\s+/)
+    .map((term) => term.replace(/^[#@]+/, ""))
+    .filter(Boolean);
+}
+
+/** haystack がすべての語を含むか（大文字小文字は無視）。 */
+function matchesAllTerms(haystack: string, terms: string[]): boolean {
+  if (terms.length === 0) {
+    return false;
+  }
+  const normalized = haystack.toLowerCase();
+  return terms.every((term) => normalized.includes(term));
+}
+
+/**
+ * 投稿を検索する（本文と投稿者の表示名・handleを対象・新しい順）。返信も対象に含める。
+ * 鍵アカウントの投稿は除く。
+ */
+export function searchPosts(query: string): Post[] {
+  const terms = toTerms(query);
+  return copyOf(
+    [...twitterPosts]
+      .filter(isVisiblePost)
+      .sort(byPostedAtDesc)
+      .filter((post) => {
+        const author = twitterUsers.find((user) => user.id === post.authorId);
+        const haystack = [post.body, author?.displayName ?? "", author?.handle ?? ""].join("\n");
+        return matchesAllTerms(haystack, terms);
+      }),
+  );
+}
+
+/**
+ * ユーザーを検索する。対象は displayName・handle・bio。
+ */
+export function searchUsers(query: string): TwitterUser[] {
+  const terms = toTerms(query);
+  return copyOf(
+    twitterUsers.filter((user) => {
+      const bio = twitterProfiles.find((profile) => profile.userId === user.id)?.bio ?? "";
+      return matchesAllTerms([user.displayName, user.handle, bio].join("\n"), terms);
+    }),
+  );
 }
 
 export {

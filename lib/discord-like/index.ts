@@ -3,7 +3,7 @@ import { guilds } from "./data/guilds";
 import { channelMessages, dmMessages } from "./data/messages";
 import { users } from "./data/users";
 import { voiceStates } from "./data/voice-states";
-import type { Channel, DMThread, Guild, Message, User, VoiceState } from "./types";
+import type { Channel, DMThread, Guild, Message, MessagePage, User, VoiceState } from "./types";
 
 /**
  * すべて同期・純関数。data/*.ts の保存オブジェクトは共有しているため、
@@ -50,9 +50,40 @@ export function getChannel(id: string): Channel | undefined {
   return undefined;
 }
 
-/** チャンネルIDで引く（DM スレッドIDとは別名前空間）。 */
-export function listMessages(channelId: string): Message[] {
-  return copyOf([...(channelMessages[channelId] ?? [])].sort(bySentAt));
+const DEFAULT_PAGE_SIZE = 50;
+
+/** カーソル方式で「before の1つ前から limit 件」を切り出す（同梱データを切るだけ）。 */
+function paginate(source: Message[], options: { before?: string; limit?: number }): MessagePage {
+  const limit = Math.max(1, options.limit ?? DEFAULT_PAGE_SIZE);
+  const sorted = [...source].sort(bySentAt);
+
+  let end = sorted.length;
+  if (options.before !== undefined) {
+    const index = sorted.findIndex((message) => message.id === options.before);
+    // 存在しないカーソルは「先頭まで遡り切った」ではなく、最新ページに戻す
+    end = index === -1 ? sorted.length : index;
+  }
+
+  const start = Math.max(0, end - limit);
+  const slice = sorted.slice(start, end);
+  const hasMore = start > 0;
+
+  return {
+    messages: copyOf(slice),
+    hasMore,
+    nextCursor: hasMore && slice.length > 0 ? slice[0].id : null,
+  };
+}
+
+/** チャンネルIDで引く（DM スレッドIDとは別名前空間）。既定は最新50件。 */
+export type { MessageAuthor, MessagePage, MessageView } from "./types";
+
+export function listMessages(options: {
+  channelId: string;
+  before?: string;
+  limit?: number;
+}): MessagePage {
+  return paginate(channelMessages[options.channelId] ?? [], options);
 }
 
 export function getUser(id: string): User | undefined {
@@ -69,9 +100,51 @@ export function getDMThread(id: string): DMThread | undefined {
   return thread ? copyOf(thread) : undefined;
 }
 
-/** DM スレッドIDで引く（チャンネルIDとは別名前空間）。 */
-export function listDMMessages(threadId: string): Message[] {
-  return copyOf([...(dmMessages[threadId] ?? [])].sort(bySentAt));
+/** DM スレッドIDで引く（チャンネルIDとは別名前空間）。既定は最新50件。 */
+export function listDMMessages(options: {
+  threadId: string;
+  before?: string;
+  limit?: number;
+}): MessagePage {
+  return paginate(dmMessages[options.threadId] ?? [], options);
+}
+
+/**
+ * 指定メッセージを含むところまで古いページを遡り、そこから最新までの連続した範囲を返す。
+ * #69 の検索ジャンプ（未読込のメッセージへ移動）で使う想定。
+ * found=false のときは先頭まで遡った結果（存在しないID）を返す。
+ */
+export function loadUntil(options: {
+  channelId?: string;
+  threadId?: string;
+  messageId: string;
+  chunkSize?: number;
+}): MessagePage & { found: boolean } {
+  const chunkSize = options.chunkSize ?? DEFAULT_PAGE_SIZE;
+  const source = options.threadId
+    ? (dmMessages[options.threadId] ?? [])
+    : (channelMessages[options.channelId ?? ""] ?? []);
+
+  const loaded: Message[] = [];
+  let page = paginate(source, { limit: chunkSize });
+
+  while (true) {
+    loaded.unshift(...page.messages);
+    if (page.messages.some((message) => message.id === options.messageId)) {
+      break;
+    }
+    if (!page.hasMore || page.nextCursor === null) {
+      break;
+    }
+    page = paginate(source, { before: page.nextCursor, limit: chunkSize });
+  }
+
+  return {
+    messages: copyOf(loaded),
+    hasMore: page.hasMore,
+    nextCursor: page.hasMore && loaded.length > 0 ? loaded[0].id : null,
+    found: loaded.some((message) => message.id === options.messageId),
+  };
 }
 
 /** URL の数値ID（urlId）から引く。見つからなければ undefined。 */

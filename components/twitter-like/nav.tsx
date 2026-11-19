@@ -5,7 +5,15 @@ import { usePathname } from "next/navigation";
 import type { ReactNode } from "react";
 import { getUserByHandle } from "@/lib/twitter-like";
 import { Avatar } from "./avatar";
-import { BrandIcon, ComposeIcon, HomeIcon, MailIcon, MoreIcon, UserIcon } from "./icons";
+import {
+  BrandIcon,
+  ComposeIcon,
+  HomeIcon,
+  MailIcon,
+  MoreIcon,
+  SearchIcon,
+  UserIcon,
+} from "./icons";
 
 type Item = { label: string; href: string; icon: ReactNode; match: (path: string) => boolean };
 
@@ -18,6 +26,12 @@ const items: Item[] = [
     href: "/twitter",
     icon: <HomeIcon />,
     match: (path) => path === "/twitter" || path.startsWith("/twitter/post/"),
+  },
+  {
+    label: "検索",
+    href: "/twitter/search",
+    icon: <SearchIcon />,
+    match: (path) => path.startsWith("/twitter/search"),
   },
   {
     label: "メッセージ",

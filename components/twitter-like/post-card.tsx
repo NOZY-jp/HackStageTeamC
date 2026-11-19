@@ -12,6 +12,7 @@ import {
   VerifiedBadge,
   ViewsIcon,
 } from "./icons";
+import { LinkifiedText } from "./linkify";
 import { isVerified } from "./lookup";
 
 /** カウントはすべて表示専用（押せない）。読み上げ用に件数と名称を持たせる。 */
@@ -99,7 +100,9 @@ export function PostCard({
             </Link>
           </p>
         ) : null}
-        <p className="tw-post-body">{post.body}</p>
+        <p className="tw-post-body">
+          <LinkifiedText text={post.body} />
+        </p>
         <PostStats post={post} />
       </div>
     </article>
