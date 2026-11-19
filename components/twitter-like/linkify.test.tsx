@@ -30,4 +30,42 @@ describe("LinkifiedText", () => {
     expect(container.querySelector("a")).toBeNull();
     expect(container).toHaveTextContent("普通の投稿文です。");
   });
+
+  it("URL 直後の日本語はリンクに含めない", () => {
+    const { container } = render(<LinkifiedText text="https://example.com/aを見て" />);
+    expect(screen.getByRole("link")).toHaveAttribute("href", "https://example.com/a");
+    expect(container).toHaveTextContent("を見て");
+  });
+
+  it("半角 (…) で囲まれた URL は末尾の ) をリンクに含めない", () => {
+    const { container } = render(<LinkifiedText text="(https://example.com/a)" />);
+    expect(screen.getByRole("link")).toHaveAttribute("href", "https://example.com/a");
+    expect(container).toHaveTextContent("(https://example.com/a)");
+  });
+
+  it("URL 内の ( ) が釣り合っている末尾 ) はリンクに残す", () => {
+    render(<LinkifiedText text="https://example.com/wiki/Foo_(bar) を参照" />);
+    expect(screen.getByRole("link")).toHaveAttribute("href", "https://example.com/wiki/Foo_(bar)");
+  });
+
+  it("「…」で囲まれた URL は括弧をリンクに含めない", () => {
+    const { container } = render(<LinkifiedText text="「https://example.com/a」" />);
+    expect(screen.getByRole("link")).toHaveAttribute("href", "https://example.com/a");
+    expect(container).toHaveTextContent("「https://example.com/a」");
+  });
+
+  it("存在しない handle のメンションはリンクにしない", () => {
+    const { container } = render(<LinkifiedText text="@unknown_user この人誰だろう" />);
+    expect(container.querySelector("a")).toBeNull();
+    expect(container).toHaveTextContent("@unknown_user この人誰だろう");
+  });
+
+  it("存在する handle でも末尾ハイフンはリンクに含めない", () => {
+    const { container } = render(<LinkifiedText text="@mai-さん に確認" />);
+    expect(screen.getByRole("link", { name: "@mai" })).toHaveAttribute(
+      "href",
+      "/twitter/profile/mai",
+    );
+    expect(container).toHaveTextContent("-さん に確認");
+  });
 });
