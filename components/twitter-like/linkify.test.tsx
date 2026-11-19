@@ -76,7 +76,7 @@ describe("LinkifiedText", () => {
   });
 
   it("URL内部の対応しない ) は URL 文字として維持される", () => {
-    const { container } = render(<LinkifiedText text="https://example.com/wiki/)(bar)" />);
+    render(<LinkifiedText text="https://example.com/wiki/)(bar)" />);
     expect(screen.getByRole("link")).toHaveAttribute("href", "https://example.com/wiki/)(bar)");
   });
 
