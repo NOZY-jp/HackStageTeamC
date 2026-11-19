@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="800" height="600" viewBox="0 0 800 600" role="img" aria-label="2019年のゲーム画面のスクリーンショット">
+  <rect width="800" height="600" fill="#1b2430"/>
+  <rect x="24" y="24" width="752" height="44" rx="6" fill="#243244"/>
+  <text x="44" y="54" font-family="sans-serif" font-size="20" fill="#cfe0f5">装備選択</text>
+  <rect x="24" y="88" width="260" height="488" rx="8" fill="#22303f"/>
+  <text x="44" y="128" font-family="sans-serif" font-size="16" fill="#8fb2d9">ハンター名</text>
+  <text x="44" y="162" font-family="monospace" font-size="26" fill="#ffffff">hunter_denden3243</text>
+  <text x="44" y="212" font-family="sans-serif" font-size="16" fill="#8fb2d9">HR</text>
+  <text x="44" y="246" font-family="monospace" font-size="26" fill="#ffffff">46</text>
+  <rect x="308" y="88" width="468" height="488" rx="8" fill="#1f2b38"/>
+  <rect x="336" y="120" width="180" height="180" rx="8" fill="#2c3d50"/>
+  <rect x="540" y="120" width="180" height="180" rx="8" fill="#2c3d50"/>
+  <rect x="336" y="330" width="180" height="180" rx="8" fill="#2c3d50"/>
+  <rect x="540" y="330" width="180" height="180" rx="8" fill="#2c3d50"/>
+  <text x="336" y="548" font-family="sans-serif" font-size="15" fill="#7f97b3">2019/06/13 22:41</text>
+</svg>

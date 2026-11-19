@@ -10,7 +10,7 @@ import {
   useState,
 } from "react";
 import { PaneToggles } from "@/components/discord-like/pane-toggles";
-import type { Message, MessageAuthor } from "@/lib/discord-like/types";
+import type { MemberView, Message, MessageAuthor } from "@/lib/discord-like/types";
 import { EmptyState } from "./empty-state";
 import { MessageRow } from "./message-row";
 
@@ -62,6 +62,7 @@ export function MessageList({
   scrollRef,
   contentRef,
   onJumpToLatest,
+  members = [],
 }: {
   messages: Message[];
   /** 書き手情報（サーバーから渡される）。 */
@@ -88,11 +89,20 @@ export function MessageList({
   contentRef?: RefObject<HTMLDivElement | null>;
   /** 「最新へ」を押したとき（位置補正の基準を捨てるために親へ知らせる）。 */
   onJumpToLatest?: () => void;
+  /** 右パネルに出すメンバー一覧。 */
+  members?: MemberView[];
 }) {
   const fallbackScrollRef = useRef<HTMLDivElement>(null);
   const scrollElement = scrollRef ?? fallbackScrollRef;
   const sentinelRef = useRef<HTMLDivElement>(null);
   const [awayFromBottom, setAwayFromBottom] = useState(false);
+  const [showMembers, setShowMembers] = useState(false);
+  const [openProfileId, setOpenProfileId] = useState<string | null>(null);
+
+  // 名簿が無い画面（DM など）ではトグルもパネルも出さない
+  const hasMembers = members.length > 0;
+  const onlineMembers = members.filter((member) => member.status !== "offline");
+  const offlineMembers = members.filter((member) => member.status === "offline");
 
   // 初回表示・チャンネル切替時は最下部（最新）へ
   // biome-ignore lint/correctness/useExhaustiveDependencies: resetKey はチャンネル切替の合図。ref は依存にしない
@@ -178,125 +188,217 @@ export function MessageList({
   }
 
   return (
-    <main id="app-main" className="app-main" aria-label={title}>
-      <header className="pane-header message-header">
-        <PaneToggles />
-        {headerAvatar ? (
-          <span
-            aria-hidden="true"
-            className="message-header-avatar"
-            style={{ backgroundColor: headerAvatar.avatarColor }}
-          >
-            {headerAvatar.displayName.slice(0, 1)}
-          </span>
-        ) : null}
-        <div className="message-header-text">
-          <h1 className="message-header-title">
-            {showHash ? (
-              <span aria-hidden="true" className="message-header-hash">
-                #
-              </span>
-            ) : null}
-            <span className="truncate">{title}</span>
-          </h1>
-          {topic ? <p className="message-header-topic">{topic}</p> : null}
-        </div>
-        {/* 検索・メンバーは見た目のみ（操作は #8 の非対象） */}
-        <div className="message-header-actions">
-          <span role="img" aria-label="検索" className="message-header-icon">
-            <svg
+    <main
+      id="app-main"
+      className={members.length > 0 ? "app-main app-main--channel" : "app-main"}
+      aria-label={title}
+    >
+      <div className="app-main-body">
+        <header className="pane-header message-header">
+          <PaneToggles />
+          {headerAvatar ? (
+            <span
               aria-hidden="true"
-              viewBox="0 0 24 24"
-              width="18"
-              height="18"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2"
-              strokeLinecap="round"
+              className="message-header-avatar"
+              style={{ backgroundColor: headerAvatar.avatarColor }}
             >
-              <circle cx="11" cy="11" r="7" />
-              <path d="m20 20-3.5-3.5" />
-            </svg>
-          </span>
-          <span role="img" aria-label="メンバー" className="message-header-icon">
-            <svg
-              aria-hidden="true"
-              viewBox="0 0 24 24"
-              width="18"
-              height="18"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            >
-              <circle cx="9" cy="8" r="3.2" />
-              <path d="M3.5 20a5.5 5.5 0 0 1 11 0" />
-              <path d="M16 5.5a3 3 0 0 1 0 5.6M17.5 20a5 5 0 0 0-2-4" />
-            </svg>
-          </span>
-        </div>
-      </header>
-
-      <div ref={scrollElement} className="pane-scroll message-scroll" onScroll={handleScroll}>
-        {messages.length === 0 ? (
-          <EmptyState kind="message" title={emptyText} description="下の入力欄から送信できます。" />
-        ) : (
-          <div className="message-scroll-content" ref={contentRef}>
-            <div className="message-history-top" ref={sentinelRef} data-testid="history-sentinel" />
-            {loadingOlder ? (
-              <div className="message-skeleton" aria-hidden="true">
-                {SKELETON_ROWS.map((row) => (
-                  <div className="message-skeleton-row" key={`skeleton-${row}`}>
-                    <span className="skeleton-block message-skeleton-avatar" />
-                    <span className="message-skeleton-lines">
-                      <span
-                        className="skeleton-block message-skeleton-line"
-                        style={{ width: "96px" }}
-                      />
-                      <span
-                        className="skeleton-block message-skeleton-line"
-                        style={{ width: "320px" }}
-                      />
-                    </span>
-                  </div>
-                ))}
-              </div>
-            ) : null}
-            {!hasMore ? <p className="message-history-end">ここが最初のメッセージです</p> : null}
-            {loadingOlder ? (
-              <p className="visually-hidden" role="status">
-                古いメッセージを読み込み中
-              </p>
-            ) : null}
-
-            <div className="message-list-inner">
-              {rows.map((row) =>
-                row.type === "date" ? (
-                  <div key={row.key} className="message-date">
-                    {row.label}
-                  </div>
-                ) : (
-                  <MessageRow
-                    key={row.key}
-                    message={row.message}
-                    authors={authors}
-                    grouped={row.grouped}
-                    replyTarget={row.replyTarget}
-                    time={formatTime(row.message.sentAt)}
-                  />
-                ),
-              )}
-            </div>
+              {headerAvatar.displayName.slice(0, 1)}
+            </span>
+          ) : null}
+          <div className="message-header-text">
+            <h1 className="message-header-title">
+              {showHash ? (
+                <span aria-hidden="true" className="message-header-hash">
+                  #
+                </span>
+              ) : null}
+              <span className="truncate">{title}</span>
+            </h1>
+            {topic ? <p className="message-header-topic">{topic}</p> : null}
           </div>
-        )}
+          {/* 検索・メンバーは見た目のみ（操作は #8 の非対象） */}
+          <div className="message-header-actions">
+            <span role="img" aria-label="検索" className="message-header-icon">
+              <svg
+                aria-hidden="true"
+                viewBox="0 0 24 24"
+                width="18"
+                height="18"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+              >
+                <circle cx="11" cy="11" r="7" />
+                <path d="m20 20-3.5-3.5" />
+              </svg>
+            </span>
+            {hasMembers ? (
+              <button
+                type="button"
+                aria-label="メンバー"
+                aria-expanded={showMembers}
+                aria-controls="members-panel"
+                className="message-header-icon message-header-button"
+                onClick={() => setShowMembers((previous) => !previous)}
+              >
+                <svg
+                  aria-hidden="true"
+                  viewBox="0 0 24 24"
+                  width="18"
+                  height="18"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                >
+                  <circle cx="9" cy="8" r="3.2" />
+                  <path d="M3.5 20a5.5 5.5 0 0 1 11 0" />
+                  <path d="M16 5.5a3 3 0 0 1 0 5.6M17.5 20a5 5 0 0 0-2-4" />
+                </svg>
+              </button>
+            ) : null}
+          </div>
+        </header>
+
+        <div ref={scrollElement} className="pane-scroll message-scroll" onScroll={handleScroll}>
+          {messages.length === 0 ? (
+            <EmptyState
+              kind="message"
+              title={emptyText}
+              description="下の入力欄から送信できます。"
+            />
+          ) : (
+            <div className="message-scroll-content" ref={contentRef}>
+              <div
+                className="message-history-top"
+                ref={sentinelRef}
+                data-testid="history-sentinel"
+              />
+              {loadingOlder ? (
+                <div className="message-skeleton" aria-hidden="true">
+                  {SKELETON_ROWS.map((row) => (
+                    <div className="message-skeleton-row" key={`skeleton-${row}`}>
+                      <span className="skeleton-block message-skeleton-avatar" />
+                      <span className="message-skeleton-lines">
+                        <span
+                          className="skeleton-block message-skeleton-line"
+                          style={{ width: "96px" }}
+                        />
+                        <span
+                          className="skeleton-block message-skeleton-line"
+                          style={{ width: "320px" }}
+                        />
+                      </span>
+                    </div>
+                  ))}
+                </div>
+              ) : null}
+              {!hasMore ? <p className="message-history-end">ここが最初のメッセージです</p> : null}
+              {loadingOlder ? (
+                <p className="visually-hidden" role="status">
+                  古いメッセージを読み込み中
+                </p>
+              ) : null}
+
+              <div className="message-list-inner">
+                {rows.map((row) =>
+                  row.type === "date" ? (
+                    <div key={row.key} className="message-date">
+                      {row.label}
+                    </div>
+                  ) : (
+                    <MessageRow
+                      key={row.key}
+                      message={row.message}
+                      authors={authors}
+                      grouped={row.grouped}
+                      replyTarget={row.replyTarget}
+                      time={formatTime(row.message.sentAt)}
+                    />
+                  ),
+                )}
+              </div>
+            </div>
+          )}
+        </div>
+        {awayFromBottom ? (
+          <button type="button" className="message-jump-latest" onClick={scrollToLatest}>
+            最新へ
+          </button>
+        ) : null}
+        {composer ? <div className="message-composer-area">{composer}</div> : null}
       </div>
-      {awayFromBottom ? (
-        <button type="button" className="message-jump-latest" onClick={scrollToLatest}>
-          最新へ
-        </button>
+      {hasMembers && showMembers ? (
+        <aside id="members-panel" className="members-panel" aria-label="メンバー一覧">
+          <div className="members-panel-head">
+            <h2 className="members-panel-title">メンバー</h2>
+            <button
+              type="button"
+              className="members-panel-close"
+              aria-label="メンバー一覧を閉じる"
+              onClick={() => setShowMembers(false)}
+            >
+              ×
+            </button>
+          </div>
+          <div className="members-panel-scroll">
+            {[
+              { label: `オンライン — ${onlineMembers.length}`, list: onlineMembers },
+              { label: `オフライン — ${offlineMembers.length}`, list: offlineMembers },
+            ].map((group) => (
+              <section key={group.label} className="members-group" aria-label={group.label}>
+                <h3 className="members-group-title">{group.label}</h3>
+                <ul className="members-list">
+                  {group.list.map((member) => (
+                    <li key={member.id} className="members-item">
+                      <button
+                        type="button"
+                        className="members-row"
+                        aria-expanded={openProfileId === member.id}
+                        onClick={() =>
+                          setOpenProfileId((previous) =>
+                            previous === member.id ? null : member.id,
+                          )
+                        }
+                      >
+                        <span
+                          aria-hidden="true"
+                          className="members-avatar"
+                          style={{ backgroundColor: member.avatarColor }}
+                        >
+                          {member.displayName.slice(0, 1)}
+                        </span>
+                        <span className="members-names">
+                          <span className="members-name">{member.displayName}</span>
+                          <span className="members-handle">{member.handle}</span>
+                        </span>
+                        <span className="members-status" data-status={member.status ?? "offline"} />
+                      </button>
+                      {openProfileId === member.id ? (
+                        <div className="members-profile">
+                          <p className="members-profile-handle">{member.handle}</p>
+                          {member.profileUrl ? (
+                            <a
+                              className="members-profile-link"
+                              href={member.profileUrl}
+                              target="_blank"
+                              rel="noreferrer noopener"
+                            >
+                              でんでんの狩猟日記 ぜんぶ
+                            </a>
+                          ) : null}
+                        </div>
+                      ) : null}
+                    </li>
+                  ))}
+                </ul>
+              </section>
+            ))}
+          </div>
+        </aside>
       ) : null}
-      {composer ? <div className="message-composer-area">{composer}</div> : null}
     </main>
   );
 }

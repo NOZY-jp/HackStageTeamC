@@ -30,7 +30,7 @@ vi.mock("@/app/(discord-like)/_actions/message-page", async () => {
 
 import { MessagePane } from "./message-pane";
 
-const CHANNEL_ID = "s1-general";
+const CHANNEL_ID = "mhc-chat";
 const PAGE_SIZE = 50;
 
 type ObserverCallback = (entries: Partial<IntersectionObserverEntry>[]) => void;
@@ -192,15 +192,15 @@ describe("MessagePane の段階的読み込み", () => {
     await triggerIntersect();
 
     // 追加読み込みの待ち（120ms）が終わる前に B へ切り替える
-    const otherChannel = toMessageView(listMessages({ channelId: "s1-random", limit: PAGE_SIZE }));
+    const otherChannel = toMessageView(listMessages({ channelId: "mhc-lfg", limit: PAGE_SIZE }));
     first.rerender(
       <AppShell rail={<span />}>
         <LocalMessagesProvider>
           <MessagePane
-            channelKey="s1-random"
+            channelKey="mhc-lfg"
             mode="channel"
             initialView={otherChannel}
-            title="雑談"
+            title="マルチ募集"
             topic="テスト"
           />
         </LocalMessagesProvider>
@@ -255,15 +255,15 @@ describe("MessagePane の段階的読み込み", () => {
     }
     expect(visibleMessages(first.container)).toBe(total);
 
-    const otherView = toMessageView(listMessages({ channelId: "s1-random", limit: PAGE_SIZE }));
+    const otherView = toMessageView(listMessages({ channelId: "mhc-lfg", limit: PAGE_SIZE }));
     first.rerender(
       <AppShell rail={<span />}>
         <LocalMessagesProvider>
           <MessagePane
-            channelKey="s1-random"
+            channelKey="mhc-lfg"
             mode="channel"
             initialView={otherView}
-            title="雑談"
+            title="マルチ募集"
             topic="テスト"
           />
         </LocalMessagesProvider>
@@ -293,15 +293,15 @@ describe("MessagePane の段階的読み込み", () => {
     const first = renderPane();
     await triggerIntersect();
 
-    const otherView = toMessageView(listMessages({ channelId: "s1-random", limit: PAGE_SIZE }));
+    const otherView = toMessageView(listMessages({ channelId: "mhc-lfg", limit: PAGE_SIZE }));
     first.rerender(
       <AppShell rail={<span />}>
         <LocalMessagesProvider>
           <MessagePane
-            channelKey="s1-random"
+            channelKey="mhc-lfg"
             mode="channel"
             initialView={otherView}
-            title="雑談"
+            title="マルチ募集"
             topic="テスト"
           />
         </LocalMessagesProvider>
@@ -344,15 +344,15 @@ describe("MessagePane の段階的読み込み", () => {
     await triggerIntersect();
     await waitFor(() => expect(visibleMessages(first.container)).toBe(PAGE_SIZE * 2));
 
-    const otherChannel = toMessageView(listMessages({ channelId: "s1-random", limit: PAGE_SIZE }));
+    const otherChannel = toMessageView(listMessages({ channelId: "mhc-lfg", limit: PAGE_SIZE }));
     first.rerender(
       <AppShell rail={<span />}>
         <LocalMessagesProvider>
           <MessagePane
-            channelKey="s1-random"
+            channelKey="mhc-lfg"
             mode="channel"
             initialView={otherChannel}
-            title="雑談"
+            title="マルチ募集"
             topic="テスト"
           />
         </LocalMessagesProvider>

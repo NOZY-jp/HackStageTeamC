@@ -2,9 +2,9 @@ import { describe, expect, it } from "vitest";
 import { getChannel, getDMThread, getGuild } from "./index";
 import { resolveChannelRoute } from "./route-resolution";
 
-const guildUrlId = getGuild("s1")?.urlId ?? "";
-const channelUrlId = getChannel("s1-general")?.urlId ?? "";
-const threadUrlId = getDMThread("t1")?.urlId ?? "";
+const guildUrlId = getGuild("mhc")?.urlId ?? "";
+const channelUrlId = getChannel("mhc-chat")?.urlId ?? "";
+const threadUrlId = getDMThread("dm-maimai")?.urlId ?? "";
 const UNKNOWN = "999999999999999999";
 
 describe("resolveChannelRoute", () => {
@@ -15,7 +15,7 @@ describe("resolveChannelRoute", () => {
   });
 
   it("DM の urlId はスレッドに解決する", () => {
-    expect(resolveChannelRoute("@me", threadUrlId)).toEqual({ kind: "dm", threadId: "t1" });
+    expect(resolveChannelRoute("@me", threadUrlId)).toEqual({ kind: "dm", threadId: "dm-maimai" });
   });
 
   it("存在しないサーバーチャンネルは channel-missing（共通の未検出）", () => {
@@ -23,20 +23,19 @@ describe("resolveChannelRoute", () => {
     expect(resolveChannelRoute(UNKNOWN, channelUrlId)).toEqual({ kind: "channel-missing" });
   });
 
-  it("別サーバーのチャンネルは channel-missing", () => {
-    const otherGuild = getGuild("s2");
-    const otherChannel = getChannel("s2-general");
-    expect(resolveChannelRoute(getGuild("s1")?.urlId ?? "", otherChannel?.urlId ?? "")).toEqual({
-      kind: "channel-missing",
-    });
-    expect(otherGuild && otherChannel).toBeTruthy();
+  it("サーバーIDが一致しない urlId の組み合わせは channel-missing", () => {
+    const channel = getChannel("mhc-chat");
+    expect(channel).toBeTruthy();
+    // 実在するチャンネルでも、サーバーIDが別なら解決しない
+    expect(resolveChannelRoute(UNKNOWN, channel?.urlId ?? "")).toEqual({ kind: "channel-missing" });
+    expect(resolveChannelRoute(guildUrlId, UNKNOWN)).toEqual({ kind: "channel-missing" });
   });
 
   it("サーバーチャンネルは内部IDに解決する", () => {
     expect(resolveChannelRoute(guildUrlId, channelUrlId)).toEqual({
       kind: "channel",
-      guildId: "s1",
-      channelId: "s1-general",
+      guildId: "mhc",
+      channelId: "mhc-chat",
     });
   });
 });
