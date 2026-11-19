@@ -223,6 +223,49 @@ export function MessageSearch() {
     buttons[next]?.focus();
   }, []);
 
+  /**
+   * フォーカストラップ。ダイアログ内の最後から Tab、先頭から Shift+Tab で循環させ、
+   * 背後のメンバー一覧やサイドバーへフォーカスが漏れないようにする。
+   */
+  const handleDialogKeyDown = useCallback((event: ReactKeyboardEvent<HTMLDivElement>) => {
+    if (event.key !== "Tab") {
+      return;
+    }
+    const dialog = event.currentTarget;
+    const candidates = Array.from(
+      dialog.querySelectorAll<HTMLElement>(
+        'button:not([disabled]), input:not([disabled]), select:not([disabled]), textarea:not([disabled]), a[href], [tabindex]:not([tabindex="-1"])',
+      ),
+    );
+    // 同じ name のラジオは、チェックされている1つだけが Tab の対象（ブラウザと同じ）
+    const radioNames = new Set(
+      candidates
+        .filter((element): element is HTMLInputElement => element instanceof HTMLInputElement)
+        .filter((element) => element.type === "radio" && element.checked)
+        .map((element) => element.name),
+    );
+    const focusable = candidates.filter((element) => {
+      if (!(element instanceof HTMLInputElement) || element.type !== "radio") {
+        return true;
+      }
+      return element.checked || !radioNames.has(element.name);
+    });
+    if (focusable.length === 0) {
+      return;
+    }
+
+    // 端で止めず、常に自分で次の要素へ移す（ブラウザ任せにすると背景へ漏れる）
+    const index = focusable.indexOf(document.activeElement as HTMLElement);
+    const next =
+      index === -1
+        ? event.shiftKey
+          ? focusable.length - 1
+          : 0
+        : (index + (event.shiftKey ? -1 : 1) + focusable.length) % focusable.length;
+    event.preventDefault();
+    focusable[next]?.focus();
+  }, []);
+
   const showResults = state.kind === "results";
   const response = state.kind === "results" ? state.response : null;
 
@@ -266,6 +309,7 @@ export function MessageSearch() {
             role="dialog"
             aria-modal="true"
             aria-labelledby="search-dialog-title"
+            onKeyDown={handleDialogKeyDown}
           >
             <div className="search-dialog-head">
               <h2 id="search-dialog-title" className="search-dialog-title">

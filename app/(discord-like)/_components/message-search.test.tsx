@@ -53,6 +53,44 @@ describe("MessageSearch", () => {
     expect(await screen.findByRole("dialog", { name: "メッセージ検索" })).toBeInTheDocument();
   });
 
+  it("Cmd+F（metaKey）でも開く", async () => {
+    render(<MessageSearch />);
+    fireEvent.keyDown(window, { key: "f", metaKey: true });
+    expect(await screen.findByRole("dialog", { name: "メッセージ検索" })).toBeInTheDocument();
+  });
+
+  it("Tab / Shift+Tab がダイアログ内を循環する（背後へ漏れない）", async () => {
+    render(<MessageSearch />);
+    const dialog = openWithButton();
+    const input = screen.getByLabelText("メッセージを検索");
+    await waitFor(() => expect(document.activeElement).toBe(input));
+
+    // ラジオはチェックされている1つだけが Tab の対象（ダイアログ内の最後になる）
+    const last = dialog.querySelector<HTMLElement>('input[name="search-order"]:checked');
+    expect(last).toBeInstanceOf(HTMLElement);
+
+    // 最後の要素で Tab → 先頭（入力）へ戻る
+    last?.focus();
+    fireEvent.keyDown(last as HTMLElement, { key: "Tab" });
+    expect(document.activeElement).toBe(input);
+
+    // 先頭（入力）で Shift+Tab → 最後の要素へ進む
+    input.focus();
+    fireEvent.keyDown(input, { key: "Tab", shiftKey: true });
+    expect(document.activeElement).toBe(last);
+  });
+
+  it("ダイアログの外にフォーカスがある状態で Tab を押すと中へ戻す", async () => {
+    render(<MessageSearch />);
+    openWithButton();
+    const input = screen.getByLabelText("メッセージを検索");
+    const outside = document.createElement("button");
+    document.body.appendChild(outside);
+    outside.focus();
+    fireEvent.keyDown(input, { key: "Tab" });
+    expect(document.activeElement).toBe(input);
+  });
+
   it("未入力では案内を出し、検索しない", () => {
     render(<MessageSearch />);
     openWithButton();
