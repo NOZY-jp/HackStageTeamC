@@ -1872,9 +1872,18 @@ a.tw-account:focus-visible {
 }
 
 .tw-page-title {
+  display: flex;
+  align-items: center;
+  gap: 4px;
   font-size: 20px;
   font-weight: 800;
   line-height: 1.2;
+}
+
+.tw-page-title .tw-icon {
+  width: 18px;
+  height: 18px;
+  color: var(--tw-muted);
 }
 
 .tw-page-subtitle {

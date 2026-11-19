@@ -1,10 +1,11 @@
 import Link from "next/link";
 import type { ReactNode } from "react";
+import { isProtected } from "@/lib/twitter-like";
 import type { Profile, TwitterUser } from "@/lib/twitter-like/types";
 import { Avatar } from "./avatar";
 import { formatCount, formatJoinedAt } from "./format";
 import { CalendarIcon, LockIcon, VerifiedBadge } from "./icons";
-import { isProtected, isVerified } from "./lookup";
+import { isVerified } from "./lookup";
 import { PageHeader } from "./page-header";
 
 export type ProfileTab = "posts" | "replies" | "media" | "likes";

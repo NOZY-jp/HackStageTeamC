@@ -11,11 +11,6 @@ export function isVerified(user: TwitterUser): boolean {
   return user.handle === "game-info";
 }
 
-/** 鍵アカウント。プロフィール情報は公開のまま、投稿一覧だけを隠す。 */
-export function isProtected(user: TwitterUser): boolean {
-  return user.protected === true;
-}
-
 /** 返信先投稿の作者。返信でなければ undefined。 */
 export function replyTargetAuthor(
   post: Post,

@@ -315,7 +315,7 @@ export const twitterPosts: Post[] = [
     authorId: "tw-nagi",
     postedAt: "2026-11-17T23:10:00+09:00",
     body: "週末は人が多いところに出る予定。混むのは苦手だけど。",
-    replyCount: 1,
+    replyCount: 0,
     repostCount: 0,
     likeCount: 5,
   },
