@@ -43,7 +43,7 @@ export type Entry = {
   category: string;
   /** 日本時間の ISO 8601 */
   publishedAt: string;
-  /** コメント（新しい順で持つ。表示件数はこの配列の長さと一致させる） */
+  /** コメント（古い順で持つ。表示件数はこの配列の長さと一致させる） */
   comments: Comment[];
   /**
    * 公開範囲。public はトップ・サイドバーに出る。unlisted（限定公開）は URL かマイリストからだけ開ける。
