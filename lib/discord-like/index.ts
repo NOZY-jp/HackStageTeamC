@@ -3,7 +3,7 @@ import { guilds } from "./data/guilds";
 import { channelMessages, dmMessages } from "./data/messages";
 import { users } from "./data/users";
 import { voiceStates } from "./data/voice-states";
-import type { Channel, DMThread, Guild, Message, User, VoiceState } from "./types";
+import type { Channel, DMThread, Guild, Message, MessagePage, User, VoiceState } from "./types";
 
 /**
  * すべて同期・純関数。data/*.ts の保存オブジェクトは共有しているため、
@@ -50,18 +50,6 @@ export function getChannel(id: string): Channel | undefined {
   return undefined;
 }
 
-/**
- * ページ単位のメッセージ。将来 API に差し替えられるよう、カーソルと残件の有無も返す。
- * messages は古い→新しい順（画面の並びと同じ）。
- */
-export type MessagePage = {
-  messages: Message[];
-  /** このページより古いメッセージが残っているか */
-  hasMore: boolean;
-  /** さらに古いページを取るときに渡すカーソル（このページで最も古いID）。無ければ null */
-  nextCursor: string | null;
-};
-
 const DEFAULT_PAGE_SIZE = 50;
 
 /** カーソル方式で「before の1つ前から limit 件」を切り出す（同梱データを切るだけ）。 */
@@ -72,7 +60,8 @@ function paginate(source: Message[], options: { before?: string; limit?: number 
   let end = sorted.length;
   if (options.before !== undefined) {
     const index = sorted.findIndex((message) => message.id === options.before);
-    end = index === -1 ? 0 : index;
+    // 存在しないカーソルは「先頭まで遡り切った」ではなく、最新ページに戻す
+    end = index === -1 ? sorted.length : index;
   }
 
   const start = Math.max(0, end - limit);
@@ -87,6 +76,8 @@ function paginate(source: Message[], options: { before?: string; limit?: number 
 }
 
 /** チャンネルIDで引く（DM スレッドIDとは別名前空間）。既定は最新50件。 */
+export type { MessageAuthor, MessagePage, MessageView } from "./types";
+
 export function listMessages(options: {
   channelId: string;
   before?: string;

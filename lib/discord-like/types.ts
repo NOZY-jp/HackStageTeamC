@@ -92,3 +92,27 @@ export type VoiceState = {
   speaking?: boolean;
   joinedAt: string;
 };
+
+/** カーソル方式の1ページ分（メッセージ本文を含む。サーバーでのみ生成する）。 */
+export type MessagePage = {
+  messages: Message[];
+  /** このページより古いメッセージが残っているか */
+  hasMore: boolean;
+  /** さらに古いページを取るときに渡すカーソル（このページで最も古いID）。無ければ null */
+  nextCursor: string | null;
+};
+
+/** クライアントに渡す最小限の書き手情報（本文をクライアントへ送らないための型）。 */
+export type MessageAuthor = {
+  id: string;
+  displayName: string;
+  avatarColor: string;
+};
+
+/** 一覧表示に必要なページ＋書き手。サーバー（Server Action / ページ）から渡す。 */
+export type MessageView = {
+  messages: Message[];
+  hasMore: boolean;
+  nextCursor: string | null;
+  authors: Record<string, MessageAuthor>;
+};

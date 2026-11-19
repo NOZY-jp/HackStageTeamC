@@ -64,12 +64,15 @@ describe("メッセージのカーソル方式（段階的読み込み）", () =
     expect(head.nextCursor).toBeNull();
   });
 
-  it("存在しない before は空ページを返す", () => {
+  it("存在しない before は最新ページに戻す（空ページで終端扱いにしない）", () => {
     const channel = firstTextChannel();
     const page = listMessages({ channelId: channel.id, before: "missing-message", limit: 10 });
-    expect(page.messages).toEqual([]);
-    expect(page.hasMore).toBe(false);
-    expect(page.nextCursor).toBeNull();
+    const latest = listMessages({ channelId: channel.id, limit: 10 });
+    expect(page.messages.map((message) => message.id)).toEqual(
+      latest.messages.map((message) => message.id),
+    );
+    expect(page.hasMore).toBe(true);
+    expect(page.nextCursor).toBe(page.messages[0].id);
   });
 
   it("存在しないチャンネルでも空ページを返す（例外にしない）", () => {
@@ -93,6 +96,15 @@ describe("メッセージのカーソル方式（段階的読み込み）", () =
     expect(older.messages).toHaveLength(5);
     const latestIds = new Set(latest.messages.map((message) => message.id));
     expect(older.messages.every((message) => !latestIds.has(message.id))).toBe(true);
+  });
+
+  it("DM でも不正なカーソルは最新ページに戻す", () => {
+    const page = listDMMessages({ threadId: "t1", before: "missing-message", limit: 5 });
+    const latest = listDMMessages({ threadId: "t1", limit: 5 });
+    expect(page.messages.map((message) => message.id)).toEqual(
+      latest.messages.map((message) => message.id),
+    );
+    expect(page.hasMore).toBe(latest.hasMore);
   });
 
   it("loadUntil は指定メッセージを含むところまで遡って返す", () => {

@@ -1,8 +1,8 @@
 "use client";
 
 import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
-import { listDMMessages, listMessages, type MessagePage } from "@/lib/discord-like";
-import type { Message } from "@/lib/discord-like/types";
+import { fetchMessagePage } from "@/app/(discord-like)/_actions/message-page";
+import type { Message, MessageAuthor, MessageView } from "@/lib/discord-like/types";
 import { useLocalMessages } from "./local-messages-context";
 import { MessageComposer } from "./message-composer";
 import { MessageList } from "./message-list";
@@ -10,33 +10,32 @@ import { isAtBottom } from "./paging-scroll";
 
 /** 同梱データなので実時間はほぼ0。スケルトンの状態遷移を見せるためだけの待ち。 */
 const PAGING_DELAY_MS = 120;
+/** 追加読み込み後に位置補正を続ける時間（画像などの遅い伸びに追随する） */
+const COMPENSATE_MS = 2500;
 
 type Mode = "channel" | "dm";
 
-const fetchPage = (mode: Mode, channelKey: string, before: string): MessagePage =>
-  mode === "dm"
-    ? listDMMessages({ threadId: channelKey, before })
-    : listMessages({ channelId: channelKey, before });
-
 /**
  * ページング状態は「どのチャンネルのものか」を必ず持ち、キーが変わったら作り直す。
- * 別キーの結果を混ぜないための世代（requestId）も一緒に持つ。
+ * 戻ってきたときのために、キーごとに直近の状態を覚えておく（再読込しない）。
  */
 type Paging = {
   key: string;
   requestId: number;
   older: Message[];
+  authors: Record<string, MessageAuthor>;
   cursor: string | null;
   hasMore: boolean;
   loading: boolean;
 };
 
-const initialPaging = (key: string, page: MessagePage, requestId = 0): Paging => ({
+const initialPaging = (key: string, view: MessageView, requestId = 0): Paging => ({
   key,
   requestId,
   older: [],
-  cursor: page.nextCursor,
-  hasMore: page.hasMore,
+  authors: {},
+  cursor: view.nextCursor,
+  hasMore: view.hasMore,
   loading: false,
 });
 
@@ -44,13 +43,12 @@ const initialPaging = (key: string, page: MessagePage, requestId = 0): Paging =>
  * メッセージログ＋入力欄。送信分はクライアント状態（Context）で持ち、
  * 初期データ（lib/discord-like）には書き戻さない。キーはチャンネルID／DMスレッドID。
  *
- * 古いメッセージは最初のページ（最新50件）だけをサーバーから渡し、
- * 上スクロールで `before` カーソルを使って50件ずつ先頭に足していく。
+ * 古いメッセージは Server Action 経由で 50 件ずつ取得する（クライアントに本文データは置かない）。
  */
 export function MessagePane({
   channelKey,
   mode,
-  initialPage,
+  initialView,
   title,
   topic,
   showHash,
@@ -58,7 +56,7 @@ export function MessagePane({
 }: {
   channelKey: string;
   mode: Mode;
-  initialPage: MessagePage;
+  initialView: MessageView;
   title: string;
   topic?: string;
   showHash?: boolean;
@@ -77,68 +75,36 @@ export function MessagePane({
   const loadAnchorRef = useRef<{ key: string; node: HTMLElement; top: number } | null>(null);
   const wasAtBottomRef = useRef(true);
 
-  const [paging, setPaging] = useState<Paging>(() => initialPaging(channelKey, initialPage));
-  const [detached, setDetached] = useState(false);
-  const wasVisibleRef = useRef(false);
+  const [paging, setPaging] = useState<Paging>(() => initialPaging(channelKey, initialView));
+  const pagingRef = useRef(paging);
+  pagingRef.current = paging;
+  // チャンネルごとの読み込み済み状態（戻ったときに続きから表示する）
+  const cacheRef = useRef<Map<string, Paging>>(new Map());
 
-  /**
-   * App Router は切替後も前の画面を display:none で残すことがある。
-   * その残骸がメッセージを抱えたままだと DOM 上で件数が混ざって見えるため、
-   * 描画されていない（= clientRect が無い）ことを検知したら中身を捨てる。
-   */
-  useEffect(() => {
-    const element = scrollRef.current;
-    if (!element) {
-      return;
-    }
-    const check = () => {
-      if (element.getClientRects().length > 0) {
-        wasVisibleRef.current = true;
-        return;
-      }
-      // 一度も描画されていない（テスト環境など）場合は消えたとみなさない
-      if (wasVisibleRef.current) {
-        setDetached(true);
-      }
-    };
-    // ルーターが前の画面を display:none に切り替えるのを属性変更で拾う
-    const paneElement = element.closest(".app-main") ?? element;
-    const mutations =
-      typeof MutationObserver === "undefined" ? null : new MutationObserver(() => check());
-    mutations?.observe(paneElement, { attributes: true, attributeFilter: ["style", "class"] });
-
-    // ルーターのキャッシュで display:none に変わるのは非同期なので、しばらく見張る
-    const interval = setInterval(check, 200);
-    const stopWatching = setTimeout(() => clearInterval(interval), 5000);
-    const observer =
-      typeof IntersectionObserver === "undefined"
-        ? null
-        : new IntersectionObserver(check, { threshold: 0 });
-    observer?.observe(element);
-    check();
-    return () => {
-      clearInterval(interval);
-      clearTimeout(stopWatching);
-      observer?.disconnect();
-      mutations?.disconnect();
-    };
-  }, []);
-
-  // 表示に使う状態。キーが変わっていたらその場で作り直す（前のチャンネルの配列を持ち越さない）
+  // 表示に使う状態。キーが変わっていたら、そのキーのキャッシュ（無ければ初期状態）を使う
   const current: Paging =
     paging.key === channelKey
       ? paging
-      : initialPaging(channelKey, initialPage, paging.requestId + 1);
+      : (cacheRef.current.get(channelKey) ??
+        initialPaging(channelKey, initialView, paging.requestId + 1));
 
-  // キーが変わったら state 側も作り直す（レンダー中に setState しないための後追い）
+  // キーが変わったら今の状態を退避し、切り替え先の状態へ移る
   useEffect(() => {
-    if (paging.key !== channelKey) {
-      setPaging((previous) => initialPaging(channelKey, initialPage, previous.requestId + 1));
+    if (paging.key === channelKey) {
+      return;
     }
-  }, [channelKey, initialPage, paging.key]);
+    // 読み込み中に切り替わっても、戻ったときにスケルトンが固着しないようにする
+    cacheRef.current.set(paging.key, { ...paging, loading: false });
+    const cached = cacheRef.current.get(channelKey);
+    setPaging(
+      cached
+        ? { ...cached, loading: false }
+        : initialPaging(channelKey, initialView, paging.requestId + 1),
+    );
+  }, [channelKey, initialView, paging]);
 
   // 読み込み開始時に決めた基準メッセージが動かないように、高さが変わるたび補正する。
-  // スケルトンは絶対配置（高さ0）なので、画像の読み込みなどで後から伸びる分にも追随できる。
+  // 利用者が自分でスクロールし始めたら補正はやめる（操作を打ち消さない）。
   useEffect(() => {
     const content = contentRef.current;
     const element = scrollRef.current;
@@ -158,7 +124,19 @@ export function MessagePane({
     };
     const observer = new ResizeObserver(compensate);
     observer.observe(content);
-    return () => observer.disconnect();
+
+    const release = () => {
+      loadAnchorRef.current = null;
+    };
+    element.addEventListener("wheel", release, { passive: true });
+    element.addEventListener("touchstart", release, { passive: true });
+    element.addEventListener("keydown", release);
+    return () => {
+      observer.disconnect();
+      element.removeEventListener("wheel", release);
+      element.removeEventListener("touchstart", release);
+      element.removeEventListener("keydown", release);
+    };
   }, [channelKey]);
 
   // 追加分の描画が落ち着いたら基準を捨てる（後から届く画像の伸びまでは追う）
@@ -169,7 +147,7 @@ export function MessagePane({
     }
     const timer = setTimeout(() => {
       loadAnchorRef.current = null;
-    }, 2500);
+    }, COMPENSATE_MS);
     return () => clearTimeout(timer);
   }, [current.older.length]);
 
@@ -199,30 +177,35 @@ export function MessagePane({
         : previous,
     );
 
-    await new Promise((resolve) => setTimeout(resolve, PAGING_DELAY_MS));
-    const page = fetchPage(mode, key, cursor);
+    try {
+      await new Promise((resolve) => setTimeout(resolve, PAGING_DELAY_MS));
+      const page = await fetchMessagePage({ mode, key, before: cursor });
 
-    // await のあいだにチャンネルが変わっていたら、その結果は捨てる
-    const elementAfter = scrollRef.current;
-    if (elementAfter && elementAfter.getClientRects().length === 0 && wasVisibleRef.current) {
-      return;
+      // 取得中にチャンネルが変わっていたら、その結果は捨てる（loading は必ず戻す）
+      setPaging((previous) => {
+        if (previous.key !== key || previous.requestId !== requestId) {
+          return previous;
+        }
+        // 二重発火などで同じページが来ても重複させない
+        const known = new Set(previous.older.map((message) => message.id));
+        const incoming = page.messages.filter((message) => !known.has(message.id));
+        return {
+          ...previous,
+          older: [...incoming, ...previous.older],
+          authors: { ...previous.authors, ...page.authors },
+          cursor: page.nextCursor,
+          hasMore: page.hasMore,
+          loading: false,
+        };
+      });
+    } finally {
+      // 結果を捨てた／例外でもスケルトンを固着させない
+      setPaging((previous) =>
+        previous.key === key && previous.requestId === requestId && previous.loading
+          ? { ...previous, loading: false }
+          : previous,
+      );
     }
-
-    setPaging((previous) => {
-      if (previous.key !== key || previous.requestId !== requestId) {
-        return previous;
-      }
-      // 二重発火などで同じページが来ても重複させない
-      const known = new Set(previous.older.map((message) => message.id));
-      const incoming = page.messages.filter((message) => !known.has(message.id));
-      return {
-        ...previous,
-        older: [...incoming, ...previous.older],
-        cursor: page.nextCursor,
-        hasMore: page.hasMore,
-        loading: false,
-      };
-    });
   }, [current, mode]);
 
   const handleSend = useCallback(
@@ -250,22 +233,24 @@ export function MessagePane({
     element.scrollTop = element.scrollHeight;
   }, [localMessages.length]);
 
-  const messages = useMemo(
-    () =>
-      [...current.older, ...initialPage.messages, ...localMessages].sort((a, b) =>
-        a.sentAt.localeCompare(b.sentAt),
-      ),
-    [current.older, initialPage.messages, localMessages],
+  // 本文はサーバーから渡されたものだけを使い、書き手はその付属情報から引く
+  const authors = useMemo(
+    () => ({ ...initialView.authors, ...current.authors }),
+    [initialView.authors, current.authors],
   );
 
-  // ルーターに残った前の画面（display:none）は描画しない
-  if (detached) {
-    return null;
-  }
+  const messages = useMemo(
+    () =>
+      [...current.older, ...initialView.messages, ...localMessages].sort((a, b) =>
+        a.sentAt.localeCompare(b.sentAt),
+      ),
+    [current.older, initialView.messages, localMessages],
+  );
 
   return (
     <MessageList
       messages={messages}
+      authors={authors}
       title={title}
       topic={topic}
       showHash={showHash}

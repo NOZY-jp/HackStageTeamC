@@ -10,7 +10,7 @@ import {
   useState,
 } from "react";
 import { PaneToggles } from "@/components/discord-like/pane-toggles";
-import type { Message } from "@/lib/discord-like/types";
+import type { Message, MessageAuthor } from "@/lib/discord-like/types";
 import { EmptyState } from "./empty-state";
 import { MessageRow } from "./message-row";
 
@@ -48,6 +48,7 @@ type Row =
  */
 export function MessageList({
   messages,
+  authors,
   title,
   topic,
   showHash = true,
@@ -62,6 +63,8 @@ export function MessageList({
   contentRef,
 }: {
   messages: Message[];
+  /** 書き手情報（サーバーから渡される）。 */
+  authors: Record<string, MessageAuthor>;
   title: string;
   topic?: string;
   showHash?: boolean;
@@ -272,6 +275,7 @@ export function MessageList({
                   <MessageRow
                     key={row.key}
                     message={row.message}
+                    authors={authors}
                     grouped={row.grouped}
                     replyTarget={row.replyTarget}
                     time={formatTime(row.message.sentAt)}

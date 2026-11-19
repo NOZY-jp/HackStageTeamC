@@ -2,7 +2,32 @@ import { act, render, screen, waitFor } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
 import { AppShell } from "@/components/discord-like/app-shell";
 import { listMessages } from "@/lib/discord-like";
+import { toMessageView } from "@/lib/discord-like/view";
 import { LocalMessagesProvider } from "./local-messages-context";
+
+// クライアントは Server Action 経由で取得する（テストでは同じデータ層で代替）
+vi.mock("@/app/(discord-like)/_actions/message-page", async () => {
+  const { listDMMessages, listMessages } = await import("@/lib/discord-like");
+  const { toMessageView } = await import("@/lib/discord-like/view");
+  return {
+    fetchMessagePage: async ({
+      mode,
+      key,
+      before,
+    }: {
+      mode: "channel" | "dm";
+      key: string;
+      before?: string;
+    }) => {
+      const page =
+        mode === "dm"
+          ? listDMMessages({ threadId: key, before })
+          : listMessages({ channelId: key, before });
+      return toMessageView(page);
+    },
+  };
+});
+
 import { MessagePane } from "./message-pane";
 
 const CHANNEL_ID = "s1-general";
@@ -56,14 +81,14 @@ const triggerIntersect = async () => {
 const visibleMessages = (container: HTMLElement) => container.querySelectorAll(".message").length;
 
 function renderPane(channelKey = CHANNEL_ID) {
-  const initialPage = listMessages({ channelId: channelKey, limit: PAGE_SIZE });
+  const initialView = toMessageView(listMessages({ channelId: channelKey, limit: PAGE_SIZE }));
   return render(
     <AppShell rail={<span />}>
       <LocalMessagesProvider>
         <MessagePane
           channelKey={channelKey}
           mode="channel"
-          initialPage={initialPage}
+          initialView={initialView}
           title="一般"
           topic="テスト"
         />
@@ -145,14 +170,14 @@ describe("MessagePane の段階的読み込み", () => {
     await triggerIntersect();
 
     // 追加読み込みの待ち（120ms）が終わる前に B へ切り替える
-    const otherChannel = listMessages({ channelId: "s1-random", limit: PAGE_SIZE });
+    const otherChannel = toMessageView(listMessages({ channelId: "s1-random", limit: PAGE_SIZE }));
     first.rerender(
       <AppShell rail={<span />}>
         <LocalMessagesProvider>
           <MessagePane
             channelKey="s1-random"
             mode="channel"
-            initialPage={otherChannel}
+            initialView={otherChannel}
             title="雑談"
             topic="テスト"
           />
@@ -171,19 +196,115 @@ describe("MessagePane の段階的読み込み", () => {
     expect(ids.some((id) => id !== null && channelA.includes(id))).toBe(false);
   });
 
-  it("チャンネルが変わると読み込み状態をリセットする", async () => {
+  it("A→B→A と戻ると、読み込み済みの続きがそのまま残る（空にならない）", async () => {
     const first = renderPane();
-    await triggerIntersect();
-    await waitFor(() => expect(visibleMessages(first.container)).toBe(PAGE_SIZE * 2));
+    const total = listMessages({ channelId: CHANNEL_ID, limit: 1000 }).messages.length;
 
-    const otherChannel = listMessages({ channelId: "s1-random", limit: PAGE_SIZE });
+    // 先頭まで遡って全件読み込む
+    for (let attempt = 0; attempt < 8; attempt += 1) {
+      if (screen.queryByText("ここが最初のメッセージです")) break;
+      await triggerIntersect();
+      await new Promise((resolve) => setTimeout(resolve, 250));
+    }
+    expect(visibleMessages(first.container)).toBe(total);
+
+    const otherView = toMessageView(listMessages({ channelId: "s1-random", limit: PAGE_SIZE }));
     first.rerender(
       <AppShell rail={<span />}>
         <LocalMessagesProvider>
           <MessagePane
             channelKey="s1-random"
             mode="channel"
-            initialPage={otherChannel}
+            initialView={otherView}
+            title="雑談"
+            topic="テスト"
+          />
+        </LocalMessagesProvider>
+      </AppShell>,
+    );
+    await waitFor(() => expect(visibleMessages(first.container)).toBe(PAGE_SIZE));
+
+    const backView = toMessageView(listMessages({ channelId: CHANNEL_ID, limit: PAGE_SIZE }));
+    first.rerender(
+      <AppShell rail={<span />}>
+        <LocalMessagesProvider>
+          <MessagePane
+            channelKey={CHANNEL_ID}
+            mode="channel"
+            initialView={backView}
+            title="一般"
+            topic="テスト"
+          />
+        </LocalMessagesProvider>
+      </AppShell>,
+    );
+
+    await waitFor(() => expect(visibleMessages(first.container)).toBe(total));
+  });
+
+  it("読み込み中に切り替えて戻っても、スケルトンが固着せず次の読み込みができる", async () => {
+    const first = renderPane();
+    await triggerIntersect();
+
+    const otherView = toMessageView(listMessages({ channelId: "s1-random", limit: PAGE_SIZE }));
+    first.rerender(
+      <AppShell rail={<span />}>
+        <LocalMessagesProvider>
+          <MessagePane
+            channelKey="s1-random"
+            mode="channel"
+            initialView={otherView}
+            title="雑談"
+            topic="テスト"
+          />
+        </LocalMessagesProvider>
+      </AppShell>,
+    );
+    await new Promise((resolve) => setTimeout(resolve, 400));
+
+    const backView = toMessageView(listMessages({ channelId: CHANNEL_ID, limit: PAGE_SIZE }));
+    first.rerender(
+      <AppShell rail={<span />}>
+        <LocalMessagesProvider>
+          <MessagePane
+            channelKey={CHANNEL_ID}
+            mode="channel"
+            initialView={backView}
+            title="一般"
+            topic="テスト"
+          />
+        </LocalMessagesProvider>
+      </AppShell>,
+    );
+
+    await waitFor(() => {
+      expect(first.container.querySelector(".message-skeleton")).toBeNull();
+    });
+
+    // 固着していなければ、もう一度読み込める
+    const before = visibleMessages(first.container);
+    await triggerIntersect();
+    await waitFor(
+      () => {
+        expect(visibleMessages(first.container)).toBeGreaterThan(before);
+      },
+      { timeout: 3000 },
+    );
+  });
+
+  it("チャンネルが変わると読み込み状態をリセットする", async () => {
+    const first = renderPane();
+    await triggerIntersect();
+    await waitFor(() => expect(visibleMessages(first.container)).toBe(PAGE_SIZE * 2));
+
+    const otherChannel = toMessageView(listMessages({ channelId: "s1-random", limit: PAGE_SIZE }));
+    first.rerender(
+      <AppShell rail={<span />}>
+        <LocalMessagesProvider>
+          <MessagePane
+            channelKey="s1-random"
+            mode="channel"
+            initialView={otherChannel}
             title="雑談"
             topic="テスト"
           />

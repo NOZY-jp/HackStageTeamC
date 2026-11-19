@@ -15,6 +15,7 @@ import {
   listVoiceStates,
 } from "@/lib/discord-like";
 import { resolveChannelRoute } from "@/lib/discord-like/route-resolution";
+import { toMessageView } from "@/lib/discord-like/view";
 
 /**
  * Discord と同じ2セグメント構成。
@@ -60,7 +61,7 @@ async function DmThread({ threadId }: { threadId: string }) {
       <MessagePane
         channelKey={thread.id}
         mode="dm"
-        initialPage={listDMMessages({ threadId: thread.id })}
+        initialView={toMessageView(listDMMessages({ threadId: thread.id }))}
         title={otherName}
         showHash={false}
         headerAvatar={{ displayName: otherName, avatarColor: other?.avatarColor ?? "transparent" }}
@@ -92,7 +93,7 @@ async function GuildChannel({ guildId, channelId }: { guildId: string; channelId
         <MessagePane
           channelKey={channel.id}
           mode="channel"
-          initialPage={listMessages({ channelId: channel.id })}
+          initialView={toMessageView(listMessages({ channelId: channel.id }))}
           title={channel.name}
           topic={channel.topic}
           showHash

@@ -21,23 +21,3 @@ export function isAtBottom({
 }: ScrollMetrics & { threshold?: number }): boolean {
   return scrollHeight - scrollTop - clientHeight <= threshold;
 }
-
-/**
- * 先頭に内容が増えたとき、見えている位置を保つ scrollTop。
- * 追加前の scrollTop に「増えた高さ」を足すだけ（上限は最大スクロール量）。
- */
-export function compensatedScrollTop({
-  prevScrollTop,
-  prevScrollHeight,
-  nextScrollHeight,
-  clientHeight,
-}: {
-  prevScrollTop: number;
-  prevScrollHeight: number;
-  nextScrollHeight: number;
-  clientHeight: number;
-}): number {
-  const next = prevScrollTop + (nextScrollHeight - prevScrollHeight);
-  const max = Math.max(0, nextScrollHeight - clientHeight);
-  return Math.min(Math.max(0, next), max);
-}
