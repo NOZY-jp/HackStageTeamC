@@ -9,7 +9,7 @@ import {
 } from "./index";
 
 const firstTextChannel = () => {
-  const guildId = "s1";
+  const guildId = "mhc";
   const channel = listChannels(guildId).find((candidate) => candidate.kind === "text");
   if (!channel) throw new Error("テキストチャンネルがありません");
   return channel;
@@ -83,13 +83,13 @@ describe("メッセージのカーソル方式（段階的読み込み）", () =
   });
 
   it("DM も同じ形で切り出せる", () => {
-    const thread = getDMThread("t1");
+    const thread = getDMThread("dm-maimai");
     expect(thread).toBeDefined();
-    const latest = listDMMessages({ threadId: "t1", limit: 5 });
+    const latest = listDMMessages({ threadId: "dm-maimai", limit: 5 });
     expect(latest.messages).toHaveLength(5);
     expect(latest.hasMore).toBe(true);
     const older = listDMMessages({
-      threadId: "t1",
+      threadId: "dm-maimai",
       before: latest.nextCursor ?? undefined,
       limit: 5,
     });
@@ -99,8 +99,8 @@ describe("メッセージのカーソル方式（段階的読み込み）", () =
   });
 
   it("DM でも不正なカーソルは最新ページに戻す", () => {
-    const page = listDMMessages({ threadId: "t1", before: "missing-message", limit: 5 });
-    const latest = listDMMessages({ threadId: "t1", limit: 5 });
+    const page = listDMMessages({ threadId: "dm-maimai", before: "missing-message", limit: 5 });
+    const latest = listDMMessages({ threadId: "dm-maimai", limit: 5 });
     expect(page.messages.map((message) => message.id)).toEqual(
       latest.messages.map((message) => message.id),
     );
@@ -115,9 +115,12 @@ describe("メッセージのカーソル方式（段階的読み込み）", () =
     const loaded = loadUntil({ channelId: channel.id, messageId: target.id, chunkSize: 10 });
     expect(loaded.found).toBe(true);
     expect(loaded.messages.some((message) => message.id === target.id)).toBe(true);
-    expect(loaded.messages[0].id).toBe(all[0].id);
+    // 返るのは「最新までの連続した範囲」。古い側が残っていてもよい
+    expect(loaded.messages.map((message) => message.id)).toEqual(
+      all.slice(all.length - loaded.messages.length).map((message) => message.id),
+    );
     expect(loaded.messages[loaded.messages.length - 1].id).toBe(all[all.length - 1].id);
-    expect(loaded.hasMore).toBe(false);
+    expect(loaded.hasMore).toBe(all.length > loaded.messages.length);
   });
 
   it("loadUntil が途中までしか遡らないときは hasMore=true を返す", () => {
@@ -140,9 +143,9 @@ describe("メッセージのカーソル方式（段階的読み込み）", () =
   });
 
   it("loadUntil は DM スレッドにも使える", () => {
-    const all = listDMMessages({ threadId: "t1", limit: 1000 }).messages;
+    const all = listDMMessages({ threadId: "dm-maimai", limit: 1000 }).messages;
     const target = all[2];
-    const loaded = loadUntil({ threadId: "t1", messageId: target.id, chunkSize: 4 });
+    const loaded = loadUntil({ threadId: "dm-maimai", messageId: target.id, chunkSize: 4 });
     expect(loaded.found).toBe(true);
     expect(loaded.messages.some((message) => message.id === target.id)).toBe(true);
   });

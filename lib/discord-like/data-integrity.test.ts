@@ -29,11 +29,12 @@ const inPeriod = (sentAt: string, from: string, to: string): boolean => {
   return day >= from && day <= to;
 };
 
-const dmMessages = (): Message[] => listDMMessages(DM_THREAD_ID);
+const dmMessages = (): Message[] =>
+  listDMMessages({ threadId: DM_THREAD_ID, limit: 1000 }).messages;
 const serverMessages = (): Message[] =>
   listChannels(GUILD_ID)
     .filter((channel) => channel.kind === "text")
-    .flatMap((channel) => listMessages(channel.id));
+    .flatMap((channel) => listMessages({ channelId: channel.id, limit: 1000 }).messages);
 
 describe("ダミーデータの整合性", () => {
   it("サーバーは「モンハンコミュニティ」1つだけで、旧3サーバーは残っていない", () => {
@@ -90,7 +91,7 @@ describe("ダミーデータの整合性", () => {
 
   it("lastMessageAt は最終メッセージと一致し、未読数は自分の発言以降の相手の発言数と一致する", () => {
     for (const thread of listDMThreads()) {
-      const messages = listDMMessages(thread.id);
+      const messages = listDMMessages({ threadId: thread.id, limit: 1000 }).messages;
       expect(messages.length).toBeGreaterThan(0);
       expect(thread.lastMessageAt).toBe(messages[messages.length - 1].sentAt);
 
@@ -104,7 +105,9 @@ describe("ダミーデータの整合性", () => {
 
   it("チャンネルの未読数は、そのチャンネルのメッセージ数以下", () => {
     for (const channel of listChannels(GUILD_ID)) {
-      expect(channel.unreadCount ?? 0).toBeLessThanOrEqual(listMessages(channel.id).length);
+      expect(channel.unreadCount ?? 0).toBeLessThanOrEqual(
+        listMessages({ channelId: channel.id, limit: 1000 }).messages.length,
+      );
     }
   });
 
@@ -115,7 +118,7 @@ describe("ダミーデータの整合性", () => {
         .map((channel) => channel.id),
     );
     for (const channel of listChannels(GUILD_ID)) {
-      const messages = listMessages(channel.id);
+      const messages = listMessages({ channelId: channel.id, limit: 1000 }).messages;
       for (const message of messages) {
         expect(getUser(message.authorId)).toBeDefined();
         expect(textChannelIds.has(message.channelId)).toBe(true);
@@ -130,7 +133,9 @@ describe("ダミーデータの整合性", () => {
   it("各スレッド・チャンネル内の時刻は昇順で、ID は重複しない", () => {
     const groups = [
       dmMessages(),
-      ...listChannels(GUILD_ID).map((channel) => listMessages(channel.id)),
+      ...listChannels(GUILD_ID).map(
+        (channel) => listMessages({ channelId: channel.id, limit: 1000 }).messages,
+      ),
     ];
     const ids = new Set<string>();
     for (const messages of groups) {
