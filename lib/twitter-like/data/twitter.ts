@@ -319,6 +319,16 @@ export const twitterPosts: Post[] = [
     repostCount: 0,
     likeCount: 5,
   },
+  {
+    id: "post-026",
+    authorId: "tw-nagi",
+    postedAt: "2026-11-18T09:20:00+09:00",
+    body: "@mai 私も一度、同じところで迷ったことがある。",
+    replyToId: "post-003",
+    replyCount: 0,
+    repostCount: 0,
+    likeCount: 2,
+  },
 ];
 
 /** ポストの表示数（インプレッション）のダミー値。Post.id → 件数。 */

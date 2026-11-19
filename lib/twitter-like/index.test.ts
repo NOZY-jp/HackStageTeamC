@@ -78,15 +78,17 @@ describe("鍵アカウントの投稿の扱い", () => {
         expect(protectedIds.has(reply.authorId)).toBe(false);
       }
     }
-    // 公開アカウントの返信は従来どおり返る
-    expect(listReplies("post-003").map((reply) => reply.id)).toContain("post-004");
+    // 同じ公開投稿への返信では公開アカウントの返信だけが残り、鍵垢の返信は消える
+    const repliesToPublicPost = listReplies("post-003").map((reply) => reply.id);
+    expect(repliesToPublicPost).toContain("post-004");
+    expect(repliesToPublicPost).not.toContain("post-026");
   });
 
   it("listPostsByAuthor は件数表示のため鍵垢の投稿も含める", () => {
     const lockedUser = listUsers().find((user) => isProtected(user));
     const own = listPostsByAuthor(lockedUser?.id ?? "missing-author");
-    // 公開面では除外される同じ投稿が、本人の件数には含まれる
-    expect(own.length).toBeGreaterThan(0);
+    // 公開面では除外される同じ投稿が、本人の件数にはすべて含まれる
+    expect(own.map((post) => post.id).sort()).toEqual(["post-024", "post-025", "post-026"]);
     for (const post of own) {
       expect(getPost(post.id)).toBeUndefined();
     }
