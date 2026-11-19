@@ -128,6 +128,14 @@ describe("searchPosts", () => {
     expect(searchPosts("   ")).toEqual([]);
   });
 
+  it("投稿者の表示名・handleも検索対象にする", () => {
+    const posts = searchPosts("hal");
+    // 本文に "hal" を含まない Hal 本人の投稿も返る
+    expect(posts.map((post) => post.id)).toContain("post-002");
+    // mai の投稿は mai 自身の投稿が返る
+    expect(searchPosts("mai").map((post) => post.id)).toContain("post-003");
+  });
+
   it("鍵アカウントの投稿は検索結果に出さない", () => {
     // tw-nagi（鍵垢）の post-024〜026 の本文に一致する語で探しても出てこない
     expect(searchPosts("記録用")).toEqual([]);

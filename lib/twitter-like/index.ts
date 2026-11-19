@@ -103,7 +103,8 @@ function matchesAllTerms(haystack: string, terms: string[]): boolean {
 }
 
 /**
- * 投稿を検索する（本文のみ・新しい順）。返信も対象に含める。鍵アカウントの投稿は除く。
+ * 投稿を検索する（本文と投稿者の表示名・handleを対象・新しい順）。返信も対象に含める。
+ * 鍵アカウントの投稿は除く。
  */
 export function searchPosts(query: string): Post[] {
   const terms = toTerms(query);
@@ -111,7 +112,11 @@ export function searchPosts(query: string): Post[] {
     [...twitterPosts]
       .filter(isVisiblePost)
       .sort(byPostedAtDesc)
-      .filter((post) => matchesAllTerms(post.body, terms)),
+      .filter((post) => {
+        const author = twitterUsers.find((user) => user.id === post.authorId);
+        const haystack = [post.body, author?.displayName ?? "", author?.handle ?? ""].join("\n");
+        return matchesAllTerms(haystack, terms);
+      }),
   );
 }
 
