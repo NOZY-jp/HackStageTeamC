@@ -99,6 +99,8 @@ export function MessageList({
   const [showMembers, setShowMembers] = useState(false);
   const [openProfileId, setOpenProfileId] = useState<string | null>(null);
 
+  // 名簿が無い画面（DM など）ではトグルもパネルも出さない
+  const hasMembers = members.length > 0;
   const onlineMembers = members.filter((member) => member.status !== "offline");
   const offlineMembers = members.filter((member) => member.status === "offline");
 
@@ -231,30 +233,32 @@ export function MessageList({
                 <path d="m20 20-3.5-3.5" />
               </svg>
             </span>
-            <button
-              type="button"
-              aria-label="メンバー"
-              aria-expanded={showMembers}
-              aria-controls="members-panel"
-              className="message-header-icon message-header-button"
-              onClick={() => setShowMembers((previous) => !previous)}
-            >
-              <svg
-                aria-hidden="true"
-                viewBox="0 0 24 24"
-                width="18"
-                height="18"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2"
-                strokeLinecap="round"
-                strokeLinejoin="round"
+            {hasMembers ? (
+              <button
+                type="button"
+                aria-label="メンバー"
+                aria-expanded={showMembers}
+                aria-controls="members-panel"
+                className="message-header-icon message-header-button"
+                onClick={() => setShowMembers((previous) => !previous)}
               >
-                <circle cx="9" cy="8" r="3.2" />
-                <path d="M3.5 20a5.5 5.5 0 0 1 11 0" />
-                <path d="M16 5.5a3 3 0 0 1 0 5.6M17.5 20a5 5 0 0 0-2-4" />
-              </svg>
-            </button>
+                <svg
+                  aria-hidden="true"
+                  viewBox="0 0 24 24"
+                  width="18"
+                  height="18"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                >
+                  <circle cx="9" cy="8" r="3.2" />
+                  <path d="M3.5 20a5.5 5.5 0 0 1 11 0" />
+                  <path d="M16 5.5a3 3 0 0 1 0 5.6M17.5 20a5 5 0 0 0-2-4" />
+                </svg>
+              </button>
+            ) : null}
           </div>
         </header>
 
@@ -326,7 +330,7 @@ export function MessageList({
         ) : null}
         {composer ? <div className="message-composer-area">{composer}</div> : null}
       </div>
-      {showMembers ? (
+      {hasMembers && showMembers ? (
         <aside id="members-panel" className="members-panel" aria-label="メンバー一覧">
           <div className="members-panel-head">
             <h2 className="members-panel-title">メンバー</h2>
