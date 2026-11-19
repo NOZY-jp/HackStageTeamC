@@ -1,9 +1,11 @@
 import Link from "next/link";
 import type { ReactNode } from "react";
+import { isProtected } from "@/lib/twitter-like";
 import type { Profile, TwitterUser } from "@/lib/twitter-like/types";
 import { Avatar } from "./avatar";
 import { formatCount, formatJoinedAt } from "./format";
-import { CalendarIcon, VerifiedBadge } from "./icons";
+import { CalendarIcon, LockIcon, VerifiedBadge } from "./icons";
+import { LinkifiedText } from "./linkify";
 import { isVerified } from "./lookup";
 import { PageHeader } from "./page-header";
 
@@ -34,11 +36,20 @@ export function ProfileShell({
   children: ReactNode;
 }) {
   const base = `/twitter/profile/${user.handle}`;
+  const verified = isVerified(user);
+  const locked = isProtected(user);
   return (
     <>
       <PageHeader
         title={user.displayName}
-        titleBadge={isVerified(user) ? <VerifiedBadge /> : null}
+        titleBadge={
+          verified || locked ? (
+            <>
+              {verified ? <VerifiedBadge /> : null}
+              {locked ? <LockIcon /> : null}
+            </>
+          ) : null
+        }
         subtitle={`${postCount} 件のポスト`}
         backHref="/twitter"
       />
@@ -54,10 +65,13 @@ export function ProfileShell({
           </div>
           <h2 className="tw-profile-name">
             {user.displayName}
-            {isVerified(user) ? <VerifiedBadge /> : null}
+            {verified ? <VerifiedBadge /> : null}
+            {locked ? <LockIcon /> : null}
           </h2>
           <p className="tw-handle">@{user.handle}</p>
-          <p className="tw-profile-bio">{profile.bio}</p>
+          <p className="tw-profile-bio">
+            <LinkifiedText text={profile.bio} />
+          </p>
           <p className="tw-profile-meta">
             {profile.location ? <span>{profile.location}</span> : null}
             <span>
@@ -88,7 +102,7 @@ export function ProfileShell({
           ))}
         </nav>
       </section>
-      {children}
+      {locked ? <ProfilePrivate handle={user.handle} /> : children}
     </>
   );
 }
@@ -99,6 +113,20 @@ export function ProfileEmpty({ title, description }: { title: string; descriptio
     <div className="tw-empty">
       <p className="tw-empty-title">{title}</p>
       <p className="tw-empty-sub">{description}</p>
+    </div>
+  );
+}
+
+/**
+ * 鍵アカウントのタブ内容。名前・bio などのプロフィール情報は公開のままにし、
+ * 投稿一覧のある場所だけをこの表示に差し替える（全タブ共通）。
+ */
+export function ProfilePrivate({ handle }: { handle: string }) {
+  return (
+    <div className="tw-empty tw-private">
+      <LockIcon />
+      <p className="tw-empty-title">これらのポストは非公開です</p>
+      <p className="tw-empty-sub">@{handle} のポストは、承認されたフォロワーだけに表示されます。</p>
     </div>
   );
 }

@@ -11,7 +11,7 @@ import {
 
 describe("lib/discord-like のアクセサ", () => {
   it("listMessages は sentAt 昇順で返す", () => {
-    const messages = listMessages("mhc-chat");
+    const messages = listMessages({ channelId: "mhc-chat", limit: 1000 }).messages;
     expect(messages.length).toBeGreaterThan(0);
     const times = messages.map((message) => message.sentAt);
     expect(times).toEqual([...times].sort());
@@ -23,7 +23,7 @@ describe("lib/discord-like のアクセサ", () => {
     const times = threads.map((thread) => thread.lastMessageAt);
     expect(times).toEqual([...times].sort().reverse());
     for (const thread of threads) {
-      expect(listDMMessages(thread.id).length).toBeGreaterThan(0);
+      expect(listDMMessages({ threadId: thread.id }).messages.length).toBeGreaterThan(0);
     }
   });
 
@@ -31,7 +31,7 @@ describe("lib/discord-like のアクセサ", () => {
     expect(getChannel("missing-channel")).toBeUndefined();
     expect(getGuild("missing-guild")).toBeUndefined();
     expect(getUser("missing-user")).toBeUndefined();
-    expect(listMessages("missing-channel")).toEqual([]);
+    expect(listMessages({ channelId: "missing-channel" }).messages).toEqual([]);
     expect(listChannels("missing-guild")).toEqual([]);
   });
 
@@ -43,12 +43,12 @@ describe("lib/discord-like のアクセサ", () => {
     }
     expect(getChannel("mhc-chat")?.name).toBe(before);
 
-    const messages = listMessages("mhc-chat");
+    const messages = listMessages({ channelId: "mhc-chat", limit: 1000 }).messages;
     const firstBody = messages[0]?.body;
     if (messages[0]) {
       messages[0].body = "書き換え";
     }
-    expect(listMessages("mhc-chat")[0]?.body).toBe(firstBody);
+    expect(listMessages({ channelId: "mhc-chat", limit: 1000 }).messages[0]?.body).toBe(firstBody);
 
     const guild = getGuild("mhc");
     const channelCount = listChannels("mhc").length;

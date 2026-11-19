@@ -1,12 +1,25 @@
 "use client";
 
-import { type ReactNode, useEffect, useRef } from "react";
+import {
+  type ReactNode,
+  type RefObject,
+  useCallback,
+  useEffect,
+  useLayoutEffect,
+  useRef,
+  useState,
+} from "react";
 import { PaneToggles } from "@/components/discord-like/pane-toggles";
-import type { Message } from "@/lib/discord-like/types";
+import type { Message, MessageAuthor } from "@/lib/discord-like/types";
 import { EmptyState } from "./empty-state";
 import { MessageRow } from "./message-row";
 
 const FIVE_MINUTES = 5 * 60 * 1000;
+/** 一番下からこれ以上離れたら「最新へ」を出す */
+const AWAY_FROM_BOTTOM = 320;
+/** 追加読み込みを始める余白（この距離まで上端が近づいたら次を取る） */
+const LOAD_MARGIN = "200px";
+const SKELETON_ROWS = ["a", "b", "c"] as const;
 
 /** 表示は固定データの UTC 表記をそのまま使う（相対表記にしない）。 */
 const dateOf = (sentAt: string) => sentAt.slice(0, 10);
@@ -29,17 +42,30 @@ type Row =
 /**
  * テキストチャンネル／DM 共通のメッセージログ。
  * URL や params に依存せず、見た目の切り替えは props（showHash など）だけで行う。
+ *
+ * 古いメッセージの追加読み込みは `onLoadOlder` を呼ぶだけにして、
+ * スクロール位置の補正（先頭に足しても画面を飛ばさない）はここで行う。
  */
 export function MessageList({
   messages,
+  authors,
   title,
   topic,
   showHash = true,
   emptyText = "まだメッセージがありません",
   headerAvatar,
   composer,
+  onLoadOlder,
+  loadingOlder = false,
+  hasMore = true,
+  resetKey,
+  scrollRef,
+  contentRef,
+  onJumpToLatest,
 }: {
   messages: Message[];
+  /** 書き手情報（サーバーから渡される）。 */
+  authors: Record<string, MessageAuthor>;
   title: string;
   topic?: string;
   showHash?: boolean;
@@ -48,17 +74,80 @@ export function MessageList({
   headerAvatar?: { displayName: string; avatarColor: string };
   /** ログの下に差し込む入力欄（省略時は出さない）。 */
   composer?: ReactNode;
+  /** 上端に近づいたとき、古いメッセージを追加で読み込む。 */
+  onLoadOlder?: () => void;
+  /** 追加読み込み中（先頭にスケルトンを出す）。 */
+  loadingOlder?: boolean;
+  /** さらに古いメッセージが残っているか。false なら終端表示。 */
+  hasMore?: boolean;
+  /** チャンネル／DM が変わったらスクロール位置を初期化するためのキー。 */
+  resetKey?: string;
+  /** スクロール要素の ref（親が位置補正に使う）。 */
+  scrollRef?: RefObject<HTMLDivElement | null>;
+  /** 中身のラッパーの ref（高さ変化の監視に使う）。 */
+  contentRef?: RefObject<HTMLDivElement | null>;
+  /** 「最新へ」を押したとき（位置補正の基準を捨てるために親へ知らせる）。 */
+  onJumpToLatest?: () => void;
 }) {
-  const scrollRef = useRef<HTMLDivElement>(null);
+  const fallbackScrollRef = useRef<HTMLDivElement>(null);
+  const scrollElement = scrollRef ?? fallbackScrollRef;
+  const sentinelRef = useRef<HTMLDivElement>(null);
+  const [awayFromBottom, setAwayFromBottom] = useState(false);
 
-  // 表示時・メッセージ追加時に最下部へ
-  // biome-ignore lint/correctness/useExhaustiveDependencies: メッセージが差し替わったらスクロール位置を戻すための依存
-  useEffect(() => {
-    const element = scrollRef.current;
+  // 初回表示・チャンネル切替時は最下部（最新）へ
+  // biome-ignore lint/correctness/useExhaustiveDependencies: resetKey はチャンネル切替の合図。ref は依存にしない
+  useLayoutEffect(() => {
+    const element = scrollElement.current;
     if (element) {
       element.scrollTop = element.scrollHeight;
+      setAwayFromBottom(false);
     }
-  }, [messages]);
+  }, [resetKey]);
+
+  // 上端の sentinel を監視して、古いメッセージを追加で読み込む
+  // biome-ignore lint/correctness/useExhaustiveDependencies: スクロール要素の ref はマウント後も同一
+  useEffect(() => {
+    const sentinel = sentinelRef.current;
+    const root = scrollElement.current;
+    if (!sentinel || !root || !onLoadOlder || !hasMore) {
+      return;
+    }
+    if (typeof IntersectionObserver === "undefined") {
+      return;
+    }
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries.some((entry) => entry.isIntersecting)) {
+          onLoadOlder();
+        }
+      },
+      { root, rootMargin: LOAD_MARGIN, threshold: 0 },
+    );
+    observer.observe(sentinel);
+    return () => observer.disconnect();
+  }, [hasMore, onLoadOlder]);
+
+  // biome-ignore lint/correctness/useExhaustiveDependencies: スクロール要素の ref はマウント後も同一
+  const handleScroll = useCallback(() => {
+    const element = scrollElement.current;
+    if (!element) {
+      return;
+    }
+    const gap = element.scrollHeight - element.scrollTop - element.clientHeight;
+    setAwayFromBottom(gap > AWAY_FROM_BOTTOM);
+  }, []);
+
+  // biome-ignore lint/correctness/useExhaustiveDependencies: スクロール要素の ref はマウント後も同一
+  const scrollToLatest = useCallback(() => {
+    const element = scrollElement.current;
+    if (!element) {
+      return;
+    }
+    // 利用者の操作なので、追加読み込みの位置補正はここで打ち切る
+    onJumpToLatest?.();
+    element.scrollTop = element.scrollHeight;
+    setAwayFromBottom(false);
+  }, [onJumpToLatest]);
 
   const byId = new Map(messages.map((message) => [message.id, message]));
   const rows: Row[] = [];
@@ -149,29 +238,64 @@ export function MessageList({
         </div>
       </header>
 
-      <div ref={scrollRef} className="pane-scroll message-scroll">
+      <div ref={scrollElement} className="pane-scroll message-scroll" onScroll={handleScroll}>
         {messages.length === 0 ? (
           <EmptyState kind="message" title={emptyText} description="下の入力欄から送信できます。" />
         ) : (
-          <div className="message-list-inner">
-            {rows.map((row) =>
-              row.type === "date" ? (
-                <div key={row.key} className="message-date">
-                  {row.label}
-                </div>
-              ) : (
-                <MessageRow
-                  key={row.key}
-                  message={row.message}
-                  grouped={row.grouped}
-                  replyTarget={row.replyTarget}
-                  time={formatTime(row.message.sentAt)}
-                />
-              ),
-            )}
+          <div className="message-scroll-content" ref={contentRef}>
+            <div className="message-history-top" ref={sentinelRef} data-testid="history-sentinel" />
+            {loadingOlder ? (
+              <div className="message-skeleton" aria-hidden="true">
+                {SKELETON_ROWS.map((row) => (
+                  <div className="message-skeleton-row" key={`skeleton-${row}`}>
+                    <span className="skeleton-block message-skeleton-avatar" />
+                    <span className="message-skeleton-lines">
+                      <span
+                        className="skeleton-block message-skeleton-line"
+                        style={{ width: "96px" }}
+                      />
+                      <span
+                        className="skeleton-block message-skeleton-line"
+                        style={{ width: "320px" }}
+                      />
+                    </span>
+                  </div>
+                ))}
+              </div>
+            ) : null}
+            {!hasMore ? <p className="message-history-end">ここが最初のメッセージです</p> : null}
+            {loadingOlder ? (
+              <p className="visually-hidden" role="status">
+                古いメッセージを読み込み中
+              </p>
+            ) : null}
+
+            <div className="message-list-inner">
+              {rows.map((row) =>
+                row.type === "date" ? (
+                  <div key={row.key} className="message-date">
+                    {row.label}
+                  </div>
+                ) : (
+                  <MessageRow
+                    key={row.key}
+                    message={row.message}
+                    authors={authors}
+                    grouped={row.grouped}
+                    replyTarget={row.replyTarget}
+                    time={formatTime(row.message.sentAt)}
+                  />
+                ),
+              )}
+            </div>
           </div>
         )}
       </div>
+      {awayFromBottom ? (
+        <button type="button" className="message-jump-latest" onClick={scrollToLatest}>
+          最新へ
+        </button>
+      ) : null}
       {composer ? <div className="message-composer-area">{composer}</div> : null}
     </main>
   );
