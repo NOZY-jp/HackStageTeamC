@@ -133,8 +133,7 @@
   grid-row: 1 / span 2;
   grid-column: 3;
   display: flex;
-  /* 本文カラム＋右のメンバー一覧を横に並べる（縦積みにしない） */
-  flex-direction: row;
+  flex-direction: column;
   min-height: 0;
   min-width: 0;
   background-color: var(--color-bg-main);
@@ -3953,6 +3952,11 @@ a.tw-dm-item:focus-visible {
 
 .message-header-button[aria-expanded="true"] {
   color: var(--color-text);
+}
+
+/* チャンネル画面だけ、本文カラム＋メンバー一覧の横並びにする（他画面に影響させない） */
+.app-main--channel {
+  flex-direction: row;
 }
 
 .app-main-body {

@@ -186,7 +186,11 @@ export function MessageList({
   }
 
   return (
-    <main id="app-main" className="app-main" aria-label={title}>
+    <main
+      id="app-main"
+      className={members.length > 0 ? "app-main app-main--channel" : "app-main"}
+      aria-label={title}
+    >
       <div className="app-main-body">
         <header className="pane-header message-header">
           <PaneToggles />

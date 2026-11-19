@@ -55,8 +55,6 @@ async function DmThread({ threadId }: { threadId: string }) {
   const other = getUser(otherId);
   const otherName = other?.displayName ?? otherId;
 
-  const members = listMemberViews();
-
   return (
     <>
       <DmList activeThreadId={thread.id} />
@@ -66,7 +64,6 @@ async function DmThread({ threadId }: { threadId: string }) {
         initialView={toMessageView(listDMMessages({ threadId: thread.id }))}
         title={otherName}
         showHash={false}
-        members={members}
         headerAvatar={{ displayName: otherName, avatarColor: other?.avatarColor ?? "transparent" }}
       />
     </>
