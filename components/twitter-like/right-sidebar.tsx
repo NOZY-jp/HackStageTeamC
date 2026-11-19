@@ -31,7 +31,10 @@ export function RightSidebar({ hideSearch = false }: { hideSearch?: boolean }) {
         <ul>
           {trends.map((trend) => (
             <li key={trend.id}>
-              <Link href={`/twitter/search?q=${encodeURIComponent(trend.name)}`} className="tw-trend">
+              <Link
+                href={`/twitter/search?q=${encodeURIComponent(trend.name)}`}
+                className="tw-trend"
+              >
                 <span className="tw-trend-meta">{trend.category}</span>
                 <span className="tw-trend-name">{trend.name}</span>
                 <span className="tw-trend-meta">{formatCount(trend.postCount)} 件のポスト</span>
