@@ -15,7 +15,7 @@ export function EntryFooter({ entry }: { entry: Entry }) {
     <p className="pb-entry-footer">
       {entry.visibility === "unlisted" ? <span className="pb-unlisted">限定公開</span> : null}
       {formatDate(entry.publishedAt).slice(-5)} | カテゴリ：{entry.category} | コメント(
-      {entry.commentCount})
+      {entry.comments.length})
     </p>
   );
 }

@@ -3,6 +3,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { BlogFrame } from "@/components/blog-like/blog-frame";
 import { EntryBody } from "@/components/blog-like/entry-body";
+import { EntryComments } from "@/components/blog-like/entry-comments";
 import { EntryDate, EntryFooter } from "@/components/blog-like/entry-meta";
 import {
   blogPath,
@@ -50,6 +51,7 @@ export default async function EntryPage({ params }: Props) {
         <h1 className="pb-entry-title">{entry.title}</h1>
         <EntryBody blocks={entry.body} />
         <EntryFooter entry={entry} />
+        <EntryComments comments={entry.comments} />
       </article>
       <nav className="pb-pager" aria-label="前後の記事">
         {older ? <Link href={entryPath(blog.id, older.id)}>« 前の記事</Link> : <span />}

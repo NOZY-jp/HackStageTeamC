@@ -34,10 +34,37 @@ describe("lib/blog-like のダミーデータの整合性", () => {
     }
   });
 
-  it("昔の呼び方（シナリオの鍵）と本名はブログに出てこない", () => {
+  it("「でんちゃん」は本文には出さず、コメントにだけ1回だけ出る", () => {
+    const bodies = JSON.stringify(entries.map((entry) => entry.body));
+    expect(bodies).not.toContain("でんちゃん");
+
+    const comments = entries.flatMap((entry) => entry.comments);
+    const den = comments.filter(
+      (comment) => comment.body.includes("でんちゃん") || comment.authorName === "でんちゃん",
+    );
+    expect(den).toHaveLength(1);
+    // 2019年の記事にだけ残っている（祖母のコメント）
+    const entry = entries.find((candidate) => candidate.comments.some((c) => c.id === den[0].id));
+    expect(entry?.publishedAt.startsWith("2019")).toBe(true);
+  });
+
+  it("昔の呼び方（ゆっちゃん）と本名は、コメントも含めて出てこない", () => {
     const text = JSON.stringify({ blogs, entries });
-    for (const word of ["でんちゃん", "ゆっちゃん", "服部", "由比"]) {
+    for (const word of ["ゆっちゃん", "服部", "由比"]) {
       expect(text, word).not.toContain(word);
+    }
+  });
+
+  it("コメント数とコメント配列の長さが一致し、IDは重複しない", () => {
+    const ids = entries.flatMap((entry) => entry.comments.map((comment) => comment.id));
+    expect(new Set(ids).size).toBe(ids.length);
+    for (const entry of entries) {
+      expect(entry.comments.length).toBeGreaterThanOrEqual(0);
+      for (const comment of entry.comments) {
+        expect(comment.postedAt.slice(0, 10) >= entry.publishedAt.slice(0, 10)).toBe(true);
+        expect(comment.body.length).toBeGreaterThan(0);
+        expect(comment.authorName.length).toBeGreaterThan(0);
+      }
     }
   });
 
