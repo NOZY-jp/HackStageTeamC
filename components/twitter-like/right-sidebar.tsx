@@ -5,33 +5,40 @@ import { formatCount } from "./format";
 import { SearchIcon, VerifiedBadge } from "./icons";
 import { isVerified } from "./lookup";
 
-export function RightSidebar() {
+export function RightSidebar({ hideSearch = false }: { hideSearch?: boolean }) {
   const trends = listTrends();
   const suggestions = listUsers()
     .filter((user) => user.handle !== "hal")
     .slice(0, 3);
   return (
     <aside className="tw-right" aria-label="サイドバー">
-      <div className="tw-search">
-        <SearchIcon />
-        <input
-          type="search"
-          className="tw-search-input"
-          placeholder="検索"
-          aria-label="検索（無効）"
-          disabled
-        />
-      </div>
+      {hideSearch ? null : (
+        <form className="tw-search" action="/twitter/search">
+          <SearchIcon />
+          <input
+            type="search"
+            name="q"
+            className="tw-search-input"
+            placeholder="検索"
+            aria-label="検索"
+          />
+        </form>
+      )}
       <section className="tw-card" aria-labelledby="tw-trends-heading">
         <h2 id="tw-trends-heading" className="tw-card-title">
           いま話題
         </h2>
         <ul>
           {trends.map((trend) => (
-            <li key={trend.id} className="tw-trend">
-              <span className="tw-trend-meta">{trend.category}</span>
-              <span className="tw-trend-name">{trend.name}</span>
-              <span className="tw-trend-meta">{formatCount(trend.postCount)} 件のポスト</span>
+            <li key={trend.id}>
+              <Link
+                href={`/twitter/search?q=${encodeURIComponent(trend.name)}`}
+                className="tw-trend"
+              >
+                <span className="tw-trend-meta">{trend.category}</span>
+                <span className="tw-trend-name">{trend.name}</span>
+                <span className="tw-trend-meta">{formatCount(trend.postCount)} 件のポスト</span>
+              </Link>
             </li>
           ))}
         </ul>
