@@ -73,7 +73,7 @@ export const twitterProfiles: Profile[] = [
   },
   {
     userId: "tw-gameinfo",
-    bio: "例のゲームの非公式まとめ。メンテ情報とイベント速報。",
+    bio: "例のゲームの非公式まとめ。メンテ情報とイベント速報。 https://example.com/game-info",
     joinedAt: "2026-11-01",
     followingCount: 15,
     followersCount: 3120,
@@ -194,7 +194,7 @@ export const twitterPosts: Post[] = [
     id: "post-012",
     authorId: "tw-gameinfo",
     postedAt: "2026-11-10T09:00:00+09:00",
-    body: "【定期メンテ】11/12(木) 14:00〜17:00。終了後に小さな修正パッチが入ります。",
+    body: "【定期メンテ】11/12(木) 14:00〜17:00。終了後に小さな修正パッチが入ります。詳細→ https://example.com/news/mainte-1112",
     replyCount: 8,
     repostCount: 62,
     likeCount: 410,
