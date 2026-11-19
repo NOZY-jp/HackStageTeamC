@@ -129,11 +129,12 @@ describe("searchPosts", () => {
   });
 
   it("投稿者の表示名・handleも検索対象にする", () => {
-    const posts = searchPosts("hal");
+    // displayName「げーむ通信」とhandle「game-info」が別文字列の fixture で、
+    // 片方の経路が壊れても検出できるようにそれぞれ独立に検証する
+    expect(searchPosts("げーむ通信").map((post) => post.id)).toContain("post-001");
+    expect(searchPosts("game-info").map((post) => post.id)).toContain("post-001");
     // 本文に "hal" を含まない Hal 本人の投稿も返る
-    expect(posts.map((post) => post.id)).toContain("post-002");
-    // mai の投稿は mai 自身の投稿が返る
-    expect(searchPosts("mai").map((post) => post.id)).toContain("post-003");
+    expect(searchPosts("hal").map((post) => post.id)).toContain("post-002");
   });
 
   it("鍵アカウントの投稿は検索結果に出さない", () => {
