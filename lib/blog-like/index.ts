@@ -1,7 +1,7 @@
 import { blogs, entries, mylists } from "./data/blog";
 import type { Blog, Entry, Mylist } from "./types";
 
-export type { Blog, Entry, EntryBlock, Mylist } from "./types";
+export type { Blog, Comment, Entry, EntryBlock, Mylist } from "./types";
 export * from "./url";
 
 /** ブログサービス名（作中の架空サービス） */
