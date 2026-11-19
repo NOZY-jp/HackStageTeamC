@@ -10,7 +10,7 @@ import {
   useState,
 } from "react";
 import { PaneToggles } from "@/components/discord-like/pane-toggles";
-import type { Message, MessageAuthor } from "@/lib/discord-like/types";
+import type { MemberView, Message, MessageAuthor } from "@/lib/discord-like/types";
 import { EmptyState } from "./empty-state";
 import { MessageRow } from "./message-row";
 
@@ -62,6 +62,7 @@ export function MessageList({
   scrollRef,
   contentRef,
   onJumpToLatest,
+  members = [],
 }: {
   messages: Message[];
   /** 書き手情報（サーバーから渡される）。 */
@@ -88,11 +89,18 @@ export function MessageList({
   contentRef?: RefObject<HTMLDivElement | null>;
   /** 「最新へ」を押したとき（位置補正の基準を捨てるために親へ知らせる）。 */
   onJumpToLatest?: () => void;
+  /** 右パネルに出すメンバー一覧。 */
+  members?: MemberView[];
 }) {
   const fallbackScrollRef = useRef<HTMLDivElement>(null);
   const scrollElement = scrollRef ?? fallbackScrollRef;
   const sentinelRef = useRef<HTMLDivElement>(null);
   const [awayFromBottom, setAwayFromBottom] = useState(false);
+  const [showMembers, setShowMembers] = useState(false);
+  const [openProfileId, setOpenProfileId] = useState<string | null>(null);
+
+  const onlineMembers = members.filter((member) => member.status !== "offline");
+  const offlineMembers = members.filter((member) => member.status === "offline");
 
   // 初回表示・チャンネル切替時は最下部（最新）へ
   // biome-ignore lint/correctness/useExhaustiveDependencies: resetKey はチャンネル切替の合図。ref は依存にしない
@@ -218,7 +226,13 @@ export function MessageList({
               <path d="m20 20-3.5-3.5" />
             </svg>
           </span>
-          <span role="img" aria-label="メンバー" className="message-header-icon">
+          <button
+            type="button"
+            aria-label="メンバー"
+            aria-expanded={showMembers}
+            className="message-header-icon message-header-button"
+            onClick={() => setShowMembers((previous) => !previous)}
+          >
             <svg
               aria-hidden="true"
               viewBox="0 0 24 24"
@@ -234,9 +248,79 @@ export function MessageList({
               <path d="M3.5 20a5.5 5.5 0 0 1 11 0" />
               <path d="M16 5.5a3 3 0 0 1 0 5.6M17.5 20a5 5 0 0 0-2-4" />
             </svg>
-          </span>
+          </button>
         </div>
       </header>
+
+      {showMembers ? (
+        <aside className="members-panel" aria-label="メンバー一覧">
+          <div className="members-panel-head">
+            <h2 className="members-panel-title">メンバー</h2>
+            <button
+              type="button"
+              className="members-panel-close"
+              aria-label="メンバー一覧を閉じる"
+              onClick={() => setShowMembers(false)}
+            >
+              ×
+            </button>
+          </div>
+          <div className="members-panel-scroll">
+            {[
+              { label: `オンライン — ${onlineMembers.length}`, list: onlineMembers },
+              { label: `オフライン — ${offlineMembers.length}`, list: offlineMembers },
+            ].map((group) => (
+              <section key={group.label} className="members-group" aria-label={group.label}>
+                <h3 className="members-group-title">{group.label}</h3>
+                <ul className="members-list">
+                  {group.list.map((member) => (
+                    <li key={member.id} className="members-item">
+                      <button
+                        type="button"
+                        className="members-row"
+                        aria-expanded={openProfileId === member.id}
+                        onClick={() =>
+                          setOpenProfileId((previous) =>
+                            previous === member.id ? null : member.id,
+                          )
+                        }
+                      >
+                        <span
+                          aria-hidden="true"
+                          className="members-avatar"
+                          style={{ backgroundColor: member.avatarColor }}
+                        >
+                          {member.displayName.slice(0, 1)}
+                        </span>
+                        <span className="members-names">
+                          <span className="members-name">{member.displayName}</span>
+                          <span className="members-handle">{member.handle}</span>
+                        </span>
+                        <span className="members-status" data-status={member.status ?? "offline"} />
+                      </button>
+                      {openProfileId === member.id ? (
+                        <div className="members-profile">
+                          <p className="members-profile-handle">{member.handle}</p>
+                          {member.profileUrl ? (
+                            <a
+                              className="members-profile-link"
+                              href={member.profileUrl}
+                              target="_blank"
+                              rel="noreferrer noopener"
+                            >
+                              プロフィールのリンク
+                            </a>
+                          ) : null}
+                        </div>
+                      ) : null}
+                    </li>
+                  ))}
+                </ul>
+              </section>
+            ))}
+          </div>
+        </aside>
+      ) : null}
 
       <div ref={scrollElement} className="pane-scroll message-scroll" onScroll={handleScroll}>
         {messages.length === 0 ? (

@@ -2,8 +2,10 @@ import type { User } from "../types";
 import {
   HAL_HANDLE,
   HAL_NAME,
+  KAI_DISPLAY_NAME,
   KAI_HANDLE,
-  KAI_NAME,
+  KANON_HANDLE,
+  KANON_NAME,
   MAIMAI_HANDLE,
   MAIMAI_NAME,
   OLD_BLOG_ARCHIVE_URL,
@@ -71,18 +73,26 @@ export const users: User[] = [
   },
   {
     id: "kai",
-    displayName: KAI_NAME,
+    displayName: KAI_DISPLAY_NAME,
     handle: KAI_HANDLE,
     avatarColor: "#3ba55d",
     status: "online",
   },
   {
-    // 昔のゲーム内ハンドルと完全一致するアカウント。ずっとオフラインのまま。
-    id: "shiro",
+    // 昔のゲーム内ハンドルと一致する旧垢。ずっとオフラインのまま（現在のハンドルとは別）。
+    id: "denden",
     displayName: OLD_DISPLAY_NAME,
     handle: OLD_HANDLE,
     avatarColor: "#7289da",
     status: "offline",
     profileUrl: OLD_BLOG_ARCHIVE_URL,
+  },
+  {
+    // 憶測: Discord のハンドルは未提供（Twixer の @kanon__dayo に寄せた仮決め）
+    id: "kanon",
+    displayName: KANON_NAME,
+    handle: KANON_HANDLE,
+    avatarColor: "#f47fff",
+    status: "offline",
   },
 ];

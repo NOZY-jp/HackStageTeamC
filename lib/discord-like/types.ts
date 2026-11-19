@@ -120,3 +120,13 @@ export type MessageView = {
   nextCursor: string | null;
   authors: Record<string, MessageAuthor>;
 };
+
+/** メンバー一覧に出す1人分（ハンドル・状態・プロフィールリンク）。 */
+export type MemberView = {
+  id: string;
+  displayName: string;
+  handle: string;
+  avatarColor: string;
+  status?: "online" | "idle" | "dnd" | "offline";
+  profileUrl?: string;
+};

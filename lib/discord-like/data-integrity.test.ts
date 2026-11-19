@@ -1,6 +1,15 @@
 import { describe, expect, it } from "vitest";
 import { SELF_USER_ID } from "@/app/(discord-like)/_components/self-user";
-import { KAI_NAME, OLD_BLOG_ARCHIVE_URL, OLD_DISPLAY_NAME, OLD_HANDLE } from "./data/names";
+import {
+  HAL_HANDLE,
+  HAL_NAME,
+  KAI_DISPLAY_NAME,
+  MAIMAI_HANDLE,
+  MAIMAI_NAME,
+  OLD_BLOG_ARCHIVE_URL,
+  OLD_DISPLAY_NAME,
+  OLD_HANDLE,
+} from "./data/names";
 import {
   getChannel,
   getGuild,
@@ -13,6 +22,7 @@ import {
   listVoiceStates,
 } from "./index";
 import type { Message } from "./types";
+import { listMemberViews } from "./view";
 
 const GUILD_ID = "mhc";
 const DM_THREAD_ID = "dm-maimai";
@@ -49,13 +59,13 @@ describe("ダミーデータの整合性", () => {
     expect(getGuild("s1")).toBeUndefined();
   });
 
-  it("Hal（自分）と MaiMai がいて、汎用の「メンバー01」名は残っていない", () => {
+  it("自分（琥珀）と MaiMai がいて、汎用の「メンバー01」名は残っていない", () => {
     const self = getUser(SELF_USER_ID);
-    expect(self?.displayName).toBe("Hal");
-    expect(self?.handle).toBe("skill5hot1202");
+    expect(self?.displayName).toBe(HAL_NAME);
+    expect(self?.handle).toBe(HAL_HANDLE);
     const mai = getUser("maimai");
-    expect(mai?.displayName).toBe("MaiMai");
-    expect(mai?.handle).toBe("maimai1110");
+    expect(mai?.displayName).toBe(MAIMAI_NAME);
+    expect(mai?.handle).toBe(MAIMAI_HANDLE);
 
     const members = listChannels(GUILD_ID).length > 0 ? getUser("gunlance") : undefined;
     expect(members).toBeDefined();
@@ -280,7 +290,7 @@ describe("謎解きの手がかり（順序1・4・5・6・9・11）", () => {
       "jijii",
       "master",
       "kai",
-      "shiro",
+      "denden",
     ];
     const old = users.map((id) => getUser(id)).find((user) => user?.handle === OLD_HANDLE);
     expect(old).toBeDefined();
@@ -301,13 +311,13 @@ describe("謎解きの手がかり（順序1・4・5・6・9・11）", () => {
       "jijii",
       "master",
       "kai",
-      "shiro",
+      "denden",
     ]
       .map((id) => getUser(id))
       .find((user) => user?.handle === OLD_HANDLE);
     expect(old?.profileUrl).toBe(OLD_BLOG_ARCHIVE_URL);
     expect(old?.profileUrl?.endsWith("/")).toBe(false);
-    expect(old?.profileUrl).toContain("archive");
+    expect(old?.profileUrl).toContain("dendenkari");
   });
 
   it("中2の頃の攻略ブログの話が会話にあり、検索語を含む（順序1）", () => {
@@ -332,7 +342,7 @@ describe("謎解きの手がかり（順序1・4・5・6・9・11）", () => {
 
   it("カイからの進捗連絡があり、カイは実在する（順序9）", () => {
     const kai = getUser("kai");
-    expect(kai?.displayName).toBe(KAI_NAME);
+    expect(kai?.displayName).toBe(KAI_DISPLAY_NAME);
     const fromKai = serverMessages().filter(
       (message) => message.authorId === "kai" && message.body.includes("進んだ"),
     );
@@ -348,5 +358,75 @@ describe("謎解きの手がかり（順序1・4・5・6・9・11）", () => {
     const last = all[all.length - 1];
     expect(last.body).toBe("住所を特定しました");
     expect(all.some((message) => /丁目|番地|号室/.test(message.body))).toBe(false);
+  });
+});
+
+describe("名前の差し替え（#76 の確定値）", () => {
+  it("旧垢は現在のどのハンドルとも一致しない（別ID）", () => {
+    const handles = [
+      "hal",
+      "maimai",
+      "gunlance",
+      "mina",
+      "haruka",
+      "slime",
+      "jijii",
+      "master",
+      "kai",
+      "denden",
+      "kanon",
+    ]
+      .map((id) => getUser(id)?.handle)
+      .filter((handle): handle is string => Boolean(handle));
+    expect(handles).toContain(OLD_HANDLE);
+    expect(handles).toContain(HAL_HANDLE);
+    expect(handles).toContain(MAIMAI_HANDLE);
+    expect(OLD_HANDLE).not.toBe(HAL_HANDLE);
+    expect(OLD_HANDLE).not.toBe(MAIMAI_HANDLE);
+  });
+
+  it("旧垢の連鎖（ブログ → 旧Twixer → 旧Discord）が矛盾しない", () => {
+    // ブログ名「でんでんの狩猟記録」に連なる旧垢のハンドル（別PFの旧アカウントを経由）
+    expect(OLD_HANDLE.startsWith("hunter_denden")).toBe(true);
+    expect(OLD_DISPLAY_NAME).toBe("hunter_denden");
+    expect(OLD_BLOG_ARCHIVE_URL).toContain("pochiblo/dendenkari");
+  });
+
+  it("順序4のスクショに旧ハンドルが描かれている", async () => {
+    const fs = await import("node:fs/promises");
+    const svg = await fs.readFile("public/mock/screenshot-2019.svg", "utf8");
+    expect(svg).toContain(OLD_HANDLE);
+    expect(svg).not.toContain(HAL_HANDLE);
+    expect(svg).not.toContain(MAIMAI_HANDLE);
+  });
+});
+
+describe("メンバー一覧と順序9のヒント", () => {
+  it("一覧にオフラインの旧垢が居て、プロフィールは記事一覧URL", () => {
+    const members = listMemberViews();
+    const old = members.find((member) => member.handle === OLD_HANDLE);
+    expect(old).toBeDefined();
+    expect(old?.status).toBe("offline");
+    expect(old?.profileUrl).toBe(OLD_BLOG_ARCHIVE_URL);
+    expect(old?.profileUrl).toContain("/pochiblo/dendenkari");
+    expect(old?.profileUrl?.endsWith("/")).toBe(false);
+    // オンラインとオフラインの両方が居る（見出し分けの前提）
+    expect(members.some((member) => member.status !== "offline")).toBe(true);
+  });
+
+  it("順序9のヒント語（Facebook / 本名 / 検索）がサーバーの会話にある", () => {
+    const text = serverMessages()
+      .map((message) => message.body)
+      .join(" / ");
+    expect(text).toMatch(/facebook/i);
+    expect(text).toContain("本名");
+    expect(text).toContain("検索");
+  });
+
+  it("募集文に助詞の重複（からから・のの・をを等）が無い", () => {
+    const all = [...serverMessages(), ...dmMessages()].map((message) => message.body);
+    for (const body of all) {
+      expect(body).not.toMatch(/からから|のの|をを|がが|にに|はは/);
+    }
   });
 });

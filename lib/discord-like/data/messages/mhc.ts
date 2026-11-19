@@ -2073,7 +2073,7 @@ export const messagesByChannelMhc: Record<string, Message[]> = {
       channelId: "mhc-lfg",
       authorId: "mina",
       sentAt: "2026-01-27T21:07:00+09:00",
-      body: "白銀の尾根 素材集め｜あと3｜今からから｜ゆるく",
+      body: "白銀の尾根 素材集め｜あと3｜今から｜ゆるく",
     },
     {
       id: "mhc-lfg-0295",
@@ -2722,7 +2722,7 @@ export const messagesByChannelMhc: Record<string, Message[]> = {
       channelId: "mhc-lfg",
       authorId: "master",
       sentAt: "2026-08-09T18:36:00+09:00",
-      body: "火口の巣 素材集め｜あと2｜今からから｜ゆるく",
+      body: "火口の巣 素材集め｜あと2｜今から｜ゆるく",
     },
     {
       id: "mhc-lfg-0387",
@@ -2829,7 +2829,7 @@ export const messagesByChannelMhc: Record<string, Message[]> = {
       channelId: "mhc-lfg",
       authorId: "mina",
       sentAt: "2026-09-16T19:56:00+09:00",
-      body: "眠りの火山 素材集め｜あと1｜今からから｜ゆるく",
+      body: "眠りの火山 素材集め｜あと1｜今から｜ゆるく",
     },
     {
       id: "mhc-lfg-0402",
@@ -4665,12 +4665,26 @@ export const messagesByChannelMhc: Record<string, Message[]> = {
     {
       id: "mhc-chat-0229",
       channelId: "mhc-chat",
+      authorId: "kai",
+      sentAt: "2026-11-18T20:24:00+09:00",
+      body: "FaceBookだと本名で検索したら結構出てくるぞ？",
+    },
+    {
+      id: "mhc-chat-0230",
+      channelId: "mhc-chat",
+      authorId: "hal",
+      sentAt: "2026-11-18T20:27:00+09:00",
+      body: "本名で検索、やってみる",
+    },
+    {
+      id: "mhc-chat-0231",
+      channelId: "mhc-chat",
       authorId: "slime",
       sentAt: "2026-11-19T17:28:00+09:00",
       body: "回線落ちた",
     },
     {
-      id: "mhc-chat-0230",
+      id: "mhc-chat-0232",
       channelId: "mhc-chat",
       authorId: "hal",
       sentAt: "2026-11-19T20:23:00+09:00",
@@ -4678,14 +4692,14 @@ export const messagesByChannelMhc: Record<string, Message[]> = {
       reactions: [{ emoji: "😂", count: 3, me: true }],
     },
     {
-      id: "mhc-chat-0231",
+      id: "mhc-chat-0233",
       channelId: "mhc-chat",
       authorId: "gunlance",
       sentAt: "2026-11-19T23:41:00+09:00",
       body: "どこで作ったの",
     },
     {
-      id: "mhc-chat-0232",
+      id: "mhc-chat-0234",
       channelId: "mhc-chat",
       authorId: "kai",
       sentAt: "2026-11-19T23:52:00+09:00",

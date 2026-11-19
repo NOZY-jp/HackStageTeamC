@@ -1361,7 +1361,7 @@ export const messagesByDMThread: Record<string, Message[]> = {
       channelId: "dm-maimai",
       sentAt: "2026-09-06T14:05:00+09:00",
       authorId: "maimai",
-      body: "この動画おもしろい https://example.com/clips/0912",
+      body: "この動画、笑った https://example.com/clips/0912",
     },
     {
       id: "dm-maimai-0192",
