@@ -14,21 +14,28 @@ const TOKEN_RE = /(https?:\/\/[A-Za-z0-9\-._~:/?#[\]@!$&'()*+,;=%]+)|@([A-Za-z0-
 // URL 末尾に来がちな句読点・閉じ括弧はリンク対象から外す
 const TRAILING_PUNCT_RE = /[.,!?;:'"’”、。）\]】」』]+$/;
 
-// URL 内の ) を出現順に走査し、対応する ( が無い ) が現れた地点で URL を切る。
-// （総数比較だと `)(bar)` 型で誤判定するため）
-const cutAtUnmatchedCloseParen = (text: string): string => {
+// URL 末尾の接尾辞に残った対応しない ) だけを外す。
+// ( と ) を出現順に対応付け（総数比較だと `)(bar)` 型で誤判定）、
+// URL 内部の ) は URL 文字として維持する（`/a)b` は全文がリンク）。
+const stripUnmatchedTrailingCloseParens = (text: string): string => {
   let depth = 0;
+  const unmatched = new Set<number>();
   for (let i = 0; i < text.length; i += 1) {
     if (text[i] === "(") {
       depth += 1;
     } else if (text[i] === ")") {
       if (depth === 0) {
-        return text.slice(0, i);
+        unmatched.add(i);
+      } else {
+        depth -= 1;
       }
-      depth -= 1;
     }
   }
-  return text;
+  let end = text.length;
+  while (end > 0 && unmatched.has(end - 1)) {
+    end -= 1;
+  }
+  return text.slice(0, end);
 };
 
 // @ の直前が英数字・アンダースコアならメンションではない（メールアドレス等）
@@ -48,7 +55,7 @@ export function LinkifiedText({ text }: { text: string }) {
     }
     if (url !== undefined) {
       const punct = TRAILING_PUNCT_RE.exec(url)?.[0] ?? "";
-      const href = cutAtUnmatchedCloseParen(url.slice(0, url.length - punct.length));
+      const href = stripUnmatchedTrailingCloseParens(url.slice(0, url.length - punct.length));
       // 外した文字は元の接尾辞の順序のまま再出力する
       const trailing = url.slice(href.length);
       nodes.push(

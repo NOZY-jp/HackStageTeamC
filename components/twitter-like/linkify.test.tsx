@@ -75,10 +75,15 @@ describe("LinkifiedText", () => {
     expect(container).toHaveTextContent("(https://example.com/a).");
   });
 
-  it("対応する ( が無い ) が途中に現れたらそこで URL を切る", () => {
+  it("URL内部の対応しない ) は URL 文字として維持される", () => {
     const { container } = render(<LinkifiedText text="https://example.com/wiki/)(bar)" />);
-    expect(screen.getByRole("link")).toHaveAttribute("href", "https://example.com/wiki/");
-    expect(container).toHaveTextContent("https://example.com/wiki/)(bar)");
+    expect(screen.getByRole("link")).toHaveAttribute("href", "https://example.com/wiki/)(bar)");
+  });
+
+  it("対応しない ) が内部にあるURLも途中で切らない", () => {
+    const { container } = render(<LinkifiedText text="https://example.com/a)b 参照" />);
+    expect(screen.getByRole("link")).toHaveAttribute("href", "https://example.com/a)b");
+    expect(container).toHaveTextContent(" 参照");
   });
 
   it("連続ハイフンを含む未知メンションはリンクにしない", () => {
