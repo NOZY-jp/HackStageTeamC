@@ -386,7 +386,7 @@ export function MessageList({
                               target="_blank"
                               rel="noreferrer noopener"
                             >
-                              プロフィールのリンク
+                              でんでんの狩猟日記 ぜんぶ
                             </a>
                           ) : null}
                         </div>

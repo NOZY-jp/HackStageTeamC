@@ -417,14 +417,14 @@ export const messagesByDMThread: Record<string, Message[]> = {
       channelId: "dm-maimai",
       sentAt: "2026-04-18T23:12:00+09:00",
       authorId: "maimai",
-      body: "休み。中2の頃って何して遊んでた？",
+      body: "休み。中3の頃って何して遊んでた？",
     },
     {
       id: "dm-maimai-0060",
       channelId: "dm-maimai",
       sentAt: "2026-04-18T23:15:00+09:00",
       authorId: "hal",
-      body: "中2の頃は攻略ブログ書いてた。毎日モンハンやってた",
+      body: "中3の頃は攻略ブログ書いてた。毎日モンハンやってた",
     },
     {
       id: "dm-maimai-0061",

@@ -317,13 +317,13 @@ describe("謎解きの手がかり（順序1・4・5・6・9・11）", () => {
       .find((user) => user?.handle === OLD_HANDLE);
     expect(old?.profileUrl).toBe(OLD_BLOG_ARCHIVE_URL);
     expect(old?.profileUrl?.endsWith("/")).toBe(false);
-    expect(old?.profileUrl).toContain("dendenkari");
+    expect(old?.profileUrl).toBe(OLD_BLOG_ARCHIVE_URL);
   });
 
-  it("中2の頃の攻略ブログの話が会話にあり、検索語を含む（順序1）", () => {
+  it("中3の頃の攻略ブログの話が会話にあり、検索語を含む（順序1）", () => {
     const messages = dmMessages();
     const haystack = messages.map((message) => message.body).join(" / ");
-    expect(haystack).toContain("中2");
+    expect(haystack).toContain("中3");
     expect(haystack).toContain("攻略ブログ");
     expect(haystack).toMatch(/note/);
   });
@@ -389,7 +389,7 @@ describe("名前の差し替え（#76 の確定値）", () => {
     // ブログ名「でんでんの狩猟記録」に連なる旧垢のハンドル（別PFの旧アカウントを経由）
     expect(OLD_HANDLE.startsWith("hunter_denden")).toBe(true);
     expect(OLD_DISPLAY_NAME).toBe("hunter_denden");
-    expect(OLD_BLOG_ARCHIVE_URL).toContain("pochiblo/dendenkari");
+    expect(OLD_BLOG_ARCHIVE_URL).toBe("/pochiblo/mylist/k7q2m9d4");
   });
 
   it("順序4のスクショに旧ハンドルが描かれている", async () => {
@@ -408,7 +408,7 @@ describe("メンバー一覧と順序9のヒント", () => {
     expect(old).toBeDefined();
     expect(old?.status).toBe("offline");
     expect(old?.profileUrl).toBe(OLD_BLOG_ARCHIVE_URL);
-    expect(old?.profileUrl).toContain("/pochiblo/dendenkari");
+    expect(old?.profileUrl).toBe("/pochiblo/mylist/k7q2m9d4");
     expect(old?.profileUrl?.endsWith("/")).toBe(false);
     // オンラインとオフラインの両方が居る（見出し分けの前提）
     expect(members.some((member) => member.status !== "offline")).toBe(true);

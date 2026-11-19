@@ -22,11 +22,9 @@ export const OLD_HANDLE = "hunter_denden3243";
 export const OLD_DISPLAY_NAME = "hunter_denden";
 
 /**
- * 旧アカウントのプロフィールに載っているブログの記事一覧（トップではない）。
- * TODO(#75): 元ブログ（#75）の作中ルートが確定したら、その記事一覧URLへ差し替える。
- * それまでは暫定のドメインで、パスは必ず「記事一覧」を指す（トップ "/" にしない）。
+ * 旧アカウントのプロフィールに載っているブログの記事一覧（#75 のマイリスト。トップではない）。
  */
-export const OLD_BLOG_ARCHIVE_URL = "https://pochiblo.example/pochiblo/dendenkari";
+export const OLD_BLOG_ARCHIVE_URL = "/pochiblo/mylist/k7q2m9d4";
 
 /** 人物名（会話の呼び方）と、Discord の表示名は別。 */
 export const KAI_NAME = "カイ";
