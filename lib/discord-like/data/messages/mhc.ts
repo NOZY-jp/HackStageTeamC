@@ -3206,14 +3206,14 @@ export const messagesByChannelMhc: Record<string, Message[]> = {
       channelId: "mhc-chat",
       authorId: "jijii",
       sentAt: "2025-02-26T19:27:00+09:00",
-      body: "回来た",
+      body: "帰ってきた",
     },
     {
       id: "mhc-chat-0023",
       channelId: "mhc-chat",
       authorId: "haruka",
       sentAt: "2025-03-05T20:34:00+09:00",
-      body: "回来た",
+      body: "帰ってきた",
     },
     {
       id: "mhc-chat-0024",
@@ -3503,7 +3503,7 @@ export const messagesByChannelMhc: Record<string, Message[]> = {
       channelId: "mhc-chat",
       authorId: "mina",
       sentAt: "2025-07-11T14:45:00+09:00",
-      body: "回来た",
+      body: "帰ってきた",
     },
     {
       id: "mhc-chat-0065",
@@ -4073,7 +4073,7 @@ export const messagesByChannelMhc: Record<string, Message[]> = {
       channelId: "mhc-chat",
       authorId: "haruka",
       sentAt: "2026-06-09T13:18:00+09:00",
-      body: "回来た",
+      body: "帰ってきた",
     },
     {
       id: "mhc-chat-0146",
@@ -4639,7 +4639,7 @@ export const messagesByChannelMhc: Record<string, Message[]> = {
       channelId: "mhc-chat",
       authorId: "slime",
       sentAt: "2026-11-16T23:00:00+09:00",
-      body: "回来た",
+      body: "帰ってきた",
     },
     {
       id: "mhc-chat-0226",

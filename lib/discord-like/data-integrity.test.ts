@@ -423,6 +423,22 @@ describe("メンバー一覧と順序9のヒント", () => {
     expect(text).toContain("検索");
   });
 
+  it("不自然な漢字の連結（回来・去来・行来など）が無い", () => {
+    const all = [...serverMessages(), ...dmMessages()].map((message) => message.body);
+    for (const body of all) {
+      expect(body).not.toMatch(/回来|去来|行来|来た来/);
+    }
+  });
+
+  it("同じ言い回しの3連続が無い（募集文の重複コピー防止）", () => {
+    const bodies = serverMessages().map((message) => message.body);
+    let streak = 1;
+    for (let i = 1; i < bodies.length; i += 1) {
+      streak = bodies[i] === bodies[i - 1] ? streak + 1 : 1;
+      expect(streak).toBeLessThan(3);
+    }
+  });
+
   it("募集文に助詞の重複（からから・のの・をを等）が無い", () => {
     const all = [...serverMessages(), ...dmMessages()].map((message) => message.body);
     for (const body of all) {
