@@ -47,6 +47,15 @@ npm run dev   # http://localhost:3000
 - ライトテーマ。配色は `app/globals.css` の `.note-shell` の中だけで定義する
 - 記事は `lib/note-like/data/articles.ts`、書き手は `lib/note-like/data/creators.ts`。記事はまだ空で、脚本が固まってから入れる
 
+## 元のブログ（Issue #73）
+
+彼女が中学生のころ書いていた元のブログ「しろの狩猟記録」（架空のブログサービス「ぽちブロ」、2018-01〜2020-02）。`/pochiblo/shirokari`。
+
+- 「閉鎖」は個人ブログでよくある形で、更新を止めて「ブログ閉鎖のお知らせ」を置いただけ。過去の記事は今も公開されている
+- 記事のリンクは今のページへそのまま進む（Twixer の古い投稿はリンク切れ、閉鎖のお知らせは leaf の新しいアカウントへ）
+- 画面: `app/(blog-like)/`、部品: `components/blog-like/`、データ: `lib/blog-like/`（記事 `data/blog.ts`）
+- 他プラットフォームと揃える仮の値（古い Twixer のハンドルなど）は `lib/blog-like/data/names.ts` に集めている
+
 ## ファイル配置（Discord like UI と新プラットフォーム）
 
 Discord like UI は次の 3 つの名前空間にまとめている。名前だけで用途が分かるようにするための置き場で、機能ごとの分割ではない。
