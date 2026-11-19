@@ -1,7 +1,6 @@
 "use client";
 
-import { getUser } from "@/lib/discord-like";
-import type { Message } from "@/lib/discord-like/types";
+import type { Message, MessageAuthor } from "@/lib/discord-like/types";
 import { MessageAttachments } from "./message-attachments";
 
 /**
@@ -10,24 +9,31 @@ import { MessageAttachments } from "./message-attachments";
  */
 export function MessageRow({
   message,
+  authors,
   grouped,
   replyTarget,
   time,
 }: {
   message: Message;
+  /** サーバーから渡された書き手情報（クライアントはデータ層を import しない） */
+  authors: Record<string, MessageAuthor>;
   grouped: boolean;
   replyTarget: Message | undefined;
   time: string;
 }) {
-  const author = getUser(message.authorId);
+  const author = authors[message.authorId];
   const displayName = author?.displayName ?? message.authorId;
   const hasReply = Boolean(message.replyToId);
   const replyName = replyTarget
-    ? (getUser(replyTarget.authorId)?.displayName ?? replyTarget.authorId)
+    ? (authors[replyTarget.authorId]?.displayName ?? replyTarget.authorId)
     : null;
 
   return (
-    <article className="message" data-grouped={grouped ? "true" : undefined}>
+    <article
+      className="message"
+      data-message-id={message.id}
+      data-grouped={grouped ? "true" : undefined}
+    >
       {grouped ? null : (
         <span
           aria-hidden="true"
