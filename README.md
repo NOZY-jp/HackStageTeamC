@@ -45,7 +45,7 @@ npm run dev   # http://localhost:3000
 
 - 動くのは検索（タイトル・要約・本文・タグ・書き手の名前とID）、タグからの検索、スキ（押した状態は保存しない）だけ。ログインや投稿は作っていない
 - ライトテーマ。配色は `app/globals.css` の `.note-shell` の中だけで定義する
-- 記事は `lib/note-like/data/articles.ts`、書き手は `lib/note-like/data/creators.ts`。記事はまだ空で、脚本が固まってから入れる
+- 記事は `lib/note-like/data/articles.ts`、書き手は `lib/note-like/data/creators.ts`。作品世界に合わせたダミーデータで、`shiro_hunt` が彼女の高校生のころのアカウント（2020〜2021年春）。活動名「しろ」とブログ名「しろの狩猟記録」は Twitter 側と揃える必要がある仮の名前
 
 ## ファイル配置（Discord like UI と新プラットフォーム）
 
