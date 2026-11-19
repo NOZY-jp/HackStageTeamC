@@ -9,6 +9,8 @@ export type TwitterUser = {
   handle: string;
   /** アバターの地色（HEX） */
   avatarColor: string;
+  /** 鍵アカウント。true のときプロフィール情報は公開のまま投稿一覧だけを隠す */
+  protected?: boolean;
 };
 
 export type Post = {

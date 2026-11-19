@@ -204,6 +204,13 @@ export const InfoIcon = () => (
     <path d="M12 11.5V17" />
   </Icon>
 );
+/** 鍵アカウントの錠前。プロフィール名の横と非公開表示に使う。 */
+export const LockIcon = () => (
+  <Icon>
+    <rect x="4.5" y="10.5" width="15" height="10" rx="2" />
+    <path d="M8 10.5V7.5a4 4 0 0 1 8 0v3" />
+  </Icon>
+);
 /** 細幅時の「ポストする」ボタンに出す羽ペン。 */
 export const ComposeIcon = () => (
   <Icon>
