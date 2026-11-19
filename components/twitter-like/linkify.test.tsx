@@ -68,4 +68,22 @@ describe("LinkifiedText", () => {
     );
     expect(container).toHaveTextContent("-さん に確認");
   });
+
+  it("URL末尾の混在記号は元の順序のまま再出力する", () => {
+    const { container } = render(<LinkifiedText text="(https://example.com/a)." />);
+    expect(screen.getByRole("link")).toHaveAttribute("href", "https://example.com/a");
+    expect(container).toHaveTextContent("(https://example.com/a).");
+  });
+
+  it("対応する ( が無い ) が途中に現れたらそこで URL を切る", () => {
+    const { container } = render(<LinkifiedText text="https://example.com/wiki/)(bar)" />);
+    expect(screen.getByRole("link")).toHaveAttribute("href", "https://example.com/wiki/");
+    expect(container).toHaveTextContent("https://example.com/wiki/)(bar)");
+  });
+
+  it("連続ハイフンを含む未知メンションはリンクにしない", () => {
+    const { container } = render(<LinkifiedText text="@mai--unknown です" />);
+    expect(container.querySelector("a")).toBeNull();
+    expect(container).toHaveTextContent("@mai--unknown です");
+  });
 });

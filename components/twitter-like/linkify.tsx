@@ -8,22 +8,27 @@ import { getUserByHandle } from "@/lib/twitter-like";
  */
 
 // http(s) URL（URLに使えるASCII文字のみ＝直後の日本語は拾わない）、
-// または @handle（handle は英数字・ハイフン・アンダースコア。末尾ハイフンは含めない）
-const TOKEN_RE =
-  /(https?:\/\/[A-Za-z0-9\-._~:/?#[\]@!$&'()*+,;=%]+)|@([A-Za-z0-9_]+(?:-[A-Za-z0-9_]+)*)/g;
+// または @handle（handle は英数字・ハイフン・アンダースコア）
+const TOKEN_RE = /(https?:\/\/[A-Za-z0-9\-._~:/?#[\]@!$&'()*+,;=%]+)|@([A-Za-z0-9_-]+)/g;
 
 // URL 末尾に来がちな句読点・閉じ括弧はリンク対象から外す
 const TRAILING_PUNCT_RE = /[.,!?;:'"’”、。）\]】」』]+$/;
 
-// URL 末尾の半角 ) は、URL 内に対応する ( が無いぶんだけ外す
-const splitUnbalancedCloseParen = (href: string): { href: string; trailing: string } => {
-  let rest = "";
-  const count = (ch: string) => href.split(ch).length - 1;
-  while (href.endsWith(")") && count(")") > count("(")) {
-    href = href.slice(0, -1);
-    rest += ")";
+// URL 内の ) を出現順に走査し、対応する ( が無い ) が現れた地点で URL を切る。
+// （総数比較だと `)(bar)` 型で誤判定するため）
+const cutAtUnmatchedCloseParen = (text: string): string => {
+  let depth = 0;
+  for (let i = 0; i < text.length; i += 1) {
+    if (text[i] === "(") {
+      depth += 1;
+    } else if (text[i] === ")") {
+      if (depth === 0) {
+        return text.slice(0, i);
+      }
+      depth -= 1;
+    }
   }
-  return { href, trailing: rest };
+  return text;
 };
 
 // @ の直前が英数字・アンダースコアならメンションではない（メールアドレス等）
@@ -43,9 +48,9 @@ export function LinkifiedText({ text }: { text: string }) {
     }
     if (url !== undefined) {
       const punct = TRAILING_PUNCT_RE.exec(url)?.[0] ?? "";
-      const stripped = splitUnbalancedCloseParen(url.slice(0, url.length - punct.length));
-      const href = stripped.href;
-      const trailing = punct + stripped.trailing;
+      const href = cutAtUnmatchedCloseParen(url.slice(0, url.length - punct.length));
+      // 外した文字は元の接尾辞の順序のまま再出力する
+      const trailing = url.slice(href.length);
       nodes.push(
         <a
           key={start}
@@ -60,15 +65,23 @@ export function LinkifiedText({ text }: { text: string }) {
       if (trailing) {
         nodes.push(trailing);
       }
-    } else if (getUserByHandle(handle)) {
-      nodes.push(
-        <Link key={start} href={`/twitter/profile/${handle}`} className="tw-inline-link">
-          @{handle}
-        </Link>,
-      );
     } else {
-      // 存在しない handle のメンションはリンクにしない（消えたアカウントの演出）
-      nodes.push(`@${handle}`);
+      // 連続ハイフンを含む候補は全体を照合し、末尾ハイフンだけ外す
+      const trimmed = handle.replace(/-+$/, "");
+      const droppedHyphens = handle.slice(trimmed.length);
+      if (getUserByHandle(trimmed)) {
+        nodes.push(
+          <Link key={start} href={`/twitter/profile/${trimmed}`} className="tw-inline-link">
+            @{trimmed}
+          </Link>,
+        );
+        if (droppedHyphens) {
+          nodes.push(droppedHyphens);
+        }
+      } else {
+        // 存在しない handle のメンションはリンクにしない（消えたアカウントの演出）
+        nodes.push(`@${handle}`);
+      }
     }
     lastIndex = start + token.length;
   }
