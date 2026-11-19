@@ -37,7 +37,7 @@
   <rect x="-150" y="-10" width="300" height="200" rx="6" fill="#fffdf6" stroke="#b9a77a" stroke-width="8"/>
   <text x="0" y="50" font-family="'Hiragino Mincho ProN','Yu Mincho','Noto Serif JP',serif" font-size="34" font-weight="700" fill="#2b2f45" text-anchor="middle">卒業証書</text>
   <rect x="-90" y="88" width="180" height="14" rx="7" fill="#c9c2b6"/><rect x="-70" y="112" width="140" height="10" rx="5" fill="#ddd6ca"/>
-  <text x="0" y="168" font-family="'Hiragino Mincho ProN','Yu Mincho','Noto Serif JP',serif" font-size="18" fill="#6b7078" text-anchor="middle">平成三十一年三月十五日</text>
+  <text x="0" y="168" font-family="'Hiragino Mincho ProN','Yu Mincho','Noto Serif JP',serif" font-size="18" fill="#6b7078" text-anchor="middle">平成三十年三月十五日</text>
 </g>
 <path d="M740 560q-20 20-10 60M900 560q20 20 10 60" stroke="#f6dcc8" stroke-width="26" stroke-linecap="round" fill="none"/>
 </svg>

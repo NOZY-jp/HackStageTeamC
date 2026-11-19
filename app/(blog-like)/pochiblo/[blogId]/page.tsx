@@ -3,7 +3,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { BlogFrame } from "@/components/blog-like/blog-frame";
 import { EntryDate, EntryFooter } from "@/components/blog-like/entry-meta";
-import { entryPath, getBlog, listBlogs, listEntries } from "@/lib/blog-like";
+import { entryPath, getBlog, listBlogs, listPublicEntries } from "@/lib/blog-like";
 
 type Props = PageProps<"/pochiblo/[blogId]">;
 
@@ -16,7 +16,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   return blog ? { title: { absolute: blog.title }, description: blog.description } : {};
 }
 
-/** ブログのトップ。記事を新しい順に、冒頭だけ並べる（いちばん上が閉鎖のお知らせ）。 */
+/** ブログのトップ。公開中の記事だけを新しい順に、冒頭だけ並べる（閉鎖後は閉鎖のお知らせだけ）。 */
 export default async function BlogTopPage({ params }: Props) {
   const blog = getBlog((await params).blogId);
   if (!blog) {
@@ -25,7 +25,7 @@ export default async function BlogTopPage({ params }: Props) {
 
   return (
     <BlogFrame blog={blog}>
-      {listEntries(blog.id).map((entry) => {
+      {listPublicEntries(blog.id).map((entry) => {
         const lead = entry.body.find((block) => block.kind === "paragraph");
         return (
           <article key={entry.id} className="pb-entry">

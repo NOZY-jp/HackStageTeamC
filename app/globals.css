@@ -4236,3 +4236,55 @@ a.tw-dm-item:focus-visible {
     grid-template-columns: minmax(0, 1fr) 210px;
   }
 }
+
+.pb-kiriban {
+  margin-top: 6px;
+  color: #d62020;
+  font-weight: bold;
+  text-align: center;
+}
+
+.pb-kiriban-note {
+  color: var(--pb-muted);
+  font-size: 11px;
+  text-align: center;
+}
+
+.pb-unlisted {
+  display: inline-block;
+  margin: 0 6px;
+  padding: 0 4px;
+  border: var(--pane-border) solid var(--pb-muted);
+  color: var(--pb-muted);
+  font-size: 10px;
+  line-height: 1.5;
+}
+
+.pb-mylist-count {
+  margin: 6px 0;
+  color: var(--pb-muted);
+  font-size: 12px;
+}
+
+.pb-mylist-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 12px;
+}
+
+.pb-mylist-table th,
+.pb-mylist-table td {
+  padding: 4px 6px;
+  border: var(--pane-border) solid var(--pb-line);
+  text-align: left;
+  vertical-align: top;
+}
+
+.pb-mylist-table th {
+  background-color: var(--pb-date-bg);
+}
+
+.pb-mylist-date {
+  white-space: nowrap;
+  font-variant-numeric: tabular-nums;
+}

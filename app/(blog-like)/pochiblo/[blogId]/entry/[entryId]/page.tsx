@@ -4,13 +4,21 @@ import { notFound } from "next/navigation";
 import { BlogFrame } from "@/components/blog-like/blog-frame";
 import { EntryBody } from "@/components/blog-like/entry-body";
 import { EntryDate, EntryFooter } from "@/components/blog-like/entry-meta";
-import { blogPath, entryPath, getBlog, getEntry, listBlogs, listEntries } from "@/lib/blog-like";
+import {
+  blogPath,
+  entryPath,
+  getBlog,
+  getEntry,
+  listAllEntries,
+  listBlogs,
+  listPublicEntries,
+} from "@/lib/blog-like";
 
 type Props = PageProps<"/pochiblo/[blogId]/entry/[entryId]">;
 
 export function generateStaticParams() {
   return listBlogs().flatMap((blog) =>
-    listEntries(blog.id).map((entry) => ({ blogId: blog.id, entryId: entry.id })),
+    listAllEntries(blog.id).map((entry) => ({ blogId: blog.id, entryId: entry.id })),
   );
 }
 
@@ -29,11 +37,11 @@ export default async function EntryPage({ params }: Props) {
     notFound();
   }
 
-  // 前後の記事（古い方が「前」）
-  const all = listEntries(blog.id);
-  const index = all.findIndex((candidate) => candidate.id === entry.id);
-  const newer = all[index - 1];
-  const older = all[index + 1];
+  // 前後の記事（古い方が「前」）。たどれるのは公開中の記事どうしだけ（限定公開の記事からは前後へ進めない）
+  const visible = entry.visibility === "public" ? listPublicEntries(blog.id) : [];
+  const index = visible.findIndex((candidate) => candidate.id === entry.id);
+  const newer = index > 0 ? visible[index - 1] : undefined;
+  const older = index >= 0 ? visible[index + 1] : undefined;
 
   return (
     <BlogFrame blog={blog}>

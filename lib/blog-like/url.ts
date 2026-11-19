@@ -38,6 +38,11 @@ export function entryPath(blogId: string, entryId: string): string {
   return `${blogPath(blogId)}/entry/${entryId}`;
 }
 
+/** マイリスト: /pochiblo/mylist/<mylistId> */
+export function mylistPath(mylistId: string): string {
+  return `/pochiblo/mylist/${mylistId}`;
+}
+
 /**
  * "2018-01-27T21:30:00+09:00" → "2018年1月27日 21:30"（style="date" なら日付まで）。
  * 日本時間の固定文字列なので、実行環境のタイムゾーンに左右されないよう文字列から組み立てる。

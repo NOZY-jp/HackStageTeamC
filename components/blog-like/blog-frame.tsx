@@ -7,13 +7,13 @@ import {
   blogPath,
   entryPath,
   listCategories,
-  listEntries,
   listMonths,
+  listPublicEntries,
 } from "@/lib/blog-like";
 
 /** 2018年ごろの無料ブログのテンプレート（サービスのバー・ヘッダー画像・右サイドバー）。 */
 export function BlogFrame({ blog, children }: { blog: Blog; children: ReactNode }) {
-  const recent = listEntries(blog.id).slice(0, 5);
+  const recent = listPublicEntries(blog.id).slice(0, 5);
   return (
     <div className="pb-shell">
       <div className="pb-service-bar">
@@ -82,6 +82,8 @@ export function BlogFrame({ blog, children }: { blog: Blog; children: ReactNode 
                     <span key={index}>{digit}</span>
                   ))}
               </p>
+              <p className="pb-kiriban">キリ番踏み逃げ禁止！</p>
+              <p className="pb-kiriban-note">20000を踏んだ人はコメントで教えてね</p>
             </SideBox>
           </aside>
         </div>
