@@ -828,6 +828,8 @@
   display: flex;
   flex-direction: column;
   overscroll-behavior: contain;
+  /* 先頭への追加は JS で位置を補正するので、ブラウザの自動アンカーリングは切る */
+  overflow-anchor: none;
 }
 
 .message-list-inner {
@@ -972,10 +974,17 @@
   min-width: 0;
 }
 
+.message-image[data-natural="true"] {
+  height: auto;
+  width: auto;
+  max-height: 160px;
+}
+
 .message-image {
   display: block;
+  /* 高さを先に確定させる。デコード前に行が伸びると、追加読み込み直後にスクロール位置が飛ぶ */
+  height: 360px;
   width: auto;
-  height: auto;
   max-width: 100%;
   max-height: 360px;
   border-radius: 4px;
@@ -2679,6 +2688,84 @@ a.tw-dm-item:focus-visible {
   max-width: 340px;
   color: var(--tw-muted);
   font-size: 15px;
+}
+
+/* ---- 段階的読み込み（#71） ---- */
+.message-scroll-content {
+  position: relative;
+  display: flex;
+  flex: 1 0 auto;
+  flex-direction: column;
+  overflow-anchor: none;
+}
+.message-history-top {
+  flex: none;
+  height: 1px;
+}
+
+/* スクロール高さに影響させない（補正計算からスケルトンの出入りを消す） */
+.message-skeleton {
+  position: absolute;
+  top: 0;
+  right: 0;
+  left: 0;
+  z-index: 2;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  padding: 16px;
+  background-color: var(--color-bg-main);
+  overflow-anchor: none;
+}
+
+.message-skeleton-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+}
+
+.message-skeleton-avatar {
+  flex: none;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+}
+
+.message-skeleton-lines {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding-top: 6px;
+}
+
+.message-skeleton-line {
+  max-width: 100%;
+  height: 12px;
+}
+
+.message-history-end {
+  margin: 16px 0 8px;
+  color: var(--color-text-muted);
+  font-size: 12px;
+  text-align: center;
+}
+
+.message-jump-latest {
+  position: fixed;
+  right: 24px;
+  bottom: 92px;
+  z-index: 5;
+  padding: 6px 12px;
+  border: var(--pane-border) solid var(--color-bg-app);
+  border-radius: 999px;
+  background-color: var(--color-bg-sidebar);
+  color: var(--color-text);
+  font-size: 12px;
+  box-shadow: 0 4px 12px rgb(0 0 0 / 35%);
+}
+
+.message-jump-latest:hover {
+  background-color: var(--color-bg-input);
 }
 
 /* 1024px 未満: 右サイドバーを隠し、左ナビはアイコンだけにする */

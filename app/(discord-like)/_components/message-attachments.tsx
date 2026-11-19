@@ -74,6 +74,8 @@ function MessageImage({ name }: { name: string }) {
       height={size.height}
       sizes="(max-width: 640px) 90vw, 420px"
       className="message-image"
+      // 小さい画像だけ自然サイズ（それ以外は CSS で高さ360pxを先に確保する）
+      data-natural={size.width <= 200 ? "true" : undefined}
       onError={() => setFailed(true)}
     />
   );

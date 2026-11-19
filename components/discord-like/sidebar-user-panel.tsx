@@ -1,7 +1,7 @@
 "use client";
 
 import { useVoice } from "@/app/(discord-like)/_components/voice-context";
-import { getGuild, getUser } from "@/lib/discord-like";
+import { getGuild, getUser } from "@/lib/discord-like/lookup";
 
 /** 現行 Discord の表示（idle は「退席中」）。DM 一覧の同名ラベルは別管理。 */
 const STATUS_LABELS: Record<string, string> = {
