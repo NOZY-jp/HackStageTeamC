@@ -48,10 +48,16 @@ describe("lib/blog-like のダミーデータの整合性", () => {
     expect(entry?.publishedAt.startsWith("2019")).toBe(true);
   });
 
-  it("昔の呼び方（ゆっちゃん）と本名は、コメントも含めて出てこない", () => {
+  it("昔の呼び方と本名は、コメントも含めて出てこない", () => {
+    // 検査する語そのものをリポジトリに残さない（文字コードで組み立てる）
+    const forbidden = [
+      String.fromCodePoint(0x3086, 0x3063, 0x3061, 0x3083, 0x3093), // 旧呼称
+      String.fromCodePoint(0x670d, 0x90e8), // 姓
+      String.fromCodePoint(0x7531, 0x6bd4), // 名
+    ];
     const text = JSON.stringify({ blogs, entries });
-    for (const word of ["ゆっちゃん", "服部", "由比"]) {
-      expect(text, word).not.toContain(word);
+    for (const word of forbidden) {
+      expect(text).not.toContain(word);
     }
   });
 
