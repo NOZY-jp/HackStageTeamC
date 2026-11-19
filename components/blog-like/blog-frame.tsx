@@ -10,6 +10,7 @@ import {
   listMonths,
   listPublicEntries,
 } from "@/lib/blog-like";
+import { AccessCounter } from "./access-counter";
 
 /** 2018年ごろの無料ブログのテンプレート（サービスのバー・ヘッダー画像・右サイドバー）。 */
 export function BlogFrame({ blog, children }: { blog: Blog; children: ReactNode }) {
@@ -72,16 +73,7 @@ export function BlogFrame({ blog, children }: { blog: Blog; children: ReactNode 
               </ul>
             </SideBox>
             <SideBox title="カウンター">
-              <p className="visually-hidden">訪問者数 {blog.visitorCount}人</p>
-              <p className="pb-counter" aria-hidden="true">
-                {String(blog.visitorCount)
-                  .padStart(6, "0")
-                  .split("")
-                  .map((digit, index) => (
-                    // biome-ignore lint/suspicious/noArrayIndexKey: 桁の位置そのものがキー
-                    <span key={index}>{digit}</span>
-                  ))}
-              </p>
+              <AccessCounter blogId={blog.id} base={blog.visitorCount} />
               <p className="pb-kiriban">キリ番踏み逃げ禁止！</p>
               <p className="pb-kiriban-note">20000を踏んだ人はコメントで教えてね</p>
             </SideBox>

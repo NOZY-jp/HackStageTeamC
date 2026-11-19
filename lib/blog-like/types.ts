@@ -13,7 +13,7 @@ export type Blog = {
   authorProfile: string;
   /** public からのパス */
   avatar: string;
-  /** サイドバーのアクセスカウンターに出す数（固定） */
+  /** サイドバーのアクセスカウンターの基準の数（ここから、開いた回数だけ増える） */
   visitorCount: number;
 };
 
