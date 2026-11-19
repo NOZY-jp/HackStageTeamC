@@ -13,6 +13,7 @@ import { PaneToggles } from "@/components/discord-like/pane-toggles";
 import type { MemberView, Message, MessageAuthor } from "@/lib/discord-like/types";
 import { EmptyState } from "./empty-state";
 import { MessageRow } from "./message-row";
+import { MessageSearch } from "./message-search";
 
 const FIVE_MINUTES = 5 * 60 * 1000;
 /** 一番下からこれ以上離れたら「最新へ」を出す */
@@ -63,6 +64,7 @@ export function MessageList({
   contentRef,
   onJumpToLatest,
   members = [],
+  focusMessageId,
 }: {
   messages: Message[];
   /** 書き手情報（サーバーから渡される）。 */
@@ -91,6 +93,8 @@ export function MessageList({
   onJumpToLatest?: () => void;
   /** 右パネルに出すメンバー一覧。 */
   members?: MemberView[];
+  /** 検索結果からジャンプしてきたメッセージ（強調して表示する）。 */
+  focusMessageId?: string;
 }) {
   const fallbackScrollRef = useRef<HTMLDivElement>(null);
   const scrollElement = scrollRef ?? fallbackScrollRef;
@@ -105,14 +109,26 @@ export function MessageList({
   const offlineMembers = members.filter((member) => member.status === "offline");
 
   // 初回表示・チャンネル切替時は最下部（最新）へ
+  // 検索からジャンプしたときは、最新ではなく該当メッセージへ寄せる
   // biome-ignore lint/correctness/useExhaustiveDependencies: resetKey はチャンネル切替の合図。ref は依存にしない
   useLayoutEffect(() => {
     const element = scrollElement.current;
-    if (element) {
+    if (element && !focusMessageId) {
       element.scrollTop = element.scrollHeight;
       setAwayFromBottom(false);
     }
   }, [resetKey]);
+
+  // ジャンプ先のメッセージ（追加読み込みで増えたときも）を画面中央に出す
+  // biome-ignore lint/correctness/useExhaustiveDependencies: messages.length はページ読み込みの合図
+  useEffect(() => {
+    if (!focusMessageId) {
+      return;
+    }
+    const root = scrollElement.current;
+    const target = root?.querySelector<HTMLElement>(`[data-message-id="${focusMessageId}"]`);
+    target?.scrollIntoView({ block: "center" });
+  }, [focusMessageId, resetKey, messages.length]);
 
   // 上端の sentinel を監視して、古いメッセージを追加で読み込む
   // biome-ignore lint/correctness/useExhaustiveDependencies: スクロール要素の ref はマウント後も同一
@@ -218,21 +234,7 @@ export function MessageList({
           </div>
           {/* 検索・メンバーは見た目のみ（操作は #8 の非対象） */}
           <div className="message-header-actions">
-            <span role="img" aria-label="検索" className="message-header-icon">
-              <svg
-                aria-hidden="true"
-                viewBox="0 0 24 24"
-                width="18"
-                height="18"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2"
-                strokeLinecap="round"
-              >
-                <circle cx="11" cy="11" r="7" />
-                <path d="m20 20-3.5-3.5" />
-              </svg>
-            </span>
+            <MessageSearch />
             {hasMembers ? (
               <button
                 type="button"
@@ -316,6 +318,7 @@ export function MessageList({
                       grouped={row.grouped}
                       replyTarget={row.replyTarget}
                       time={formatTime(row.message.sentAt)}
+                      focused={row.message.id === focusMessageId}
                     />
                   ),
                 )}

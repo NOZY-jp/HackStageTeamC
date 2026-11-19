@@ -54,6 +54,7 @@ export function MessagePane({
   showHash,
   headerAvatar,
   members = [],
+  focusMessageId,
 }: {
   channelKey: string;
   mode: Mode;
@@ -64,6 +65,8 @@ export function MessagePane({
   headerAvatar?: { displayName: string; avatarColor: string };
   /** メンバー一覧（サーバー側で作って渡す）。 */
   members?: MemberView[];
+  /** 検索結果からジャンプしてきたメッセージ（強調して表示する）。 */
+  focusMessageId?: string;
 }) {
   const { messagesFor, addMessage } = useLocalMessages();
   const localMessages = messagesFor(channelKey);
@@ -265,6 +268,7 @@ export function MessagePane({
       showHash={showHash}
       headerAvatar={headerAvatar}
       members={members}
+      focusMessageId={focusMessageId}
       onLoadOlder={loadOlder}
       loadingOlder={current.loading}
       hasMore={current.hasMore}

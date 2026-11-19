@@ -13,6 +13,7 @@ export function MessageRow({
   grouped,
   replyTarget,
   time,
+  focused = false,
 }: {
   message: Message;
   /** サーバーから渡された書き手情報（クライアントはデータ層を import しない） */
@@ -20,6 +21,8 @@ export function MessageRow({
   grouped: boolean;
   replyTarget: Message | undefined;
   time: string;
+  /** 検索結果からジャンプしてきた1件（強調表示する） */
+  focused?: boolean;
 }) {
   const author = authors[message.authorId];
   const displayName = author?.displayName ?? message.authorId;
@@ -33,6 +36,7 @@ export function MessageRow({
       className="message"
       data-message-id={message.id}
       data-grouped={grouped ? "true" : undefined}
+      data-focused={focused ? "true" : undefined}
     >
       {grouped ? null : (
         <span
