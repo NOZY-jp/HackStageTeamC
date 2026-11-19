@@ -17,7 +17,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const user = getUserByHandle(handle);
   return user
     ? { title: `${user.displayName} (@${user.handle}) のメディア` }
-    : { title: "ユーザーが見つかりません" };
+    : { title: "このアカウントは存在しません" };
 }
 
 export default async function TwitterProfileMediaPage({ params }: Props) {
