@@ -4,6 +4,7 @@ import type { Post, TwitterUser } from "@/lib/twitter-like/types";
 import { Avatar } from "./avatar";
 import { formatCount, formatPostedAt } from "./format";
 import { VerifiedBadge } from "./icons";
+import { LinkifiedText } from "./linkify";
 import { isVerified } from "./lookup";
 import { PostStats } from "./post-card";
 
@@ -49,7 +50,9 @@ export function PostDetail({
           </Link>
         </p>
       ) : null}
-      <p className="tw-post-body tw-post-body-lg">{post.body}</p>
+      <p className="tw-post-body tw-post-body-lg">
+        <LinkifiedText text={post.body} />
+      </p>
       <p className="tw-detail-time">
         <time dateTime={post.postedAt}>{formatPostedAt(post.postedAt)}</time>
         <span aria-hidden="true"> · </span>
