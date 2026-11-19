@@ -5,23 +5,25 @@ import { formatCount } from "./format";
 import { SearchIcon, VerifiedBadge } from "./icons";
 import { isVerified } from "./lookup";
 
-export function RightSidebar() {
+export function RightSidebar({ hideSearch = false }: { hideSearch?: boolean }) {
   const trends = listTrends();
   const suggestions = listUsers()
     .filter((user) => user.handle !== "hal")
     .slice(0, 3);
   return (
     <aside className="tw-right" aria-label="サイドバー">
-      <form className="tw-search" action="/twitter/search">
-        <SearchIcon />
-        <input
-          type="search"
-          name="q"
-          className="tw-search-input"
-          placeholder="検索"
-          aria-label="検索"
-        />
-      </form>
+      {hideSearch ? null : (
+        <form className="tw-search" action="/twitter/search">
+          <SearchIcon />
+          <input
+            type="search"
+            name="q"
+            className="tw-search-input"
+            placeholder="検索"
+            aria-label="検索"
+          />
+        </form>
+      )}
       <section className="tw-card" aria-labelledby="tw-trends-heading">
         <h2 id="tw-trends-heading" className="tw-card-title">
           いま話題

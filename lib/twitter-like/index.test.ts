@@ -127,6 +127,13 @@ describe("searchPosts", () => {
     expect(searchPosts("")).toEqual([]);
     expect(searchPosts("   ")).toEqual([]);
   });
+
+  it("鍵アカウントの投稿は検索結果に出さない", () => {
+    // tw-nagi（鍵垢）の post-024〜026 の本文に一致する語で探しても出てこない
+    expect(searchPosts("記録用")).toEqual([]);
+    expect(searchPosts("混むのは苦手")).toEqual([]);
+    expect(searchPosts("迷った").map((post) => post.id)).not.toContain("post-026");
+  });
 });
 
 describe("searchUsers", () => {

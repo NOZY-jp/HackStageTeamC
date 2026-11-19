@@ -1741,10 +1741,12 @@ a.tw-account:focus-visible {
   background-color: var(--tw-bg);
 }
 
-/* 検索ページのフォーム（メインカラム内）は sticky にせず左右に余白を取る */
+/* 検索ページのフォーム（メインカラム内）は sticky にせず左右に余白を取る。
+   左右は margin にして、絶対配置の虫眼鏡アイコンの基準位置をサイドバー側と揃える */
 .tw-main .tw-search {
   position: relative;
-  padding: 8px 16px;
+  padding: 8px 0;
+  margin: 0 16px;
 }
 
 .tw-search .tw-icon {

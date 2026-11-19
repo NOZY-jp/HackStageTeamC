@@ -86,7 +86,7 @@ export default async function TwitterSearchPage({ searchParams }: Props) {
           </>
         )}
       </main>
-      <RightSidebar />
+      <RightSidebar hideSearch />
     </>
   );
 }

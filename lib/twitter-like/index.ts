@@ -103,12 +103,15 @@ function matchesAllTerms(haystack: string, terms: string[]): boolean {
 }
 
 /**
- * 投稿を検索する（本文のみ・新しい順）。返信も対象に含める。
+ * 投稿を検索する（本文のみ・新しい順）。返信も対象に含める。鍵アカウントの投稿は除く。
  */
 export function searchPosts(query: string): Post[] {
   const terms = toTerms(query);
   return copyOf(
-    [...twitterPosts].sort(byPostedAtDesc).filter((post) => matchesAllTerms(post.body, terms)),
+    [...twitterPosts]
+      .filter(isVisiblePost)
+      .sort(byPostedAtDesc)
+      .filter((post) => matchesAllTerms(post.body, terms)),
   );
 }
 
