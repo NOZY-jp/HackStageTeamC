@@ -84,6 +84,55 @@ export function listTrends(): Trend[] {
   return copyOf(twitterTrends);
 }
 
+/** 検索語を小文字の語に分ける。先頭の # と @ は無視する。 */
+function toTerms(query: string): string[] {
+  return query
+    .toLowerCase()
+    .split(/\s+/)
+    .map((term) => term.replace(/^[#@]+/, ""))
+    .filter(Boolean);
+}
+
+/** haystack がすべての語を含むか（大文字小文字は無視）。 */
+function matchesAllTerms(haystack: string, terms: string[]): boolean {
+  if (terms.length === 0) {
+    return false;
+  }
+  const normalized = haystack.toLowerCase();
+  return terms.every((term) => normalized.includes(term));
+}
+
+/**
+ * 投稿を検索する（本文と投稿者の表示名・handleを対象・新しい順）。返信も対象に含める。
+ * 鍵アカウントの投稿は除く。
+ */
+export function searchPosts(query: string): Post[] {
+  const terms = toTerms(query);
+  return copyOf(
+    [...twitterPosts]
+      .filter(isVisiblePost)
+      .sort(byPostedAtDesc)
+      .filter((post) => {
+        const author = twitterUsers.find((user) => user.id === post.authorId);
+        const haystack = [post.body, author?.displayName ?? "", author?.handle ?? ""].join("\n");
+        return matchesAllTerms(haystack, terms);
+      }),
+  );
+}
+
+/**
+ * ユーザーを検索する。対象は displayName・handle・bio。
+ */
+export function searchUsers(query: string): TwitterUser[] {
+  const terms = toTerms(query);
+  return copyOf(
+    twitterUsers.filter((user) => {
+      const bio = twitterProfiles.find((profile) => profile.userId === user.id)?.bio ?? "";
+      return matchesAllTerms([user.displayName, user.handle, bio].join("\n"), terms);
+    }),
+  );
+}
+
 export {
   getTwitterConversation,
   lastTwitterMessage,
