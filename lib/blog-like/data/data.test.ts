@@ -34,15 +34,18 @@ describe("lib/blog-like のダミーデータの整合性", () => {
     }
   });
 
-  it("「でんちゃん」は本文には出さず、コメントにだけ1回だけ出る", () => {
+  it("「でんちゃん」は本文には出さず、祖母が呼びかけるコメントにだけ1回だけ出る", () => {
     const bodies = JSON.stringify(entries.map((entry) => entry.body));
     expect(bodies).not.toContain("でんちゃん");
 
     const comments = entries.flatMap((entry) => entry.comments);
-    const den = comments.filter(
-      (comment) => comment.body.includes("でんちゃん") || comment.authorName === "でんちゃん",
-    );
+    const den = comments.filter((comment) => comment.body.includes("でんちゃん"));
     expect(den).toHaveLength(1);
+    // 祖母が家族内の呼び名で主人公に呼びかけている（投稿者名ではない）
+    expect(den[0].authorName).toBe("ばあちゃん");
+    expect(den[0].body.startsWith("でんちゃん")).toBe(true);
+    // 「でんちゃん」を名乗る投稿者は居ない
+    expect(comments.filter((comment) => comment.authorName === "でんちゃん")).toHaveLength(0);
     // 2019年の記事にだけ残っている（祖母のコメント）
     const entry = entries.find((candidate) => candidate.comments.some((c) => c.id === den[0].id));
     expect(entry?.publishedAt.startsWith("2019")).toBe(true);
