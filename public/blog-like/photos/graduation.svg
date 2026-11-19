@@ -1,0 +1,43 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 800" width="1200" height="800">
+<rect width="1200" height="800" fill="#cfe4f5"/>
+<rect x="0" y="120" width="1200" height="380" fill="#e9e3d6"/>
+<rect x="60" y="170" width="90" height="70" fill="#a9c4dc"/><rect x="60" y="290" width="90" height="70" fill="#a9c4dc"/><rect x="210" y="170" width="90" height="70" fill="#a9c4dc"/><rect x="210" y="290" width="90" height="70" fill="#a9c4dc"/><rect x="360" y="170" width="90" height="70" fill="#a9c4dc"/><rect x="360" y="290" width="90" height="70" fill="#a9c4dc"/><rect x="510" y="170" width="90" height="70" fill="#a9c4dc"/><rect x="510" y="290" width="90" height="70" fill="#a9c4dc"/><rect x="660" y="170" width="90" height="70" fill="#a9c4dc"/><rect x="660" y="290" width="90" height="70" fill="#a9c4dc"/><rect x="810" y="170" width="90" height="70" fill="#a9c4dc"/><rect x="810" y="290" width="90" height="70" fill="#a9c4dc"/><rect x="960" y="170" width="90" height="70" fill="#a9c4dc"/><rect x="960" y="290" width="90" height="70" fill="#a9c4dc"/><rect x="1110" y="170" width="90" height="70" fill="#a9c4dc"/><rect x="1110" y="290" width="90" height="70" fill="#a9c4dc"/>
+<rect x="0" y="500" width="1200" height="300" fill="#bfb6a6"/>
+<path d="M0 560h1200" stroke="#ada392" stroke-width="4"/>
+<rect x="70" y="250" width="200" height="420" fill="#8a7a6a"/><rect x="90" y="270" width="160" height="360" fill="#fffaf2"/>
+<text x="170" y="330" font-family="'Hiragino Mincho ProN','Yu Mincho','Noto Serif JP',serif" font-size="40" font-weight="700" fill="#2b2f45" text-anchor="middle" writing-mode="tb">卒業証書授与式</text>
+<circle cx="1060" cy="150" r="70" fill="#f6c7d3"/><circle cx="1110" cy="190" r="50" fill="#f9d6df"/><circle cx="1010" cy="200" r="46" fill="#f9d6df"/>
+
+<g transform="translate(560 0)">
+  <path d="M-70 760l20-250h100l20 250z" fill="#3b4466"/>
+  <path d="M-80 520q0-150 80-150t80 150v20h-160z" fill="#2b3150"/>
+  <path d="M-22 380l22 40 22-40z" fill="#ffffff"/><path d="M-12 392l12 22 12-22z" fill="#c8483f"/>
+  <rect x="-16" y="330" width="32" height="44" fill="#f2d3bf"/>
+  <ellipse cx="0" cy="290" rx="62" ry="70" fill="#f6dcc8"/>
+  <path d="M-66 290q-4-96 66-100 70 4 66 100-20-46-66-50-46 4-66 50z" fill="#4a3b33"/>
+  
+  <path d="M-30 296q8-8 16 0M14 296q8-8 16 0" stroke="#2b2f45" stroke-width="5" fill="none" stroke-linecap="round"/>
+  <path d="M-14 322q14 12 28 0" stroke="#c8483f" stroke-width="5" fill="none" stroke-linecap="round"/>
+  <circle cx="-38" cy="314" r="9" fill="#f2b8c6" opacity=".7"/><circle cx="38" cy="314" r="9" fill="#f2b8c6" opacity=".7"/>
+</g>
+
+<g transform="translate(820 0)">
+  <path d="M-70 760l20-250h100l20 250z" fill="#3b4466"/>
+  <path d="M-80 520q0-150 80-150t80 150v20h-160z" fill="#2b3150"/>
+  <path d="M-22 380l22 40 22-40z" fill="#ffffff"/><path d="M-12 392l12 22 12-22z" fill="#c8483f"/>
+  <rect x="-16" y="330" width="32" height="44" fill="#f2d3bf"/>
+  <ellipse cx="0" cy="290" rx="62" ry="70" fill="#f6dcc8"/>
+  <path d="M-66 290q-4-96 66-100 70 4 66 100-20-46-66-50-46 4-66 50z" fill="#2b2220"/>
+  <path d="M-66 280q-14 90 6 150l20-6q-16-60-6-140zM66 280q14 90-6 150l-20-6q16-60 6-140z" fill="#2b2220"/>
+  <path d="M-30 296q8-8 16 0M14 296q8-8 16 0" stroke="#2b2f45" stroke-width="5" fill="none" stroke-linecap="round"/>
+  <path d="M-14 322q14 12 28 0" stroke="#c8483f" stroke-width="5" fill="none" stroke-linecap="round"/>
+  <circle cx="-38" cy="314" r="9" fill="#f2b8c6" opacity=".7"/><circle cx="38" cy="314" r="9" fill="#f2b8c6" opacity=".7"/>
+</g>
+<g transform="translate(820 470) rotate(-4)">
+  <rect x="-150" y="-10" width="300" height="200" rx="6" fill="#fffdf6" stroke="#b9a77a" stroke-width="8"/>
+  <text x="0" y="50" font-family="'Hiragino Mincho ProN','Yu Mincho','Noto Serif JP',serif" font-size="34" font-weight="700" fill="#2b2f45" text-anchor="middle">卒業証書</text>
+  <rect x="-90" y="88" width="180" height="14" rx="7" fill="#c9c2b6"/><rect x="-70" y="112" width="140" height="10" rx="5" fill="#ddd6ca"/>
+  <text x="0" y="168" font-family="'Hiragino Mincho ProN','Yu Mincho','Noto Serif JP',serif" font-size="18" fill="#6b7078" text-anchor="middle">平成三十年三月十五日</text>
+</g>
+<path d="M740 560q-20 20-10 60M900 560q20 20 10 60" stroke="#f6dcc8" stroke-width="26" stroke-linecap="round" fill="none"/>
+</svg>

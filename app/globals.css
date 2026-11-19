@@ -3942,3 +3942,357 @@ a.tw-dm-item:focus-visible {
     grid-template-columns: minmax(0, 1fr);
   }
 }
+
+/* ---- Blog like UI（/pochiblo 配下）。彼女の元のブログ「しろの狩猟記録」（2018年ごろの無料ブログ） ---- */
+
+/*
+ * 2018年ごろの無料ブログのテンプレートに寄せる: 固定幅の2カラム、小さめの文字、色付きの見出し帯、
+ * 下線付きの青いリンク、模様の背景。角丸や大きな余白は使わない。
+ * 配色は .pb-shell の中だけで定義する（ライトのみ）。body はスクロールしないので、.pb-page が自前でスクロールする。
+ */
+.pb-page {
+  color-scheme: light;
+  height: 100dvh;
+  overflow-y: auto;
+}
+
+.pb-shell {
+  --pb-bg: #fff6e8;
+  --pb-bg-dot: #f5c08c;
+  --pb-surface: #ffffff;
+  --pb-text: #333333;
+  --pb-muted: #777777;
+  --pb-line: #e3c9a4;
+  --pb-link: #0b5bbf;
+  --pb-link-visited: #7a3fa0;
+  --pb-band: #f08a3c;
+  --pb-band-dark: #c96520;
+  --pb-text-on-band: #ffffff;
+  --pb-date-bg: #fff0dc;
+
+  min-height: 100%;
+  padding: 0 0 24px;
+  background-color: var(--pb-bg);
+  background-image: radial-gradient(var(--pb-bg-dot) 3px, transparent 3.5px);
+  background-size: 20px 20px;
+  color: var(--pb-text);
+  font-family:
+    "ＭＳ Ｐゴシック", "MS PGothic", "Hiragino Kaku Gothic Pro", "ヒラギノ角ゴ Pro W3", Meiryo,
+    "Noto Sans JP", sans-serif;
+  font-size: 13px;
+  line-height: 1.7;
+}
+
+.pb-shell a {
+  color: var(--pb-link);
+  text-decoration: underline;
+}
+
+.pb-shell a:visited {
+  color: var(--pb-link-visited);
+}
+
+.pb-shell a:hover {
+  text-decoration: none;
+}
+
+.pb-shell :focus-visible {
+  outline-color: var(--pb-band-dark);
+}
+
+/* サービスの細いバー */
+.pb-service-bar {
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 2px 8px;
+  border-bottom: var(--pane-border) solid #999999;
+  background: linear-gradient(#fafafa, #dddddd);
+  color: #555555;
+  font-size: 11px;
+}
+
+.pb-service-logo {
+  color: var(--pb-band-dark);
+  font-weight: bold;
+}
+
+/* 固定幅の本体 */
+.pb-container {
+  max-width: 860px;
+  margin: 12px auto 0;
+  border: var(--pane-border) solid var(--pb-line);
+  background-color: var(--pb-surface);
+}
+
+.pb-blog-header {
+  padding: 28px 20px 24px;
+  border-bottom: 4px double var(--pb-band);
+  background: linear-gradient(#ffd7a8, #ffb26b);
+}
+
+.pb-blog-title {
+  font-size: 26px;
+  font-weight: bold;
+  text-shadow:
+    2px 2px 0 var(--pb-surface),
+    -1px -1px 0 var(--pb-surface);
+}
+
+.pb-shell .pb-blog-title,
+.pb-shell .pb-blog-title:visited {
+  color: var(--pb-band-dark);
+  text-decoration: none;
+}
+
+.pb-blog-description {
+  margin-top: 4px;
+  font-size: 12px;
+}
+
+.pb-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 16px;
+  padding: 12px;
+}
+
+.pb-main {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  min-width: 0;
+}
+
+/* 記事 */
+.pb-entry-date {
+  padding: 2px 8px;
+  border-left: 6px solid var(--pb-band);
+  background-color: var(--pb-date-bg);
+  color: var(--pb-band-dark);
+  font-size: 12px;
+  font-weight: bold;
+  font-variant-numeric: tabular-nums;
+}
+
+.pb-entry-title {
+  margin-top: 8px;
+  padding-bottom: 2px;
+  border-bottom: var(--pane-border) dashed var(--pb-line);
+  font-size: 15px;
+  font-weight: bold;
+}
+
+.pb-entry-title::before {
+  content: "■ ";
+  color: var(--pb-band);
+}
+
+.pb-entry-body {
+  margin-top: 8px;
+}
+
+.pb-entry-body p,
+.pb-entry-lead {
+  margin: 8px 0;
+}
+
+.pb-entry-body h3 {
+  margin: 14px 0 6px;
+  padding: 1px 6px;
+  background-color: var(--pb-date-bg);
+  font-size: 13px;
+  font-weight: bold;
+}
+
+.pb-entry-body figure {
+  margin: 10px 0;
+}
+
+.pb-entry-body figure img {
+  width: 100%;
+  max-width: 480px;
+  height: auto;
+  border: var(--pane-border) solid #cccccc;
+  padding: 3px;
+  background-color: var(--pb-surface);
+}
+
+.pb-entry-body figcaption {
+  color: var(--pb-muted);
+  font-size: 12px;
+}
+
+.pb-entry-link a {
+  overflow-wrap: anywhere;
+}
+
+.pb-more {
+  display: block;
+  text-align: right;
+}
+
+.pb-entry-footer {
+  margin-top: 8px;
+  padding-top: 2px;
+  border-top: var(--pane-border) dotted #bbbbbb;
+  color: var(--pb-muted);
+  font-size: 11px;
+  text-align: right;
+}
+
+.pb-pager {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 6px 0;
+  border-top: var(--pane-border) solid var(--pb-line);
+  border-bottom: var(--pane-border) solid var(--pb-line);
+  font-size: 12px;
+}
+
+/* サイドバー */
+.pb-sidebar {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  font-size: 12px;
+}
+
+.pb-side-box {
+  border: var(--pane-border) solid var(--pb-line);
+}
+
+.pb-side-title {
+  padding: 2px 8px;
+  background: linear-gradient(var(--pb-band), var(--pb-band-dark));
+  color: var(--pb-text-on-band);
+  font-size: 12px;
+  font-weight: bold;
+}
+
+.pb-side-content {
+  padding: 6px 8px;
+}
+
+.pb-profile {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.pb-avatar {
+  width: 48px;
+  height: 48px;
+  border: var(--pane-border) solid #cccccc;
+}
+
+.pb-profile-name {
+  font-weight: bold;
+}
+
+.pb-profile-text {
+  margin-top: 4px;
+}
+
+.pb-side-list li::before {
+  content: "・";
+}
+
+.pb-counter {
+  display: flex;
+  justify-content: center;
+  gap: 2px;
+  font-family: "Courier New", monospace;
+  font-size: 14px;
+  font-weight: bold;
+}
+
+.pb-counter span {
+  padding: 0 3px;
+  border: var(--pane-border) solid #333333;
+  background-color: #222222;
+  color: #7dff7d;
+}
+
+.pb-footer {
+  padding: 8px;
+  border-top: var(--pane-border) solid var(--pb-line);
+  background-color: var(--pb-date-bg);
+  color: var(--pb-muted);
+  font-size: 11px;
+  text-align: center;
+}
+
+.pb-gone {
+  padding: 80px 16px;
+  text-align: center;
+}
+
+.pb-gone-title {
+  font-size: 16px;
+  font-weight: bold;
+}
+
+.pb-gone-text {
+  margin-top: 8px;
+  color: var(--pb-muted);
+}
+
+@media (min-width: 760px) {
+  .pb-layout {
+    grid-template-columns: minmax(0, 1fr) 210px;
+  }
+}
+
+.pb-kiriban {
+  margin-top: 6px;
+  color: #d62020;
+  font-weight: bold;
+  text-align: center;
+}
+
+.pb-kiriban-note {
+  color: var(--pb-muted);
+  font-size: 11px;
+  text-align: center;
+}
+
+.pb-unlisted {
+  display: inline-block;
+  margin: 0 6px;
+  padding: 0 4px;
+  border: var(--pane-border) solid var(--pb-muted);
+  color: var(--pb-muted);
+  font-size: 10px;
+  line-height: 1.5;
+}
+
+.pb-mylist-count {
+  margin: 6px 0;
+  color: var(--pb-muted);
+  font-size: 12px;
+}
+
+.pb-mylist-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 12px;
+}
+
+.pb-mylist-table th,
+.pb-mylist-table td {
+  padding: 4px 6px;
+  border: var(--pane-border) solid var(--pb-line);
+  text-align: left;
+  vertical-align: top;
+}
+
+.pb-mylist-table th {
+  background-color: var(--pb-date-bg);
+}
+
+.pb-mylist-date {
+  white-space: nowrap;
+  font-variant-numeric: tabular-nums;
+}
