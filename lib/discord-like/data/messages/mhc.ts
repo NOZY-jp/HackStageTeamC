@@ -5583,6 +5583,7 @@ export const messagesByChannelMhc: Record<string, Message[]> = {
       authorId: "master",
       sentAt: "2025-05-03T16:56:00+09:00",
       body: "集会所のルールを更新しました。募集はマルチ募集チャンネルでお願いします。",
+      pinned: true,
     },
     {
       id: "mhc-notice-0004",
@@ -5597,6 +5598,7 @@ export const messagesByChannelMhc: Record<string, Message[]> = {
       authorId: "master",
       sentAt: "2025-06-18T19:40:00+09:00",
       body: "荒らし対策として、募集の連投は1時間に1回までにします。",
+      pinned: true,
     },
     {
       id: "mhc-notice-0006",

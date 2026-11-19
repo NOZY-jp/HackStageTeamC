@@ -4703,3 +4703,9 @@ a.tw-dm-item:focus-visible {
   background-color: #f0c419;
   color: #000000;
 }
+
+.message-pin {
+  margin-right: 4px;
+  font-size: 12px;
+  line-height: 1;
+}

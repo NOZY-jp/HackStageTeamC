@@ -88,6 +88,11 @@ export function MessageRow({
         )}
 
         <p className="message-body" data-system={message.system ? "true" : undefined}>
+          {message.pinned ? (
+            <span role="img" aria-label="ピン留め" title="ピン留め" className="message-pin">
+              📌
+            </span>
+          ) : null}
           {message.body}
           {grouped && message.editedAt ? <span className="message-edited"> (編集済み)</span> : null}
         </p>

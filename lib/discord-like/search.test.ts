@@ -76,7 +76,15 @@ describe("フィルタの組み合わせ", () => {
     expect(run("has:file").total).toBe(0);
   });
 
-  it("pinned: は固定のピン留め集合と一致する", () => {
+  it("ピン留めはデータ（Message.pinned）にだけ存在する", () => {
+    const pinnedIds = index.documents
+      .filter((document) => document.pinned)
+      .map((document) => document.id)
+      .sort();
+    expect(pinnedIds).toEqual(["mhc-notice-0003", "mhc-notice-0005"]);
+  });
+
+  it("pinned: はデータのピン留めと一致する", () => {
     const pinned = run("pinned:true");
     expect(pinned.total).toBeGreaterThan(0);
     expect(pinned.hits.every((hit) => hit.pinned)).toBe(true);

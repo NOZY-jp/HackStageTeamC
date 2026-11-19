@@ -62,15 +62,6 @@ export type SearchIndex = {
   users: MatchedUser[];
 };
 
-/**
- * ピン留めは #68 のデータに属性が無いため、検索用のメタデータとしてここに固定で持つ。
- * データ本体（lib/discord-like/data/**）は変更しない。追加するときはこの一覧だけ直す。
- */
-export const PINNED_MESSAGE_IDS: ReadonlySet<string> = new Set([
-  "mhc-notice-0003", // 集会所のルール
-  "mhc-notice-0005", // 募集の連投について
-]);
-
 const LINK = /https?:\/\/\S+/;
 
 const flagsOf = (
@@ -115,7 +106,7 @@ export function buildSearchIndex(): SearchIndex {
           sentAt: message.sentAt,
           body: message.body,
           lowerBody: message.body.toLowerCase(),
-          pinned: PINNED_MESSAGE_IDS.has(message.id),
+          pinned: message.pinned === true,
           has: flagsOf(message.body, message.attachments),
           inLabels: [channel.name, `#${channel.name}`, guild.name].map((label) =>
             label.toLowerCase(),
@@ -150,7 +141,7 @@ export function buildSearchIndex(): SearchIndex {
         sentAt: message.sentAt,
         body: message.body,
         lowerBody: message.body.toLowerCase(),
-        pinned: PINNED_MESSAGE_IDS.has(message.id),
+        pinned: message.pinned === true,
         has: flagsOf(message.body, message.attachments),
         inLabels: [partnerName, partner?.handle ?? partnerId, "dm", "ダイレクトメッセージ"].map(
           (label) => label.toLowerCase(),
