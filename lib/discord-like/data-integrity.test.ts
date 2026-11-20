@@ -114,9 +114,19 @@ describe("ダミーデータの整合性", () => {
     expect(new Set(handles).size).toBe(handles.length);
   });
 
-  it("DM スレッドは MaiMai とカイの2件（調査の会話は公開チャンネルに置かない・#121）", () => {
+  it("DM スレッドは9本（恋人・依頼主・友人・先輩・後輩。#133）", () => {
     const threads = listDMThreads();
-    expect(threads.map((thread) => thread.id).sort()).toEqual(["dm-kai", DM_THREAD_ID]);
+    expect(threads.map((thread) => thread.id).sort()).toEqual([
+      "dm-gunlance",
+      "dm-hayashi",
+      "dm-jun",
+      "dm-kai",
+      DM_THREAD_ID,
+      "dm-miyu",
+      "dm-ootsuka",
+      "dm-taku",
+      "dm-yama",
+    ]);
     const mai = threads.find((thread) => thread.id === DM_THREAD_ID);
     expect(mai?.participantIds).toEqual([SELF_USER_ID, "maimai"]);
     const kai = threads.find((thread) => thread.id === "dm-kai");

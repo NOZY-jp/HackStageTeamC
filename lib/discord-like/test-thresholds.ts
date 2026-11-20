@@ -28,7 +28,7 @@ export const NATURALNESS_LIMITS = {
   /** 同じ発言件数の日が連続してよい日数（-1。3日以上続かない） */
   maxSameDailyCountStreak: 6, // 目標 2。日次の件数を意図的に散らす作業は #133 で行う
   /** カイとの DM の月あたり発言数（以下） */
-  dmKaiMonthlyMax: 6,
+  dmKaiMonthlyMax: 10,
   /** MaiMai との DM でやり取りする週の日数（以下） */
   dmMaimaiWeeklyDaysMax: 7,
   /** 連続して空く日数（以下） */
@@ -42,7 +42,7 @@ export const VOLUME_LIMITS = {
   /** サーバーの数（旧3サーバー名は禁止のまま） */
   guildCount: 3, // mhc・univ・friend（#132）
   /** DM の総メッセージ数（範囲） */
-  dmMessages: { min: 436, max: 2000 }, // 目標 1,400〜1,650
+  dmMessages: { min: 1500, max: 1600 }, // #133 で 1,500 に拡張
   /** サーバーの総メッセージ数（3サーバー合算・範囲） */
   serverMessages: { min: 1570, max: 2900 }, // #131 で 1,570。目標 2,500〜2,900
   /**
@@ -53,10 +53,11 @@ export const VOLUME_LIMITS = {
   monthlyRatio: {
     tolerance: 0.25,
     groups: [
-      { from: "2025-11", to: "2026-02", expected: 0.0065 },
-      { from: "2026-03", to: "2026-06", expected: 0.121 },
-      { from: "2026-07", to: "2026-08", expected: 0.3 },
-      { from: "2026-09", to: "2026-11", expected: 0.838 },
+      // #133 で DM を1,500通に増やした後の実測（DM/サーバー比）
+      { from: "2025-11", to: "2026-02", expected: 0.156 },
+      { from: "2026-03", to: "2026-06", expected: 1.287 },
+      { from: "2026-07", to: "2026-08", expected: 1.263 },
+      { from: "2026-09", to: "2026-11", expected: 1.503 },
     ],
   },
   /** 付き合った後の週のやり取り日数（以上）と、空いてよい連続日数（以下） */
