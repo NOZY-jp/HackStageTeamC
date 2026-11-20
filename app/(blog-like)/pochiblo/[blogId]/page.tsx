@@ -5,6 +5,12 @@ import { BlogFrame } from "@/components/blog-like/blog-frame";
 import { EntryDate, EntryFooter } from "@/components/blog-like/entry-meta";
 import { entryPath, getBlog, listBlogs, listPublicEntries } from "@/lib/blog-like";
 
+// ブログは params から引くので、トップレベルで params を待つ＝URL データを読むことになる。
+// Cache Components（PPR）のままだと「params が <Suspense> の外で読まれている」警告が出るため、
+// 記事・マイリストのルートと同じく、この区画はブロックを許可する（#86）。
+// ここは静的データだけなので待ち時間は無く、存在しないブログは 404 のまま返せる。
+export const instant = false;
+
 type Props = PageProps<"/pochiblo/[blogId]">;
 
 export function generateStaticParams() {
