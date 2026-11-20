@@ -1,4 +1,5 @@
 import { notFound } from "next/navigation";
+import { ChannelNotFound } from "@/app/(discord-like)/_components/channel-not-found";
 import { DmNotFound } from "@/app/(discord-like)/_components/dm-not-found";
 import { MessagePane } from "@/app/(discord-like)/_components/message-pane";
 import { SELF_USER_ID } from "@/app/(discord-like)/_components/self-user";
@@ -7,7 +8,9 @@ import {
   getChannel,
   getDMThread,
   getGuild,
+  getGuildByUrlId,
   getUser,
+  listChannels,
   listDMMessages,
   listMessages,
   listVoiceStates,
@@ -15,6 +18,7 @@ import {
 } from "@/lib/discord-like";
 import { resolveChannelRoute } from "@/lib/discord-like/route-resolution";
 import { listMemberViews, toMessageView } from "@/lib/discord-like/view";
+import { dmListPath, guildChannelPath } from "@/lib/platform/app-prefix";
 
 /**
  * Discord と同じ2セグメント構成。
@@ -42,8 +46,19 @@ export default async function ChannelPage({
       return (
         <GuildChannel guildId={route.guildId} channelId={route.channelId} focusMessageId={focus} />
       );
-    default:
-      notFound();
+    default: {
+      // 一覧（レイアウト）を残したまま、メイン領域に未検出を出す（#70）
+      const guild = getGuildByUrlId(decodeURIComponent(guildId));
+      const first = guild
+        ? (listChannels(guild.id).find((candidate) => candidate.kind === "text") ??
+          listChannels(guild.id)[0])
+        : undefined;
+      return (
+        <ChannelNotFound
+          serverHref={guild && first ? guildChannelPath(guild.urlId, first.urlId) : dmListPath()}
+        />
+      );
+    }
   }
 }
 
