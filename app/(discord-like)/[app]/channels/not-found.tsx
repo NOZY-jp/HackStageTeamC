@@ -3,5 +3,5 @@ import { dmListPath } from "@/lib/platform/app-prefix";
 
 /** サーバー自体が見つからないとき（guild が無いので一覧へは戻せない）。 */
 export default function NotFound() {
-  return <ChannelNotFound serverHref={dmListPath()} backLabel="DMへ戻る" />;
+  return <ChannelNotFound serverHref={dmListPath()} backLabel="DMへ戻る" withSidebar={false} />;
 }

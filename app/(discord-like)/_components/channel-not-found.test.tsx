@@ -41,6 +41,6 @@ describe("ChannelNotFound", () => {
     );
     // channel-missing でも ChannelNotFound を返し、レイアウトの一覧を残す
     expect(page).toContain("<ChannelNotFound");
-    expect(page).toContain("guildChannelPath(guild.urlId, first.urlId)");
+    expect(page).toContain("channelFallback(guildId)");
   });
 });

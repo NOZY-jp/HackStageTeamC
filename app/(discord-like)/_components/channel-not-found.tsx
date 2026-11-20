@@ -7,13 +7,16 @@ import Link from "next/link";
 export function ChannelNotFound({
   serverHref,
   backLabel = "サーバーへ戻る",
+  withSidebar = true,
 }: {
   /** 戻り先（サーバーの最初のチャンネルなど） */
   serverHref: string;
   backLabel?: string;
+  /** 左の一覧を出しているか（出していなければ 404 はレール以外の全幅に置く） */
+  withSidebar?: boolean;
 }) {
   return (
-    <div className="route-state route-state--main">
+    <div className={withSidebar ? "route-state route-state--main" : "route-state"}>
       <p className="route-state-code" aria-hidden="true">
         404
       </p>

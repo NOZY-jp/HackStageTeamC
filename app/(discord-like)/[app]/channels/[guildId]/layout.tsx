@@ -45,9 +45,13 @@ async function ChannelsSidebar({ params }: { params: Promise<{ guildId: string }
     return <DmList />;
   }
 
-  // URL の guildId は数値の urlId。一覧は内部IDで引く
+  // URL の guildId は数値の urlId。一覧は内部IDで引く。
+  // 存在しない guild では一覧を出さない（404 をメイン領域に出す。#70）
   const guild = getGuildByUrlId(segment);
-  return <ChannelSidebar guildId={guild?.id ?? segment} />;
+  if (!guild) {
+    return null;
+  }
+  return <ChannelSidebar guildId={guild.id} />;
 }
 
 function SidebarSkeleton({ label }: { label: string }) {
