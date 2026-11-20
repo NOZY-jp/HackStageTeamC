@@ -24,10 +24,24 @@ const existingTimes = [
   ...Object.values(serversHistory).flat(),
 ].map((message) => message.sentAt);
 
+const callWindows: { start: number; end: number }[] = [];
+let openStart: number | undefined;
+for (const message of [...maimaiList].sort((a, b) => a.sentAt.localeCompare(b.sentAt))) {
+  if (message.body.includes("通話を開始")) openStart = Date.parse(message.sentAt);
+  else if (
+    openStart !== undefined &&
+    (message.body.includes("通話を終了") || message.body.includes("応答がありません"))
+  ) {
+    callWindows.push({ start: openStart, end: Date.parse(message.sentAt) });
+    openStart = undefined;
+  }
+}
+
 const { additions, calls } = generateDmExpansion({
   existingTimes,
   existingMaimaiDays: [...maimaiDays],
   existingCallStarts,
+  existingCallWindows: callWindows,
   existingLastMaimaiAt,
 });
 
