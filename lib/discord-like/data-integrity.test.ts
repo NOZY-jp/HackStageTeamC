@@ -331,6 +331,21 @@ describe("謎解きの手がかり（順序1・4・5・6・9・11）", () => {
     expect(haystack).toMatch(/note/);
   });
 
+  it("ブログの回想はリョウが問い、MaiMai が自分のこととして答える（#102 指摘）", () => {
+    const messages = dmMessages();
+    const byId = (id: string) => messages.find((message) => message.id === id);
+    // 「中3の頃って何して遊んでた？」はリョウの質問（MaiMai の自問自答にしない）
+    expect(byId("dm-maimai-0059")?.authorId).toBe("hal");
+    expect(byId("dm-maimai-0060")?.authorId).toBe("maimai");
+    expect(byId("dm-maimai-0060")?.body).toContain("攻略ブログ");
+    // スクショを貼るのも MaiMai 本人
+    expect(byId("dm-maimai-0062")?.authorId).toBe("maimai");
+    // 旧ブログは 2020-02 に note へ移行済み、という振り返りになっている
+    expect(byId("dm-maimai-0063")?.authorId).toBe("hal");
+    expect(byId("dm-maimai-0063")?.body).toContain("note");
+    expect(byId("dm-maimai-0064")?.body).toMatch(/2020年.*2月|2020-02/);
+  });
+
   it("IDが違うスクショが添付されている（順序4・本文で説明しない）", () => {
     const messages = dmMessages();
     const withImage = messages.filter((message) =>

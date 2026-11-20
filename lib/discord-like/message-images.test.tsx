@@ -119,13 +119,15 @@ describe("実体が無い画像の扱い（#102 追補）", () => {
   });
 });
 
-describe("撮影画像の取り残し防止（#102）", () => {
-  // #105 fa4e972（ID を hunter_denden3243 に統一して撮り直した画像）。撮り直したら更新する
+describe("撮影画像の取り残し防止（#102 / #103）", () => {
+  // #105 d0b940a（2026年を MaiMai 本人視点にし、旧注記とカイを外して撮り直した画像）。撮り直したら更新する
   const EXPECTED_SHA256: Record<string, string> = {
     "public/discord-like/screenshot-2018-game.png":
-      "1639a1c21692173a05cea18091bdbe17f4d8fd82cedc26aa38bb8852a19292f3",
+      "514f51c50c8842b66134f33ca8fbb39c95e491960afa1d58189dc6c9d7abdb79",
     "public/discord-like/screenshot-2019-lobby.png":
-      "133b7274301f416c019cce41e1e2c6044e9d41981f4b9297ce047b6a781dcf8d",
+      "c1815ed3edbe3dca106bc855530621d1764d9633d4db4ef63465867a147043eb",
+    "public/discord-like/screenshot-2026-friends.png":
+      "abf5afc17a27ee3c95fa467f73d255b2e770c75462a13032f4e59aa252682d2d",
   };
 
   it("ゲーム画面の画像が最新（古い ID の画像が残っていない）", async () => {

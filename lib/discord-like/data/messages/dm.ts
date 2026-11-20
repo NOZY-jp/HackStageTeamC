@@ -416,7 +416,7 @@ export const messagesByDMThread: Record<string, Message[]> = {
       id: "dm-maimai-0059",
       channelId: "dm-maimai",
       sentAt: "2026-04-18T23:12:00+09:00",
-      authorId: "maimai",
+      authorId: "hal",
       body: "中3の頃って何して遊んでた？",
     },
     {
@@ -453,14 +453,14 @@ export const messagesByDMThread: Record<string, Message[]> = {
       channelId: "dm-maimai",
       sentAt: "2026-04-18T23:21:00+09:00",
       authorId: "hal",
-      body: "なつかしい。あとでnoteにまとめたら？",
+      body: "なつかしい。このブログ、noteに移行したんだよね？",
     },
     {
       id: "dm-maimai-0064",
       channelId: "dm-maimai",
       sentAt: "2026-04-18T23:23:00+09:00",
       authorId: "maimai",
-      body: "ブログの記事、noteに移行しようと思ってる",
+      body: "うん、2020年の2月に移した。前の記事は残してあるよ",
     },
     {
       id: "dm-maimai-0065",
