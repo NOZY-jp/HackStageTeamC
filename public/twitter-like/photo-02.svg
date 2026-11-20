@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="800" height="600" viewBox="0 0 800 600" role="img" aria-label="テーブルをはさんで笑う二人。手前の子は茶髪のロング">
+  <rect width="800" height="600" fill="#f2e7da"/>
+  <rect y="430" width="800" height="170" fill="#c9a883"/>
+  <rect x="230" y="390" width="340" height="60" rx="10" fill="#8c6b4f"/>
+  <g>
+    <circle cx="300" cy="230" r="64" fill="#f3d3bd"/>
+    <path d="M236 230c0-56 30-92 64-92s64 36 64 92c0 20-6 30-6 30l-8-44-100 2-6 42s-8-10-8-30Z" fill="#2f2a28"/>
+    <circle cx="280" cy="228" r="6" fill="#2f2a28"/>
+    <circle cx="320" cy="228" r="6" fill="#2f2a28"/>
+    <path d="M282 268q18 16 36 0" stroke="#b5654f" stroke-width="5" fill="none" stroke-linecap="round"/>
+    <path d="M262 300h76l16 120H246z" fill="#7b8fa8"/>
+  </g>
+  <g>
+    <circle cx="520" cy="240" r="60" fill="#f7dcc4"/>
+    <path d="M456 240c0-58 28-94 64-94 40 0 64 40 64 94l-6 130-10-8-6-116-84 2-6 114-10 8Z" fill="#7a4a2c"/>
+    <circle cx="500" cy="238" r="6" fill="#3a2a20"/>
+    <circle cx="540" cy="238" r="6" fill="#3a2a20"/>
+    <path d="M502 278q18 16 36 0" stroke="#c2664f" stroke-width="5" fill="none" stroke-linecap="round"/>
+    <path d="M484 306h72l16 114H468z" fill="#b07a86"/>
+  </g>
+</svg>

@@ -1,0 +1,22 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="800" height="600" viewBox="0 0 800 600" role="img" aria-label="制服姿で並ぶ二人。左の子は黒髪のボブ">
+  <rect width="800" height="600" fill="#e9eef2"/>
+  <rect y="430" width="800" height="170" fill="#cfd6dc"/>
+  <g>
+    <circle cx="290" cy="250" r="70" fill="#f3d3bd"/>
+    <path d="M212 250c0-58 34-96 78-96s78 38 78 96c0 22-8 34-8 34l-10-46-120 2-8 44s-10-12-10-34Z" fill="#2f2a28"/>
+    <circle cx="268" cy="248" r="7" fill="#2f2a28"/>
+    <circle cx="312" cy="248" r="7" fill="#2f2a28"/>
+    <path d="M272 288q18 14 36 0" stroke="#b5654f" stroke-width="5" fill="none" stroke-linecap="round"/>
+    <path d="M250 330h80l16 170H232z" fill="#3c4a5e"/>
+    <path d="M290 332l-24 30 24 22 24-22z" fill="#f4f6f8"/>
+  </g>
+  <g>
+    <circle cx="500" cy="262" r="66" fill="#f7dcc4"/>
+    <path d="M430 262c0-64 32-100 72-100 44 0 70 40 70 100l-6 120-12-10-6-108-96 4-6 106-12 10Z" fill="#7a4a2c"/>
+    <circle cx="478" cy="260" r="7" fill="#3a2a20"/>
+    <circle cx="522" cy="260" r="7" fill="#3a2a20"/>
+    <path d="M482 300q18 16 36 0" stroke="#c2664f" stroke-width="5" fill="none" stroke-linecap="round"/>
+    <path d="M462 340h80l18 160H444z" fill="#3c4a5e"/>
+    <path d="M502 342l-24 30 24 22 24-22z" fill="#f4f6f8"/>
+  </g>
+</svg>
