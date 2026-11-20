@@ -74,8 +74,8 @@ export const nicknames: Nickname[] = [
   {
     of: "maimai",
     text: "まいまい",
-    usedBy: ["ryo", "kai"],
-    note: "リョウの呼び方（Discord の表示名から）",
+    usedBy: ["ryo", "kai", "maimai"],
+    note: "リョウの呼び方（Discord の表示名から）。本人も自分のことをこう言う（箱書き 第一章）",
   },
   {
     of: "maimai",
