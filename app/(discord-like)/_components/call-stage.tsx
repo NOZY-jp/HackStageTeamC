@@ -87,6 +87,25 @@ function SpeakerIcon({ off }: { off: boolean }) {
   );
 }
 
+function ShareIcon() {
+  return (
+    <svg
+      aria-hidden="true"
+      viewBox="0 0 24 24"
+      width="16"
+      height="16"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      <rect x="3" y="5" width="18" height="12" rx="2" />
+      <path d="M9 21h6M12 17v4" />
+    </svg>
+  );
+}
+
 function LeaveIcon() {
   return (
     <svg
@@ -170,6 +189,7 @@ export function CallStage({
   // ホバー中か、通話エリアの中にフォーカスがあるあいだだけ操作を出す
   const [active, setActive] = useState(false);
   const [focused, setFocused] = useState(false);
+  const [shareNotice, setShareNotice] = useState(false);
   const controlsVisible = active || focused;
   const elapsed = useCallTimer(joined);
   const tabIndex = controlsVisible ? 0 : -1;
@@ -189,14 +209,16 @@ export function CallStage({
       }}
     >
       {/* キーボードでも操作を出せる入口（見た目は出さない）。フォーカスすると操作バーが出る */}
-      <button
-        type="button"
-        className="call-reveal sr-only"
-        onClick={() => setActive(true)}
-        onFocus={() => setFocused(true)}
-      >
-        通話の操作を表示
-      </button>
+      {joined ? (
+        <button
+          type="button"
+          className="call-reveal sr-only"
+          onClick={() => setActive(true)}
+          onFocus={() => setFocused(true)}
+        >
+          通話の操作を表示
+        </button>
+      ) : null}
 
       <div className="call-stage-info">
         <h2 className="call-stage-title">{title}</h2>
@@ -230,44 +252,57 @@ export function CallStage({
         ))}
       </ul>
 
-      <div className="call-controls" data-visible={controlsVisible ? "true" : "false"}>
-        {joined ? (
-          <>
-            <button
-              type="button"
-              className="voice-button"
-              tabIndex={tabIndex}
-              aria-label={muted ? "ミュートを解除" : "ミュート"}
-              aria-pressed={muted}
-              onClick={onToggleMute}
-            >
-              <MicIcon muted={muted} />
-              <span>{muted ? "ミュート中" : "ミュート"}</span>
-            </button>
-            <button
-              type="button"
-              className="voice-button"
-              tabIndex={tabIndex}
-              aria-label={deafened ? "スピーカーのオフを解除" : "スピーカーをオフ"}
-              aria-pressed={deafened}
-              onClick={onToggleDeafen}
-            >
-              <SpeakerIcon off={deafened} />
-              <span>{deafened ? "スピーカーオン" : "スピーカーオフ"}</span>
-            </button>
-            <button
-              type="button"
-              className="voice-button voice-button-danger"
-              tabIndex={tabIndex}
-              aria-label="切断"
-              onClick={onLeave}
-            >
-              <LeaveIcon />
-              <span>切断</span>
-            </button>
-          </>
-        ) : null}
-      </div>
+      {joined ? (
+        <div className="call-controls" data-visible={controlsVisible ? "true" : "false"}>
+          <button
+            type="button"
+            className="voice-button"
+            tabIndex={tabIndex}
+            aria-label="画面共有（準備中）"
+            onClick={() => setShareNotice(true)}
+          >
+            <ShareIcon />
+            <span>画面共有</span>
+          </button>
+          <button
+            type="button"
+            className="voice-button"
+            tabIndex={tabIndex}
+            aria-label={muted ? "ミュートを解除" : "ミュート"}
+            aria-pressed={muted}
+            onClick={onToggleMute}
+          >
+            <MicIcon muted={muted} />
+            <span>{muted ? "ミュート中" : "ミュート"}</span>
+          </button>
+          <button
+            type="button"
+            className="voice-button"
+            tabIndex={tabIndex}
+            aria-label={deafened ? "スピーカーのオフを解除" : "スピーカーをオフ"}
+            aria-pressed={deafened}
+            onClick={onToggleDeafen}
+          >
+            <SpeakerIcon off={deafened} />
+            <span>{deafened ? "スピーカーオン" : "スピーカーオフ"}</span>
+          </button>
+          <button
+            type="button"
+            className="voice-button voice-button-danger"
+            tabIndex={tabIndex}
+            aria-label="切断"
+            onClick={onLeave}
+          >
+            <LeaveIcon />
+            <span>切断</span>
+          </button>
+          {shareNotice ? (
+            <span className="call-controls-note" role="status">
+              画面共有は準備中です
+            </span>
+          ) : null}
+        </div>
+      ) : null}
     </section>
   );
 }

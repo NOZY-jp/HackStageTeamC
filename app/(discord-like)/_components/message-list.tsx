@@ -11,6 +11,7 @@ import {
 } from "react";
 import { PaneToggles } from "@/components/discord-like/pane-toggles";
 import type { MemberView, Message, MessageAuthor } from "@/lib/discord-like/types";
+import { callHistoryByMessage, callHistoryLabel } from "./call-history";
 import { EmptyState } from "./empty-state";
 import { MessageRow } from "./message-row";
 import { MessageSearch } from "./message-search";
@@ -32,6 +33,7 @@ const formatTime = (sentAt: string) => sentAt.slice(11, 16);
 
 type Row =
   | { type: "date"; key: string; label: string }
+  | { type: "call"; key: string; label: string }
   | {
       type: "message";
       key: string;
@@ -193,11 +195,16 @@ export function MessageList({
   }, [onJumpToLatest]);
 
   const byId = new Map(messages.map((message) => [message.id, message]));
+  // 通話の開始/終了のシステムメッセージは、1枚の通話履歴カードに畳む（データは変えない）
+  const { byId: callById, hidden: hiddenCalls } = callHistoryByMessage(messages);
   const rows: Row[] = [];
   let currentDate = "";
   let previous: Message | undefined;
 
   for (const message of messages) {
+    if (hiddenCalls.has(message.id)) {
+      continue;
+    }
     const date = dateOf(message.sentAt);
     if (date !== currentDate) {
       currentDate = date;
@@ -209,6 +216,13 @@ export function MessageList({
       previous !== undefined &&
       previous.authorId === message.authorId &&
       Date.parse(message.sentAt) - Date.parse(previous.sentAt) <= FIVE_MINUTES;
+
+    const call = callById.get(message.id);
+    if (call) {
+      rows.push({ type: "call", key: `call-${message.id}`, label: callHistoryLabel(call) });
+      previous = undefined;
+      continue;
+    }
 
     rows.push({
       type: "message",
@@ -327,6 +341,13 @@ export function MessageList({
                   row.type === "date" ? (
                     <div key={row.key} className="message-date">
                       {row.label}
+                    </div>
+                  ) : row.type === "call" ? (
+                    <div key={row.key} className="call-history-card" role="note">
+                      <span className="call-history-icon" aria-hidden="true">
+                        ☎
+                      </span>
+                      <span>{row.label}</span>
                     </div>
                   ) : (
                     <MessageRow
