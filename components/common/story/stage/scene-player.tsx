@@ -8,6 +8,7 @@ import {
   type ChatMessage,
   type CustomCueName,
   chatsOf,
+  choicesLeft,
   cuesOf,
   emptyStage,
   type FlagId,
@@ -38,7 +39,12 @@ export type ScenePlayerProps = {
   beat: Beat;
   settings: PlaybackSettings;
   onSettingsChange: (next: PlaybackSettings) => void;
-  onComplete: (beat: Beat, choiceId?: string) => void;
+  /** 場面を流し終えた。chosen はこの場面で選んだ選択肢（寄り道も、選んだ順） */
+  onComplete: (beat: Beat, chosen: string[]) => void;
+  /**
+   * 立っているフラグ（選択肢の requires を見るため）。渡さなければ requires を見ずに全部出す（確認画面の単体再生）
+   */
+  flags?: readonly FlagId[];
   onFlag: (flag: FlagId) => void;
   onMinimize: () => void;
   onOpenLog: () => void;
@@ -56,8 +62,8 @@ export type ScenePlayerProps = {
 };
 
 /** 読んでいる位置。進行状態（終わった場面だけを保存）とは別に、タブを閉じるまで覚えておく */
-const READING_KEY = "hackstage:story-reading:v2";
-type Reading = { beatId: string; index: number; choiceId?: string };
+const READING_KEY = "hackstage:story-reading:v3";
+type Reading = { beatId: string; index: number; chosen: string[] };
 
 function loadReading(beatId: string): Reading | undefined {
   try {
@@ -69,7 +75,9 @@ function loadReading(beatId: string): Reading | undefined {
     return {
       beatId,
       index: Math.max(0, Math.floor(parsed.index)),
-      choiceId: typeof parsed.choiceId === "string" ? parsed.choiceId : undefined,
+      chosen: Array.isArray(parsed.chosen)
+        ? parsed.chosen.filter((id): id is string => typeof id === "string")
+        : [],
     };
   } catch {
     return undefined;
@@ -102,6 +110,7 @@ export function ScenePlayer({
   settings,
   onSettingsChange,
   onComplete,
+  flags,
   onFlag,
   onMinimize,
   onOpenLog,
@@ -119,8 +128,20 @@ export function ScenePlayer({
   speedRef.current = speed;
 
   const [resume] = useState(() => (rememberPosition ? loadReading(beat.id) : undefined));
-  const [choiceId, setChoiceId] = useState<string | undefined>(resume?.choiceId);
-  const cues = useMemo(() => cuesOf(beat, choiceId), [beat, choiceId]);
+  // この場面で選んだ選択肢（寄り道も、選んだ順）
+  const [chosen, setChosen] = useState<string[]>(resume?.chosen ?? []);
+  const cues = useMemo(() => cuesOf(beat, chosen), [beat, chosen]);
+  // いま出す選択肢（寄り道で立ったフラグも足して requires を見る）
+  const left = useMemo(() => {
+    if (!flags) return (beat.choices ?? []).filter((choice) => !chosen.includes(choice.id));
+    const raised = (beat.choices ?? [])
+      .filter((choice) => chosen.includes(choice.id))
+      .flatMap((choice) => choice.sets ?? []);
+    return choicesLeft(beat, [...flags, ...raised], chosen);
+  }, [beat, chosen, flags]);
+  // 最後に選んだのが寄り道でない選択肢なら、場面はそれで終わる
+  const lastChoice = beat.choices?.find((choice) => choice.id === chosen.at(-1));
+  const decided = Boolean(lastChoice && lastChoice.completes !== false);
   const [index, setIndex] = useState<number>(-1);
   const [busy, setBusy] = useState(true);
   const [windowVisible, setWindowVisible] = useState(true);
@@ -319,19 +340,21 @@ export function ScenePlayer({
   }, [resume]);
 
   // 選択肢を選んだら、そのセリフ（台本の続き）から流す
-  const pendingChoice = useRef(false);
+  // 選択肢を選んだら、足された命令（リョウの発言と返事）の頭から流す
+  const pendingFrom = useRef<number | undefined>(undefined);
   useEffect(() => {
-    if (pendingChoice.current) {
-      pendingChoice.current = false;
-      void run(beat.script.length);
+    if (pendingFrom.current !== undefined) {
+      const from = pendingFrom.current;
+      pendingFrom.current = undefined;
+      void run(from);
     }
-  }, [run, beat.script.length]);
+  }, [run]);
 
   useEffect(() => {
     if (rememberPosition && index >= 0) {
-      saveReading({ beatId: beat.id, index, choiceId });
+      saveReading({ beatId: beat.id, index, chosen });
     }
-  }, [rememberPosition, beat.id, index, choiceId]);
+  }, [rememberPosition, beat.id, index, chosen]);
 
   // 各プラットフォームの画面用: これまでに流したチャットと、いまの通話の様子
   const done = Math.max(reached, index >= 0 ? Math.min(index, cues.length) : 0);
@@ -351,12 +374,12 @@ export function ScenePlayer({
 
   // 場面を流し終えたら、選択肢を出すか、場面を終える
   const finished = !busy && index >= cues.length && !custom;
-  const needsChoice = finished && (beat.choices?.length ?? 0) > 0 && choiceId === undefined;
+  const needsChoice = finished && !decided && left.length > 0;
   useEffect(() => {
     if (finished && !needsChoice) {
-      onComplete(beat, choiceId);
+      onComplete(beat, chosen);
     }
-  }, [finished, needsChoice, onComplete, beat, choiceId]);
+  }, [finished, needsChoice, onComplete, beat, chosen]);
 
   const currentCue = index >= 0 && index < cues.length ? cues[index] : undefined;
   const current = currentCue?.type === "text" ? currentCue : undefined;
@@ -374,12 +397,12 @@ export function ScenePlayer({
   }, [busy, current, index, run]);
 
   const choose = (id: string) => {
-    pendingChoice.current = true;
-    setChoiceId(id);
+    pendingFrom.current = cues.length;
+    setChosen((current) => [...current, id]);
   };
 
   const noMoreText = nextStop(cues, index + 1).textIndex === undefined;
-  const isLast = noMoreText && (!beat.choices?.length || choiceId !== undefined);
+  const isLast = noMoreText && (decided || left.length === 0);
   const CustomComponent = custom ? CUSTOM_CUE_COMPONENTS[custom.name] : undefined;
   const shownCue = needsChoice ? lastText : current;
 
@@ -410,7 +433,7 @@ export function ScenePlayer({
       {!minimized && (windowVisible || needsChoice) ? (
         <TextWindow
           cue={shownCue}
-          choices={needsChoice ? beat.choices : undefined}
+          choices={needsChoice ? left : undefined}
           busy={busy || Boolean(custom)}
           isLast={isLast}
           settings={settings}

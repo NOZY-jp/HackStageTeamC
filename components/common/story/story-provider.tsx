@@ -35,7 +35,8 @@ type StoryContextValue = {
   /** 次に始まる場面 */
   upcoming?: Beat;
   setFlag: (flag: FlagId) => void;
-  completeBeat: (beat: Beat, choiceId?: string) => void;
+  /** 場面を終える。chosen はこの場面で選んだ選択肢（寄り道も、選んだ順） */
+  completeBeat: (beat: Beat, chosen?: readonly string[]) => void;
   reset: () => void;
   /** 保存された状態を読み終えたか（読む前に画面がフラグを立てて上書きしないように） */
   ready: boolean;
@@ -63,11 +64,30 @@ function load(): StoryState {
     return {
       flags: Array.isArray(parsed.flags) ? parsed.flags : [],
       completed: Array.isArray(parsed.completed) ? parsed.completed : [],
-      choices: parsed.choices && typeof parsed.choices === "object" ? parsed.choices : {},
+      choices: readChoices(parsed.choices),
     };
   } catch {
     return initialState;
   }
+}
+
+/**
+ * 選んだ選択肢を読む。前の形（場面ごとに1つの文字列）も、選んだ順の配列として読み直す。
+ * 壊れた値は捨てる。
+ */
+export function readChoices(value: unknown): StoryState["choices"] {
+  if (!value || typeof value !== "object" || Array.isArray(value)) {
+    return {};
+  }
+  const choices: StoryState["choices"] = {};
+  for (const [beatId, chosen] of Object.entries(value)) {
+    if (typeof chosen === "string") {
+      choices[beatId] = [chosen];
+    } else if (Array.isArray(chosen) && chosen.every((id) => typeof id === "string")) {
+      choices[beatId] = chosen;
+    }
+  }
+  return choices;
 }
 
 function save(state: StoryState) {
@@ -101,7 +121,12 @@ export function StoryProvider({ children }: { children: ReactNode }) {
     [],
   );
   const onComplete = useCallback(
-    (beat: Beat, choiceId?: string) => setState((current) => completeBeat(current, beat, choiceId)),
+    (beat: Beat, chosen: readonly string[] = []) =>
+      setState((current) => {
+        // 選んだ順に選び直す（寄り道は場面を続け、最後の選択肢で場面が終わる）
+        const next = chosen.reduce((state, id) => completeBeat(state, beat, id), current);
+        return next.completed.includes(beat.id) ? next : completeBeat(next, beat);
+      }),
     [],
   );
   const reset = useCallback(() => {

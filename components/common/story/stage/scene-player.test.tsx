@@ -32,13 +32,19 @@ async function flush() {
   }
 }
 
-function renderPlayer(onComplete = vi.fn(), onFlag = vi.fn()) {
+function renderPlayer(
+  onComplete = vi.fn(),
+  onFlag = vi.fn(),
+  scene: Beat = beat,
+  flags?: string[],
+) {
   // 開発時と同じく StrictMode で包む（effect の付け直しで場面が止まらないことも確かめる）
   render(
     <StrictMode>
       <ScenePlayer
-        beat={beat}
+        beat={scene}
         settings={settings}
+        flags={flags as never}
         onSettingsChange={vi.fn()}
         onComplete={onComplete}
         onFlag={onFlag}
@@ -85,6 +91,48 @@ describe("ScenePlayer", () => {
     expect(screen.getByText("Aを選んだ", { selector: ".sw-text" })).toBeInTheDocument();
     fireEvent.click(screen.getByText("Aを選んだ", { selector: ".sw-text" }));
     await flush();
-    expect(onComplete).toHaveBeenCalledWith(beat, "a");
+    expect(onComplete).toHaveBeenCalledWith(beat, ["a"]);
+  });
+
+  it("寄り道を選ぶと、返事のあとに残りの選択肢がまた出て、最後に選んだ順で場面を終える", async () => {
+    vi.useFakeTimers({ toFake: ["setTimeout", "requestAnimationFrame", "setInterval"] });
+    const detour: Beat = {
+      id: "test-detour",
+      chapter: 1,
+      when: [],
+      script: [say("kai", "どうする？")],
+      choices: [
+        { id: "go", label: "検索する" },
+        {
+          id: "ask",
+          label: "相談する",
+          completes: false,
+          reply: [say("kai", "寄り道の返事")],
+        },
+        { id: "hidden", label: "条件つき", requires: ["s03-blog-found"] },
+      ],
+    };
+    const onComplete = vi.fn();
+    renderPlayer(onComplete, vi.fn(), detour, ["started"]);
+    await flush();
+    fireEvent.click(screen.getByText("どうする？", { selector: ".sw-text" }));
+    await flush();
+    // 条件のフラグが無い選択肢は出ない
+    expect(screen.queryByRole("button", { name: "条件つき" })).toBeNull();
+    fireEvent.click(screen.getByRole("button", { name: "相談する" }));
+    await flush();
+    fireEvent.click(screen.getByText("相談する", { selector: ".sw-text" }));
+    await flush();
+    expect(screen.getByText("寄り道の返事", { selector: ".sw-text" })).toBeInTheDocument();
+    fireEvent.click(screen.getByText("寄り道の返事", { selector: ".sw-text" }));
+    await flush();
+    expect(onComplete).not.toHaveBeenCalled();
+    // 寄り道は二度出ない
+    expect(screen.queryByRole("button", { name: "相談する" })).toBeNull();
+    fireEvent.click(screen.getByRole("button", { name: "検索する" }));
+    await flush();
+    fireEvent.click(screen.getByText("検索する", { selector: ".sw-text" }));
+    await flush();
+    expect(onComplete).toHaveBeenCalledWith(detour, ["ask", "go"]);
   });
 });

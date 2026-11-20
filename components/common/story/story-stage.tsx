@@ -332,6 +332,7 @@ export function StoryStage() {
             settings={settings}
             onSettingsChange={setSettings}
             onComplete={preview ? endPreview : completeBeat}
+            flags={preview ? undefined : state.flags}
             onFlag={preview ? () => {} : setFlag}
             label={preview ? "単体再生（進行は変わりません）" : undefined}
             rememberPosition={!preview}

@@ -3,7 +3,7 @@ import { isAtPlace } from "./places";
 import { beats as allBeats } from "./scenario";
 import { CHAT_CHANNELS, type Cue, say } from "./stage/cues";
 import { type ChatMessage, chatsOf, textsOf } from "./stage/runner";
-import type { Beat, Line, StoryState } from "./types";
+import type { Beat, Choice, Line, StoryState } from "./types";
 
 /**
  * 進行のロジック。すべて純関数で、状態を受け取って新しい状態を返す（画面や保存は別）。
@@ -42,31 +42,84 @@ export function nextBeat(state: StoryState, beats: Beat[] = allBeats): Beat | un
   return availableBeats(state, beats)[0];
 }
 
+/** この場面でもう選んだ選択肢（選んだ順） */
+export function chosenIn(state: StoryState, beatId: string): string[] {
+  return state.choices[beatId] ?? [];
+}
+
+/** いま出す選択肢（条件のフラグがそろっていて、まだ選んでいない寄り道を除いたもの） */
+export function remainingChoices(state: StoryState, beat: Beat): Choice[] {
+  return choicesLeft(beat, state.flags, chosenIn(state, beat.id));
+}
+
 /**
- * 場面を終える。選択肢がある場面は choiceId が要る。
- * 場面の sets と、選んだ選択肢の sets のフラグを立てる。
+ * 立っているフラグと、この場面でもう選んだ選択肢から、いま出す選択肢を決める。
+ * 場面を流している画面は、寄り道で立ったフラグ（sets）も足して渡す
  */
-export function completeBeat(state: StoryState, beat: Beat, choiceId?: string): StoryState {
-  const choice = beat.choices?.find((candidate) => candidate.id === choiceId);
-  if (beat.choices && beat.choices.length > 0 && !choice) {
-    throw new Error(`場面 ${beat.id} には選択肢が必要です`);
+export function choicesLeft(
+  beat: Beat,
+  flags: readonly FlagId[],
+  chosen: readonly string[],
+): Choice[] {
+  return (beat.choices ?? []).filter(
+    (choice) =>
+      !chosen.includes(choice.id) && (choice.requires ?? []).every((flag) => flags.includes(flag)),
+  );
+}
+
+/**
+ * 選択肢を選ぶ。選んだ順に残し、選択肢の sets のフラグを立てる。
+ * 寄り道（completes: false）なら場面は続き、そうでなければ場面を終える。
+ */
+export function choose(state: StoryState, beat: Beat, choiceId: string): StoryState {
+  const choice = remainingChoices(state, beat).find((candidate) => candidate.id === choiceId);
+  if (!choice) {
+    throw new Error(`場面 ${beat.id} で選択肢 ${choiceId} は選べません`);
   }
+  const next: StoryState = {
+    ...state,
+    flags: unique([...state.flags, ...(choice.sets ?? [])]),
+    choices: { ...state.choices, [beat.id]: [...chosenIn(state, beat.id), choice.id] },
+  };
+  return choice.completes === false ? next : finish(next, beat);
+}
+
+/** 場面を終えたことにする（場面の sets のフラグを立てる） */
+function finish(state: StoryState, beat: Beat): StoryState {
   return {
-    flags: unique([...state.flags, ...(beat.sets ?? []), ...(choice?.sets ?? [])]),
+    ...state,
+    flags: unique([...state.flags, ...(beat.sets ?? [])]),
     completed: [...state.completed, beat.id],
-    choices: choice ? { ...state.choices, [beat.id]: choice.id } : state.choices,
   };
 }
 
-/** 場面の命令を、選んだ選択肢（リョウの発言と、その後の命令）まで含めて1列にする */
-export function cuesOf(beat: Beat, choiceId?: string): Cue[] {
-  const choice = beat.choices?.find((candidate) => candidate.id === choiceId);
-  return [...beat.script, ...(choice ? [say("ryo", choice.label), ...(choice.reply ?? [])] : [])];
+/**
+ * 場面を終える。選択肢がある場面は choiceId が要る（choose と同じ。寄り道を渡すと場面は続く）。
+ */
+export function completeBeat(state: StoryState, beat: Beat, choiceId?: string): StoryState {
+  if (choiceId !== undefined) {
+    return choose(state, beat, choiceId);
+  }
+  if (remainingChoices(state, beat).length > 0) {
+    throw new Error(`場面 ${beat.id} には選択肢が必要です`);
+  }
+  return finish(state, beat);
+}
+
+/** 場面の命令を、選んだ選択肢（寄り道も、選んだ順に。リョウの発言と、その後の命令）まで含めて1列にする */
+export function cuesOf(beat: Beat, chosen: readonly string[] = []): Cue[] {
+  return [
+    ...beat.script,
+    ...chosen.flatMap((choiceId) => {
+      const choice = beat.choices?.find((candidate) => candidate.id === choiceId);
+      return choice ? [say("ryo", choice.label), ...(choice.reply ?? [])] : [];
+    }),
+  ];
 }
 
 /** 場面の文章（ログに残る行）。選んだ選択肢まで含める */
-export function linesOf(beat: Beat, choiceId?: string): Line[] {
-  return textsOf(cuesOf(beat, choiceId));
+export function linesOf(beat: Beat, chosen: readonly string[] = []): Line[] {
+  return textsOf(cuesOf(beat, chosen));
 }
 
 /** 終わった場面から会話の履歴を組み立て直す（保存しているのは状態だけ） */
@@ -76,7 +129,7 @@ export function transcript(
 ): { beat: Beat; lines: Line[] }[] {
   return state.completed.flatMap((beatId) => {
     const beat = beats.find((candidate) => candidate.id === beatId);
-    return beat ? [{ beat, lines: linesOf(beat, state.choices[beatId]) }] : [];
+    return beat ? [{ beat, lines: linesOf(beat, chosenIn(state, beatId)) }] : [];
   });
 }
 
@@ -90,7 +143,7 @@ export function currentChapter(state: StoryState, beats: Beat[] = allBeats): num
 export function completedChats(state: StoryState, beats: Beat[] = allBeats): ChatMessage[] {
   return state.completed.flatMap((beatId) => {
     const beat = beats.find((candidate) => candidate.id === beatId);
-    return beat ? chatsOf(beat.id, cuesOf(beat, state.choices[beatId])) : [];
+    return beat ? chatsOf(beat.id, cuesOf(beat, chosenIn(state, beatId))) : [];
   });
 }
 

@@ -76,6 +76,27 @@ export const chapter4: Beat[] = [
 
 `choices`（場面の最後の選択肢）、`sets`（終わったら立つフラグ）も書けます。見本は `lib/story/scenario/sample.ts`（全命令を一度ずつ使う）です。
 
+### 選択肢
+
+場面の最後に `choices` を書くと、文章の帯の上に選択肢が出ます。選んだ文はリョウの発言として会話に残り、`reply`（命令の並び）が続きます。
+
+- `sets`: 選んだら立つフラグ
+- `requires`: このフラグがそろうまで、その選択肢は出ない（手がかりを見つけた人だけが選べる、など）
+- `completes: false`: **寄り道**。選んでも場面は終わらず、返事のあとにまた残りの選択肢が出る（同じ寄り道は二度出ない）。寄り道の発言と返事も、選んだ順にログに残る
+
+```ts
+choices: [
+  { id: "search", label: "本名で検索する", sets: ["s10-talkup-match"] },
+  {
+    id: "ask",
+    label: "カイに相談する",
+    requires: ["s03-blog-found"],
+    completes: false,
+    reply: [todo(call("kai"), "カイの返事")],
+  },
+],
+```
+
 ### 命令の一覧（`lib/story/stage/cues.ts`）
 
 | 命令           | 書き方                                                                           | すること                                                                   |

@@ -94,8 +94,12 @@ export function ScenePreview({ beatId }: { beatId: string }) {
               beat={beat}
               settings={settings}
               onSettingsChange={setSettings}
-              onComplete={(_, choiceId) =>
-                setDone(choiceId ? `場面が終わりました（選択: ${choiceId}）` : "場面が終わりました")
+              onComplete={(_, chosen) =>
+                setDone(
+                  chosen.length > 0
+                    ? `場面が終わりました（選択: ${chosen.join(" → ")}）`
+                    : "場面が終わりました",
+                )
               }
               onFlag={() => {}}
               onMinimize={() => setMinimized(true)}
