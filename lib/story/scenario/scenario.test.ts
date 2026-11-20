@@ -1,25 +1,33 @@
 import { describe, expect, it } from "vitest";
 import { characters, FORBIDDEN_WORDS, nicknames } from "../characters";
 import { EXTRA_FLAGS, type FlagId } from "../flags";
+import { say, textsOf, validateBeat } from "../stage";
 import { STEP_IDS } from "../steps";
 import type { Beat, Line } from "../types";
 import { beats } from "./index";
 
 /** 場面に出てくる全部の行（選択肢の文はリョウの発言として数える） */
 const allLines = (beat: Beat): Line[] => [
-  ...beat.lines,
+  ...textsOf(beat.script),
   ...(beat.choices ?? []).flatMap((choice) => [
-    { from: "ryo" as const, text: choice.label },
-    ...(choice.reply ?? []),
+    say("ryo", choice.label),
+    ...textsOf(choice.reply ?? []),
   ]),
 ];
 
 describe("台本の整合性", () => {
-  it("場面IDは重複せず、章番号から始まる", () => {
+  it("場面IDは重複せず、章番号から始まる（見本は sample-）", () => {
     const ids = beats.map((beat) => beat.id);
     expect(new Set(ids).size).toBe(ids.length);
     for (const beat of beats) {
-      expect(beat.id.startsWith(`ch${beat.chapter}-`), beat.id).toBe(true);
+      const prefix = beat.previewOnly ? "sample-" : `ch${beat.chapter}-`;
+      expect(beat.id.startsWith(prefix), beat.id).toBe(true);
+    }
+  });
+
+  it("命令の書き間違い（出していない立ち絵の操作・未登録の背景など）が無い", () => {
+    for (const beat of beats) {
+      expect(validateBeat(beat), beat.id).toEqual([]);
     }
   });
 
@@ -33,13 +41,10 @@ describe("台本の整合性", () => {
     }
   });
 
-  it("発言する人と DM の相手は台帳にいる", () => {
+  it("発言する人は台帳にいる", () => {
     for (const beat of beats) {
-      if (beat.channel.kind === "discord-dm") {
-        expect(characters[beat.channel.with], beat.id).toBeDefined();
-      }
       for (const line of allLines(beat)) {
-        if (line.from !== "system") {
+        if (line.from) {
           expect(characters[line.from], `${beat.id}: ${line.from}`).toBeDefined();
         }
       }
@@ -83,7 +88,7 @@ describe("台本の整合性", () => {
     for (const nickname of nicknames) {
       for (const beat of beats) {
         for (const line of allLines(beat)) {
-          if (line.from !== "system" && line.text.includes(nickname.text)) {
+          if (line.from && line.text.includes(nickname.text)) {
             expect(nickname.usedBy, `${beat.id}: ${line.from} が「${nickname.text}」`).toContain(
               line.from,
             );

@@ -1,0 +1,62 @@
+import { APP_PREFIX, dmListPath, dmThreadPath, guildChannelPath } from "@/lib/platform/app-prefix";
+
+/**
+ * 物語の場面が起きる画面。場面に `place` を書くと、その画面を開いたときに始まる
+ * （開いていなければ、画面の右下に「◯◯を開く」と案内だけ出す。勝手に画面は移さない）。
+ * チャットの命令（chat）も、どの画面に流れるかをここで決める。
+ *
+ * URL は lib/platform/app-prefix.ts の関数で作る（各プラットフォームの名前空間は import しない・#76）。
+ * URL の数値 ID は lib/discord-like/data と同じ値（progression.test.ts で突き合わせる）。
+ */
+export const MAIMAI_DM_URL_ID = "1187002356428841501";
+/** モンハンコミュニティ（サーバー）と、そのボイスチャンネル「深夜の集会」 */
+export const MHC_GUILD_URL_ID = "1187002356428840961";
+export const NIGHT_VC_URL_ID = "1187002356428840973";
+
+export type Place = {
+  /** 案内に出す名前（「Discord を開く」の「Discord」） */
+  label: string;
+  /** 案内のリンク先 */
+  href: string;
+  /** この接頭辞で始まる URL を開いていれば、その画面にいるとみなす */
+  match: string;
+  /**
+   * 場面が始まったあとは、この接頭辞の中なら移っても続ける（通話しながら Discord の別のチャンネルを見る、など）。
+   * 無ければ match の外に出たら窓を隠し、「◯◯を開く」の案内にする
+   */
+  within?: string;
+};
+
+export const PLACES = {
+  discord: { label: "Discord", href: dmListPath(), match: `/${APP_PREFIX}/` },
+  "discord:dm-maimai": {
+    label: "MaiMai との DM",
+    href: dmThreadPath(MAIMAI_DM_URL_ID),
+    match: dmThreadPath(MAIMAI_DM_URL_ID),
+  },
+  "discord:vc-night": {
+    label: "Discord の「深夜の集会」",
+    href: guildChannelPath(MHC_GUILD_URL_ID, NIGHT_VC_URL_ID),
+    match: guildChannelPath(MHC_GUILD_URL_ID, NIGHT_VC_URL_ID),
+    within: `/${APP_PREFIX}/`,
+  },
+} as const satisfies Record<string, Place>;
+
+export type PlaceId = keyof typeof PLACES;
+
+function startsWithPath(pathname: string, prefix: string): boolean {
+  return pathname === prefix || pathname.startsWith(prefix.endsWith("/") ? prefix : `${prefix}/`);
+}
+
+/** いま開いている URL が、その画面か */
+export function isAtPlace(pathname: string, place: PlaceId): boolean {
+  return startsWithPath(pathname, PLACES[place].match);
+}
+
+/** 場面が始まったあと、続けてよい範囲にいるか（within が無ければ isAtPlace と同じ） */
+export function isWithinPlace(pathname: string, place: PlaceId): boolean {
+  const target: Place = PLACES[place];
+  return (
+    isAtPlace(pathname, place) || (target.within ? startsWithPath(pathname, target.within) : false)
+  );
+}

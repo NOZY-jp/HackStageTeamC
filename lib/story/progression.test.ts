@@ -5,9 +5,12 @@
  */
 import { describe, expect, it } from "vitest";
 import { getEntry, getMylist, listMylistEntries, listPublicEntries } from "@/lib/blog-like";
+import { getChannel, getDMThread, getGuild } from "@/lib/discord-like";
 import { channelMessages, dmMessages } from "@/lib/discord-like/data/messages";
 import { users } from "@/lib/discord-like/data/users";
 import { characters } from "./characters";
+import { MAIMAI_DM_URL_ID, MHC_GUILD_URL_ID, NIGHT_VC_URL_ID } from "./places";
+import { VOICE_CHANNELS } from "./stage";
 import { STEP_IDS, steps } from "./steps";
 
 const OLD_DISCORD_ID = characters.maimai.accounts.discordOldId;
@@ -84,4 +87,19 @@ describe("進行チェック（各プラットフォームのデータに手が�
   it.todo("段階7・8: コンテスト名が造語「蒼穹フォトアワード 2020」になっている（#77）");
   it.todo("段階2: Twixer にかのんの「○○にも書いてたよな」リプライがある");
   it.todo("段階10: talkup に本人のプロフィールと写真がある");
+});
+
+describe("物語のチャットの流し先（lib/story/places.ts）", () => {
+  it("MaiMai との DM の URL が Discord のデータと一致する", () => {
+    expect(getDMThread("dm-maimai")?.urlId).toBe(MAIMAI_DM_URL_ID);
+  });
+
+  it("通話の場所が Discord のボイスチャンネルで、URL も一致する", () => {
+    expect(getGuild("mhc")?.urlId).toBe(MHC_GUILD_URL_ID);
+    for (const key of Object.keys(VOICE_CHANNELS)) {
+      const channel = getChannel(key.replace(/^discord:/, ""));
+      expect(channel?.kind).toBe("voice");
+    }
+    expect(getChannel("mhc-vc-3")?.urlId).toBe(NIGHT_VC_URL_ID);
+  });
 });
