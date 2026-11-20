@@ -235,12 +235,11 @@ describe("ダミーデータの整合性", () => {
     expect(server).toBeLessThanOrEqual(VOLUME_LIMITS.serverMessages.max);
   });
 
-  it("月次の 個人:サーバー 比がしきい値の±25%に収まる", () => {
+  it("後半ほど DM が濃くなる傾向がある（データ量で絶対値は動くため傾向で見る）", () => {
     const dm = allDMMessages();
     // 期間比はサーバー全体（3サーバー合算）で見る
     const server = allServerMessages();
-    // データ量（#131〜#133）で絶対値は動くため、「時間が進むほど DM が濃くなる」傾向を見る。
-    // 最初の期間に対して最後の期間が trendMultiplier 倍以上になっていること。
+    // データ量で絶対値は動くため、「後半ほど DM が濃い」傾向だけを見る
     const ratios: number[] = [];
     for (const period of PERIODS) {
       const inRange = (message: { sentAt: string }) =>

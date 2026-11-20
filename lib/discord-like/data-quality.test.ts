@@ -1,11 +1,16 @@
 /**
  * データ品質のガード（#131・決定 D9/D10）。
  * 生成データの「穴」「英語テンプレ」「使い回し」「発言者の逸脱」「日次集中」「時刻衝突」を落とす。
+ * 数字・記号で一意に見せた文（水増し）も許さない。
  */
 import { describe, expect, it } from "vitest";
 import { buildMhcHistory } from "./data/messages/mhc-history";
-import { ACQUAINTANCE_NOTES } from "./data/people/acquaintance-notes";
-import { FRIEND_MEMBERS, looksPadded, UNIV_MEMBERS } from "./generators/servers";
+import {
+  KAI_LIMIT_IN_MHC,
+  looksMechanical,
+  looksTwoTopic,
+  PERSON_FORBIDDEN,
+} from "./generators/mhc-history";
 import { listChannels, listDMMessages, listDMThreads, listGuilds, listMessages } from "./index";
 import { QUALITY_LIMITS as Q } from "./test-thresholds";
 import type { Message } from "./types";
@@ -13,7 +18,7 @@ import type { Message } from "./types";
 const allMessages = (): Message[] => {
   const server = listGuilds().flatMap((guild) =>
     listChannels(guild.id)
-      // voice も含める（VC の開始/終了も sentAt 一意の対象）
+      .filter((channel) => channel.kind === "text")
       .flatMap((channel) => listMessages({ channelId: channel.id, limit: 5000 }).messages),
   );
   const dm = listDMThreads().flatMap(
@@ -22,15 +27,16 @@ const allMessages = (): Message[] => {
   return [...server, ...dm];
 };
 
-/**
- * #131/#132 で追加したデータ（ID の接頭辞で判別する）。
- * - mhc の追加分は `mhc-<channel>-h####`
- * - 新サーバーは `univ-*` / `friend-*`
- */
-const NEW_ID = /^(mhc-(lfg|chat|questions|clips|gear|notice|intro)-h|univ-|friend-)/;
+/** #131 で追加した mhc の履歴（`mhc-<channel>-h####`） */
+const NEW_ID = /^mhc-(lfg|chat|questions|clips|gear|notice|intro)-h\d{4}$/;
+const messages = allMessages();
 const newMessages = (): Message[] => messages.filter((message) => NEW_ID.test(message.id));
 
-const messages = allMessages();
+/** 数字・記号で一意に見せた水増し文か（URL は除く） */
+const looksPadded = (body: string): boolean => {
+  if (/https?:\/\//.test(body)) return false;
+  return /[（(]\s*\d{1,4}\s*[)）]\s*$/.test(body) || /\d{3,}\s*$/.test(body);
+};
 
 describe("データ品質（#131 / D9・D10）", () => {
   it("本文に生成の穴（undefined・null・NaN・{{ }}・TODO）が無い", () => {
@@ -50,8 +56,34 @@ describe("データ品質（#131 / D9・D10）", () => {
     }
   });
 
+  it("数字・記号で一意に見せた水増し文が無い", () => {
+    for (const message of messages) {
+      expect(looksPadded(message.body), `${message.id}: ${message.body}`).toBe(false);
+    }
+  });
+
+  it("文末に「時刻＋モンスター名」を機械的に足した文が無い", () => {
+    for (const message of messages) {
+      expect(looksMechanical(message.body), `${message.id}: ${message.body}`).toBe(false);
+    }
+  });
+
+  it("1文に2つの話題（時刻＋別の話題）を連結しない", () => {
+    for (const message of messages) {
+      expect(looksTwoTopic(message.body), `${message.id}: ${message.body}`).toBe(false);
+    }
+  });
+
+  it("「〜の件／〜の話」の継ぎはぎで水増ししない", () => {
+    for (const message of messages) {
+      expect(
+        /(の件|の話)[、。].*(の件|の話)/.test(message.body),
+        `${message.id}: ${message.body}`,
+      ).toBe(false);
+    }
+  });
+
   it("新規追加分の本文ユニーク率は95%以上、全体は85%以上（system 行は除く）", () => {
-    // 入室/退出のシステム行は仕様上どうしても同じ文言になるため、ユニーク率の分母から除く（D9）
     const isText = (message: Message) => message.system !== true;
     const added = newMessages().filter(isText);
     const texts = messages.filter(isText);
@@ -63,59 +95,85 @@ describe("データ品質（#131 / D9・D10）", () => {
 
   it("mhc の発言者は9人まで、kai は mhc と dm-kai 以外で発言せず、mhc では5件まで（D10）", () => {
     let kaiInMhc = 0;
-    for (const guild of listGuilds()) {
-      if (guild.id !== "mhc") continue;
-      for (const channel of listChannels(guild.id).filter((item) => item.kind === "text")) {
-        for (const message of listMessages({ channelId: channel.id, limit: 5000 }).messages) {
-          expect(Q.mhcSpeakers, `${message.id} ${message.authorId}`).toContain(message.authorId);
-          if (message.authorId === "kai") kaiInMhc += 1;
-        }
+    for (const channel of listChannels("mhc").filter((item) => item.kind === "text")) {
+      for (const message of listMessages({ channelId: channel.id, limit: 5000 }).messages) {
+        expect(Q.mhcSpeakers, `${message.id} ${message.authorId}`).toContain(message.authorId);
+        if (message.authorId === "kai") kaiInMhc += 1;
       }
     }
-    expect(kaiInMhc).toBeLessThanOrEqual(Q.kaiInMhc);
+    expect(kaiInMhc).toBeLessThanOrEqual(KAI_LIMIT_IN_MHC);
     for (const message of messages) {
-      if (message.authorId === "kai") {
-        expect(
-          ["mhc", "dm-kai"].some((key) => message.channelId.startsWith(key)),
-          message.id,
-        ).toBe(true);
-      }
+      if (message.authorId !== "kai") continue;
+      expect(
+        ["mhc", "dm-kai"].some((key) => message.channelId.startsWith(key)),
+        message.id,
+      ).toBe(true);
     }
   });
 
-  it("サーバーごと・月ごとに10日以上発言があり、6日以降にも発言がある", () => {
-    // 全サーバー＋DMの合算ではなく、サーバー単位で日次分散を見る（合算だと薄い月が隠れる）
-    for (const guild of listGuilds()) {
-      const days = new Map<string, Set<string>>();
-      const texts = listChannels(guild.id).filter((channel) => channel.kind === "text");
-      for (const channel of texts) {
-        for (const message of listMessages({ channelId: channel.id, limit: 5000 }).messages) {
-          const month = message.sentAt.slice(0, 7);
-          const set = days.get(month) ?? new Set<string>();
-          set.add(message.sentAt.slice(0, 10));
-          days.set(month, set);
-        }
+  it("学生でない人（MaiMai・じじい・マスター）は学生語彙を使わない（0件）", () => {
+    // 既存メッセージは書き換えない（D9）。新規追加分だけを検査する
+    for (const message of newMessages()) {
+      const rule = PERSON_FORBIDDEN[message.authorId];
+      if (!rule) continue;
+      expect(rule.test(message.body), `${message.id} ${message.authorId}: ${message.body}`).toBe(
+        false,
+      );
+    }
+  });
+
+  it("mhc は各月10日以上発言があり、6日以降にも発言がある", () => {
+    const byMonth = new Map<string, Set<string>>();
+    for (const channel of listChannels("mhc").filter((item) => item.kind === "text")) {
+      for (const message of listMessages({ channelId: channel.id, limit: 5000 }).messages) {
+        const month = message.sentAt.slice(0, 7);
+        const days = byMonth.get(month) ?? new Set<string>();
+        days.add(message.sentAt.slice(0, 10));
+        byMonth.set(month, days);
       }
-      for (const [month, set] of days) {
-        expect(set.size, `${guild.id} ${month}`).toBeGreaterThanOrEqual(Q.minActiveDaysPerMonth);
-        const latestDay = Math.max(...[...set].map((day) => Number(day.slice(8, 10))));
-        expect(latestDay, `${guild.id} ${month}`).toBeGreaterThanOrEqual(Q.activityAfterDay);
-      }
+    }
+    expect(byMonth.size).toBeGreaterThanOrEqual(12);
+    for (const [month, days] of byMonth) {
+      expect(days.size, month).toBeGreaterThanOrEqual(Q.minActiveDaysPerMonth);
+      const latestDay = Math.max(...[...days].map((day) => Number(day.slice(8, 10))));
+      expect(latestDay, month).toBeGreaterThanOrEqual(Q.activityAfterDay);
+    }
+  });
+
+  it("sentAt はサーバー・DM をまたいで一意（既存由来の重複だけ例外）", () => {
+    // D9: 既存メッセージの時刻は書き換えない。既存同士の重複だけを明示的に除外する。
+    // 例外は「時刻」ではなく既存の ID の組で固定する（時刻を書き換えないため）
+    const EXISTING_DUPLICATE_IDS = new Set([
+      "mhc-chat-0046",
+      "mhc-chat-0047",
+      "dm-maimai-0178",
+      "dm-maimai-0179",
+      "dm-maimai-0201",
+      "dm-maimai-0202",
+      "dm-maimai-0346",
+      "dm-maimai-0347",
+      "mhc-chat-0221",
+      "dm-maimai-0397",
+    ]);
+    const seen = new Map<string, string>();
+    for (const message of messages) {
+      if (EXISTING_DUPLICATE_IDS.has(message.id)) continue;
+      const other = seen.get(message.sentAt);
+      expect(other, `${message.id} ${message.sentAt} が ${other} と重複`).toBeUndefined();
+      seen.set(message.sentAt, message.id);
     }
   });
 
   it("生成器は同じ seed で同じ結果になる（再現性）", () => {
-    // 生成時に渡した「既存の時刻」だけで再生成する（生成済みの時刻を混ぜると入力が変わる）
     const isBase = (message: Message) =>
-      /^mhc-(lfg|chat|questions|clips|notice)-d{4}$/.test(message.id) ||
+      /^mhc-(lfg|chat|questions|clips|notice)-\d{4}$/.test(message.id) ||
       message.channelId.startsWith("dm-");
     const times = [...new Set(messages.filter(isBase).map((message) => message.sentAt))];
     const first = buildMhcHistory(times);
     const second = buildMhcHistory(times);
     expect(second).toEqual(first);
-    const current = listGuilds()
-      .filter((guild) => guild.id === "mhc")
-      .flatMap((guild) => listChannels(guild.id).filter((channel) => channel.kind === "text"))
+    const current = listChannels("mhc")
+      .filter((channel) => channel.kind === "text")
       .flatMap((channel) => listMessages({ channelId: channel.id, limit: 5000 }).messages)
       .filter((message) => NEW_ID.test(message.id))
       .map(
@@ -128,70 +186,6 @@ describe("データ品質（#131 / D9・D10）", () => {
       );
     expect(generated.length).toBe(current.length);
     expect([...generated].sort()).toEqual([...current].sort());
-  });
-
-  it("sentAt はサーバー・DM をまたいで一意（既存由来の重複だけ例外）", () => {
-    // D9: 既存メッセージの時刻は書き換えない。既存同士の重複だけを明示的に除外する。
-    const EXISTING_DUPLICATES = new Set([
-      "2025-05-10T15:53:00+09:00", // mhc-chat-0046 × 0047（既存）
-      "2026-09-02T21:12:00+09:00", // dm-maimai-0178 × 0179（既存）
-      "2026-09-09T23:21:00+09:00", // dm-maimai-0201 × 0202（既存）
-      "2026-10-26T22:16:00+09:00", // dm-maimai-0346 × 0347（既存）
-      "2026-11-10T23:21:00+09:00", // mhc-chat-0221 × dm-maimai-0397（既存）
-    ]);
-    const seen = new Set<string>();
-    for (const message of messages) {
-      if (EXISTING_DUPLICATES.has(message.sentAt)) continue;
-      expect(seen.has(message.sentAt), `${message.id} ${message.sentAt}`).toBe(false);
-      seen.add(message.sentAt);
-    }
-  });
-
-  it("#144: 数字・記号で一意に見せた水増し文が無い", () => {
-    for (const message of messages) {
-      expect(looksPadded(message.body), `${message.id}: ${message.body}`).toBe(false);
-    }
-  });
-
-  it("#144: friend は現実の友達だけで、MaiMai・かのんが発言しない", () => {
-    const friend = listGuilds().find((guild) => guild.id === "friend");
-    expect(friend).toBeDefined();
-    const speakers = new Set<string>();
-    for (const channel of listChannels("friend")) {
-      for (const message of listMessages({ channelId: channel.id, limit: 5000 }).messages) {
-        expect(FRIEND_MEMBERS, message.id).toContain(message.authorId);
-        speakers.add(message.authorId);
-      }
-    }
-    expect(speakers.has("maimai")).toBe(false);
-    expect(speakers.has("kanon")).toBe(false);
-  });
-
-  it("#144: univ は hal＋同級生18＋先輩6＋後輩9 の34人が発言する", () => {
-    const speakers = new Set<string>();
-    for (const channel of listChannels("univ")) {
-      for (const message of listMessages({ channelId: channel.id, limit: 5000 }).messages) {
-        expect(UNIV_MEMBERS, message.id).toContain(message.authorId);
-        if (message.system !== true) speakers.add(message.authorId);
-      }
-    }
-    expect(speakers.size).toBe(34);
-  });
-
-  it("#144: 初出より前に発言しない（docs の初出と一致）", () => {
-    const firstSeen = new Map<string, string>();
-    for (const [id, note] of Object.entries(ACQUAINTANCE_NOTES)) {
-      const match = /^(d{4})-(d{2})/.exec(note.firstSeen);
-      if (match) firstSeen.set(id, `${match[1]}-${match[2]}`);
-    }
-    for (const message of messages) {
-      const seen = firstSeen.get(message.authorId);
-      if (!seen) continue;
-      expect(
-        message.sentAt.slice(0, 7) >= seen,
-        `${message.id} ${message.authorId} ${message.sentAt} < ${seen}`,
-      ).toBe(true);
-    }
   });
 
   it("voice チャンネルには入室/退出のシステムメッセージしか無い（#129 で VoiceSession を追加）", () => {

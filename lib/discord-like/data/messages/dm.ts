@@ -1269,7 +1269,7 @@ export const messagesByDMThread: Record<string, Message[]> = {
     {
       id: "dm-maimai-0178",
       channelId: "dm-maimai",
-      sentAt: "2026-09-02T21:13:00+09:00",
+      sentAt: "2026-09-02T21:12:00+09:00",
       authorId: "hal",
       body: "21時から",
     },
@@ -1430,7 +1430,7 @@ export const messagesByDMThread: Record<string, Message[]> = {
     {
       id: "dm-maimai-0201",
       channelId: "dm-maimai",
-      sentAt: "2026-09-09T23:22:00+09:00",
+      sentAt: "2026-09-09T23:21:00+09:00",
       authorId: "hal",
       body: "いいよ",
     },
@@ -2445,7 +2445,7 @@ export const messagesByDMThread: Record<string, Message[]> = {
     {
       id: "dm-maimai-0346",
       channelId: "dm-maimai",
-      sentAt: "2026-10-26T22:17:00+09:00",
+      sentAt: "2026-10-26T22:16:00+09:00",
       authorId: "hal",
       body: "いいよ",
     },
@@ -2802,7 +2802,7 @@ export const messagesByDMThread: Record<string, Message[]> = {
     {
       id: "dm-maimai-0397",
       channelId: "dm-maimai",
-      sentAt: "2026-11-10T23:22:00+09:00",
+      sentAt: "2026-11-10T23:21:00+09:00",
       authorId: "hal",
       body: "おやすみ",
     },

@@ -370,6 +370,9 @@ const jst = (ms: number) => {
 };
 
 /** 数字・記号で一意に見せた文（水増し）を弾く */
+/** 「〜の件／〜の話」の継ぎはぎ（水増し）を弾く */
+export const looksSpliced = (body: string): boolean => /(の件|の話)[、。].*(の件|の話)/.test(body);
+
 export const looksPadded = (body: string): boolean => {
   // URL は数字を含んでもよい（本文を数字で水増ししたものだけを弾く）
   if (/https?:\/\//.test(body)) return false;
@@ -391,6 +394,13 @@ export function generateServers(
   const usedTimes = new Set(existingTimes);
   const usedBody = new Set<string>();
   const out: Record<string, Message[]> = {};
+
+  // 初出より前には発言させない（ノイズ経路も含めて共通化）
+  const pickAuthor = (server: { members: string[] }, at: string) => {
+    const month = at.slice(0, 7);
+    const eligible = server.members.filter((id) => !firstSeen[id] || month >= firstSeen[id]);
+    return pick(eligible.length > 0 ? eligible : ["hal"]);
+  };
 
   for (const server of SERVERS) {
     for (const [channelId] of server.channels) out[channelId] = [];
@@ -457,7 +467,7 @@ export function generateServers(
         out[item.ch].push({
           id: `${item.ch}-m${String(out[item.ch].length + 1).padStart(4, "0")}`,
           channelId: item.ch,
-          authorId: pick(server.members),
+          authorId: pickAuthor(server, jst(item.at)),
           sentAt: jst(item.at),
           body,
         });
@@ -469,7 +479,7 @@ export function generateServers(
         out[item.ch].push({
           id: `${item.ch}-m${String(out[item.ch].length + 1).padStart(4, "0")}`,
           channelId: item.ch,
-          authorId: pick(server.members),
+          authorId: pickAuthor(server, jst(item.at)),
           sentAt: jst(item.at),
           body,
         });
@@ -481,7 +491,7 @@ export function generateServers(
         out[item.ch].push({
           id: `${item.ch}-m${String(out[item.ch].length + 1).padStart(4, "0")}`,
           channelId: item.ch,
-          authorId: pick(server.members),
+          authorId: pickAuthor(server, jst(item.at)),
           sentAt: jst(item.at),
           body,
         });
@@ -490,14 +500,15 @@ export function generateServers(
       let body = "";
       for (let attempt = 0; attempt < 3000; attempt += 1) {
         const candidate = pick(TEMPLATES[item.ch])(pick);
-        if (usedBody.has(candidate) || looksPadded(candidate)) continue;
+        if (usedBody.has(candidate) || looksPadded(candidate) || looksSpliced(candidate)) continue;
         body = candidate;
         break;
       }
       if (!body) {
         for (let attempt = 0; attempt < 3000; attempt += 1) {
           const candidate = `${pick(TEMPLATES[item.ch])(pick)}、${pick(P.time)}の${pick(P.tail)}`;
-          if (usedBody.has(candidate) || looksPadded(candidate)) continue;
+          if (usedBody.has(candidate) || looksPadded(candidate) || looksSpliced(candidate))
+            continue;
           body = candidate;
           break;
         }
