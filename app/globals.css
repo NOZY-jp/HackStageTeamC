@@ -1062,6 +1062,18 @@
   color: var(--color-text-muted);
 }
 
+.voice-header-text {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+}
+
+.voice-header-handle {
+  margin: 0;
+  color: var(--color-text-muted);
+  font-size: 11px;
+}
+
 .voice-header-title {
   overflow: hidden;
   color: var(--color-text);
@@ -1199,6 +1211,32 @@
   max-height: 100%;
 }
 
+/* DM 通話: 相手を大きく中央、自分は右下の小窓 */
+.call-tiles[data-layout="dm"] {
+  position: relative;
+  display: flex;
+  align-items: stretch;
+  justify-content: center;
+  /* 相手のタイルを stage の高さいっぱいに使う */
+  height: 100%;
+}
+
+.call-tiles[data-layout="dm"] .call-tile:first-child {
+  width: 100%;
+  height: 100%;
+  max-width: 100%;
+}
+
+.call-tiles[data-layout="dm"] .call-tile:nth-child(2) {
+  position: absolute;
+  right: 8px;
+  bottom: 8px;
+  width: min(180px, 32%);
+  aspect-ratio: 16 / 9;
+  padding: 6px;
+  background-color: var(--color-bg-input);
+}
+
 .call-tile[data-speaking="true"] {
   border-color: var(--color-status-online);
   box-shadow: 0 0 0 3px color-mix(in srgb, var(--color-status-online) 30%, transparent);
@@ -1331,6 +1369,25 @@
     transition-duration: 0s;
     transition-delay: 0s;
   }
+}
+
+/* 狭い画面では、小窓が中央の操作バーに重ならないよう上へ逃がす */
+@media (max-width: 1140px) {
+  .call-tiles[data-layout="dm"] .call-tile:nth-child(2) {
+    bottom: 88px;
+    width: 132px;
+  }
+}
+
+/* 小窓（右下）はアバターと名前を小さくする */
+.call-tiles[data-layout="dm"] .call-tile:nth-child(2) .call-tile-avatar {
+  width: 44px;
+  height: 44px;
+  font-size: 18px;
+}
+
+.call-tiles[data-layout="dm"] .call-tile:nth-child(2) .call-tile-name {
+  font-size: 11px;
 }
 
 .sr-only {

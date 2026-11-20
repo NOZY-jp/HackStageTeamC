@@ -57,6 +57,7 @@ export function MessageList({
   showHash = true,
   emptyText = "まだメッセージがありません",
   headerAvatar,
+  headerAction,
   composer,
   onLoadOlder,
   loadingOlder = false,
@@ -77,6 +78,8 @@ export function MessageList({
   emptyText?: string;
   /** DM などでヘッダに出す相手のアバター（省略時は出さない）。 */
   headerAvatar?: { displayName: string; avatarColor: string };
+  /** ヘッダ右端に置く導線（DM の通話ボタンなど）。 */
+  headerAction?: ReactNode;
   /** ログの下に差し込む入力欄（省略時は出さない）。 */
   composer?: ReactNode;
   /** 上端に近づいたとき、古いメッセージを追加で読み込む。 */
@@ -262,6 +265,7 @@ export function MessageList({
           </div>
           {/* 検索・メンバーは見た目のみ（操作は #8 の非対象） */}
           <div className="message-header-actions">
+            {headerAction}
             <MessageSearch />
             {hasMembers ? (
               <button
