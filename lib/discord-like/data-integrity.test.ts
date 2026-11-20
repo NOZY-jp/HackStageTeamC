@@ -448,19 +448,27 @@ describe("メンバー一覧と順序9のヒント", () => {
 });
 
 describe("DM の同一発言の重複（#88）", () => {
-  it("同じ発言者が続けて同じ本文（または接頭辞）を送っていない", () => {
+  it("同じ発言者が続けて完全に同じ本文を送っていない", () => {
     const messages = dmMessages();
     const offenders: string[] = [];
     for (let i = 1; i < messages.length; i += 1) {
       const prev = messages[i - 1];
       const current = messages[i];
       if (prev.authorId !== current.authorId) continue;
-      const a = prev.body.trim();
-      const b = current.body.trim();
-      if (a === b || a.startsWith(b) || b.startsWith(a)) {
-        offenders.push(`${prev.id} "${a}" -> ${current.id} "${b}"`);
+      // 相づち（「うん」→「うん、そうだね」）は正常なので、完全一致だけを重複とみなす
+      if (prev.body.trim() === current.body.trim()) {
+        offenders.push(`${prev.id} -> ${current.id} "${current.body}"`);
       }
     }
     expect(offenders).toEqual([]);
+  });
+
+  it("2026-04-18 23:11 の「休み」のあとに「休み」で始まる発言が続かない", () => {
+    const messages = dmMessages();
+    const index = messages.findIndex((message) => message.id === "dm-maimai-0065");
+    expect(index).toBeGreaterThanOrEqual(0);
+    expect(messages[index].body).toBe("休み");
+    expect(messages[index + 1]?.id).toBe("dm-maimai-0059");
+    expect(messages[index + 1].body.startsWith("休み")).toBe(false);
   });
 });
