@@ -66,14 +66,17 @@ for (const [channelId, messages] of groupByChannel()) {
       pending.push(message);
       continue;
     }
-    if (pending.length === 0) continue;
-    if (MISSED.test(message.body)) {
-      if (pending.length === 0)
-        throw new Error(`応答なしの前に対応する開始がありません: ${message.id}`);
+    const isMissed = MISSED.test(message.body);
+    const isEnd = END.test(message.body);
+    if (!isMissed && !isEnd) continue;
+    if (pending.length === 0) {
+      // 開始なしの終了・不在着信はデータ異常（黙って捨てない）
+      throw new Error(`開始のない終了: ${message.id}`);
+    }
+    if (isMissed) {
       pushSession(pending.shift() as Message, undefined, "missed");
       continue;
     }
-    if (!END.test(message.body)) continue;
     const starter = pending[0];
     const minutes = (Date.parse(message.sentAt) - Date.parse(starter.sentAt)) / 60_000;
     if (minutes < 1 || minutes > MAX_MINUTES) {

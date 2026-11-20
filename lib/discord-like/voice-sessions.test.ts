@@ -103,6 +103,19 @@ describe("VoiceSession（#129）", () => {
     expect(JSON.stringify(listVoiceSessions())).toBe(before);
   });
 
+  it("開始のない終了・不在着信はデータ異常として落とす（黙って捨てない）", async () => {
+    // 導出ロジックを直接は呼べないため、データ側に孤立した終了が無いことを固定する
+    const system = messages.filter((message) => message.system === true);
+    const starts = system.filter((message) => message.body.includes("通話を開始しました"));
+    const ends = system.filter((message) => message.body.includes("通話を終了しました"));
+    const missed = system.filter((message) => message.body.includes("応答がありませんでした"));
+    expect(sessions.length).toBe(starts.length);
+    expect(sessions.filter((session) => session.endedReason === "hangup").length).toBe(ends.length);
+    expect(sessions.filter((session) => session.endedReason === "missed").length).toBe(
+      missed.length,
+    );
+  });
+
   it("scope で絞り込める（dm / guild）", () => {
     const dm = listVoiceSessions({ scope: "dm" });
     const guild = listVoiceSessions({ scope: "guild" });
