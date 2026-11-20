@@ -8,7 +8,7 @@ import type { Post, Profile, Trend, TwitterUser } from "../types";
  */
 export const twitterUsers: TwitterUser[] = [
   { id: "tw-hal", displayName: "Hal", handle: "hal", avatarColor: "#3b6fd4" },
-  { id: "tw-mai", displayName: "Mai", handle: "mai", avatarColor: "#c2417c" },
+  { id: "tw-mai", displayName: "Mai", handle: "mai2mai2", avatarColor: "#c2417c" },
   { id: "tw-ren", displayName: "れん", handle: "ren", avatarColor: "#2f8f6b" },
   { id: "tw-yuki", displayName: "ゆき", handle: "yuki", avatarColor: "#8a5cc2" },
   { id: "tw-sou", displayName: "ソウ", handle: "sou", avatarColor: "#b86a1f" },
@@ -100,7 +100,8 @@ export const twitterProfiles: Profile[] = [
     // 改名したことと旧ハンドル・旧表示名を bio に残す（今は誰も使っていない）
     userId: "tw-old-denden",
     bio: "前は @hunter_denden0102（表示名 hunter_denden）で活動していました。「写真コンテストで賞をもらいました！」を書いた頃のアカウントです。BFF: @kanon__dayo",
-    joinedAt: "2018-05-03",
+    // 旧ブログの最古記事（2018-01-27）より前から使っているアカウント
+    joinedAt: "2017-12-01",
     followingCount: 38,
     followersCount: 64,
   },
@@ -145,7 +146,7 @@ export const twitterPosts: Post[] = [
     id: "post-004",
     authorId: "tw-hal",
     postedAt: "2026-11-03T23:55:00+09:00",
-    body: "@mai その人、いまも毎日インしてるらしい。",
+    body: "@mai2mai2 その人、いまも毎日インしてるらしい。",
     replyToId: "post-003",
     replyCount: 1,
     repostCount: 0,
@@ -349,7 +350,7 @@ export const twitterPosts: Post[] = [
     id: "post-026",
     authorId: "tw-nagi",
     postedAt: "2026-11-18T09:20:00+09:00",
-    body: "@mai 私も一度、同じところで迷ったことがある。",
+    body: "@mai2mai2 私も一度、同じところで迷ったことがある。",
     replyToId: "post-003",
     replyCount: 0,
     repostCount: 0,

@@ -78,10 +78,29 @@ describe("第三章 Twitter 側（#94）", () => {
     expect(getPost("post-103")).toBeDefined();
   });
 
+  it("旧アカウントは旧ブログの最古記事より前から存在する（2017-12-01）", () => {
+    const old = accounts().find((account) => account.handle === RENAMED_HANDLE);
+    expect(old?.joinedAt).toBe("2017-12-01");
+    // 旧ブログの最古記事（2018-01-27）より前
+    expect((old?.joinedAt ?? "") < "2018-01-27").toBe(true);
+  });
+
+  it("現在のアカウントの handle は正本どおり mai2mai2", () => {
+    const mai = accounts().find((account) => account.handle === "mai2mai2");
+    expect(mai?.id).toBe("tw-mai");
+    expect(accounts().some((account) => account.handle === "mai")).toBe(false);
+    // メンションの表示も新しい handle に揃っている
+    const mentions = listPosts().filter((post) => post.body.includes("@mai"));
+    expect(mentions.length).toBeGreaterThan(0);
+    for (const post of mentions) {
+      expect(post.body).toContain("@mai2mai2");
+    }
+  });
+
   it("8b: 旧アカウントの作者が2019年の投稿を書いている（現在のアカウントで読める）", () => {
     const post = getPost("post-101");
     expect(post?.authorId).toBe("tw-mai");
-    const mai = accounts().find((account) => account.handle === "mai");
+    const mai = accounts().find((account) => account.handle === "mai2mai2");
     expect(mai).toBeDefined();
     // アカウント作成が投稿日より前（投稿できない矛盾を作らない）
     expect((mai?.joinedAt ?? "") < (post?.postedAt ?? "")).toBe(true);
