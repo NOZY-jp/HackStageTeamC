@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { Suspense } from "react";
-import { StoryProvider } from "@/components/common/story/story-provider";
+import { StoryPage, StoryProvider } from "@/components/common/story/story-provider";
 import { StoryStage } from "@/components/common/story/story-stage";
 import { SITE_URL } from "@/lib/seo/site";
 import { googleVerification } from "@/lib/seo/verification";
@@ -22,7 +22,8 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
       <body className="h-full">
         {/* シナリオの進行状態は全プラットフォームで共有する */}
         <StoryProvider>
-          {children}
+          {/* 場面を流しているあいだは、後ろの画面を inert にする */}
+          <StoryPage>{children}</StoryPage>
           {/* 台本をどの画面の上にも出す（usePathname を使うので Suspense で包む） */}
           <Suspense fallback={null}>
             <StoryStage />

@@ -90,4 +90,11 @@ describe("TextWindow", () => {
     fireEvent.keyDown(document.body, { key: "9" });
     expect(onChoose).toHaveBeenCalledTimes(1);
   });
+
+  it("読み上げは行ごとに1回（文字送りの本文は読み上げない）", () => {
+    renderWindow();
+    expect(screen.getByText("一行目")).toHaveAttribute("aria-hidden", "true");
+    const live = screen.getByText("カイ：一行目");
+    expect(live).toHaveAttribute("aria-live", "polite");
+  });
 });

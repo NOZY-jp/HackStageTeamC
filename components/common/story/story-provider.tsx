@@ -43,6 +43,9 @@ type StoryContextValue = {
   chats: ChatMessage[];
   /** いま流している場面のチャット（ScenePlayer が知らせる） */
   setLiveChats: (chats: ChatMessage[]) => void;
+  /** 場面を流している（後ろの画面を操作させない）。StoryStage が知らせ、StoryPage が後ろを inert にする */
+  covering: boolean;
+  setCovering: (covering: boolean) => void;
   /** いま流している場面の通話の様子（場面が終わったら空） */
   voice: VoiceRoom[];
   setVoice: (rooms: VoiceRoom[]) => void;
@@ -80,6 +83,7 @@ export function StoryProvider({ children }: { children: ReactNode }) {
   const [ready, setReady] = useState(false);
   const [liveChats, setLiveChats] = useState<ChatMessage[]>([]);
   const [voice, setVoice] = useState<VoiceRoom[]>([]);
+  const [covering, setCovering] = useState(false);
 
   useEffect(() => {
     setState(load());
@@ -125,8 +129,10 @@ export function StoryProvider({ children }: { children: ReactNode }) {
       setLiveChats,
       voice,
       setVoice,
+      covering,
+      setCovering,
     }),
-    [state, onSetFlag, onComplete, reset, ready, chats, voice],
+    [state, onSetFlag, onComplete, reset, ready, chats, voice, covering],
   );
 
   return <StoryContext.Provider value={value}>{children}</StoryContext.Provider>;
@@ -141,6 +147,20 @@ export function useStoryChats(channel: ChatChannel): ChatMessage[] {
   return useMemo(
     () => (context ? context.chats.filter((chat) => chat.channel === channel) : []),
     [context, channel],
+  );
+}
+
+/**
+ * 各プラットフォームの画面の入れ物。場面を流しているあいだは inert にして、
+ * マウスだけでなく Tab・キー入力でも後ろの画面を操作できないようにする（ルートレイアウトで children を包む）。
+ * 箱は作らない（display: contents）ので、各画面のレイアウトは変わらない。
+ */
+export function StoryPage({ children }: { children: ReactNode }) {
+  const context = useContext(StoryContext);
+  return (
+    <div className="contents" inert={context?.covering ?? false}>
+      {children}
+    </div>
   );
 }
 

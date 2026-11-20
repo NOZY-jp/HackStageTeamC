@@ -232,6 +232,8 @@ export function TextWindow({
   };
 
   const speaker = cue ? speakerOf(cue) : null;
+  // 読み上げ用の1行（行が変わったときだけ変わる）
+  const spoken = cue ? (speaker ? `${speaker.name}：${text}` : text) : "";
 
   return (
     <section
@@ -254,10 +256,14 @@ export function TextWindow({
           <span className="sw-channel">{label}</span>
         </p>
       ) : null}
+      <p className="sr-only" aria-live="polite">
+        {spoken}
+      </p>
       {/* biome-ignore lint/a11y/useKeyWithClickEvents: キー操作は document の Enter / Space で受ける */}
       {/* biome-ignore lint/a11y/noStaticElementInteractions: 本文のどこを押しても次へ進む（ノベルゲームの操作） */}
       <div className="sw-body" onClick={onBodyClick}>
-        <p className="sw-text" aria-live="polite" title={cue ? FRAMES[cue.frame] : undefined}>
+        {/* 文字送りの本文は読み上げない（1文字ずつ伸びるたびに読み直されるため）。読み上げは下の live 領域で行ごとに1回 */}
+        <p className="sw-text" aria-hidden="true" title={cue ? FRAMES[cue.frame] : undefined}>
           {cue ? sliceChars(text, chars) : null}
         </p>
         {atChoices ? (

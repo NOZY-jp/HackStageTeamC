@@ -1,5 +1,6 @@
 "use client";
 
+import dynamic from "next/dynamic";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { type ComponentType, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
@@ -20,7 +21,7 @@ import {
 } from "@/lib/story";
 import { usePlaybackSettings } from "./playback-settings";
 import { clearScenePreview, loadScenePreview } from "./scene-preview-request";
-import { ScenePlayer, type ScenePlayerProps } from "./stage/scene-player";
+import type { ScenePlayerProps } from "./stage/scene-player";
 import { useStory } from "./story-provider";
 
 /**
@@ -72,6 +73,16 @@ function useChatNotice(pathname: string, chats: ChatMessage[], ready: boolean) {
  * 出し方の部品。場面の presenter ごとに切り替える。
  * Discord の DM に流すなどの出し方を足すときは、Beat["presenter"] に名前を足し、ここに部品を登録する。
  */
+/**
+ * 場面を流す部品は、場面があるときだけ読み込む（動きのライブラリ motion を、場面の無いページの共通の読み込みに載せない）。
+ */
+const ScenePlayer = dynamic(
+  () => import("./stage/scene-player").then((module) => module.ScenePlayer),
+  {
+    ssr: false,
+  },
+);
+
 const PRESENTERS: Record<NonNullable<Beat["presenter"]>, ComponentType<ScenePlayerProps>> = {
   stage: ScenePlayer,
 };
@@ -200,8 +211,17 @@ export function LogPanel({
 
 export function StoryStage() {
   const pathname = usePathname();
-  const { state, upcoming, completeBeat, setFlag, ready, chats, setLiveChats, setVoice } =
-    useStory();
+  const {
+    state,
+    upcoming,
+    completeBeat,
+    setFlag,
+    ready,
+    chats,
+    setLiveChats,
+    setVoice,
+    setCovering,
+  } = useStory();
   const unread = useChatNotice(pathname, chats, ready);
   const [settings, setSettings] = usePlaybackSettings();
   const [minimized, setMinimized] = useState(false);
@@ -254,6 +274,13 @@ export function StoryStage() {
   // プレイヤーに操作させたいところでは、場面を終えて文章の窓を出さない（docs/story.md）。
   // 探索中は、右下の札のぶんだけ画面を縮めて、画面の下まで使えるようにする
   useReserveViewport(inScene ? null : dock);
+  // 後ろの画面を inert にする（StoryPage）。窓が出せないあいだ（読み込み前・隠す画面）は止めない
+  const covering =
+    inScene && mounted && ready && !hidden && (Boolean(preview) || state.flags.includes("started"));
+  useEffect(() => {
+    setCovering(covering);
+    return () => setCovering(false);
+  }, [covering, setCovering]);
   // たたんでいるとき（絵を見ている）は、Enter・Space・Esc で文章の窓に戻る
   useRestoreKeys(inScene && minimized, () => setMinimized(false));
 

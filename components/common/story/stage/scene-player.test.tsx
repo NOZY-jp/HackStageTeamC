@@ -60,21 +60,21 @@ describe("ScenePlayer", () => {
     vi.useFakeTimers({ toFake: ["setTimeout", "requestAnimationFrame", "setInterval"] });
     const { onFlag } = renderPlayer();
     await flush();
-    expect(screen.getByText("一行目")).toBeInTheDocument();
+    expect(screen.getByText("一行目", { selector: ".sw-text" })).toBeInTheDocument();
     expect(onFlag).not.toHaveBeenCalled();
-    fireEvent.click(screen.getByText("一行目"));
+    fireEvent.click(screen.getByText("一行目", { selector: ".sw-text" }));
     await flush();
     expect(onFlag).toHaveBeenCalledWith("askedKai");
-    expect(screen.getByText("二行目")).toBeInTheDocument();
+    expect(screen.getByText("二行目", { selector: ".sw-text" })).toBeInTheDocument();
   });
 
   it("最後に選択肢を出し、選ぶとリョウの発言と続きを流してから場面を終える", async () => {
     vi.useFakeTimers({ toFake: ["setTimeout", "requestAnimationFrame", "setInterval"] });
     const { onComplete } = renderPlayer();
     await flush();
-    fireEvent.click(screen.getByText("一行目"));
+    fireEvent.click(screen.getByText("一行目", { selector: ".sw-text" }));
     await flush();
-    fireEvent.click(screen.getByText("二行目"));
+    fireEvent.click(screen.getByText("二行目", { selector: ".sw-text" }));
     await flush();
     expect(onComplete).not.toHaveBeenCalled();
     fireEvent.click(screen.getByRole("button", { name: "Aにする" }));
@@ -82,8 +82,8 @@ describe("ScenePlayer", () => {
     expect(screen.getByText("Aにする")).toBeInTheDocument();
     fireEvent.click(screen.getByText("Aにする"));
     await flush();
-    expect(screen.getByText("Aを選んだ")).toBeInTheDocument();
-    fireEvent.click(screen.getByText("Aを選んだ"));
+    expect(screen.getByText("Aを選んだ", { selector: ".sw-text" })).toBeInTheDocument();
+    fireEvent.click(screen.getByText("Aを選んだ", { selector: ".sw-text" }));
     await flush();
     expect(onComplete).toHaveBeenCalledWith(beat, "a");
   });
