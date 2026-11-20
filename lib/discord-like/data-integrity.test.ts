@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { SELF_USER_ID } from "@/app/(discord-like)/_components/self-user";
+import { getMessageImage, OLD_TWIXER_HANDLE } from "./data/message-images";
 import {
   HAL_HANDLE,
   HAL_NAME,
@@ -26,6 +27,8 @@ import { listMemberViews } from "./view";
 
 const GUILD_ID = "mhc";
 const DM_THREAD_ID = "dm-maimai";
+const DISCORD_SCREENSHOT = "screenshot-2026.png";
+const OLD_BLOG_IMAGE = "screenshot-2019.svg";
 
 const PERIODS = [
   { key: "1期", from: "2025-02-01", to: "2025-05-31", ratio: 1 / 9 },
@@ -392,12 +395,19 @@ describe("名前の差し替え（#76 の確定値）", () => {
     expect(OLD_BLOG_ARCHIVE_URL).toBe("/pochiblo/mylist/k7q2m9d4");
   });
 
-  it("順序4のスクショに旧ハンドルが描かれている", async () => {
-    const fs = await import("node:fs/promises");
-    const svg = await fs.readFile("public/mock/screenshot-2019.svg", "utf8");
-    expect(svg).toContain(OLD_HANDLE);
-    expect(svg).not.toContain(HAL_HANDLE);
-    expect(svg).not.toContain(MAIMAI_HANDLE);
+  it("順序4の向き: Discord のスクショは現ID、旧ブログの画像は旧ID", () => {
+    // 画像の実体ではなく、1か所の定義（message-images.ts）で向きを固定する
+    const discordImage = getMessageImage(DISCORD_SCREENSHOT);
+    expect(discordImage.owner).toBe("current");
+    expect(discordImage.handle).toBe(MAIMAI_HANDLE);
+    expect(discordImage.handle).not.toBe(OLD_TWIXER_HANDLE);
+
+    const blogImage = getMessageImage(OLD_BLOG_IMAGE);
+    expect(blogImage.owner).toBe("old");
+    expect(blogImage.handle).toBe(OLD_TWIXER_HANDLE);
+    expect(blogImage.handle).not.toBe(MAIMAI_HANDLE);
+    // 旧ブログの画像に現在のハンドルは写らない
+    expect(blogImage.handle).not.toBe(HAL_HANDLE);
   });
 });
 

@@ -438,11 +438,11 @@ export const messagesByDMThread: Record<string, Message[]> = {
       channelId: "dm-maimai",
       sentAt: "2026-04-18T23:19:00+09:00",
       authorId: "hal",
-      body: "あの頃のスクショ見つけた。画像だけ貼る",
+      body: "今のアカウントのスクショ。画像だけ貼る",
       attachments: [
         {
-          id: "dm-maimai-att-2019",
-          name: "screenshot-2019.svg",
+          id: "dm-maimai-att-2026",
+          name: "screenshot-2026.png",
           kind: "image",
           sizeLabel: "412 KB",
         },
