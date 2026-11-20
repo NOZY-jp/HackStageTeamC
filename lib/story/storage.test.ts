@@ -45,6 +45,39 @@ describe("進行状態の保存（#81）", () => {
     expect(loadProgress(storage)).toEqual(emptyProgress());
   });
 
+  it("v1 の保存だけが残っていても、やり直すと v1 から復元されない（#111）", () => {
+    // v1 キーにだけ状態がある（v2 へはまだ移行していない）
+    const legacy = fakeStorage({
+      "hackstage-story-progress-v1": JSON.stringify({
+        flags: ["mylist_opened"],
+        completedScenes: ["ch1-mylist"],
+        choices: { "ch1-mylist": "remember" },
+      }),
+    });
+    // 読み込み時は v1 を移行して復元する（従来どおり）
+    expect(loadProgress(legacy).completedScenes).toEqual(["ch1-mylist"]);
+
+    clearProgress(legacy);
+    expect(legacy.data.has("hackstage-story-progress-v1")).toBe(false);
+    expect(legacy.data.has(STORAGE_KEY)).toBe(false);
+    // 直後に読み直しても初期状態（v1 から戻らない）
+    expect(loadProgress(legacy)).toEqual(emptyProgress());
+  });
+
+  it("v2 と v1 の両方がある状態でも、やり直すと両方消える（#111）", () => {
+    const storage = fakeStorage({
+      "hackstage-story-progress-v1": JSON.stringify({
+        flags: ["mylist_opened"],
+        completedScenes: ["ch1-mylist"],
+        choices: {},
+      }),
+    });
+    saveProgress(applyTrigger(emptyProgress(), triggers[0]), storage);
+    clearProgress(storage);
+    expect(storage.data.size).toBe(0);
+    expect(loadProgress(storage)).toEqual(emptyProgress());
+  });
+
   it("localStorage が例外を投げても落ちない（SecurityError・容量不足）", () => {
     const throwing = {
       getItem: () => {

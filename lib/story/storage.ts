@@ -123,7 +123,10 @@ export function saveProgress(
   }
 }
 
-/** 保存を消して最初からやり直す。 */
+/**
+ * 保存を消して最初からやり直す。
+ * v1 を消し忘れると、直後の loadProgress が v1 から復元してしまうので両方消す。
+ */
 export function clearProgress(storage: WritableStorage | undefined = browserStorage()): void {
   if (!storage) {
     return;
@@ -132,5 +135,10 @@ export function clearProgress(storage: WritableStorage | undefined = browserStor
     storage.removeItem(STORAGE_KEY);
   } catch {
     // 消せないときは何もしない
+  }
+  try {
+    storage.removeItem(LEGACY_STORAGE_KEY);
+  } catch {
+    // v1 が無い・消せない環境でも、v2 の削除は済んでいる
   }
 }
