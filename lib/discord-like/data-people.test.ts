@@ -56,9 +56,9 @@ describe("サーバーのメッセージ集計単位（#132）", () => {
     expect(textCount("mhc") + textCount("univ") + textCount("friend")).toBe(2690);
   });
 
-  it("VC の入室/退出システムメッセージは voice チャンネルにだけある（univ 6・friend 2）", () => {
-    expect(voiceCount("univ")).toBe(6);
-    expect(voiceCount("friend")).toBe(2);
+  it("VC の入室/退出システムメッセージは voice チャンネルにだけある（univ 10・friend 4）", () => {
+    expect(voiceCount("univ")).toBe(10);
+    expect(voiceCount("friend")).toBe(4);
     expect(voiceCount("mhc")).toBe(0);
     for (const guildId of ["univ", "friend"]) {
       for (const channel of listChannels(guildId).filter((item) => item.kind === "voice")) {

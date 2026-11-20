@@ -19,7 +19,7 @@ export type DMExpansionTarget = { threadId: string; personId: string; count: num
 
 export const DM_EXPANSION_TARGETS: DMExpansionTarget[] = [
   { threadId: "dm-maimai", personId: "maimai", count: 719 },
-  { threadId: "dm-kai", personId: "kai", count: 90 },
+  { threadId: "dm-kai", personId: "kai", count: 55 },
   { threadId: "dm-taku", personId: "taku", count: 60 },
   { threadId: "dm-jun", personId: "jun", count: 45 },
   { threadId: "dm-miyu", personId: "miyu", count: 35 },
@@ -46,16 +46,16 @@ const MAIMAI_MONTHS: [string, number][] = [
 ];
 
 const KAI_MONTHS: [string, number][] = [
-  ["2026-02", 8],
-  ["2026-03", 9],
-  ["2026-04", 10],
-  ["2026-05", 10],
-  ["2026-06", 10],
-  ["2026-07", 10],
-  ["2026-08", 10],
-  ["2026-09", 10],
-  ["2026-10", 10],
-  ["2026-11", 8],
+  ["2026-02", 6],
+  ["2026-03", 6],
+  ["2026-04", 6],
+  ["2026-05", 6],
+  ["2026-06", 6],
+  ["2026-07", 6],
+  ["2026-08", 6],
+  ["2026-09", 6],
+  ["2026-10", 6],
+  ["2026-11", 1],
 ];
 
 const FRIEND_MONTHS: Record<string, [string, number][]> = {
@@ -194,32 +194,38 @@ const MONSTER = [
 
 const BODY_TEMPLATES: Record<string, (() => string)[]> = {
   "dm-maimai": [
-    () => `${pickM(TIME)}から${pickM(PLACE)}にいるね`,
-    () => `${pickM(FOOD)}作った。${pickM(MOOD)}`,
-    () => `${pickM(SHOP)}寄ってく`,
-    () => `${pickM(REACT)}。${pickM(TIME)}に連絡する`,
-    () => `今日は${pickM(MOOD)}から${pickM(PLACE)}行く`,
+    () => `${pickM(TIME)}から通話できる？`,
+    () => `今日は${pickM(MOOD)}から${pickM(["ゲーム", "通話", "配信"])}見てる`,
+    () => `${pickM(REACT)}。${pickM(TIME)}に${pickM(["通話", "連絡", "ゲーム"])}する`,
     () => `${pickM(MONSTER)}の話、${pickM(TIME)}にしよう`,
-    () => `${pickM(FOOD)}食べたい。${pickM(TIME)}なら空いてる`,
-    () => `おつかれ。${pickM(PLACE)}着いた`,
-    () => `${pickM(REACT)}よ。${pickM(SHOP)}で待ってる`,
+    () => `${pickM(FOOD)}食べながら${pickM(["通話", "ゲーム", "動画"])}してた`,
+    () =>
+      `おつかれ。${pickM(["今日", "明日", "週末"])}は${pickM(["ゆっくり", "のんびり", "早め"])}に`,
+    () => `${pickM(REACT)}よ。${pickM(["写真", "動画", "スクショ"])}送る`,
     () => `${pickM(TIME)}の件、${pickM(REACT)}`,
-    () => `${pickM(PLACE)}で${pickM(FOOD)}食べてきた`,
-    () => `明日の${pickM(TIME)}、${pickM(PLACE)}でいい？`,
-    () => `${pickM(SHOP)}の${pickM(FOOD)}買って帰る`,
-    () => `${pickM(MOOD)}。${pickM(TIME)}に${pickM(PLACE)}`,
+    () => `${pickM(["ゲーム", "通話", "配信"])}の${pickM(["調子", "準備", "予定"])}どう？`,
+    () => `${pickM(MOOD)}。${pickM(TIME)}に${pickM(["ゲーム", "通話"])}しよ`,
+    () =>
+      `${pickM(["今日", "明日", "週末"])}は${pickM(["家", "バイト", "用事"])}で${pickM(["ゆっくり", "ばたばた", "のんびり"])}`,
+    () => `${pickM(["写真", "動画", "スクショ"])}ありがとう。${pickM(MOOD)}`,
   ],
   "dm-kai": [
-    () => `ログの${pickM(["3ページ目", "日付", "時刻", "添付"])}を確認しました`,
     () =>
-      `${pickM(TIME)}の書き込み、${pickM(["矛盾しています", "辻褄が合いません", "出所が不明です"])}`,
+      `${pickM(["今日は", "明日は", "週末は"])}${pickM(["予定ありますか", "空いてますか", "連絡つきますか"])}`,
     () =>
-      `旧アカウントの${pickM(["投稿", "返信", "削除", "編集"])}が${pickM(["2件", "3件", "4件", "5件"])}ありました`,
-    () => `集会の${pickM(["募集文", "参加者", "時刻", "返信"])}を照合しています`,
+      `${pickM(["了解", "承知", "確認済み"])}です。${pickM(["また連絡します", "追って共有します", "予定を合わせます"])}`,
     () =>
-      `進捗のみ共有します。${pickM(["まだ断定できません", "追加で確認します", "材料は揃ってきました"])}`,
+      `${pickM(["ありがとうございます", "助かります", "お手数かけます"])}。${pickM(["助かりました", "参考にします", "進めておきます"])}`,
     () =>
-      `${pickM(["画像", "スクリーンショット", "メタ情報"])}の${pickM(["日付", "撮影時刻", "Exif"])}を見ています`,
+      `${pickM(["体調", "予定", "天気"])}は${pickM(["大丈夫ですか", "問題ないですか", "落ち着いてますか"])}`,
+    () =>
+      `${pickM(["今日", "明日", "週末", "来週"])}の${pickM(["件", "話", "予定"])}、${pickM(["進めます", "合わせます", "見ておきます"])}`,
+    () =>
+      `${pickM(["先ほど", "さっき", "昨日"])}の${pickM(["連絡", "話", "件"])}、${pickM(["了解しました", "受け取りました", "確認済みです"])}`,
+    () =>
+      `${pickM(["念のため", "一応", "あとで"])}${pickM(["共有します", "連絡します", "送ります"])}`,
+    () =>
+      `${pickM(["無理せず", "焦らず", "ゆっくり"])}${pickM(["進めてください", "で大丈夫です", "お願いします"])}`,
   ],
   "dm-taku": [
     () => `${pickM(MONSTER)}行く？${pickM(TIME)}から`,
@@ -260,6 +266,19 @@ const BODY_TEMPLATES: Record<string, (() => string)[]> = {
   ],
 };
 
+const KAI_INVESTIGATION: (() => string)[] = [
+  () => `ログの${pickM(["3ページ目", "日付", "時刻", "添付"])}を確認しました`,
+  () =>
+    `${pickM(TIME)}の書き込み、${pickM(["矛盾しています", "辻褄が合いません", "出所が不明です"])}`,
+  () =>
+    `旧アカウントの${pickM(["投稿", "返信", "削除", "編集"])}が${pickM(["2件", "3件", "4件", "5件"])}ありました`,
+  () => `集会の${pickM(["募集文", "参加者", "時刻", "返信"])}を照合しています`,
+  () =>
+    `${pickM(["画像", "スクリーンショット", "メタ情報"])}の${pickM(["日付", "撮影時刻", "Exif"])}を見ています`,
+  () =>
+    `進捗のみ共有します。${pickM(["まだ断定できません", "追加で確認します", "材料は揃ってきました"])}`,
+];
+
 const templates = new Map<string, (() => string)[]>();
 let picker: <T>(list: T[]) => T = (list) => list[0];
 const pickM = <T>(list: T[]): T => picker(list);
@@ -270,6 +289,8 @@ export type DMExpansionInput = {
   /** dm-maimai で既に発言がある日（2025-11〜2026-08） */
   existingMaimaiDays: string[];
   existingCallStarts: number;
+  /** 既存の通話区間（新規の通話をここに重ねない） */
+  existingCallWindows?: { start: number; end: number }[];
   existingLastMaimaiAt: string;
 };
 
@@ -401,9 +422,18 @@ export function generateDmExpansion(input: DMExpansionInput): DMExpansionResult 
   }
   // 通話は1日1回まで（同じ日に開始が並ばないよう、日付を重複させない）
   const callDays = [...new Set(maimaiList.map((message) => message.sentAt.slice(0, 10)))];
+  const windows = input.existingCallWindows ?? [];
+  const overlaps = (at: number) =>
+    windows.some((w) => at > w.start - 60 * 60000 && at < w.end + 60 * 60000);
   for (let index = 0; index < callBudget; index += 1) {
     if (callDays.length === 0) break;
-    const day = callDays.splice(int(0, callDays.length - 1), 1)[0];
+    let day = callDays.splice(int(0, callDays.length - 1), 1)[0];
+    let guardDay = 0;
+    while (day && overlaps(Date.parse(`${day}T23:00:00+09:00`)) && guardDay < 60) {
+      day = callDays.splice(int(0, callDays.length - 1), 1)[0];
+      guardDay += 1;
+    }
+    if (!day) break;
     // 通話は夜〜深夜に始まる（早朝は始めない）
     // 23時台に収める（日付をまたぐと静かな日を潰すため）
     let start = nextTime(Date.parse(`${day}T23:${pad(int(0, 20))}:00+09:00`));
@@ -468,7 +498,11 @@ export function generateDmExpansion(input: DMExpansionInput): DMExpansionResult 
       const isKai = additions["dm-kai"].length % 2 === 0;
       let body: string | null = null;
       for (let attempt = 0; attempt < 300; attempt += 1) {
-        const candidate = pick(templates.get("dm-kai") ?? [])();
+        const pool =
+          month >= "2026-10"
+            ? [...KAI_INVESTIGATION, ...(templates.get("dm-kai") ?? [])]
+            : (templates.get("dm-kai") ?? []);
+        const candidate = pick(pool)();
         if (!additions["dm-kai"].some((message) => message.body === candidate)) {
           body = candidate;
           break;
@@ -479,7 +513,11 @@ export function generateDmExpansion(input: DMExpansionInput): DMExpansionResult 
         channelId: "dm-kai",
         authorId: isKai ? "kai" : "hal",
         sentAt: key,
-        body: body ?? "確認します",
+        body:
+          body ??
+          (() => {
+            throw new Error("dm-kai: 本文を一意にできませんでした");
+          })(),
       });
     }
   }
@@ -522,35 +560,12 @@ export function generateDmExpansion(input: DMExpansionInput): DMExpansionResult 
     }
   }
 
-  // 件数を目標どおりに合わせる（不足は月中の空き日に足し、超過は末尾から削る）
+  // 月次表の合計は目標と一致していること（パディングで水増ししない）
   for (const target of DM_EXPANSION_TARGETS) {
-    if (target.threadId === "dm-maimai") continue;
     const list = additions[target.threadId];
     if (!list) continue;
-    if (list.length > target.count) list.splice(target.count);
-    let guard = 0;
-    while (list.length < target.count && guard < 2000) {
-      guard += 1;
-      const month = target.threadId === "dm-kai" ? pick(KAI_MONTHS)[0] : pick(MAIMAI_MONTHS)[0];
-      const daysInMonth =
-        month === "2026-11"
-          ? 19
-          : new Date(
-              Date.UTC(Number(month.slice(0, 4)), Number(month.slice(5, 7)), 0),
-            ).getUTCDate();
-      const at = Date.parse(
-        `${month}-${pad(int(1, daysInMonth))}T${pad(int(9, 21))}:${pad(int(0, 59))}:00+09:00`,
-      );
-      const { at: safeAt, key } = nextTime(at);
-      if (target.threadId === "dm-kai" && safeAt >= Date.parse("2026-11-19T23:40:00+09:00"))
-        continue;
-      list.push({
-        id: `${target.threadId}-x${String(list.length + 1).padStart(4, "0")}`,
-        channelId: target.threadId,
-        authorId: list.length % 2 === 0 ? target.personId : "hal",
-        sentAt: key,
-        body: `${pick(["確認しました", "了解です", "また連絡します"])}（${list.length}）`,
-      });
+    if (list.length !== target.count) {
+      throw new Error(`${target.threadId}: ${list.length} !== ${target.count}`);
     }
   }
 
