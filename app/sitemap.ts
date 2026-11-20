@@ -1,11 +1,13 @@
 import type { MetadataRoute } from "next";
-import { listAllEntries, listBlogs } from "@/lib/blog-like";
+import { listBlogs, listPublicEntries } from "@/lib/blog-like";
 import { articleHref, creatorHref, listArticles, listCreators } from "@/lib/note-like";
 import { PHOTO_CONTEST_RESULT_PATH } from "@/lib/seo/contest";
 import { SITE_URL } from "@/lib/seo/site";
 
 /**
  * 検索に載せるのはブログと leaf（note）だけ。
+ * ブログは「ブログ名」と「移設・閉鎖のお知らせ（公開記事）」だけを載せる。限定公開の記事は載せない
+ * （人の決定 2026-11-20「ブログ名と移設しましたという記事だけヒットすればいい」）。
  * Discord・Twixer・talkup は物語の手がかりを含むので載せない。
  * サービス直下の /pochiblo は 404 なので含めない（記事一覧は /pochiblo/<blogId>）。
  */
@@ -16,7 +18,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
       changeFrequency: "weekly" as const,
       priority: 0.8,
     },
-    ...listAllEntries(blog.id).map((entry) => ({
+    ...listPublicEntries(blog.id).map((entry) => ({
       url: `${SITE_URL}/pochiblo/${blog.id}/entry/${entry.id}`,
       lastModified: entry.publishedAt,
       changeFrequency: "monthly" as const,
