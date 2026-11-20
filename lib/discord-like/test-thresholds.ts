@@ -50,17 +50,32 @@ export const VOLUME_LIMITS = {
    * 目標は 2025-11〜2026-02=1:1.2 / 2026-03〜06=1:1.5 / 2026-07〜08=1:1.8 / 2026-09〜11=1:1.3。
    * 現状はデータが少なく、下の `expected` は実測値（#131〜#133 で目標へ近づける）。
    */
+  /** DM/サーバー比は「後半ほど DM が濃い」傾向だけを見る（PM承認・データ量で絶対値は動く） */
   monthlyRatio: {
     tolerance: 0.25,
-    groups: [
-      { from: "2025-11", to: "2026-02", expected: 0.093 },
-      { from: "2026-03", to: "2026-06", expected: 0.38 },
-      { from: "2026-07", to: "2026-08", expected: 1.01 },
-      { from: "2026-09", to: "2026-11", expected: 2.53 },
-    ],
+    trendMultiplier: 2,
   },
   /** 付き合った後の週のやり取り日数（以上）と、空いてよい連続日数（以下） */
   /** 付き合った後の週は5日以上やり取りし、連続して空くのは3日まで（#130 で有効化）。 */
   datingWeek: { minDays: 5, maxGapDays: 3 },
   /** 通話の開始/終了の対応（不在着信は除外） */
+} as const;
+
+/**
+ * データ品質のガード（#131・決定 D9/D10）。
+ * 「機械生成の穴」と「テンプレの使い回し」をテストで落とす。
+ */
+export const QUALITY_LIMITS = {
+  /** 新規追加分の本文ユニーク率（以上） */
+  newUniqueRate: 0.95,
+  /** 全体の本文ユニーク率（以上） */
+  overallUniqueRate: 0.85,
+  /** これ以上同じ本文が繰り返されたら、既存でも本文を差し替えてよい（D9） */
+  rewriteIfRepeatedAtLeast: 5,
+  /** mhc で発言してよい人（D10: kai も可） */
+  mhcSpeakers: ["hal", "maimai", "gunlance", "mina", "haruka", "slime", "jijii", "master", "kai"],
+  /** mhc 内での kai の発言上限（D10） */
+  kaiInMhc: 5,
+  minActiveDaysPerMonth: 10,
+  activityAfterDay: 6,
 } as const;
