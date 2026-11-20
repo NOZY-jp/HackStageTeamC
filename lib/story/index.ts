@@ -13,7 +13,7 @@ export {
   resetProgress,
 } from "./engine";
 export { flags, getFlag, triggers } from "./flags";
-export { sceneCount, scenes } from "./script";
+export { ENDING_ADDRESS_CONFIRMED, sceneCount, scenes } from "./script";
 export {
   clearProgress,
   isProgress,

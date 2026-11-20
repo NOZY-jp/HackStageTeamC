@@ -59,6 +59,11 @@ export function StoryBoard() {
     setProgress(loadProgress());
   };
 
+  // 終わりのある選択肢を選んだら、結末を最終状態として出す
+  const ending = scenes
+    .flatMap((scene) => scene.choices)
+    .find((choice) => choice.ending && Object.values(progress.choices).includes(choice.id))?.ending;
+
   const available = availableScenes(progress);
   const transcript = replayTranscript(progress);
   const done = scenes.filter((scene) => progress.completedScenes.includes(scene.id)).length;
@@ -113,6 +118,23 @@ export function StoryBoard() {
           })}
         </ul>
       </section>
+
+      {ending ? (
+        <section
+          aria-labelledby="story-ending"
+          className="rounded border border-white/25 bg-white/5 p-4"
+        >
+          <h2 id="story-ending" className="text-base font-semibold">
+            結末
+          </h2>
+          <p role="status" className="mt-1 text-sm font-semibold">
+            {ending}
+          </p>
+          <p className="mt-1 text-xs text-fg-muted">
+            ここで物語は終わりです（住所そのものは作りません）。
+          </p>
+        </section>
+      ) : null}
 
       <section aria-labelledby="story-now" className="flex flex-col gap-3">
         <h2 id="story-now" className="text-base font-semibold">

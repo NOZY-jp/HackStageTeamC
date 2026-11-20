@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { cast } from "./cast";
 import { flags, triggers } from "./flags";
-import { scenes } from "./script";
+import { ENDING_ADDRESS_CONFIRMED, scenes } from "./script";
 import type { Progress } from "./types";
 
 const castIds = new Set(cast.map((member) => member.id));
@@ -75,6 +75,9 @@ describe("台本の整合性（#81）", () => {
     expect(ch4?.choices.map((choice) => choice.id)).toEqual(["search-name"]);
     expect(ch4?.choices[0].label).toContain("本名");
     expect(ch4?.choices[0].setsFlags).toContain("facebook_search");
+    // 正本の終了条件は「住所を特定しました」で終わる（住所データは作らない）
+    expect(ENDING_ADDRESS_CONFIRMED).toBe("住所を特定しました");
+    expect(ch4?.choices[0].ending).toBe(ENDING_ADDRESS_CONFIRMED);
   });
 
   it("台本とフラグ定義のIDが一致する（未定義のフラグを使わない）", () => {

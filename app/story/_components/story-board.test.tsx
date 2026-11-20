@@ -46,6 +46,27 @@ describe("シナリオ確認画面（#81）", () => {
     });
   });
 
+  it("最後まで進めると「住所を特定しました」が最終状態として出る", async () => {
+    const user = userEvent.setup();
+    render(<StoryBoard />);
+    await screen.findByRole("heading", { name: "シナリオ確認" });
+
+    await user.click(screen.getByRole("button", { name: "マイリストを開く" }));
+    await user.click(screen.getByRole("button", { name: "見に行く" }));
+    await user.click(screen.getByRole("button", { name: "コンテスト結果を見る" }));
+    await user.click(screen.getByRole("button", { name: "旧ブログのコメント欄を読む" }));
+    await user.click(screen.getByRole("button", { name: "写真のページを見に行く" }));
+    await user.click(screen.getByRole("button", { name: "カイに相談する" }));
+    await user.click(screen.getByRole("button", { name: "本名で TalkUp を検索する" }));
+
+    // 結末が確認画面に読める（フラグの説明に埋もれさせない）
+    expect(screen.getByRole("heading", { name: "結末" })).toBeInTheDocument();
+    expect(screen.getByRole("status")).toHaveTextContent("住所を特定しました");
+    expect(screen.getByText(/住所そのものは作りません/)).toBeInTheDocument();
+    // 5場面すべて終わっている
+    expect(screen.getByText(/終わった場面: 4 \/ 4/)).toBeInTheDocument();
+  });
+
   it("「でんちゃん」を見つけるまで、カイへの相談は選べない（選択肢ゲート）", async () => {
     const user = userEvent.setup();
     render(<StoryBoard />);

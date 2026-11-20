@@ -10,6 +10,12 @@ import type { Scene } from "./types";
  * カイからの連絡は、コンテスト名で本名が分かった後（real_name_known）に置く。
  * 「でんちゃん」は 旧ブログのコメント欄で見つける → カイに相談する の2段階で届く。
  */
+/**
+ * 結末の文言（正本: 段階11「住所作成はしない。『住所を特定しました』で終了」）。
+ * 住所そのもののデータは作らない。文言はここ1か所だけを正とする。
+ */
+export const ENDING_ADDRESS_CONFIRMED = "住所を特定しました";
+
 export const scenes: Scene[] = [
   {
     id: "ch1-mylist",
@@ -82,7 +88,13 @@ export const scenes: Scene[] = [
       },
     ],
     choices: [
-      { id: "search-name", label: "本名で TalkUp を検索する", setsFlags: ["facebook_search"] },
+      {
+        id: "search-name",
+        label: "本名で TalkUp を検索する",
+        setsFlags: ["facebook_search"],
+        // ここで物語は終わる（住所は作らない）
+        ending: ENDING_ADDRESS_CONFIRMED,
+      },
     ],
     completesFlags: [],
   },

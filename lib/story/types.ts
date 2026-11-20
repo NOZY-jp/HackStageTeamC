@@ -66,6 +66,8 @@ export type SceneChoice = {
   setsFlags: FlagId[];
   /** このフラグがそろうまで選べない（選択肢単位のゲート） */
   requires?: FlagId[];
+  /** この選択肢で物語が終わるときの結末文（確認画面に最終状態として出す） */
+  ending?: string;
 };
 
 /** 場面。要求フラグがそろい、まだ終わっていなければ始まる。 */
