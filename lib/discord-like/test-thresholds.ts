@@ -28,6 +28,7 @@ export const NATURALNESS_LIMITS = {
   /** 同じ発言件数の日が連続してよい日数（-1。3日以上続かない） */
   maxSameDailyCountStreak: 6, // 目標 2。日次の件数を意図的に散らす作業は #133 で行う
   /** カイとの DM の月あたり発言数（以下） */
+  /** dm-kai の「回」＝会話の機会（日）の月あたり上限。通数の上限ではない */
   dmKaiMonthlyMax: 6,
   /** MaiMai との DM でやり取りする週の日数（以下） */
   dmMaimaiWeeklyDaysMax: 7,

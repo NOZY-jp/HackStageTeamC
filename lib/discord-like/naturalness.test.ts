@@ -238,14 +238,17 @@ describe("会話の自然さ（#130）", () => {
 
   it("関係性ごとの頻度の上限", () => {
     // カイとの DM（依頼主）は月6回まで
+    // 「回」＝会話の機会（日）。通数ではなく、月あたりの発言日数で見る
     const kai = listDMMessages({ threadId: "dm-kai", limit: 5000 }).messages;
-    const byMonth = new Map<string, number>();
+    const daysPerMonth = new Map<string, Set<string>>();
     for (const message of kai) {
       const month = message.sentAt.slice(0, 7);
-      byMonth.set(month, (byMonth.get(month) ?? 0) + 1);
+      const days = daysPerMonth.get(month) ?? new Set<string>();
+      days.add(message.sentAt.slice(0, 10));
+      daysPerMonth.set(month, days);
     }
-    for (const [month, count] of byMonth) {
-      expect(count, `dm-kai ${month}`).toBeLessThanOrEqual(L.dmKaiMonthlyMax);
+    for (const [month, days] of daysPerMonth) {
+      expect(days.size, `dm-kai ${month}`).toBeLessThanOrEqual(L.dmKaiMonthlyMax);
     }
 
     // MaiMai との DM は週7日を超えない（週ごとに数える）
