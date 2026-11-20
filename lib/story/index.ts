@@ -1,38 +1,19 @@
-export { cast, castCallName, castName, getCastMember } from "./cast";
-export {
-  applyTrigger,
-  availableScenes,
-  completeScene,
-  emptyProgress,
-  findScene,
-  hasAllFlags,
-  isChoiceAvailable,
-  isSceneAvailable,
-  nextScene,
-  replayTranscript,
-  resetProgress,
-} from "./engine";
-export { flags, getFlag, triggers } from "./flags";
-export { ENDING_ADDRESS_CONFIRMED, sceneCount, scenes } from "./script";
-export {
-  clearProgress,
-  isProgress,
-  loadProgress,
-  PROGRESS_EVENT,
-  STORAGE_KEY,
-  saveProgress,
-} from "./storage";
-export type {
-  CastAccount,
-  CastId,
-  CastMember,
-  Chapter,
-  FlagId,
-  Progress,
-  Scene,
-  SceneChoice,
-  SceneLine,
-  StoryFlag,
-  TranscriptEntry,
-  Trigger,
-} from "./types";
+export { characters, FORBIDDEN_WORDS, getCharacter, nicknames } from "./characters";
+export * from "./engine";
+export { EXTRA_FLAGS, FLAG_IDS, type FlagId } from "./flags";
+export { beats } from "./scenario";
+export { getStep, STEP_IDS, type Step, type StepId, steps } from "./steps";
+export type * from "./types";
+
+/** 章の名前（シナリオの章立て） */
+export const CHAPTER_TITLES: Record<number, string> = {
+  1: "プロローグ",
+  2: "失踪",
+  3: "助言",
+  4: "痕跡",
+  5: "欠片",
+  6: "現実",
+};
+
+/** フラグの説明（段階のフラグは段階の要約） */
+export { flagLabel } from "./labels";

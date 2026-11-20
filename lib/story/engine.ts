@@ -1,113 +1,82 @@
-import { scenes as defaultScenes } from "./script";
-import type { Progress, Scene, SceneChoice, TranscriptEntry, Trigger } from "./types";
-
-/** 何も見つけていない初期状態。 */
-export function emptyProgress(): Progress {
-  return { flags: [], completedScenes: [], choices: {} };
-}
-
-/** 重複を除いてフラグを足す。 */
-function withFlags(base: string[], added: string[]): string[] {
-  return [...new Set([...base, ...added])];
-}
-
-/** 要求フラグがすべて立っているか。 */
-export function hasAllFlags(progress: Progress, required: string[]): boolean {
-  return required.every((flag) => progress.flags.includes(flag));
-}
-
-/** その選択肢をいま選べるか（選択肢の requires がそろっている）。 */
-export function isChoiceAvailable(progress: Progress, choice: SceneChoice): boolean {
-  return hasAllFlags(progress, choice.requires ?? []);
-}
-
-/** その場面をいま始められるか（未完了で、要求フラグがそろっている）。 */
-export function isSceneAvailable(progress: Progress, scene: Scene): boolean {
-  return !progress.completedScenes.includes(scene.id) && hasAllFlags(progress, scene.requires);
-}
-
-/** いま始められる場面（台本の順）。 */
-export function availableScenes(progress: Progress, scenes: Scene[] = defaultScenes): Scene[] {
-  return scenes.filter((scene) => isSceneAvailable(progress, scene));
-}
-
-/** 次に始まる場面（台本の順で最初のもの）。 */
-export function nextScene(progress: Progress, scenes: Scene[] = defaultScenes): Scene | undefined {
-  return availableScenes(progress, scenes)[0];
-}
-
-/** きっかけを起こしてフラグを立てる。 */
-export function applyTrigger(progress: Progress, trigger: Trigger): Progress {
-  return { ...progress, flags: withFlags(progress.flags, trigger.setsFlags) };
-}
+import type { FlagId } from "./flags";
+import { beats as allBeats } from "./scenario";
+import type { Beat, Line, StoryState } from "./types";
 
 /**
- * 場面を終える。選択肢が必須の場面では choiceId を渡す。
- * 始められない場面・存在しない選択肢は例外にする（台本の誤りをテストで落とすため）。
+ * 進行のロジック。すべて純関数で、状態を受け取って新しい状態を返す（画面や保存は別）。
  */
-export function completeScene(progress: Progress, scene: Scene, choiceId?: string): Progress {
-  if (!isSceneAvailable(progress, scene)) {
-    throw new Error(`場面 ${scene.id} は今は始められません`);
-  }
-  const choice = choiceId
-    ? scene.choices.find((candidate) => candidate.id === choiceId)
-    : undefined;
-  if (choiceId && !choice) {
-    throw new Error(`場面 ${scene.id} に選択肢 ${choiceId} はありません`);
-  }
-  if (choice && !isChoiceAvailable(progress, choice)) {
-    throw new Error(`選択肢 ${choice.id} はまだ選べません（${choice.requires?.join(", ")}）`);
-  }
-  if (!choice && scene.choices.length > 0) {
-    throw new Error(`場面 ${scene.id} は選択肢が必要です`);
-  }
 
-  // 寄り道の選択肢（completesScene: false）は、フラグと選んだ内容だけ残して場面を続ける
-  if (choice && choice.completesScene === false) {
-    return {
-      flags: withFlags(progress.flags, choice.setsFlags),
-      completedScenes: progress.completedScenes,
-      choices: { ...progress.choices, [scene.id]: choice.id },
-    };
-  }
+export const initialState: StoryState = { flags: [], completed: [], choices: {} };
 
+const unique = <T>(values: T[]): T[] => [...new Set(values)];
+
+/** フラグを立てる。もう立っていれば何もしない */
+export function setFlag(state: StoryState, flag: FlagId): StoryState {
+  return state.flags.includes(flag) ? state : { ...state, flags: [...state.flags, flag] };
+}
+
+/** 場面が始まるのに足りないもの（フラグと、先に終わっているべき場面） */
+export function missingFor(state: StoryState, beat: Beat): { flags: FlagId[]; beats: string[] } {
   return {
-    flags: withFlags(progress.flags, [...scene.completesFlags, ...(choice?.setsFlags ?? [])]),
-    completedScenes: [...progress.completedScenes, scene.id],
-    choices: choice ? { ...progress.choices, [scene.id]: choice.id } : progress.choices,
+    flags: beat.when.filter((flag) => !state.flags.includes(flag)),
+    beats: (beat.after ?? []).filter((id) => !state.completed.includes(id)),
   };
 }
 
+/** 始められる場面（条件がそろい、まだ終わっていない）。台本の並び順 */
+export function availableBeats(state: StoryState, beats: Beat[] = allBeats): Beat[] {
+  return beats.filter((beat) => {
+    if (state.completed.includes(beat.id)) {
+      return false;
+    }
+    const missing = missingFor(state, beat);
+    return missing.flags.length === 0 && missing.beats.length === 0;
+  });
+}
+
+/** 次に始まる場面 */
+export function nextBeat(state: StoryState, beats: Beat[] = allBeats): Beat | undefined {
+  return availableBeats(state, beats)[0];
+}
+
 /**
- * 会話の履歴を、終わった場面と選んだ選択肢から組み立て直す。
- * メッセージ自体は保存しない（台本を差し替えれば履歴も変わる）。
+ * 場面を終える。選択肢がある場面は choiceId が要る。
+ * 場面の sets と、選んだ選択肢の sets のフラグを立てる。
  */
-export function replayTranscript(
-  progress: Progress,
-  scenes: Scene[] = defaultScenes,
-): TranscriptEntry[] {
-  return scenes
-    .filter((scene) => progress.completedScenes.includes(scene.id))
-    .map((scene) => {
-      const choiceId = progress.choices[scene.id];
-      const choice = scene.choices.find((candidate) => candidate.id === choiceId);
-      return {
-        sceneId: scene.id,
-        chapter: scene.chapter,
-        title: scene.title,
-        lines: scene.lines,
-        ...(choice ? { choice: { id: choice.id, label: choice.label } } : {}),
-        ...(choice?.replyLines ? { replyLines: choice.replyLines } : {}),
-      };
-    });
+export function completeBeat(state: StoryState, beat: Beat, choiceId?: string): StoryState {
+  const choice = beat.choices?.find((candidate) => candidate.id === choiceId);
+  if (beat.choices && beat.choices.length > 0 && !choice) {
+    throw new Error(`場面 ${beat.id} には選択肢が必要です`);
+  }
+  return {
+    flags: unique([...state.flags, ...(beat.sets ?? []), ...(choice?.sets ?? [])]),
+    completed: [...state.completed, beat.id],
+    choices: choice ? { ...state.choices, [beat.id]: choice.id } : state.choices,
+  };
 }
 
-/** 最初からやり直す。 */
-export function resetProgress(): Progress {
-  return emptyProgress();
+/** 場面の会話を、選んだ選択肢まで含めて1列にする */
+export function linesOf(beat: Beat, choiceId?: string): Line[] {
+  const choice = beat.choices?.find((candidate) => candidate.id === choiceId);
+  return [
+    ...beat.lines,
+    ...(choice ? [{ from: "ryo" as const, text: choice.label }, ...(choice.reply ?? [])] : []),
+  ];
 }
 
-/** 台本から場面IDで引く。 */
-export function findScene(id: string, scenes: Scene[] = defaultScenes): Scene | undefined {
-  return scenes.find((scene) => scene.id === id);
+/** 終わった場面から会話の履歴を組み立て直す（保存しているのは状態だけ） */
+export function transcript(
+  state: StoryState,
+  beats: Beat[] = allBeats,
+): { beat: Beat; lines: Line[] }[] {
+  return state.completed.flatMap((beatId) => {
+    const beat = beats.find((candidate) => candidate.id === beatId);
+    return beat ? [{ beat, lines: linesOf(beat, state.choices[beatId]) }] : [];
+  });
+}
+
+/** いまの章（終わった場面のうち最も進んだ章。始めていなければ 1） */
+export function currentChapter(state: StoryState, beats: Beat[] = allBeats): number {
+  const chapters = transcript(state, beats).map(({ beat }) => beat.chapter);
+  return chapters.length > 0 ? Math.max(...chapters) : 1;
 }

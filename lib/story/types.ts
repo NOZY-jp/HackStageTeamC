@@ -1,111 +1,93 @@
 /**
- * シナリオを進める仕組みの型（試作）。
- * 値は cast.ts / flags.ts / script.ts に置き、ロジックは lib/story/engine.ts の純関数だけにする。
+ * シナリオを進める仕組みの型。プラットフォームをまたいで使う（lib/story は共有の名前空間）。
+ *
+ * - 人物（Character）: 誰がどのプラットフォームでどの名前か（本名は置かない）
+ * - 段階（Step, steps.ts）: 謎解きの順序。正本は Issue #76
+ * - フラグ（Flag, flags.ts）: 段階に着いたこと・場面の進み具合。宣言したものだけ使う
+ * - 場面（Beat, scenario/）: 条件がそろったら流れる会話・独り言のひとまとまり
  */
+import type { FlagId } from "./flags";
 
-/** 登場人物のID。台帳（cast.ts）に居るIDだけを使う。 */
-export type CastId = "ryo" | "mai" | "kai" | "kanon";
+export type CharacterId = "ryo" | "maimai" | "kai" | "kanon";
 
-/** 進行フラグのID。定義は flags.ts に置く（台本は文字列で参照する）。 */
-export type FlagId = string;
-
-/** 台本の章。物語の進行順。 */
-export type Chapter = "助言" | "痕跡" | "欠片" | "現実";
-
-/** 人物のアカウント（プラットフォームごとに名前が違う）。 */
-export type CastAccount = {
-  platform: "pochiblo" | "leaf" | "twixer" | "discord";
-  handle: string;
-  /** そのサービスでの表示名（分かっている場合だけ） */
-  displayName?: string;
+export type Character = {
+  id: CharacterId;
+  /** 作中でよく使う呼び名（作中のテキストに出してよい名前） */
+  name: string;
+  age: number;
+  firstPerson: string;
+  /** 二人称。決まっている人だけ */
+  secondPerson?: string;
+  /** 性格・背景のメモ（台本を書くとき用） */
+  note: string;
+  /** プラットフォームごとのアカウント。旧アカウントは old 付き */
+  accounts: Partial<{
+    discordName: string;
+    discordId: string;
+    discordOldName: string;
+    discordOldId: string;
+    twixer: string;
+    twixerOld: string;
+    leaf: string;
+    blog: string;
+    talkup: string;
+  }>;
 };
 
-/**
- * 人物の台帳。本名は置かない（作中でも本文には出さない方針）。
- * 表示名はこのファイルの displayName だけを正とする。
- */
-export type CastMember = {
-  id: CastId;
-  displayName: string;
-  /** 作中で使う呼称（例: まいまい）。無ければ displayName を使う */
-  nickname?: string;
-  /** 一人称 */
-  pronoun: string;
-  accounts: CastAccount[];
-  /** 昔の呼び方と、それを知っている人（人物ID）・根拠 */
-  oldNames: { name: string; knownBy: CastId[]; source?: string }[];
-  /** この人物の役割（確認画面用の一言） */
-  role: string;
-};
-
-/** プレイヤーが見つけたこと（フラグ）の定義。 */
-export type StoryFlag = {
-  id: FlagId;
-  label: string;
-  description: string;
-};
-
-/** きっかけ（各画面に置く部品が起こす出来事）。 */
-export type Trigger = {
-  id: string;
-  label: string;
-  description: string;
-  setsFlags: FlagId[];
-};
-
-/** 台詞。 */
-export type SceneLine = {
-  speakerId: CastId;
+/** 呼び名と、それを作中で使ってよい人。シナリオの鍵になる呼び名もここで管理する */
+export type Nickname = {
+  /** 呼ばれる人 */
+  of: CharacterId;
   text: string;
+  /** その呼び名を台本の中で使ってよい人 */
+  usedBy: CharacterId[];
+  note?: string;
 };
 
-/** プレイヤーの選択肢。選ぶとフラグが立つことがある。 */
-export type SceneChoice = {
+/** 会話が流れる場所。今は Discord の DM とリョウの独り言だけ */
+export type Channel = { kind: "discord-dm"; with: CharacterId } | { kind: "monologue" };
+
+export type Line = {
+  from: CharacterId | "system";
+  text: string;
+  /** 資料に文面がまだ無い行（仮置き）。確認画面で目立たせ、テストで数える */
+  todo?: true;
+};
+
+export type Choice = {
   id: string;
+  /** 選択肢の文。選ぶとリョウの発言として会話に残る */
   label: string;
-  setsFlags: FlagId[];
-  /** このフラグがそろうまで選べない（選択肢単位のゲート） */
-  requires?: FlagId[];
-  /** この選択肢で物語が終わるときの結末文（確認画面に最終状態として出す） */
-  ending?: string;
-  /** 選んだ直後に続く台詞（話者が反応する1〜2行） */
-  replyLines?: SceneLine[];
-  /**
-   * この選択肢で場面を完了するか（既定 true）。
-   * false は「寄り道」で、選んでも場面は終わらず、ほかの選択肢を選び直せる。
-   */
-  completesScene?: boolean;
+  /** 選んだら立つフラグ */
+  sets?: FlagId[];
+  /** 選んだあとに続く相手の返事 */
+  reply?: Line[];
 };
 
-/** 場面。要求フラグがそろい、まだ終わっていなければ始まる。 */
-export type Scene = {
+export type Beat = {
+  /** 場面ID。章番号から始める（例: "ch3-ask-kai"） */
   id: string;
-  chapter: Chapter;
-  title: string;
-  requires: FlagId[];
-  lines: SceneLine[];
-  choices: SceneChoice[];
+  chapter: number;
+  channel: Channel;
+  /** この場面が始まる条件のフラグ（全部そろったら） */
+  when: FlagId[];
+  /** 先に終わっている必要がある場面（同じ章の中で順に流すとき） */
+  after?: string[];
+  /** 文面の出どころ（例: "Google Docs 箱書き 第三章"）。シナリオ担当が照合するため */
+  source?: string;
+  /** 流れる会話 */
+  lines: Line[];
+  /** プレイヤー（リョウ）の選択肢。無ければ会話が流れたら終わり */
+  choices?: Choice[];
   /** 場面が終わったら立つフラグ */
-  completesFlags: FlagId[];
-  /** この場面で物語が終わるときの結末文（選択肢なしで完了する場面用） */
-  ending?: string;
+  sets?: FlagId[];
 };
 
-/** 進行状態。localStorage に保存する。 */
-export type Progress = {
+/** 進行状態。保存するのはこれだけで、会話の履歴はここから組み立て直す */
+export type StoryState = {
   flags: FlagId[];
-  completedScenes: string[];
+  /** 終わった場面（終わった順） */
+  completed: string[];
   /** 場面ID → 選んだ選択肢ID */
   choices: Record<string, string>;
-};
-
-/** 組み立て直した会話の1場面分。 */
-export type TranscriptEntry = {
-  sceneId: string;
-  chapter: Chapter;
-  title: string;
-  lines: SceneLine[];
-  choice?: { id: string; label: string };
-  /** 選んだ直後に続く台詞 */
-  replyLines?: SceneLine[];
 };
