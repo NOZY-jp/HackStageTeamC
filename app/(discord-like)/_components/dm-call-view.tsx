@@ -32,13 +32,16 @@ export function DmCallView({
   const [muted, setMuted] = useState(false);
   const [deafened, setDeafened] = useState(false);
   const [connected, setConnected] = useState(true);
-  // 通話画面に「入り直した」ことを検知する（SPA で同じ画面が再利用されても初期化する）
-  const callPath = `${dmThreadPath(threadUrlId)}/call`;
+  // 通話画面に「入り直した」ことを検知する（SPA で同じ画面が再利用されても初期化する）。
+  // 生成したパスと完全一致で比べると、末尾スラッシュや %40 の差で一致しないことがあるため、
+  // 正規化した pathname が /call で終わるかで判定する。
+  const normalizedPath = (pathname ?? "").replace(/\/+$/, "").replace(/%40/gi, "@");
+  const onCallPath = normalizedPath.endsWith("/call");
   const enteredRef = useRef(false);
   const [entry, setEntry] = useState(0);
 
   useEffect(() => {
-    const onCall = pathname === callPath;
+    const onCall = onCallPath;
     if (onCall && !enteredRef.current) {
       // 入口で必ず初期化する（前回の connected=false を持ち越さない）
       enteredRef.current = true;
@@ -51,7 +54,7 @@ export function DmCallView({
     if (!onCall && enteredRef.current) {
       enteredRef.current = false;
     }
-  }, [addMessage, callPath, pathname, threadId]);
+  }, [addMessage, onCallPath, threadId]);
 
   /** 通話を終える（切断ボタン・「チャットに戻る」のどちらでも同じ処理を通す）。 */
   const endCall = () => {

@@ -6,8 +6,10 @@ import { DmCallView } from "./dm-call-view";
 import { LocalMessagesProvider, useLocalMessages } from "./local-messages-context";
 
 const push = vi.fn();
+// pathname をテストから動かせるようにする（実際の /call → /dm → /call の遷移を再現する）
+let mockPathname = "/discord.com/channels/@me/1187002356428841501/call";
 vi.mock("next/navigation", () => ({
-  usePathname: () => "/discord.com/channels/@me/1187002356428841501/call",
+  usePathname: () => mockPathname,
   useRouter: () => ({ push, replace: vi.fn(), refresh: vi.fn() }),
 }));
 
@@ -38,6 +40,7 @@ const view = () => (
 
 beforeEach(() => {
   push.mockClear();
+  mockPathname = "/discord.com/channels/@me/1187002356428841501/call";
 });
 
 describe("DM の通話画面（#137）", () => {
@@ -144,6 +147,7 @@ function Harness({ showCall }: { showCall: boolean }) {
 describe("入場→退出→再入場（#140）", () => {
   it("2回目の入場でも connected が true で、開始/終了が履歴に積まれる", async () => {
     const { container, rerender } = render(<Harness showCall />);
+    mockPathname = "/discord.com/channels/@me/1187002356428841501/call";
     await screen.findByRole("main", { name: "MaiMai との通話" });
     await waitFor(() => {
       expect(screen.getByTestId("log").textContent).toContain("通話を開始しました");
@@ -154,9 +158,11 @@ describe("入場→退出→再入場（#140）", () => {
     });
 
     // チャットへ（同じ Provider のまま）。SPA で同じ画面へ戻る想定
+    mockPathname = "/discord.com/channels/@me/1187002356428841501";
     rerender(<Harness showCall={false} />);
     expect(screen.getByText("チャット")).toBeInTheDocument();
 
+    mockPathname = "/discord.com/channels/@me/1187002356428841501/call";
     rerender(<Harness showCall />);
     await screen.findByRole("main", { name: "MaiMai との通話" });
     // 2回目も接続状態から始まる（前回の connected=false を持ち越さない）
@@ -165,5 +171,16 @@ describe("入場→退出→再入場（#140）", () => {
       expect(screen.getByTestId("log-system").textContent).toBe("true / true / true");
     });
     expect(screen.getByTestId("log").textContent?.match(/通話を開始しました/g)).toHaveLength(2);
+  });
+
+  it("直リンクで開いても（末尾スラッシュ・%40 付きでも）開始ログが1件だけ積まれる", async () => {
+    mockPathname = "/discord.com/channels/%40me/1187002356428841501/call/";
+    const { container } = render(view());
+    await screen.findByRole("main", { name: "MaiMai との通話" });
+    await waitFor(() => {
+      expect(screen.getByTestId("log").textContent).toContain("通話を開始しました");
+    });
+    expect(screen.getByTestId("log").textContent?.match(/通話を開始しました/g)).toHaveLength(1);
+    expect(container.querySelector(".call-stage")?.getAttribute("data-connected")).toBe("true");
   });
 });
