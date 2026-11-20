@@ -1,11 +1,20 @@
 import { describe, expect, it } from "vitest";
-import { getUserById, listPosts, listPostsByAuthor, searchFacebook } from "./index";
+import {
+  getUserById,
+  listContactUsers,
+  listPosts,
+  listPostsByAuthor,
+  listUsers,
+  searchFacebook,
+} from "./index";
 
 // 検査する語そのものをリポジトリに残さない（文字コードで組み立てる）
 const word = (...codePoints: number[]) => String.fromCodePoint(...codePoints);
 const FAMILY_NAME = word(0x670d, 0x90e8);
 const GIVEN_NAME = word(0x7531, 0x6bd4);
 const REAL_NAME = `${FAMILY_NAME} ${GIVEN_NAME}`;
+const REAL_NAME_NO_SPACE = `${FAMILY_NAME}${GIVEN_NAME}`;
+const REAL_NAME_FULL_SPACE = `${FAMILY_NAME}　${GIVEN_NAME}`;
 const REGION = word(0x795e, 0x5948, 0x5ddd, 0x770c); // 神奈川県
 
 /** 住所らしき表記（番地・建物名・最寄駅）が無いことを検査する。 */
@@ -60,6 +69,32 @@ describe("第五章: 本名で見つかる TalkUp アカウント（#95）", () 
     expect(titles).not.toContain("大学の友達と");
   });
 
+  it("本名は空白の有無（半角・全角）どちらでも同じ相手に届く", () => {
+    for (const query of [REAL_NAME, REAL_NAME_NO_SPACE, REAL_NAME_FULL_SPACE]) {
+      const result = searchFacebook(query);
+      const users = result.users.filter((user) => user.id === "u40");
+      expect(users, query).toHaveLength(1);
+      expect(result.posts.length, query).toBe(3);
+    }
+  });
+
+  it("検索前の「連絡先」に本名のアカウントは出さない", () => {
+    const contacts = listContactUsers();
+    expect(contacts.some((user) => user.id === "u40")).toBe(false);
+    // 他の人物は残す
+    expect(contacts.length).toBe(listUsers().length - 1);
+    expect(contacts.length).toBeGreaterThan(0);
+  });
+
+  it("入学式の投稿はアカウント作成（joinedAt）より後にある", () => {
+    const joinedAt = getUserById("u40")?.joinedAt ?? "";
+    // 入学式は2018年4月（投稿日より前にアカウントがある）
+    expect(joinedAt.slice(0, 10)).toBe("2018-04-01");
+    for (const post of listPostsByAuthor("u40")) {
+      expect(post.createdAt > joinedAt).toBe(true);
+    }
+  });
+
   it("説明から出身地域（都道府県）が分かる", () => {
     const user = getUserById("u40");
     expect(user?.location).toBe(REGION);
@@ -71,8 +106,8 @@ describe("第五章: 本名で見つかる TalkUp アカウント（#95）", () 
       )
       .join("\n");
     expect(text).toContain(REGION);
-    // 湘南（神奈川の地域名）でも補強している
-    expect(text).toContain(word(0x6e58, 0x5357));
+    // 地名は都道府県まで（湘南などの地域名は使わない）
+    expect(text).not.toContain(word(0x6e58, 0x5357));
   });
 
   it("住所（番地・建物名・最寄駅）はデータに存在しない", () => {

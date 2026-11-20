@@ -48,6 +48,45 @@ describe("TalkUp のフィードと検索（#95）", () => {
     ).toBeInTheDocument();
   });
 
+  it("本名は空白の有無（半角・全角）どちらでも1ユーザー・3投稿ヒットする", () => {
+    for (const q of ["服部 由比", "服部由比", "服部　由比"]) {
+      nav.query = new URLSearchParams(`q=${q}`);
+      const { container, unmount } = renderFeed();
+
+      expect(screen.getByText(/ユーザー1件 \/ 投稿3件/), q).toBeInTheDocument();
+      const users = screen.getByRole("region", { name: "該当するユーザー" });
+      expect(within(users).getAllByRole("link"), q).toHaveLength(1);
+      expect(container.querySelectorAll("article"), q).toHaveLength(3);
+      unmount();
+    }
+  });
+
+  it("?q= がクライアント遷移で変わると検索結果も追従する", () => {
+    nav.query = new URLSearchParams();
+    const { rerender } = renderFeed();
+    expect(screen.queryByText(/の検索結果/)).not.toBeInTheDocument();
+
+    nav.query = new URLSearchParams("q=服部由比");
+    rerender(
+      <FacebookProvider>
+        <FacebookFeedPage />
+      </FacebookProvider>,
+    );
+
+    expect(screen.getByText(/ユーザー1件 \/ 投稿3件/)).toBeInTheDocument();
+  });
+
+  it("右サイドバーの「連絡先」に本名のアカウントを出さない（検索前のネタバレ防止）", () => {
+    nav.query = new URLSearchParams();
+    renderFeed();
+
+    const contacts = screen.getByRole("complementary", { name: "連絡先" });
+    expect(within(contacts).queryByText(/服部/)).not.toBeInTheDocument();
+    expect(within(contacts).queryByRole("link", { name: /由比/ })).not.toBeInTheDocument();
+    // 他の人物は残す
+    expect(within(contacts).getAllByRole("link").length).toBeGreaterThan(5);
+  });
+
   it("ヒットしない語では 0 件の表示になる", () => {
     nav.query = new URLSearchParams("q=存在しない語");
     renderFeed();

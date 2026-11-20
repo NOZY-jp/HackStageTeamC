@@ -1,9 +1,10 @@
 import Link from "next/link";
-import { listUsers } from "@/lib/facebook-like";
+import { listContactUsers } from "@/lib/facebook-like";
 import { FbAvatar } from "./avatar";
 
 export function FacebookRightSidebar() {
-  const users = listUsers();
+  // 本名で捜す相手（u40）は検索前に見せない
+  const users = listContactUsers();
 
   return (
     <aside className="fb-right-col" aria-label="連絡先">

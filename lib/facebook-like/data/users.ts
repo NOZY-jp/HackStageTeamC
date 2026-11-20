@@ -147,7 +147,7 @@ export const fbUsers: FbUser[] = [
     bio: "写真を撮るのが好き。高校では写真部でした。地元は神奈川。",
     workplace: "デザイン事務所",
     location: "神奈川県",
-    joinedAt: "2019-04-02T00:00:00Z",
+    joinedAt: "2018-04-01T00:00:00Z",
     friendIds: [],
   },
   {
