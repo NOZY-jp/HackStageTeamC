@@ -14,8 +14,9 @@ const run = (query: string, order?: "new" | "old") => {
 };
 
 describe("インデックス", () => {
-  it("#68 の全メッセージ（サーバー2,690・DM436）を対象にする", () => {
-    // #131 で mhc に 800通（8ch）を追加した
+  it("#68 の全メッセージ（テキスト2,690・DM436）を対象にする", () => {
+    // サーバーのインデックスは **text チャンネルだけ**（voice の入室/退出は対象外）。
+    // #131 で mhc に 800通、#132 で univ/friend に 1,120通（text）を追加した
     expect(index.documents.filter((doc) => doc.mode === "channel")).toHaveLength(2690);
     expect(index.documents.filter((doc) => doc.mode === "dm")).toHaveLength(436);
   });

@@ -31,6 +31,46 @@ function allAuthorIds(): string[] {
   return [...guildMessages, ...dmMessages].map((message) => message.authorId);
 }
 
+describe("サーバーのメッセージ集計単位（#132）", () => {
+  const textCount = (guildId: string) =>
+    listChannels(guildId)
+      .filter((channel) => channel.kind === "text")
+      .reduce(
+        (total, channel) =>
+          total + listMessages({ channelId: channel.id, limit: 5000 }).messages.length,
+        0,
+      );
+  const voiceCount = (guildId: string) =>
+    listChannels(guildId)
+      .filter((channel) => channel.kind === "voice")
+      .reduce(
+        (total, channel) =>
+          total + listMessages({ channelId: channel.id, limit: 5000 }).messages.length,
+        0,
+      );
+
+  it("text の合計は 2,690（mhc 1,570・univ 700・friend 420）", () => {
+    expect(textCount("mhc")).toBe(1570);
+    expect(textCount("univ")).toBe(700);
+    expect(textCount("friend")).toBe(420);
+    expect(textCount("mhc") + textCount("univ") + textCount("friend")).toBe(2690);
+  });
+
+  it("VC の入室/退出システムメッセージは voice チャンネルにだけある（univ 6・friend 2）", () => {
+    expect(voiceCount("univ")).toBe(6);
+    expect(voiceCount("friend")).toBe(2);
+    expect(voiceCount("mhc")).toBe(0);
+    for (const guildId of ["univ", "friend"]) {
+      for (const channel of listChannels(guildId).filter((item) => item.kind === "voice")) {
+        for (const message of listMessages({ channelId: channel.id, limit: 100 }).messages) {
+          expect(message.system, message.id).toBe(true);
+          expect(message.body, message.id).toMatch(/通話を(開始|終了)しました/);
+        }
+      }
+    }
+  });
+});
+
 describe("人物データ400人（#128）", () => {
   it("全部で400人・オンライン30人・発言する50人", () => {
     expect(users).toHaveLength(400);
