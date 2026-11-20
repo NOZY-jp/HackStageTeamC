@@ -1,3 +1,4 @@
+import { HAL_HANDLE } from "@/lib/discord-like/data/names";
 import type { Post, Profile, Trend, TwitterUser } from "../types";
 
 /**
@@ -7,7 +8,7 @@ import type { Post, Profile, Trend, TwitterUser } from "../types";
  * 日時は 2026-11 固定（JST）。劇中世界の投稿のみ（開発用語は入れない）。
  */
 export const twitterUsers: TwitterUser[] = [
-  { id: "tw-hal", displayName: "Hal", handle: "kohakunchos0117", avatarColor: "#3b6fd4" },
+  { id: "tw-hal", displayName: "Hal", handle: HAL_HANDLE, avatarColor: "#3b6fd4" },
   { id: "tw-mai", displayName: "Mai", handle: "mai2mai2", avatarColor: "#c2417c" },
   { id: "tw-ren", displayName: "れん", handle: "ren", avatarColor: "#2f8f6b" },
   { id: "tw-yuki", displayName: "ゆき", handle: "yuki", avatarColor: "#8a5cc2" },
