@@ -14,9 +14,9 @@ const run = (query: string, order?: "new" | "old") => {
 };
 
 describe("インデックス", () => {
-  it("#68 の全メッセージ（サーバー1,570・DM436）を対象にする", () => {
+  it("#68 の全メッセージ（サーバー2,690・DM436）を対象にする", () => {
     // カイとの進捗やり取り（5件）を公開チャンネルから DM へ移した（#121）
-    expect(index.documents.filter((doc) => doc.mode === "channel")).toHaveLength(1570);
+    expect(index.documents.filter((doc) => doc.mode === "channel")).toHaveLength(2690);
     expect(index.documents.filter((doc) => doc.mode === "dm")).toHaveLength(436);
   });
 });
