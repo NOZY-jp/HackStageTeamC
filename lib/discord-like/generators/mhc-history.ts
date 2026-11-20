@@ -43,6 +43,34 @@ const SPEAKERS = ["hal", "maimai", "gunlance", "mina", "haruka", "slime", "jijii
 const REGULARS = ["gunlance", "mina", "haruka", "slime", "jijii"];
 export const KAI_LIMIT_IN_MHC = 5;
 
+/** 文末に「時刻＋モンスター名」を機械的に足しただけの文か（水増し） */
+export const looksMechanical = (body: string): boolean =>
+  /(20時|21時|21時半|22時|22時半|23時|週末の昼|土曜の夜|日曜の午後|今夜|明日の夜|金曜の夜).*(リオレウス|タマミツネ|イザリ|ディアブロス|古樹のモリガミ|巨大魚のオオヌシ|歴戦の個体|眠りのマドロミ|月見ヶ原の主|紅色の牙)$/.test(
+    body,
+  );
+
+/** 人物ごとの禁止語彙（属性から機械的に決まる。#143） */
+/** 学生でない人に使わせない語彙（人物属性で決まる。#148） */
+export const STUDENT_VOCAB =
+  /大学|生協|購買|1限|2限|3限|4限|5限|ゼミ|駅前|公園|学食|履修|レポート|講義|サークル|課題|バイト|小テスト|期末|試験/;
+
+export const PERSON_FORBIDDEN: Record<string, RegExp> = {
+  // MaiMai は社会人（学生語彙を一切使わない）
+  maimai: STUDENT_VOCAB,
+  // 笛じじいは学生ではない（年配）
+  jijii: STUDENT_VOCAB,
+  // 集会所マスターも学生ではない
+  master: STUDENT_VOCAB,
+  // kai は mhc では雑談とゲームだけ（調査・進捗を書かない。D10）
+  kai: /ログ|照合|矛盾|Exif|メタ情報|進捗|調査|特定/,
+};
+
+/** 1文に2つの話題（時刻＋別の話題）を連結した文か（#148） */
+export const looksTwoTopic = (body: string): boolean =>
+  /(かな|だと思う|かも).*(時|限|週末の昼|今夜|明日の夜|金曜の夜).*(いけそう|むりそう|空いてる)/.test(
+    body,
+  );
+
 const P = {
   time: [
     "20時",
@@ -146,7 +174,7 @@ const buildTemplates = (pick: <T>(list: T[]) => T): Record<string, (() => string
     () => `${pick(P.class)}つらい`,
     () => `${pick(P.task)}終わらない`,
     () => `${pick(P.time)}から${pick(P.quest)}行く人いる？`,
-    () => `${pick(P.replyShort)}、${pick(P.topicTail)}`,
+    () => `${pick(P.replyShort)}。${pick(P.topicTail)}`,
     () => `${pick(P.topic)}${pick(P.topicTail)}`,
     () => `${pick(P.morning)}。${pick(P.weather)}`,
     () => `${pick(P.night)}。${pick(P.time)}まで`,
@@ -212,8 +240,6 @@ export function generateMhcHistory(
 
   const TEMPLATES = buildTemplates(pick);
   const usedTimes = new Set(existingTimes);
-  // 物語の最後（2026-11-19 23:52 の「住所を特定しました」）より前で止める
-  const CAP = Date.parse("2026-11-19T23:45:00+09:00");
   const all: { ch: string; at: number; key: string; body: string; author: string }[] = [];
 
   for (const [month, total] of MONTHS) {
@@ -223,10 +249,11 @@ export function generateMhcHistory(
         : new Date(Date.UTC(Number(month.slice(0, 4)), Number(month.slice(5, 7)), 0)).getUTCDate();
     // 活動日: 6日以降を中心に、必ず10日以上。どの活動日にも1通以上置く
     const active = new Set<number>();
-    const targetDays = Math.max(10, Math.min(13, Math.ceil(total / 6)));
-    for (let day = 6; day <= days && active.size < targetDays; day += 1)
-      if (rand() < 0.6) active.add(day);
-    for (let day = 1; active.size < targetDays && day <= days; day += 1) active.add(day);
+    for (let day = 6; day <= days; day += 1) if (rand() < 0.5) active.add(day);
+    active.add(6);
+    active.add(7);
+    active.add(8);
+    for (let day = 1; day <= 5 && active.size < 10; day += 1) active.add(day);
     const activeDays = [...active].sort((a, b) => a - b);
     const counts = activeDays.map(() => 1);
     let left = total - activeDays.length;
@@ -244,7 +271,7 @@ export function generateMhcHistory(
         const size = Math.min(remaining, int(1, 4));
         const ch = pick(MHC_HISTORY_CHANNELS.map(([id]) => id));
         for (let k = 0; k < size; k += 1) {
-          let at = Math.min(burstStart + (k === 0 ? 0 : int(1, 15)) * 60000, CAP - 60000);
+          let at = burstStart + (k === 0 ? 0 : int(1, 15)) * 60000;
           let key = jst(at);
           let guard = 0;
           while (usedTimes.has(key) && guard < 400) {
@@ -300,16 +327,16 @@ export function generateMhcHistory(
       if (!body) body = `https://example.com/notes/${int(10000, 99999)}`;
     } else if (roll < 0.09 && typoCount < 40) {
       for (let attempt = 0; attempt < 300; attempt += 1) {
-        const candidate = `${pick(["誤字った", "言い直すと", "いや、違う", "間違えた"])}。${pick(P.quest)}の${pick(["話", "件", "やつ"])}、${pick(P.time)}のこと`;
+        const candidate = `${pick(["誤字った", "言い直すと", "いや、違う", "間違えた"])}。${pick(P.quest)}、${pick(P.time)}のこと`;
         if (!usedBody.has(candidate)) {
           body = candidate;
           break;
         }
       }
       typoCount += 1;
-    } else if (roll < 0.28 && topicCount < 120) {
+    } else if (roll < 0.33 && topicCount < 135) {
       for (let attempt = 0; attempt < 2000; attempt += 1) {
-        const candidate = `${pick(P.topic)}${pick(P.topicTail)}、${pick(P.time)}の${pick(["話", "件", "やつ"])}`;
+        const candidate = `${pick(P.topic)}${pick(P.topicTail)}。${pick(["それはそう", "いいと思う", "どうだろう"])}`;
         if (!usedBody.has(candidate)) {
           body = candidate;
           break;
@@ -328,8 +355,8 @@ export function generateMhcHistory(
     }
     if (body === null) {
       for (let attempt = 0; attempt < 2000; attempt += 1) {
-        const candidate = `${pick(TEMPLATES[item.ch])()}${pick(["。", "！", "…", " かな", " だと思う"])}${pick(P.time)}の${pick(P.quest)}`;
-        if (!usedBody.has(candidate)) {
+        const candidate = `${pick(TEMPLATES[item.ch])()}${pick(["。", "！", "…", " かな", " だと思う"])}`;
+        if (!usedBody.has(candidate) && !looksMechanical(candidate) && !looksTwoTopic(candidate)) {
           body = candidate;
           break;
         }
@@ -359,12 +386,21 @@ export function generateMhcHistory(
     }
   }
 
+  // 3連続の話者差し替えで制約に反したら、もう一度直す
+  const STUDENT_SPEAKERS = ["hal", "gunlance", "mina", "haruka", "slime"];
+  for (const item of merged) {
+    const rule = PERSON_FORBIDDEN[item.author];
+    if (!rule?.test(item.body)) continue;
+    item.author = pick(STUDENT_SPEAKERS);
+  }
+
   // kai は D10 の上限まで（残りは他の常連へ）
   let kaiCount = 0;
   for (const item of merged) {
     if (item.author !== "kai") continue;
     kaiCount += 1;
-    if (kaiCount > KAI_LIMIT_IN_MHC) item.author = pick(REGULARS);
+    if (kaiCount > KAI_LIMIT_IN_MHC)
+      item.author = pick(["hal", "gunlance", "mina", "haruka", "slime"]);
   }
 
   // スタンプのみを最低12件は確保する（自然さのしきい値のため）

@@ -370,6 +370,9 @@ const jst = (ms: number) => {
 };
 
 /** 数字・記号で一意に見せた文（水増し）を弾く */
+/** 「〜の件／〜の話」の継ぎはぎ（水増し）を弾く */
+export const looksSpliced = (body: string): boolean => /(の件|の話)[、。].*(の件|の話)/.test(body);
+
 export const looksPadded = (body: string): boolean => {
   // URL は数字を含んでもよい（本文を数字で水増ししたものだけを弾く）
   if (/https?:\/\//.test(body)) return false;
@@ -497,14 +500,15 @@ export function generateServers(
       let body = "";
       for (let attempt = 0; attempt < 3000; attempt += 1) {
         const candidate = pick(TEMPLATES[item.ch])(pick);
-        if (usedBody.has(candidate) || looksPadded(candidate)) continue;
+        if (usedBody.has(candidate) || looksPadded(candidate) || looksSpliced(candidate)) continue;
         body = candidate;
         break;
       }
       if (!body) {
         for (let attempt = 0; attempt < 3000; attempt += 1) {
           const candidate = `${pick(TEMPLATES[item.ch])(pick)}、${pick(P.time)}の${pick(P.tail)}`;
-          if (usedBody.has(candidate) || looksPadded(candidate)) continue;
+          if (usedBody.has(candidate) || looksPadded(candidate) || looksSpliced(candidate))
+            continue;
           body = candidate;
           break;
         }
