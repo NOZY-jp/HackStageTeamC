@@ -1,5 +1,6 @@
 import { describe, expect, it, vi } from "vitest";
-import { googleVerification, metadata } from "./layout";
+import { googleVerification } from "@/lib/seo/verification";
+import { metadata } from "./layout";
 
 const DUMMY_TOKEN = "dummy-token-for-test";
 
