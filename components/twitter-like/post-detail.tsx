@@ -6,7 +6,7 @@ import { formatCount, formatPostedAt } from "./format";
 import { VerifiedBadge } from "./icons";
 import { LinkifiedText } from "./linkify";
 import { isVerified } from "./lookup";
-import { PostStats } from "./post-card";
+import { PostMediaList, PostStats } from "./post-card";
 
 /**
  * 個別投稿ページの主役カード。大きめの本文と絶対時刻・表示数、件数の行を表示する。
@@ -53,6 +53,7 @@ export function PostDetail({
       <p className="tw-post-body tw-post-body-lg">
         <LinkifiedText text={post.body} />
       </p>
+      {post.media && post.media.length > 0 ? <PostMediaList media={post.media} /> : null}
       <p className="tw-detail-time">
         <time dateTime={post.postedAt}>{formatPostedAt(post.postedAt)}</time>
         <span aria-hidden="true"> · </span>
