@@ -1,5 +1,14 @@
+import type { Metadata } from "next";
 import { ArticleCard } from "@/components/note-like/article-card";
-import { getCreator, listArticles } from "@/lib/note-like";
+import { getCreator, listArticles, SERVICE_NAME } from "@/lib/note-like";
+import { canonicalUrl } from "@/lib/seo/site";
+
+export const metadata: Metadata = {
+  // ルートのテンプレート（| HackStage）ではなく、leaf の名前で固定する
+  title: { absolute: `新着記事｜${SERVICE_NAME}` },
+  description: "leaf の新着記事一覧。一枚ずつ、長い話を残しておける場所です。",
+  alternates: { canonical: canonicalUrl("/note") },
+};
 
 export default function NoteTopPage() {
   const articles = listArticles();

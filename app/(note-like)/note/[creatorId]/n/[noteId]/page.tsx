@@ -8,6 +8,7 @@ import { ArticleListItem } from "@/components/note-like/article-list-item";
 import { CreatorAvatar } from "@/components/note-like/creator-avatar";
 import {
   type ArticleBlock,
+  articleHref,
   creatorHref,
   formatPublishedAt,
   getArticle,
@@ -16,6 +17,7 @@ import {
   listArticlesByCreator,
   tagHref,
 } from "@/lib/note-like";
+import { canonicalUrl } from "@/lib/seo/site";
 
 type Props = PageProps<"/note/[creatorId]/n/[noteId]">;
 
@@ -31,7 +33,14 @@ export function generateStaticParams() {
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { creatorId, noteId } = await params;
   const article = getArticle(creatorId, noteId);
-  return article ? { title: article.title, description: article.excerpt } : {};
+  if (!article) {
+    return {};
+  }
+  return {
+    title: article.title,
+    description: article.excerpt,
+    alternates: { canonical: canonicalUrl(articleHref(article)) },
+  };
 }
 
 function Block({ block }: { block: ArticleBlock }) {

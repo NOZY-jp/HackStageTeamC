@@ -3,7 +3,8 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { BlogFrame } from "@/components/blog-like/blog-frame";
 import { EntryDate, EntryFooter } from "@/components/blog-like/entry-meta";
-import { entryPath, getBlog, listBlogs, listPublicEntries } from "@/lib/blog-like";
+import { blogPath, entryPath, getBlog, listBlogs, listPublicEntries } from "@/lib/blog-like";
+import { canonicalUrl } from "@/lib/seo/site";
 
 // ブログは params から引くので、トップレベルで params を待つ＝URL データを読むことになる。
 // Cache Components（PPR）のままだと「params が <Suspense> の外で読まれている」警告が出るため、
@@ -19,7 +20,14 @@ export function generateStaticParams() {
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const blog = getBlog((await params).blogId);
-  return blog ? { title: { absolute: blog.title }, description: blog.description } : {};
+  if (!blog) {
+    return {};
+  }
+  return {
+    title: { absolute: blog.title },
+    description: blog.description,
+    alternates: { canonical: canonicalUrl(blogPath(blog.id)) },
+  };
 }
 
 /** ブログのトップ。公開中の記事だけを新しい順に、冒頭だけ並べる（閉鎖後は閉鎖のお知らせだけ）。 */
