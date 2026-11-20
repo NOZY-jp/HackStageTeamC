@@ -1152,18 +1152,31 @@
   display: grid;
   flex: 1;
   gap: 12px;
-  align-content: start;
+  height: 100%;
+  min-height: 0;
+  /* 余白が残るときは中央に置く（上に寄せない）。行は stage の高さいっぱいに伸ばす */
+  align-content: center;
   justify-content: center;
-  grid-template-columns: repeat(auto-fit, minmax(150px, 200px));
+  grid-auto-rows: minmax(120px, 1fr);
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
   margin: 0;
   padding: 0;
   list-style: none;
 }
 
-/* 1人のときは大きく中央に置く（黒い余白を作らない） */
+/* 人数に応じて stage を埋める: 1人=大きく / 2人=2列 / 3〜4人=2×2 / 5人以上=グリッド */
 .call-tiles[data-count="1"] {
-  align-content: center;
-  grid-template-columns: minmax(200px, 280px);
+  grid-template-columns: minmax(0, 1fr);
+}
+
+.call-tiles[data-count="2"],
+.call-tiles[data-count="3"],
+.call-tiles[data-count="4"] {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.call-tiles[data-count="3"] .call-tile:first-child {
+  grid-row: span 2;
 }
 
 /* DM 通話: 相手を大きく中央、自分は右下の小窓 */
@@ -1205,15 +1218,17 @@
   gap: 8px;
   align-items: center;
   justify-content: center;
-  aspect-ratio: 4 / 3;
-  padding: 12px;
+  min-height: 0;
+  padding: 16px;
   border: 2px solid transparent;
   border-radius: 12px;
   background-color: var(--color-bg-panel);
 }
 
 .call-tiles[data-count="1"] .call-tile {
-  aspect-ratio: 16 / 9;
+  width: 100%;
+  height: 100%;
+  max-height: 100%;
 }
 
 .call-tile[data-speaking="true"] {
@@ -1225,11 +1240,11 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 72px;
-  height: 72px;
+  width: clamp(72px, 12vh, 120px);
+  height: clamp(72px, 12vh, 120px);
   border-radius: 50%;
   color: var(--color-text-on-danger);
-  font-size: 28px;
+  font-size: clamp(28px, 5vh, 48px);
   font-weight: 700;
 }
 
@@ -1243,7 +1258,7 @@
 .call-tile-name {
   overflow: hidden;
   color: var(--color-text);
-  font-size: 13px;
+  font-size: clamp(14px, 1.8vh, 20px);
   font-weight: 700;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -1251,7 +1266,9 @@
 
 .call-tile-badge {
   display: inline-flex;
+  align-items: center;
   color: var(--color-text-muted);
+  transform: scale(clamp(1, 1.4vh, 1.6));
 }
 
 .call-tile-badge[data-state="muted"] {
