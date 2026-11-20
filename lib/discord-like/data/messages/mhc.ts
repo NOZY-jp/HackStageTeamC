@@ -4649,34 +4649,6 @@ export const messagesByChannelMhc: Record<string, Message[]> = {
       body: "紅葉の谷きれい",
     },
     {
-      id: "mhc-chat-0227",
-      channelId: "mhc-chat",
-      authorId: "kai",
-      sentAt: "2026-11-18T20:12:00+09:00",
-      body: "例の件、どこまで進んだ？",
-    },
-    {
-      id: "mhc-chat-0228",
-      channelId: "mhc-chat",
-      authorId: "hal",
-      sentAt: "2026-11-18T20:20:00+09:00",
-      body: "あと少し。また報告する",
-    },
-    {
-      id: "mhc-chat-0229",
-      channelId: "mhc-chat",
-      authorId: "kai",
-      sentAt: "2026-11-18T20:24:00+09:00",
-      body: "FaceBookだと本名で検索したら結構出てくるぞ？",
-    },
-    {
-      id: "mhc-chat-0230",
-      channelId: "mhc-chat",
-      authorId: "hal",
-      sentAt: "2026-11-18T20:27:00+09:00",
-      body: "本名で検索、やってみる",
-    },
-    {
       id: "mhc-chat-0231",
       channelId: "mhc-chat",
       authorId: "slime",
@@ -4697,14 +4669,6 @@ export const messagesByChannelMhc: Record<string, Message[]> = {
       authorId: "gunlance",
       sentAt: "2026-11-19T23:41:00+09:00",
       body: "どこで作ったの",
-    },
-    {
-      // 結末の報告はカイではなくリョウ（カイは黒幕なので結末を宣言しない・#121）
-      id: "mhc-chat-0234",
-      channelId: "mhc-chat",
-      authorId: "hal",
-      sentAt: "2026-11-19T23:52:00+09:00",
-      body: "住所を特定しました",
     },
   ],
   "mhc-questions": [
