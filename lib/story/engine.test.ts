@@ -10,25 +10,24 @@ import {
   setFlag,
   transcript,
 } from "./engine";
+import { say } from "./stage";
 import type { Beat } from "./types";
 
 const beats: Beat[] = [
   {
     id: "a",
     chapter: 2,
-    channel: { kind: "monologue" },
     when: ["started"],
-    lines: [{ from: "ryo", text: "A" }],
+    script: [say("ryo", "A")],
     sets: ["askedKai"],
   },
   {
     id: "b",
     chapter: 3,
-    channel: { kind: "discord-dm", with: "kai" },
     when: ["askedKai"],
-    lines: [{ from: "kai", text: "B" }],
+    script: [say("kai", "B")],
     choices: [
-      { id: "x", label: "X", sets: ["s03-blog-found"], reply: [{ from: "kai", text: "X!" }] },
+      { id: "x", label: "X", sets: ["s03-blog-found"], reply: [say("kai", "X!")] },
       { id: "y", label: "Y" },
     ],
   },
