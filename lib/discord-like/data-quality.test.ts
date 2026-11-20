@@ -3,6 +3,7 @@
  * 生成データの「穴」「英語テンプレ」「使い回し」「発言者の逸脱」「日次集中」「時刻衝突」を落とす。
  */
 import { describe, expect, it } from "vitest";
+import { buildMhcHistory } from "./data/messages/mhc-history";
 import { listChannels, listDMMessages, listDMThreads, listGuilds, listMessages } from "./index";
 import { QUALITY_LIMITS as Q } from "./test-thresholds";
 import type { Message } from "./types";
@@ -24,7 +25,7 @@ const allMessages = (): Message[] => {
  * - mhc の追加分は `mhc-<channel>-h####`
  * - 新サーバーは `univ-*` / `friend-*`
  */
-const NEW_ID = /^(mhc-(lfg|chat|questions|clips|gear|notice|intro|ochiba)-h|univ-|friend-)/;
+const NEW_ID = /^(mhc-(lfg|chat|questions|clips|gear|notice|intro)-h|univ-|friend-)/;
 const newMessages = (): Message[] => messages.filter((message) => NEW_ID.test(message.id));
 
 const messages = allMessages();
@@ -47,12 +48,9 @@ describe("データ品質（#131 / D9・D10）", () => {
     }
   });
 
-  it("新規追加分の本文ユニーク率は95%以上、全体は85%以上（システム行・スタンプ・画像のみは除く）", () => {
-    // 入室/退出のシステム行、スタンプのみ、画像のみは仕様上どうしても同じ文言になるため対象外（D9）
-    const isText = (message: Message) =>
-      message.system !== true &&
-      !/^:[a-z0-9_]+:$/.test(message.body.trim()) &&
-      !((message.attachments?.length ?? 0) > 0 && message.body.trim().length === 0);
+  it("新規追加分の本文ユニーク率は95%以上、全体は85%以上（system 行は除く）", () => {
+    // 入室/退出のシステム行は仕様上どうしても同じ文言になるため、ユニーク率の分母から除く（D9）
+    const isText = (message: Message) => message.system !== true;
     const added = newMessages().filter(isText);
     const texts = messages.filter(isText);
     const addedUnique = new Set(added.map((message) => message.body)).size / added.length;
@@ -61,15 +59,18 @@ describe("データ品質（#131 / D9・D10）", () => {
     expect(overallUnique).toBeGreaterThanOrEqual(Q.overallUniqueRate);
   });
 
-  it("mhc の発言者は9人まで、kai は mhc と dm-kai 以外で発言しない", () => {
+  it("mhc の発言者は9人まで、kai は mhc と dm-kai 以外で発言せず、mhc では5件まで（D10）", () => {
+    let kaiInMhc = 0;
     for (const guild of listGuilds()) {
       if (guild.id !== "mhc") continue;
       for (const channel of listChannels(guild.id).filter((item) => item.kind === "text")) {
         for (const message of listMessages({ channelId: channel.id, limit: 5000 }).messages) {
           expect(Q.mhcSpeakers, `${message.id} ${message.authorId}`).toContain(message.authorId);
+          if (message.authorId === "kai") kaiInMhc += 1;
         }
       }
     }
+    expect(kaiInMhc).toBeLessThanOrEqual(Q.kaiInMhc);
     for (const message of messages) {
       if (message.authorId === "kai") {
         expect(
@@ -80,20 +81,51 @@ describe("データ品質（#131 / D9・D10）", () => {
     }
   });
 
-  it("各月で10日以上発言があり、6日以降にも発言がある", () => {
-    const byMonth = new Map<string, Set<string>>();
-    for (const message of messages) {
-      const month = message.sentAt.slice(0, 7);
-      const days = byMonth.get(month) ?? new Set<string>();
-      days.add(message.sentAt.slice(0, 10));
-      byMonth.set(month, days);
+  it("サーバーごと・月ごとに10日以上発言があり、6日以降にも発言がある", () => {
+    // 全サーバー＋DMの合算ではなく、サーバー単位で日次分散を見る（合算だと薄い月が隠れる）
+    for (const guild of listGuilds()) {
+      const days = new Map<string, Set<string>>();
+      const texts = listChannels(guild.id).filter((channel) => channel.kind === "text");
+      for (const channel of texts) {
+        for (const message of listMessages({ channelId: channel.id, limit: 5000 }).messages) {
+          const month = message.sentAt.slice(0, 7);
+          const set = days.get(month) ?? new Set<string>();
+          set.add(message.sentAt.slice(0, 10));
+          days.set(month, set);
+        }
+      }
+      for (const [month, set] of days) {
+        expect(set.size, `${guild.id} ${month}`).toBeGreaterThanOrEqual(Q.minActiveDaysPerMonth);
+        const latestDay = Math.max(...[...set].map((day) => Number(day.slice(8, 10))));
+        expect(latestDay, `${guild.id} ${month}`).toBeGreaterThanOrEqual(Q.activityAfterDay);
+      }
     }
-    expect(byMonth.size).toBeGreaterThanOrEqual(12);
-    for (const [month, days] of byMonth) {
-      expect(days.size, month).toBeGreaterThanOrEqual(Q.minActiveDaysPerMonth);
-      const latestDay = Math.max(...[...days].map((day) => Number(day.slice(8, 10))));
-      expect(latestDay, month).toBeGreaterThanOrEqual(Q.activityAfterDay);
-    }
+  });
+
+  it("生成器は同じ seed で同じ結果になる（再現性）", () => {
+    // 生成時に渡した「既存の時刻」だけで再生成する（生成済みの時刻を混ぜると入力が変わる）
+    const isBase = (message: Message) =>
+      /^mhc-(lfg|chat|questions|clips|notice)-d{4}$/.test(message.id) ||
+      message.channelId.startsWith("dm-");
+    const times = [...new Set(messages.filter(isBase).map((message) => message.sentAt))];
+    const first = buildMhcHistory(times);
+    const second = buildMhcHistory(times);
+    expect(second).toEqual(first);
+    const current = listGuilds()
+      .filter((guild) => guild.id === "mhc")
+      .flatMap((guild) => listChannels(guild.id).filter((channel) => channel.kind === "text"))
+      .flatMap((channel) => listMessages({ channelId: channel.id, limit: 5000 }).messages)
+      .filter((message) => NEW_ID.test(message.id))
+      .map(
+        (message) => `${message.channelId} ${message.sentAt} ${message.authorId} ${message.body}`,
+      );
+    const generated = Object.values(first)
+      .flat()
+      .map(
+        (message) => `${message.channelId} ${message.sentAt} ${message.authorId} ${message.body}`,
+      );
+    expect(generated.length).toBe(current.length);
+    expect([...generated].sort()).toEqual([...current].sort());
   });
 
   it("sentAt はサーバー・DM をまたいで一意", () => {

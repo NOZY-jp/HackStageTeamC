@@ -1,5 +1,6 @@
 import type { Message } from "../../types";
-import { mhcHistory } from "./mhc-history";
+import { messagesByDMThread } from "./dm";
+import { buildMhcHistory } from "./mhc-history";
 
 /** モンハンコミュニティ のテキストチャンネルごとのメッセージ。キーはチャンネルID。 */
 const existingMessagesByChannelMhc: Record<string, Message[]> = {
@@ -3375,14 +3376,14 @@ const existingMessagesByChannelMhc: Record<string, Message[]> = {
       id: "mhc-chat-0046",
       channelId: "mhc-chat",
       authorId: "hal",
-      sentAt: "2025-05-10T15:54:00+09:00",
+      sentAt: "2025-05-10T15:53:00+09:00",
       body: "うまい",
     },
     {
       id: "mhc-chat-0047",
       channelId: "mhc-chat",
       authorId: "haruka",
-      sentAt: "2025-05-10T15:53:00+09:00",
+      sentAt: "2025-05-10T15:54:00+09:00",
       body: "どこで作ったの",
     },
     {
@@ -5590,7 +5591,15 @@ const existingMessagesByChannelMhc: Record<string, Message[]> = {
   ],
 };
 
-/** 既存の5ch＋#131 の追加履歴（8ch・800通）をチャンネルごとにまとめたもの（時刻順）。 */
+const existingTimes = [
+  ...Object.values(existingMessagesByChannelMhc).flat(),
+  ...Object.values(messagesByDMThread).flat(),
+].map((message) => message.sentAt);
+
+/** #131 の追加履歴（7ch・800通）。既存の時刻と衝突しないよう生成時にずらす。 */
+const mhcHistory = buildMhcHistory(existingTimes);
+
+/** 既存の5ch＋#131 の追加履歴（7ch・800通）をチャンネルごとにまとめたもの（時刻順）。 */
 const merged = new Map<string, Message[]>();
 for (const source of [existingMessagesByChannelMhc, mhcHistory]) {
   for (const [channelId, messages] of Object.entries(source)) {

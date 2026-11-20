@@ -78,6 +78,8 @@ export const QUALITY_LIMITS = {
   rewriteIfRepeatedAtLeast: 5,
   /** mhc で発言してよい人（D10: kai も可） */
   mhcSpeakers: ["hal", "maimai", "gunlance", "mina", "haruka", "slime", "jijii", "master", "kai"],
+  /** mhc 内での kai の発言上限（D10） */
+  kaiInMhc: 5,
   /** 各月で最低限発言がある日数（以上） */
   minActiveDaysPerMonth: 10,
   /** 各月で「6日以降」にも発言があること */
