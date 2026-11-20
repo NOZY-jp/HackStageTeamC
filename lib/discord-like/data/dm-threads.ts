@@ -1,6 +1,9 @@
 import type { DMThread } from "../types";
 
-/** DM スレッドは MaiMai との1件のみ。lastMessageAt は最終メッセージと同じ固定値。 */
+/**
+ * DM スレッド。lastMessageAt は最終メッセージと同じ固定値。
+ * カイとの DM は、調査の進捗（結末を含む）を公開チャンネルに出さないための非公開の場（#121）。
+ */
 export const dmThreads: DMThread[] = [
   {
     id: "dm-maimai",
@@ -8,5 +11,12 @@ export const dmThreads: DMThread[] = [
     participantIds: ["hal", "maimai"],
     lastMessageAt: "2026-11-19T21:48:00+09:00",
     unreadCount: 2,
+  },
+  {
+    id: "dm-kai",
+    urlId: "1187002356428841502",
+    participantIds: ["hal", "kai"],
+    lastMessageAt: "2026-11-19T23:52:00+09:00",
+    unreadCount: 0,
   },
 ];
