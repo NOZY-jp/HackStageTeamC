@@ -49,7 +49,8 @@ describe("鍵アカウントの投稿の扱い", () => {
     const protectedHandles = listUsers()
       .filter((user) => isProtected(user))
       .map((user) => user.handle);
-    expect(protectedHandles).toEqual(["nagi"]);
+    // 鍵垢は複数ありうる（旧アカウント #94 も鍵垢）
+    expect(protectedHandles).toContain("nagi");
   });
 
   it("listPosts / getPost は鍵垢の投稿を公開面に出さない", () => {

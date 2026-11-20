@@ -13,6 +13,14 @@ export type TwitterUser = {
   protected?: boolean;
 };
 
+/** 投稿に添える写真。 */
+export type PostMedia = {
+  src: string;
+  alt: string;
+  width: number;
+  height: number;
+};
+
 export type Post = {
   /** URL に入る（/twitter/post/[postId]） */
   id: string;
@@ -23,6 +31,8 @@ export type Post = {
   body: string;
   /** 返信先の Post.id。無ければトップレベルの投稿 */
   replyToId?: string;
+  /** 添付写真（無ければ本文だけ） */
+  media?: PostMedia[];
   replyCount: number;
   repostCount: number;
   likeCount: number;
