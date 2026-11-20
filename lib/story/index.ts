@@ -1,7 +1,10 @@
 export { characters, FORBIDDEN_WORDS, getCharacter, nicknames } from "./characters";
 export * from "./engine";
 export { EXTRA_FLAGS, FLAG_IDS, type FlagId } from "./flags";
+export { isAtPlace, isWithinPlace, PLACES, type Place, type PlaceId } from "./places";
+export * from "./playback";
 export { beats } from "./scenario";
+export * from "./stage";
 export { getStep, STEP_IDS, type Step, type StepId, steps } from "./steps";
 export {
   clearState,
@@ -17,7 +20,7 @@ export type * from "./types";
 
 /** 章の名前（シナリオの章立て） */
 export const CHAPTER_TITLES: Record<number, string> = {
-  1: "プロローグ",
+  1: "序章",
   2: "失踪",
   3: "助言",
   4: "痕跡",

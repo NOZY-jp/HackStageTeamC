@@ -12,25 +12,24 @@ import {
   setFlag,
   transcript,
 } from "./engine";
+import { say } from "./stage";
 import type { Beat } from "./types";
 
 const beats: Beat[] = [
   {
     id: "a",
     chapter: 2,
-    channel: { kind: "monologue" },
     when: ["started"],
-    lines: [{ from: "ryo", text: "A" }],
+    script: [say("ryo", "A")],
     sets: ["askedKai"],
   },
   {
     id: "b",
     chapter: 3,
-    channel: { kind: "discord-dm", with: "kai" },
     when: ["askedKai"],
-    lines: [{ from: "kai", text: "B" }],
+    script: [say("kai", "B")],
     choices: [
-      { id: "x", label: "X", sets: ["s03-blog-found"], reply: [{ from: "kai", text: "X!" }] },
+      { id: "x", label: "X", sets: ["s03-blog-found"], reply: [say("kai", "X!")] },
       { id: "y", label: "Y" },
     ],
   },
@@ -93,9 +92,8 @@ describe("lib/story の進行", () => {
     const talk: Beat = {
       id: "t",
       chapter: 5,
-      channel: { kind: "discord-dm", with: "kai" },
       when: [],
-      lines: [{ from: "kai", text: "どうする？" }],
+      script: [say("kai", "どうする？")],
       choices: [
         { id: "search", label: "検索する", sets: ["s10-talkup-match"] },
         {
@@ -104,7 +102,7 @@ describe("lib/story の進行", () => {
           requires: ["s03-blog-found"],
           completes: false,
           sets: ["askedKai"],
-          reply: [{ from: "kai", text: "でんちゃんって呼ぶと喜ぶぞ" }],
+          reply: [say("kai", "でんちゃんって呼ぶと喜ぶぞ")],
         },
       ],
     };

@@ -26,6 +26,7 @@ export const characters: Record<CharacterId, Character> = {
   ryo: {
     id: "ryo",
     name: "リョウ",
+    color: "#e3a65c",
     age: 22,
     firstPerson: "僕",
     secondPerson: "君",
@@ -35,6 +36,7 @@ export const characters: Record<CharacterId, Character> = {
   maimai: {
     id: "maimai",
     name: MAIMAI_NAME,
+    color: "#e58fb6",
     age: 23,
     firstPerson: "わたし",
     note: "彼女。2018年1月（中3）に MHW で攻略ブログを始め、2020年に閉鎖して note（leaf）へ。2021年の受験で更新停止。2025年春にワイルズでリョウと出会い、2026年8月から付き合っている。突然連絡が途絶える",
@@ -50,6 +52,7 @@ export const characters: Record<CharacterId, Character> = {
   kai: {
     id: "kai",
     name: KAI_NAME,
+    color: "#7fa2f0",
     age: 23,
     firstPerson: "俺",
     note: "協力者に見える友人（黒幕。作中では明かさない）。大学院2年、内定複数。さわやかで草食系だが頼もしい。リョウとは別ゲームで知り合い、その後 MaiMai と知り合った",
@@ -58,6 +61,7 @@ export const characters: Record<CharacterId, Character> = {
   kanon: {
     id: "kanon",
     name: KANON_NAME,
+    color: "#7fc4a2",
     age: 23,
     firstPerson: "私",
     note: "MaiMai のいちばんの親友（中学・高校が同じ、BFF）。大学進学以来、自然に疎遠",

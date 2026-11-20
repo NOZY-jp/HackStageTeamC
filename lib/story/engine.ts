@@ -1,5 +1,8 @@
 import type { FlagId } from "./flags";
+import { isAtPlace } from "./places";
 import { beats as allBeats } from "./scenario";
+import { CHAT_CHANNELS, type Cue, say } from "./stage/cues";
+import { type ChatMessage, chatsOf, textsOf } from "./stage/runner";
 import type { Beat, Choice, Line, StoryState } from "./types";
 
 /**
@@ -26,7 +29,7 @@ export function missingFor(state: StoryState, beat: Beat): { flags: FlagId[]; be
 /** 始められる場面（条件がそろい、まだ終わっていない）。台本の並び順 */
 export function availableBeats(state: StoryState, beats: Beat[] = allBeats): Beat[] {
   return beats.filter((beat) => {
-    if (state.completed.includes(beat.id)) {
+    if (beat.previewOnly || state.completed.includes(beat.id)) {
       return false;
     }
     const missing = missingFor(state, beat);
@@ -46,11 +49,21 @@ export function chosenIn(state: StoryState, beatId: string): string[] {
 
 /** いま出す選択肢（条件のフラグがそろっていて、まだ選んでいない寄り道を除いたもの） */
 export function remainingChoices(state: StoryState, beat: Beat): Choice[] {
-  const chosen = chosenIn(state, beat.id);
+  return choicesLeft(beat, state.flags, chosenIn(state, beat.id));
+}
+
+/**
+ * 立っているフラグと、この場面でもう選んだ選択肢から、いま出す選択肢を決める。
+ * 場面を流している画面は、寄り道で立ったフラグ（sets）も足して渡す
+ */
+export function choicesLeft(
+  beat: Beat,
+  flags: readonly FlagId[],
+  chosen: readonly string[],
+): Choice[] {
   return (beat.choices ?? []).filter(
     (choice) =>
-      !chosen.includes(choice.id) &&
-      (choice.requires ?? []).every((flag) => state.flags.includes(flag)),
+      !chosen.includes(choice.id) && (choice.requires ?? []).every((flag) => flags.includes(flag)),
   );
 }
 
@@ -93,15 +106,20 @@ export function completeBeat(state: StoryState, beat: Beat, choiceId?: string): 
   return finish(state, beat);
 }
 
-/** 場面の会話を、選んだ選択肢（寄り道も、選んだ順に）まで含めて1列にする */
-export function linesOf(beat: Beat, chosen: readonly string[] = []): Line[] {
+/** 場面の命令を、選んだ選択肢（寄り道も、選んだ順に。リョウの発言と、その後の命令）まで含めて1列にする */
+export function cuesOf(beat: Beat, chosen: readonly string[] = []): Cue[] {
   return [
-    ...beat.lines,
+    ...beat.script,
     ...chosen.flatMap((choiceId) => {
       const choice = beat.choices?.find((candidate) => candidate.id === choiceId);
-      return choice ? [{ from: "ryo" as const, text: choice.label }, ...(choice.reply ?? [])] : [];
+      return choice ? [say("ryo", choice.label), ...(choice.reply ?? [])] : [];
     }),
   ];
+}
+
+/** 場面の文章（ログに残る行）。選んだ選択肢まで含める */
+export function linesOf(beat: Beat, chosen: readonly string[] = []): Line[] {
+  return textsOf(cuesOf(beat, chosen));
 }
 
 /** 終わった場面から会話の履歴を組み立て直す（保存しているのは状態だけ） */
@@ -119,4 +137,29 @@ export function transcript(
 export function currentChapter(state: StoryState, beats: Beat[] = allBeats): number {
   const chapters = transcript(state, beats).map(({ beat }) => beat.chapter);
   return chapters.length > 0 ? Math.max(...chapters) : 1;
+}
+
+/** 終わった場面で流したチャット（終わった順）。各プラットフォームの画面はこれを過去のデータに足して出す */
+export function completedChats(state: StoryState, beats: Beat[] = allBeats): ChatMessage[] {
+  return state.completed.flatMap((beatId) => {
+    const beat = beats.find((candidate) => candidate.id === beatId);
+    return beat ? chatsOf(beat.id, cuesOf(beat, chosenIn(state, beatId))) : [];
+  });
+}
+
+/**
+ * まだ見ていない、ほかの人からのチャット（「DM が届きました」の知らせに使う）。
+ * いまその画面を開いているものは、見ているので除く。
+ */
+export function unreadChats(
+  chats: ChatMessage[],
+  seen: readonly string[],
+  pathname: string,
+): ChatMessage[] {
+  return chats.filter(
+    (chat) =>
+      chat.from !== "ryo" &&
+      !seen.includes(chat.id) &&
+      !isAtPlace(pathname, CHAT_CHANNELS[chat.channel].place),
+  );
 }
