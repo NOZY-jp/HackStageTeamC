@@ -48,6 +48,14 @@ describe("fbYuiPosts", () => {
     expect(stamps).toEqual(sorted);
   });
 
+  it("stays within the high school era (2018-04-09 .. 2020-12-31)", () => {
+    // 2021年の受験以降は更新されない設定。卒業式（2021-03）も範囲外。
+    for (const stamp of fbYuiPosts.map((post) => post.createdAt)) {
+      expect(stamp >= "2018-04-09T00:00:00Z").toBe(true);
+      expect(stamp <= "2020-12-31T23:59:59Z").toBe(true);
+    }
+  });
+
   it("has comments whose postId matches the parent post id", () => {
     for (const post of fbYuiPosts) {
       expect(post.comments.length).toBeLessThanOrEqual(2);

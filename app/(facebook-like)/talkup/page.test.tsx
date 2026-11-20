@@ -40,7 +40,12 @@ describe("TalkUp のフィードと検索（#95）", () => {
     );
     // (b) 関係ない投稿は出ない（全件フィードにならない）
     expect(screen.queryByText(/HackStage TeamC の新しいポータル画面/)).not.toBeInTheDocument();
-    expect(container.querySelectorAll("article").length).toBeLessThan(5);
+    const articles = container.querySelectorAll("article");
+    expect(articles.length).toBeGreaterThanOrEqual(3);
+    for (const article of Array.from(articles)) {
+      // 描画された投稿はすべて本人（u40）のもの
+      expect(article.getAttribute("aria-label")).toBe("服部 由比の投稿");
+    }
 
     // 該当する投稿（本人の投稿）は出る
     expect(
@@ -48,15 +53,20 @@ describe("TalkUp のフィードと検索（#95）", () => {
     ).toBeInTheDocument();
   });
 
-  it("本名は空白の有無（半角・全角）どちらでも1ユーザー・3投稿ヒットする", () => {
+  it("本名は空白の有無（半角・全角）どちらでも1ユーザー・本人の投稿だけが出る", () => {
     for (const q of ["服部 由比", "服部由比", "服部　由比"]) {
       nav.query = new URLSearchParams(`q=${q}`);
       const { container, unmount } = renderFeed();
 
-      expect(screen.getByText(/ユーザー1件 \/ 投稿3件/), q).toBeInTheDocument();
+      expect(screen.getByText(/ユーザー1件 \/ 投稿\d+件/), q).toBeInTheDocument();
       const users = screen.getByRole("region", { name: "該当するユーザー" });
       expect(within(users).getAllByRole("link"), q).toHaveLength(1);
-      expect(container.querySelectorAll("article"), q).toHaveLength(3);
+      const articles = container.querySelectorAll("article");
+      expect(articles.length, q).toBeGreaterThanOrEqual(3);
+      for (const article of Array.from(articles)) {
+        // 描画された投稿はすべて本人（u40）のもの
+        expect(article.getAttribute("aria-label"), q).toBe("服部 由比の投稿");
+      }
       unmount();
     }
   });
@@ -73,7 +83,7 @@ describe("TalkUp のフィードと検索（#95）", () => {
       </FacebookProvider>,
     );
 
-    expect(screen.getByText(/ユーザー1件 \/ 投稿3件/)).toBeInTheDocument();
+    expect(screen.getByText(/ユーザー1件 \/ 投稿\d+件/)).toBeInTheDocument();
   });
 
   it("右サイドバーの「連絡先」に本名のアカウントを出さない（検索前のネタバレ防止）", () => {

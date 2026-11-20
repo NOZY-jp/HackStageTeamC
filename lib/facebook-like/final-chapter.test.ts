@@ -69,12 +69,17 @@ describe("第五章: 本名で見つかる TalkUp アカウント（#95）", () 
     expect(titles).not.toContain("大学の友達と");
   });
 
-  it("本名は空白の有無（半角・全角）どちらでも同じ相手に届く", () => {
+  it("本名は空白の有無（半角・全角）どちらでも本人の投稿だけが返る", () => {
     for (const query of [REAL_NAME, REAL_NAME_NO_SPACE, REAL_NAME_FULL_SPACE]) {
       const result = searchFacebook(query);
       const users = result.users.filter((user) => user.id === "u40");
       expect(users, query).toHaveLength(1);
-      expect(result.posts.length, query).toBe(3);
+      // データが増えても、本名検索に乗るのは本人の投稿だけ
+      expect(result.posts.length, query).toBeGreaterThanOrEqual(3);
+      expect(
+        result.posts.every((post) => post.authorId === "u40"),
+        query,
+      ).toBe(true);
     }
   });
 
