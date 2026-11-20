@@ -1,6 +1,6 @@
 import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import { beforeEach, describe, expect, it } from "vitest";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 import { STORAGE_KEY } from "@/lib/story";
 import { StoryBoard } from "./story-board";
 
@@ -31,7 +31,7 @@ describe("シナリオ確認画面（#81）", () => {
     await user.click(screen.getByRole("button", { name: "マイリストを開く" }));
 
     expect(screen.getByRole("heading", { name: "助言：マイリストの通知" })).toBeInTheDocument();
-    expect(screen.getByText(/マイリスト開いたんだ/)).toBeInTheDocument();
+    expect(screen.getByText(/マイリスト、開いてみた/)).toBeInTheDocument();
 
     // 選択肢
     await user.click(screen.getByRole("button", { name: "覚えてる。見に行く" }));
@@ -44,6 +44,25 @@ describe("シナリオ確認画面（#81）", () => {
     await waitFor(() => {
       expect(window.localStorage.getItem(STORAGE_KEY)).toContain("ch1-mylist");
     });
+  });
+
+  it("台帳の表示は1か所の型から引き、アカウント行の key が重複しない", async () => {
+    const errorSpy = vi.spyOn(console, "error").mockImplementation(() => {});
+    const { container } = render(<StoryBoard />);
+    await screen.findByRole("heading", { name: "シナリオ確認" });
+
+    // 呼称・各サービスの表示名・旧ブログ・呼び名の根拠が台帳から読める
+    expect(screen.getByText("MaiMai（まいまい）")).toBeInTheDocument();
+    const text = container.textContent ?? "";
+    expect(text).toContain("discord: kohakunchos0117（琥珀）");
+    expect(text).toContain("discord: imperial_chi（χ）");
+    expect(text).toContain("pochiblo: denden0102（でんでん）");
+    expect(text).toContain("twixer: hunter_denden0102（hunter_denden）");
+    expect(text).toContain("でんちゃん（旧ブログのコメント欄に祖母が一度だけ書いた）");
+
+    // 同じ platform を2つ持つ人（mai）でも key 重複の警告を出さない
+    expect(errorSpy).not.toHaveBeenCalled();
+    errorSpy.mockRestore();
   });
 
   it("やり直すと最初の状態に戻る", async () => {

@@ -57,6 +57,25 @@ describe("台本の整合性（#81）", () => {
     }
   });
 
+  it("彼女（mai）を話者にしない（冒頭から連絡がつかない・進行役はカイだけ）", () => {
+    const speakers = scenes.flatMap((scene) => scene.lines.map((line) => line.speakerId));
+    expect(speakers).not.toContain("mai");
+    // 台本に「でんちゃん」の経路が2段階（コメント欄で見つける→カイに相談）で入っている
+    const flagsUsed = scenes.flatMap((scene) => [
+      ...scene.requires,
+      ...scene.choices.flatMap((choice) => choice.setsFlags),
+    ]);
+    expect(flagsUsed).toContain("denchan_found");
+    expect(flagsUsed).toContain("denchan_confirmed");
+    // かのんは「リョウが問い、かのんが答える」向き（撮影場所を知っているのはかのん）
+    const ch4 = scenes.find((scene) => scene.id === "ch4-kanon");
+    const ryoLine = ch4?.lines.find((line) => line.speakerId === "ryo")?.text ?? "";
+    expect(ryoLine).toContain("？");
+    expect(
+      ch4?.lines.some((line) => line.speakerId === "kanon" && line.text.includes("うん")),
+    ).toBe(true);
+  });
+
   it("台本とフラグ定義のIDが一致する（未定義のフラグを使わない）", () => {
     const used = [
       ...scenes.flatMap((scene) => [
@@ -88,6 +107,21 @@ describe("台本の整合性（#81）", () => {
     const progress = playThrough();
     expect(progress.completedScenes).toHaveLength(scenes.length);
     expect(progress.completedScenes).toEqual(scenes.map((scene) => scene.id));
+  });
+
+  it("台帳のアカウント行は key が重複しない（同じ platform を2つ持つ人だけ handle で分かれる）", () => {
+    for (const member of cast) {
+      const keys = member.accounts.map(
+        (account) => `${member.id}-${account.platform}-${account.handle}`,
+      );
+      expect(new Set(keys).size, member.id).toBe(keys.length);
+      // 旧垢の表示名も台帳から読める
+      for (const account of member.accounts) {
+        if (account.platform === "discord" || account.platform === "twixer") {
+          expect(typeof account.handle).toBe("string");
+        }
+      }
+    }
   });
 
   it("章は決められた4つだけ", () => {

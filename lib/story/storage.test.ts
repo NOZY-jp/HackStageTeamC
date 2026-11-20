@@ -45,6 +45,44 @@ describe("進行状態の保存（#81）", () => {
     expect(loadProgress(storage)).toEqual(emptyProgress());
   });
 
+  it("localStorage が例外を投げても落ちない（SecurityError・容量不足）", () => {
+    const throwing = {
+      getItem: () => {
+        throw new DOMException("blocked", "SecurityError");
+      },
+      setItem: () => {
+        throw new DOMException("quota", "QuotaExceededError");
+      },
+      removeItem: () => {
+        throw new DOMException("blocked", "SecurityError");
+      },
+    };
+    expect(loadProgress(throwing)).toEqual(emptyProgress());
+    expect(() => saveProgress(emptyProgress(), throwing)).not.toThrow();
+    expect(() => clearProgress(throwing)).not.toThrow();
+  });
+
+  it("window.localStorage へのアクセス自体が拒否されても落ちない", () => {
+    const original = Object.getOwnPropertyDescriptor(window, "localStorage");
+    Object.defineProperty(window, "localStorage", {
+      configurable: true,
+      get() {
+        throw new DOMException("blocked", "SecurityError");
+      },
+    });
+    try {
+      // 既定引数（browserStorage()）が例外を握りつぶし、保存できなくても初期状態で進む
+      expect(() => loadProgress()).not.toThrow();
+      expect(loadProgress()).toEqual(emptyProgress());
+      expect(() => saveProgress(emptyProgress())).not.toThrow();
+      expect(() => clearProgress()).not.toThrow();
+    } finally {
+      if (original) {
+        Object.defineProperty(window, "localStorage", original);
+      }
+    }
+  });
+
   it("形の検査", () => {
     expect(isProgress({ flags: [], completedScenes: [], choices: {} })).toBe(true);
     expect(isProgress(null)).toBe(false);

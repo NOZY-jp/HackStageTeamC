@@ -249,13 +249,20 @@ export function StoryBoard() {
           <tbody>
             {cast.map((member) => (
               <tr key={member.id} className="border-b border-white/5 align-top">
-                <td className="py-1 font-semibold">{member.displayName}</td>
+                <td className="py-1 font-semibold">
+                  {member.displayName}
+                  {member.nickname ? `（${member.nickname}）` : ""}
+                </td>
                 <td className="py-1">{member.pronoun}</td>
                 <td className="py-1">{member.role}</td>
                 <td className="py-1">
                   {member.accounts.map((account) => (
-                    <span key={`${member.id}-${account.platform}`} className="mr-2 text-xs">
+                    <span
+                      key={`${member.id}-${account.platform}-${account.handle}`}
+                      className="mr-2 text-xs"
+                    >
                       {account.platform}: {account.handle}
+                      {account.displayName ? `（${account.displayName}）` : ""}
                     </span>
                   ))}
                 </td>
@@ -263,10 +270,11 @@ export function StoryBoard() {
                   {member.oldNames.length === 0
                     ? "—"
                     : member.oldNames
-                        .map(
-                          (old) =>
-                            `${old.name}（${old.knownBy.map((id) => castName(id)).join("・")}）`,
-                        )
+                        .map((old) => {
+                          const knownBy = old.knownBy.map((id) => castName(id)).join("・");
+                          const basis = knownBy || old.source || "";
+                          return basis ? `${old.name}（${basis}）` : old.name;
+                        })
                         .join("、")}
                 </td>
               </tr>

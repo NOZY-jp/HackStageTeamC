@@ -16,6 +16,8 @@ export type Chapter = "助言" | "痕跡" | "欠片" | "現実";
 export type CastAccount = {
   platform: "pochiblo" | "leaf" | "twixer" | "discord";
   handle: string;
+  /** そのサービスでの表示名（分かっている場合だけ） */
+  displayName?: string;
 };
 
 /**
@@ -25,11 +27,13 @@ export type CastAccount = {
 export type CastMember = {
   id: CastId;
   displayName: string;
+  /** 作中で使う呼称（例: まいまい）。無ければ displayName を使う */
+  nickname?: string;
   /** 一人称 */
   pronoun: string;
   accounts: CastAccount[];
-  /** 昔の呼び方と、それを知っている人（人物ID） */
-  oldNames: { name: string; knownBy: CastId[] }[];
+  /** 昔の呼び方と、それを知っている人（人物ID）・根拠 */
+  oldNames: { name: string; knownBy: CastId[]; source?: string }[];
   /** この人物の役割（確認画面用の一言） */
   role: string;
 };

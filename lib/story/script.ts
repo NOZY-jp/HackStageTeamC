@@ -6,7 +6,9 @@ import type { Scene } from "./types";
  * - completesFlags: 場面が終わったら立つ
  * - 選択肢の setsFlags: 選んだときだけ立つ
  *
+ * 彼女は冒頭から連絡がつかない（進行役はカイだけ）。彼女を話者にしない。
  * カイからの連絡は、コンテスト名で本名が分かった後（real_name_known）に置く。
+ * 「でんちゃん」は 旧ブログのコメント欄で見つける → カイに相談する の2段階で届く。
  */
 export const scenes: Scene[] = [
   {
@@ -15,9 +17,11 @@ export const scenes: Scene[] = [
     title: "マイリストの通知",
     requires: ["mylist_opened"],
     lines: [
-      { speakerId: "mai", text: "マイリスト開いたんだ。あのブログ、まだ残ってた？" },
-      { speakerId: "ryo", text: "うん。記事は少ないけど、コメントまで残ってた。" },
-      { speakerId: "mai", text: "写真の記事、覚えてる？ 賞をもらったやつ。" },
+      {
+        speakerId: "ryo",
+        text: "マイリスト、開いてみた。記事は少ないけど、コメントまで残ってた。",
+      },
+      { speakerId: "ryo", text: "写真の記事、あった。賞をもらったやつだ。" },
     ],
     choices: [
       { id: "remember", label: "覚えてる。見に行く", setsFlags: ["photo_hint"] },
@@ -31,12 +35,11 @@ export const scenes: Scene[] = [
     title: "結果ページの名前",
     requires: ["real_name_known"],
     lines: [
-      { speakerId: "mai", text: "結果ページ、見た？ 名前まで載ってるなんて思わなかった。" },
-      { speakerId: "ryo", text: "見た。……この名前、どこかで聞いた気がする。" },
-      { speakerId: "mai", text: "気のせいじゃない？ 昔の呼び方なら、かのんが知ってるかも。" },
+      { speakerId: "ryo", text: "結果ページを見た。名前まで載ってるなんて思わなかった。" },
+      { speakerId: "ryo", text: "……この名前、どこかで聞いた気がする。" },
     ],
     choices: [
-      { id: "ask-kanon", label: "かのんに聞く", setsFlags: ["kanon_heard"] },
+      { id: "see-photo", label: "写真のページを見に行く", setsFlags: [] },
       { id: "keep", label: "自分で調べる", setsFlags: [] },
     ],
     completesFlags: [],
@@ -52,8 +55,8 @@ export const scenes: Scene[] = [
       { speakerId: "kai", text: "その写真、撮った場所に心当たりある？" },
     ],
     choices: [
+      { id: "ask-kai", label: "カイに相談する", setsFlags: ["denchan_confirmed"] },
       { id: "go", label: "その場所に行ってみる", setsFlags: [] },
-      { id: "ask-kanon", label: "かのんにも聞いてみる", setsFlags: ["kanon_heard"] },
     ],
     completesFlags: ["kai_contacted"],
   },
@@ -61,11 +64,11 @@ export const scenes: Scene[] = [
     id: "ch4-kanon",
     chapter: "現実",
     title: "かのんの記憶",
-    requires: ["kanon_heard", "photo_hint"],
+    requires: ["denchan_found", "denchan_confirmed", "photo_hint"],
     lines: [
       { speakerId: "kanon", text: "久しぶり。あの写真、覚えてるよ。" },
-      { speakerId: "ryo", text: "橋のたもとで撮ったんでしょ。今も残ってるかは分からないけど。" },
-      { speakerId: "kanon", text: "残ってると思う。行ってみたら？" },
+      { speakerId: "ryo", text: "あの写真、橋のたもとで撮ったんだよね？" },
+      { speakerId: "kanon", text: "うん。今も残ってるかは分からないけど、行ってみたら？" },
     ],
     choices: [{ id: "thanks", label: "ありがとう。行ってみる", setsFlags: [] }],
     completesFlags: [],

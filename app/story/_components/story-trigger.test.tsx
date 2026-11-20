@@ -34,11 +34,11 @@ describe("きっかけ部品（#81）", () => {
   it("フラグが変わったことを画面へ知らせる", async () => {
     const listener = vi.fn();
     window.addEventListener(PROGRESS_EVENT, listener);
-    render(<StoryTrigger triggerId="ask-kanon" />);
+    render(<StoryTrigger triggerId="find-denchan" />);
     await waitFor(() => {
       expect(listener).toHaveBeenCalled();
     });
-    expect(loadProgress().flags).toContain("kanon_heard");
+    expect(loadProgress().flags).toContain("denchan_found");
     window.removeEventListener(PROGRESS_EVENT, listener);
   });
 

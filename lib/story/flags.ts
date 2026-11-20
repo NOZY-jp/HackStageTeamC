@@ -26,9 +26,14 @@ export const flags: StoryFlag[] = [
     description: "受賞作の写真が、昔のブログの写真と同じだと分かった。",
   },
   {
-    id: "kanon_heard",
-    label: "かのんに聞いた",
-    description: "かのんに昔の呼び方を聞いた。",
+    id: "denchan_found",
+    label: "「でんちゃん」を見つけた",
+    description: "旧ブログのコメント欄に、祖母が一度だけ書いた呼び名が残っていた。",
+  },
+  {
+    id: "denchan_confirmed",
+    label: "呼び名の由来を知った",
+    description: "カイに相談して、「でんちゃん」が誰の呼び名かを教えてもらった。",
   },
 ];
 
@@ -54,9 +59,9 @@ export const triggers: Trigger[] = [
     setsFlags: ["real_name_known"],
   },
   {
-    id: "ask-kanon",
-    label: "かのんに聞く",
-    description: "幼なじみに昔の呼び方を聞いたことにする。",
-    setsFlags: ["kanon_heard"],
+    id: "find-denchan",
+    label: "旧ブログのコメント欄を読む",
+    description: "祖母が一度だけ書いた「でんちゃん」を見つけたことにする。",
+    setsFlags: ["denchan_found"],
   },
 ];
