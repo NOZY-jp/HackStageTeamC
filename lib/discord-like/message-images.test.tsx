@@ -118,3 +118,22 @@ describe("実体が無い画像の扱い（#102 追補）", () => {
     expect(getMessageImage("not-yet.png").status).toBe("pending");
   });
 });
+
+describe("撮影画像の取り残し防止（#102）", () => {
+  // #105 fa4e972（ID を hunter_denden3243 に統一して撮り直した画像）。撮り直したら更新する
+  const EXPECTED_SHA256: Record<string, string> = {
+    "public/discord-like/screenshot-2018-game.png":
+      "1639a1c21692173a05cea18091bdbe17f4d8fd82cedc26aa38bb8852a19292f3",
+    "public/discord-like/screenshot-2019-lobby.png":
+      "133b7274301f416c019cce41e1e2c6044e9d41981f4b9297ce047b6a781dcf8d",
+  };
+
+  it("ゲーム画面の画像が最新（古い ID の画像が残っていない）", async () => {
+    const crypto = await import("node:crypto");
+    for (const [path, expected] of Object.entries(EXPECTED_SHA256)) {
+      const buffer = await fs.readFile(path);
+      const actual = crypto.createHash("sha256").update(buffer).digest("hex");
+      expect(actual, path).toBe(expected);
+    }
+  });
+});
