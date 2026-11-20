@@ -85,9 +85,31 @@ describe("進行状態の保存（#81）", () => {
 
   it("形の検査", () => {
     expect(isProgress({ flags: [], completedScenes: [], choices: {} })).toBe(true);
+    expect(isProgress({ flags: [], completedScenes: [], choices: { s: ["a"] } })).toBe(true);
     expect(isProgress(null)).toBe(false);
     expect(isProgress({ flags: [1], completedScenes: [], choices: {} })).toBe(false);
     expect(isProgress({ flags: [], completedScenes: [], choices: null })).toBe(false);
     expect(isProgress({ flags: [], completedScenes: [1], choices: {} })).toBe(false);
+    // v1 の choices（場面あたり1値）はそのままでは今の形に合わない
+    expect(isProgress({ flags: [], completedScenes: [], choices: { s: "a" } })).toBe(false);
+  });
+
+  it("v1 の保存を読んで今の形に移行する（choices の配列化・場面IDの付け替え）", () => {
+    const storage = fakeStorage({
+      "hackstage-story-progress-v1": JSON.stringify({
+        flags: ["facebook_search"],
+        completedScenes: ["ch3-kai", "ch4-kanon"],
+        choices: { "ch3-kai": "search-name", "ch4-kanon": "x" },
+      }),
+    });
+
+    expect(loadProgress(storage)).toEqual({
+      flags: ["facebook_search"],
+      completedScenes: ["ch3-kai", "ch4-matching"],
+      choices: { "ch3-kai": ["search-name"], "ch4-matching": ["x"] },
+    });
+    // 次の保存は v2 キーに書く
+    saveProgress(loadProgress(storage), storage);
+    expect(storage.data.has(STORAGE_KEY)).toBe(true);
   });
 });

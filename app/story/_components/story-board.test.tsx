@@ -1,4 +1,4 @@
-import { render, screen, waitFor } from "@testing-library/react";
+import { render, screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { STORAGE_KEY } from "@/lib/story";
@@ -64,7 +64,7 @@ describe("シナリオ確認画面（#81）", () => {
     expect(screen.getByRole("heading", { name: "結末" })).toBeInTheDocument();
     expect(screen.getByRole("status")).toHaveTextContent("住所を特定しました");
     expect(screen.getByText(/住所そのものは作りません/)).toBeInTheDocument();
-    // 5場面すべて終わっている
+    // 4場面すべて終わっている
     expect(screen.getByText(/終わった場面: 4 \/ 4/)).toBeInTheDocument();
   });
 
@@ -103,6 +103,12 @@ describe("シナリオ確認画面（#81）", () => {
     // そのまま検索を選べば ch4（照合）へ進める
     await user.click(screen.getByRole("button", { name: "本名で TalkUp を検索する" }));
     expect(screen.getByRole("button", { name: "この場面を終える" })).toBeInTheDocument();
+
+    // 寄り道の選択とカイの助言も履歴に残る（結末の伏線。選択肢を上書きしない）
+    const log = screen.getByRole("region", { name: "カイとの会話（履歴）" });
+    expect(within(log).getByText("選んだ答え: カイに相談する")).toBeInTheDocument();
+    expect(within(log).getByText("選んだ答え: 本名で TalkUp を検索する")).toBeInTheDocument();
+    expect(within(log).getByText(/『でんちゃん』って呼ばれるのが好きなんだ/)).toBeInTheDocument();
   });
 
   it("台帳の表示は1か所の型から引き、アカウント行の key が重複しない", async () => {
