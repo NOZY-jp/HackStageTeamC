@@ -7,6 +7,7 @@
  */
 export const NATURALNESS_LIMITS = {
   /** 未返信で終わる DM スレッドの割合（以上） */
+  /** 未返信で終わる DM の割合（下限。緩和ではなく「最低これだけ残す」の意味） */
   unrepliedThreadRatio: 0.2,
   /** 既読スルー（質問のあとに返事が無いまま次の話題へ）の件数（以上） */
   readThrough: 20,
