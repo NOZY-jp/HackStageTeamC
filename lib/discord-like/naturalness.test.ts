@@ -5,7 +5,14 @@
  */
 import { describe, expect, it } from "vitest";
 import { MAIMAI_NAME } from "./data/names";
-import { listChannels, listDMMessages, listDMThreads, listGuilds, listMessages } from "./index";
+import {
+  listChannels,
+  listDMMessages,
+  listDMThreads,
+  listGuilds,
+  listMessages,
+  listVoiceSessions,
+} from "./index";
 import { NATURALNESS_LIMITS as L } from "./test-thresholds";
 import type { Message } from "./types";
 
@@ -91,14 +98,14 @@ function replyGaps(groups: Map<string, Message[]>): number[] {
  * 通話の開始/終了の対応（不在着信は「終了」として数える）。
  * #129 で `VoiceSession` が入ったら、この関数の中だけを差し替える。
  */
-function callSessions(messages: Message[]): { starts: number; ends: number } {
-  const calls = messages.filter(
-    (message) => message.body.includes("通話を開始") || message.body.includes("通話を終了"),
-  );
-  const missed = messages.filter((message) => message.body.includes("応答がありませんでした"));
+function callSessions(): { starts: number; ends: number } {
+  // #129: 通話は VoiceSession を正とする（不在着信もセッションとして数える）
+  const sessions = listVoiceSessions();
   return {
-    starts: calls.filter((message) => message.body.includes("通話を開始")).length,
-    ends: calls.filter((message) => message.body.includes("通話を終了")).length + missed.length,
+    starts: sessions.length,
+    ends:
+      sessions.filter((session) => session.endedReason === "hangup").length +
+      sessions.filter((session) => session.endedReason === "missed").length,
   };
 }
 
@@ -166,7 +173,7 @@ describe("会話の自然さ（#130）", () => {
   });
 
   it("通話の開始と終了が対になっている（不在着信は終了として数える）", () => {
-    const { starts, ends } = callSessions(messages);
+    const { starts, ends } = callSessions();
     expect(starts).toBeGreaterThan(0);
     expect(Math.abs(starts - ends)).toBeLessThanOrEqual(L.callPairTolerance);
   });

@@ -2,8 +2,18 @@ import { dmThreads } from "./data/dm-threads";
 import { guilds } from "./data/guilds";
 import { channelMessages, dmMessages } from "./data/messages";
 import { users } from "./data/users";
+import { voiceSessions } from "./data/voice-sessions";
 import { voiceStates } from "./data/voice-states";
-import type { Channel, DMThread, Guild, Message, MessagePage, User, VoiceState } from "./types";
+import type {
+  Channel,
+  DMThread,
+  Guild,
+  Message,
+  MessagePage,
+  User,
+  VoiceSession,
+  VoiceState,
+} from "./types";
 
 /**
  * すべて同期・純関数。data/*.ts の保存オブジェクトは共有しているため、
@@ -76,7 +86,7 @@ function paginate(source: Message[], options: { before?: string; limit?: number 
 }
 
 /** チャンネルIDで引く（DM スレッドIDとは別名前空間）。既定は最新50件。 */
-export type { MessageAuthor, MessagePage, MessageView } from "./types";
+export type { MessageAuthor, MessagePage, MessageView, VoiceSession } from "./types";
 
 export function listMessages(options: {
   channelId: string;
@@ -166,6 +176,18 @@ export function getChannelByUrlId(urlId: string): Channel | undefined {
 export function getDMThreadByUrlId(urlId: string): DMThread | undefined {
   const thread = dmThreads.find((candidate) => candidate.urlId === urlId);
   return thread ? copyOf(thread) : undefined;
+}
+
+/** 通話セッション（#129）。scope や channel で絞れる。 */
+export function listVoiceSessions(options?: {
+  channelId?: string;
+  scope?: "dm" | "guild";
+}): VoiceSession[] {
+  return voiceSessions.filter(
+    (session) =>
+      (!options?.channelId || session.channelId === options.channelId) &&
+      (!options?.scope || session.scope === options.scope),
+  );
 }
 
 export function listVoiceStates(channelId: string): VoiceState[] {
