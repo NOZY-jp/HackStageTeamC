@@ -8,7 +8,7 @@ import { isVerified } from "./lookup";
 export function RightSidebar({ hideSearch = false }: { hideSearch?: boolean }) {
   const trends = listTrends();
   const suggestions = listUsers()
-    .filter((user) => user.handle !== "hal")
+    .filter((user) => user.handle !== "kohakunchos0117")
     .slice(0, 3);
   return (
     <aside className="tw-right" aria-label="サイドバー">
