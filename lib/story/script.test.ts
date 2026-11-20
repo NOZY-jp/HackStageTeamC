@@ -35,7 +35,7 @@ function playThrough(): Progress {
     ];
     progress.completedScenes.push(next.id);
     if (choice) {
-      progress.choices[next.id] = choice.id;
+      progress.choices[next.id] = [choice.id];
     }
   }
   return progress;
@@ -54,7 +54,7 @@ describe("台本の整合性（#81）", () => {
     }
     // 選択肢が無い場面は「場面を終える」で完了する（ch4 だけ）
     const withoutChoices = scenes.filter((scene) => scene.choices.length === 0).map((s) => s.id);
-    expect(withoutChoices).toEqual(["ch4-kanon"]);
+    expect(withoutChoices).toEqual(["ch4-matching"]);
   });
 
   it("出てくる人物は全員台帳にいる", () => {
@@ -77,7 +77,7 @@ describe("台本の整合性（#81）", () => {
     expect(flagsUsed).toContain("denchan_found");
     expect(flagsUsed).toContain("denchan_confirmed");
     // かのんはリョウと知り合いではないので、ch4 もリョウの独白にする
-    const ch4 = scenes.find((scene) => scene.id === "ch4-kanon");
+    const ch4 = scenes.find((scene) => scene.id === "ch4-matching");
     expect(ch4?.lines.every((line) => line.speakerId === "ryo")).toBe(true);
     expect(ch4?.lines.some((line) => line.speakerId === "kanon")).toBe(false);
     // 順序9: 検索はカイの助言（ch3）で行い、「その場所に行ってみる」は置かない
@@ -143,7 +143,7 @@ describe("台本の整合性（#81）", () => {
     for (const scene of scenes) {
       for (const choice of scene.choices) {
         const progress = runToEnd({ sceneId: scene.id, choiceId: choice.id });
-        expect(progress.completedScenes, `${scene.id}/${choice.id}`).toContain("ch4-kanon");
+        expect(progress.completedScenes, `${scene.id}/${choice.id}`).toContain("ch4-matching");
         expect(progress.flags, `${scene.id}/${choice.id}`).toContain("facebook_search");
         expect(progress.completedScenes).toHaveLength(scenes.length);
       }

@@ -2,7 +2,43 @@ import { emptyProgress } from "./engine";
 import type { Progress } from "./types";
 
 /** 保存キー。形式を変えたら上げる。 */
-export const STORAGE_KEY = "hackstage-story-progress-v1";
+export const STORAGE_KEY = "hackstage-story-progress-v2";
+
+/** 寄り道の選択肢が履歴に残る前の保存キー（choices が場面あたり1値だった v1）。 */
+const LEGACY_STORAGE_KEY = "hackstage-story-progress-v1";
+
+/** あとから付け替えた場面ID（旧ID → 新ID）。履歴を失わないため保存値も直す。 */
+const RENAMED_SCENES: Record<string, string> = {
+  "ch4-kanon": "ch4-matching",
+};
+
+/**
+ * 旧形式の保存を今の形にそろえる（v1 → v2）。
+ * - choices が場面あたり1値（文字列）だったので配列にする
+ * - 場面IDの付け替えを completedScenes / choices のキーに反映する
+ * v2 の形の値を渡しても変わらない（べき等）。
+ */
+function migrateProgress(value: unknown): unknown {
+  if (!value || typeof value !== "object") {
+    return value;
+  }
+  const candidate = value as { choices?: unknown; completedScenes?: unknown };
+  const choices =
+    candidate.choices && typeof candidate.choices === "object"
+      ? Object.fromEntries(
+          Object.entries(candidate.choices).map(([sceneId, picked]) => [
+            RENAMED_SCENES[sceneId] ?? sceneId,
+            typeof picked === "string" ? [picked] : picked,
+          ]),
+        )
+      : candidate.choices;
+  const completedScenes = Array.isArray(candidate.completedScenes)
+    ? candidate.completedScenes.map((id) =>
+        typeof id === "string" ? (RENAMED_SCENES[id] ?? id) : id,
+      )
+    : candidate.completedScenes;
+  return { ...candidate, choices, completedScenes };
+}
 
 type ReadableStorage = Pick<Storage, "getItem">;
 type WritableStorage = Pick<Storage, "setItem" | "removeItem">;
@@ -47,7 +83,9 @@ export function isProgress(value: unknown): value is Progress {
     candidate.completedScenes.every((id) => typeof id === "string") &&
     typeof candidate.choices === "object" &&
     candidate.choices !== null &&
-    Object.values(candidate.choices).every((choice) => typeof choice === "string")
+    Object.values(candidate.choices).every(
+      (picked) => Array.isArray(picked) && picked.every((id) => typeof id === "string"),
+    )
   );
 }
 
@@ -57,11 +95,12 @@ export function loadProgress(storage: ReadableStorage | undefined = browserStora
     return emptyProgress();
   }
   try {
-    const raw = storage.getItem(STORAGE_KEY);
+    // v2 が無ければ v1 を読んで移行する（次回の保存から v2 に書く）
+    const raw = storage.getItem(STORAGE_KEY) ?? storage.getItem(LEGACY_STORAGE_KEY);
     if (!raw) {
       return emptyProgress();
     }
-    const parsed: unknown = JSON.parse(raw);
+    const parsed: unknown = migrateProgress(JSON.parse(raw));
     return isProgress(parsed) ? parsed : emptyProgress();
   } catch {
     return emptyProgress();
