@@ -267,8 +267,9 @@ describe("ダミーデータの整合性", () => {
   });
 
   it("付き合った後は週5日以上やり取りし、空いても3日まで（#130 で新仕様化）", () => {
-    // 現状はデータが少ないので、しきい値は「週の日数の下限」「連続空白の上限」に置いている
-    expect(VOLUME_LIMITS.datingWeek.minDays).toBeGreaterThanOrEqual(2);
+    // 受入条件そのもの（週5日以上・空き3日まで）を固定する。緩めるとここで落ちる
+    expect(VOLUME_LIMITS.datingWeek.minDays).toBe(5);
+    expect(VOLUME_LIMITS.datingWeek.maxGapDays).toBe(3);
     const dm = dmMessages();
     const days = [
       ...new Set(
