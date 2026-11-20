@@ -43,7 +43,7 @@ export const VOLUME_LIMITS = {
   /** サーバーの数（旧3サーバー名は禁止のまま） */
   guildCount: 3, // mhc・univ・friend（#132）
   /** DM の総メッセージ数（範囲） */
-  dmMessages: { min: 436, max: 2000 }, // 目標 1,400〜1,650
+  dmMessages: { min: 1500, max: 1600 }, // #133 で 1,500 通に拡張
   /** サーバーの総メッセージ数（3サーバー合算・範囲） */
   serverMessages: { min: 1570, max: 2900 }, // #131 で 1,570。目標 2,500〜2,900
   /**

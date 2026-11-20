@@ -286,6 +286,46 @@ describe("データ品質（#131 / D9・D10）", () => {
     expect(second.additions).toEqual(first.additions);
   });
 
+  it("#146: 敬語の向き（先輩とは双方ていねい・後輩には hal がタメ口）", () => {
+    const ootsuka = listDMMessages({ threadId: "dm-ootsuka", limit: 5000 }).messages;
+    const hayashi = listDMMessages({ threadId: "dm-hayashi", limit: 5000 }).messages;
+    const polite = /です|ます|ました|ません|ください|ございます/;
+    const plain = /？$|だよ|だね|する|いく|行く|ね$/;
+    for (const message of ootsuka) {
+      if (!message.id.includes("-x")) continue;
+      // 先輩からも hal からもていねい
+      expect(polite.test(message.body), `${message.id}: ${message.body}`).toBe(true);
+    }
+    for (const message of hayashi) {
+      if (!message.id.includes("-x")) continue;
+      if (message.authorId === "hayashi") {
+        expect(polite.test(message.body), `${message.id}: ${message.body}`).toBe(true);
+      } else {
+        expect(plain.test(message.body), `${message.id}: ${message.body}`).toBe(true);
+      }
+    }
+  });
+
+  it("#146: MaiMai（社会人）はバイト・学生語彙を使わない／hal の不自然な語尾を使わない", () => {
+    const list = listDMMessages({ threadId: "dm-maimai", limit: 5000 }).messages;
+    for (const message of list) {
+      if (!message.id.includes("-x")) continue;
+      if (message.authorId === "maimai") {
+        expect(/バイト|大学|講義|ゼミ|履修|レポート/.test(message.body), message.id).toBe(false);
+      }
+      expect(/ありがとうよ。/.test(message.body), message.id).toBe(false);
+    }
+  });
+
+  it("#146: dm-kai の進捗語彙は 2026-10 以降だけ", () => {
+    const kai = listDMMessages({ threadId: "dm-kai", limit: 5000 }).messages;
+    const progress = /ログ|照合|矛盾|Exif|メタ情報|進捗|特定|確認済み|追って共有|進めます/;
+    for (const message of kai) {
+      if (!message.id.includes("-x") || message.sentAt.slice(0, 7) >= "2026-10") continue;
+      expect(progress.test(message.body), `${message.id}: ${message.body}`).toBe(false);
+    }
+  });
+
   it("voice チャンネルには入室/退出のシステムメッセージしか無い（#129 で VoiceSession を追加）", () => {
     for (const guild of listGuilds()) {
       for (const channel of listChannels(guild.id).filter((item) => item.kind === "voice")) {
