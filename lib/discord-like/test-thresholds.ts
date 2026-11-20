@@ -64,3 +64,22 @@ export const VOLUME_LIMITS = {
   datingWeek: { minDays: 5, maxGapDays: 3 },
   /** 通話の開始/終了の対応（不在着信は除外） */
 } as const;
+
+/**
+ * データ品質のガード（#131・決定 D9/D10）。
+ * 「機械生成の穴」と「テンプレの使い回し」をテストで落とす。
+ */
+export const QUALITY_LIMITS = {
+  /** 新規追加分の本文ユニーク率（以上） */
+  newUniqueRate: 0.95,
+  /** 全体の本文ユニーク率（以上） */
+  overallUniqueRate: 0.85,
+  /** これ以上同じ本文が繰り返されたら、既存でも本文を差し替えてよい（D9） */
+  rewriteIfRepeatedAtLeast: 5,
+  /** mhc で発言してよい人（D10: kai も可） */
+  mhcSpeakers: ["hal", "maimai", "gunlance", "mina", "haruka", "slime", "jijii", "master", "kai"],
+  /** 各月で最低限発言がある日数（以上） */
+  minActiveDaysPerMonth: 10,
+  /** 各月で「6日以降」にも発言があること */
+  activityAfterDay: 6,
+} as const;

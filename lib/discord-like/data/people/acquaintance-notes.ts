@@ -18,15 +18,15 @@ export type AcquaintanceNote = {
 export const ACQUAINTANCE_NOTES: Record<string, AcquaintanceNote> = {
   taku: {
     calledByMe: "タク",
-    callsMe: "ハル",
+    callsMe: "リョウ",
     relation: "中学からのリア友（モンハン仲間）",
     quirk: "「まじで」",
     frequency: "高",
     firstSeen: "2025-02 マルチ募集",
   },
-  sou: {
-    calledByMe: "ソウ",
-    callsMe: "ハル",
+  jun: {
+    calledByMe: "ジュン",
+    callsMe: "リョウ",
     relation: "高校の同級生",
     quirk: "「それな」",
     frequency: "中",
@@ -42,7 +42,7 @@ export const ACQUAINTANCE_NOTES: Record<string, AcquaintanceNote> = {
   },
   riku: {
     calledByMe: "リク",
-    callsMe: "ハル",
+    callsMe: "リョウ",
     relation: "バイト先の友達",
     quirk: "「とりあえず」",
     frequency: "低",
@@ -50,7 +50,7 @@ export const ACQUAINTANCE_NOTES: Record<string, AcquaintanceNote> = {
   },
   nao: {
     calledByMe: "ナオ",
-    callsMe: "ハル",
+    callsMe: "リョウ",
     relation: "中学の同級生",
     quirk: "「うそ」",
     frequency: "低",
@@ -58,7 +58,7 @@ export const ACQUAINTANCE_NOTES: Record<string, AcquaintanceNote> = {
   },
   yuuto: {
     calledByMe: "ユウト",
-    callsMe: "ハル",
+    callsMe: "リョウ",
     relation: "高校の部活仲間",
     quirk: "「なるほどね」",
     frequency: "低",

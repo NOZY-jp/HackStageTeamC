@@ -97,6 +97,14 @@ describe("人物データ400人（#128）", () => {
     }
   });
 
+  it("状態の内訳は online 30・idle 10・dnd 4・offline 356", () => {
+    const count = (status: string) => users.filter((user) => user.status === status).length;
+    expect(count("online")).toBe(30);
+    expect(count("idle")).toBe(10);
+    expect(count("dnd")).toBe(4);
+    expect(count("offline")).toBe(356);
+  });
+
   it("ID・ハンドル・表示名は一意", () => {
     for (const key of ["id", "handle", "displayName"] as const) {
       const values = users.map((user) => user[key]);
