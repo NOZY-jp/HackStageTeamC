@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { HAL_HANDLE } from "@/lib/discord-like/data/names";
 import { listTrends, listUsers } from "@/lib/twitter-like";
 import { Avatar } from "./avatar";
 import { formatCount } from "./format";
@@ -8,7 +9,7 @@ import { isVerified } from "./lookup";
 export function RightSidebar({ hideSearch = false }: { hideSearch?: boolean }) {
   const trends = listTrends();
   const suggestions = listUsers()
-    .filter((user) => user.handle !== "hal")
+    .filter((user) => user.handle !== HAL_HANDLE)
     .slice(0, 3);
   return (
     <aside className="tw-right" aria-label="サイドバー">
