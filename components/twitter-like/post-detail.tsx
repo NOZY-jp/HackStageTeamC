@@ -3,9 +3,7 @@ import { twitterViewCounts } from "@/lib/twitter-like/data/twitter";
 import type { Post, TwitterUser } from "@/lib/twitter-like/types";
 import { Avatar } from "./avatar";
 import { formatCount, formatPostedAt } from "./format";
-import { VerifiedBadge } from "./icons";
 import { LinkifiedText } from "./linkify";
-import { isVerified } from "./lookup";
 import { PostMediaList, PostStats } from "./post-card";
 
 /**
@@ -35,7 +33,6 @@ export function PostDetail({
         <div className="tw-detail-author">
           <Link href={profileHref} className="tw-name tw-detail-name">
             {author.displayName}
-            {isVerified(author) ? <VerifiedBadge /> : null}
           </Link>
           <Link href={profileHref} className="tw-handle">
             @{author.handle}

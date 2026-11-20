@@ -26,15 +26,9 @@ export default function TwitterTimelinePage() {
     ) : null;
   };
 
-  // 「フォロー中」は hal がフォローしている人物の投稿だけ（公式まとめアカは除外）
+  // 「フォロー中」は hal がフォローしている人物の投稿だけ（今のデータでは全員が知り合い）
   const forYou = <div>{posts.map((post) => renderPost(post, users))}</div>;
-  const following = (
-    <div>
-      {posts
-        .filter((post) => post.authorId !== "tw-gameinfo")
-        .map((post) => renderPost(post, users))}
-    </div>
-  );
+  const following = <div>{posts.map((post) => renderPost(post, users))}</div>;
 
   return (
     <>

@@ -19,7 +19,9 @@ describe("メディアタブ（#94）", () => {
   });
 
   it("画像つきの投稿が無い人では空表示", async () => {
-    const ui = await TwitterProfileMediaPage({ params: Promise.resolve({ handle: "ren" }) });
+    const ui = await TwitterProfileMediaPage({
+      params: Promise.resolve({ handle: "kohakunchos0117" }),
+    });
     const { container } = render(ui);
     expect(container.textContent).toContain("メディアはまだありません");
   });

@@ -1,15 +1,14 @@
 import Link from "next/link";
 import { HAL_HANDLE } from "@/lib/discord-like/data/names";
-import { listTrends, listUsers } from "@/lib/twitter-like";
+import { isProtected, listTrends, listUsers } from "@/lib/twitter-like";
 import { Avatar } from "./avatar";
 import { formatCount } from "./format";
-import { SearchIcon, VerifiedBadge } from "./icons";
-import { isVerified } from "./lookup";
+import { SearchIcon } from "./icons";
 
 export function RightSidebar({ hideSearch = false }: { hideSearch?: boolean }) {
   const trends = listTrends();
   const suggestions = listUsers()
-    .filter((user) => user.handle !== HAL_HANDLE)
+    .filter((user) => user.handle !== HAL_HANDLE && !isProtected(user))
     .slice(0, 3);
   return (
     <aside className="tw-right" aria-label="サイドバー">
@@ -57,10 +56,7 @@ export function RightSidebar({ hideSearch = false }: { hideSearch?: boolean }) {
               <Link href={`/twitter/profile/${user.handle}`} className="tw-suggest">
                 <Avatar user={user} />
                 <span className="tw-suggest-text">
-                  <span className="tw-name">
-                    {user.displayName}
-                    {isVerified(user) ? <VerifiedBadge /> : null}
-                  </span>
+                  <span className="tw-name">{user.displayName}</span>
                   <span className="tw-handle">@{user.handle}</span>
                 </span>
               </Link>

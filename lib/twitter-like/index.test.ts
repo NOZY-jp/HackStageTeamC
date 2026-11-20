@@ -35,12 +35,12 @@ describe("lib/twitter-like のアクセサ", () => {
   });
 
   it("戻り値を書き換えても内部状態が変わらない（深いコピー）", () => {
-    const before = getPost("post-001")?.body;
-    const post = getPost("post-001");
+    const before = getPost("post-002")?.body;
+    const post = getPost("post-002");
     if (post) {
       post.body = "書き換え";
     }
-    expect(getPost("post-001")?.body).toBe(before);
+    expect(getPost("post-002")?.body).toBe(before);
   });
 });
 
@@ -49,8 +49,8 @@ describe("鍵アカウントの投稿の扱い", () => {
     const protectedHandles = listUsers()
       .filter((user) => isProtected(user))
       .map((user) => user.handle);
-    // 鍵垢は複数ありうる（旧アカウント #94 も鍵垢）
-    expect(protectedHandles).toContain("nagi");
+    // 旧アカウント（#94）は鍵垢
+    expect(protectedHandles).toContain("maimai_mhw");
   });
 
   it("listPosts / getPost は鍵垢の投稿を公開面に出さない", () => {
@@ -66,7 +66,7 @@ describe("鍵アカウントの投稿の扱い", () => {
       expect(getPost(id)).toBeUndefined();
     }
     // 公開アカウントの投稿は従来どおり取れる
-    expect(getPost("post-001")).toBeDefined();
+    expect(getPost("post-002")).toBeDefined();
   });
 
   it("listReplies にも鍵垢の返信は混ざらない", () => {
@@ -81,17 +81,18 @@ describe("鍵アカウントの投稿の扱い", () => {
         expect(protectedIds.has(reply.authorId)).toBe(false);
       }
     }
-    // 同じ公開投稿への返信では公開アカウントの返信だけが残り、鍵垢の返信は消える
+    // 公開投稿への返信は公開アカウントの返信だけ
     const repliesToPublicPost = listReplies("post-003").map((reply) => reply.id);
-    expect(repliesToPublicPost).toContain("post-004");
-    expect(repliesToPublicPost).not.toContain("post-026");
+    expect(repliesToPublicPost).toEqual(["post-004"]);
+    // 鍵垢の投稿への返信（post-202、同じ鍵垢からの自己返信）は公開面に出ない
+    expect(listReplies("post-201")).toEqual([]);
   });
 
   it("listPostsByAuthor は件数表示のため鍵垢の投稿も含める", () => {
     const lockedUser = listUsers().find((user) => isProtected(user));
     const own = listPostsByAuthor(lockedUser?.id ?? "missing-author");
     // 公開面では除外される同じ投稿が、本人の件数にはすべて含まれる
-    expect(own.map((post) => post.id).sort()).toEqual(["post-024", "post-025", "post-026"]);
+    expect(own.map((post) => post.id).sort()).toEqual(["post-201", "post-202", "post-203"]);
     for (const post of own) {
       expect(getPost(post.id)).toBeUndefined();
     }
@@ -100,8 +101,8 @@ describe("鍵アカウントの投稿の扱い", () => {
 
 describe("searchPosts", () => {
   it("本文に語を含む投稿を新しい順で返す", () => {
-    const posts = searchPosts("紅葉");
-    expect(posts.map((post) => post.id)).toEqual(["post-017", "post-007", "post-001"]);
+    const posts = searchPosts("眠");
+    expect(posts.map((post) => post.id)).toEqual(["post-023", "post-018"]);
   });
 
   it("空白区切りの語をすべて含む投稿だけに絞る", () => {
@@ -130,28 +131,29 @@ describe("searchPosts", () => {
   });
 
   it("投稿者の表示名・handleも検索対象にする", () => {
-    // displayName「げーむ通信」とhandle「game-info」が別文字列の fixture で、
+    // displayName「Hal」とhandle「kohakunchos0117」が別文字列の fixture で、
     // 片方の経路が壊れても検出できるようにそれぞれ独立に検証する
-    expect(searchPosts("げーむ通信").map((post) => post.id)).toContain("post-001");
-    expect(searchPosts("game-info").map((post) => post.id)).toContain("post-001");
-    // 本文に handle を含まない tw-hal 本人の投稿も返る
+    expect(searchPosts("Hal").map((post) => post.id)).toContain("post-002");
     expect(searchPosts("kohakunchos0117").map((post) => post.id)).toContain("post-002");
+    // 本文に handle を含まない tw-hal 本人の投稿も返る
+    expect(searchPosts("kohakunchos0117").map((post) => post.id)).toContain("post-014");
   });
 
   it("鍵アカウントの投稿は検索結果に出さない", () => {
-    // tw-nagi（鍵垢）の post-024〜026 の本文に一致する語で探しても出てこない
-    expect(searchPosts("記録用")).toEqual([]);
-    expect(searchPosts("混むのは苦手")).toEqual([]);
-    expect(searchPosts("迷った").map((post) => post.id)).not.toContain("post-026");
+    // 旧垢（tw-old-denden・鍵垢）の post-201〜203 の本文に一致する語で探しても出てこない
+    expect(searchPosts("モンスターハンターワールド")).toEqual([]);
+    expect(searchPosts("ブログもはじめてみた")).toEqual([]);
+    // 「ブログ」で見つかるのは公開の返信（post-102）だけ。鍵垢の投稿（post-202/203）は出ない
+    expect(searchPosts("ブログ").map((post) => post.id)).toEqual(["post-102"]);
   });
 });
 
 describe("searchUsers", () => {
   it("handle・displayName・bio を対象に検索する", () => {
     expect(searchUsers("kohakunchos0117").map((user) => user.id)).toEqual(["tw-hal"]);
-    expect(searchUsers("げーむ通信").map((user) => user.id)).toEqual(["tw-gameinfo"]);
-    const bioMatch = searchUsers("カフェ");
-    expect(bioMatch.map((user) => user.id)).toEqual(["tw-sana"]);
+    expect(searchUsers("ソウ").map((user) => user.id)).toEqual(["tw-sou"]);
+    const bioMatch = searchUsers("古い友達");
+    expect(bioMatch.map((user) => user.id)).toEqual(["tw-kanon"]);
   });
 
   it("空のクエリでは何も返さない", () => {
