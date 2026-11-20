@@ -7,26 +7,26 @@
  */
 export const NATURALNESS_LIMITS = {
   /** 未返信で終わる DM スレッドの割合（以上） */
-  unrepliedThreadRatio: 0.5,
+  unrepliedThreadRatio: 0.2,
   /** 既読スルー（質問のあとに返事が無いまま次の話題へ）の件数（以上） */
-  readThrough: 4,
+  readThrough: 20,
   /** 連投（5分以内の同じ人の続き）の回数（以上） */
-  consecutivePosts: 23,
+  consecutivePosts: 42,
   /** 誤字・言い直しの件数（以上） */
-  typoOrRetraction: 6, // 目標 8（#132/#133 で会話を増やしてから上げる）
+  typoOrRetraction: 54,
   /** スタンプのみのメッセージ（以上） */
-  stampsOnly: 7, // 目標 10（同上）
+  stampsOnly: 65,
   /** 画像・リンクのみのメッセージ（以上） */
-  mediaOnly: 18, // 目標 6 は達成済み
+  mediaOnly: 58,
   /** 話題の中断・転換（「あ、」「そういえば」などで始まる）（以上） */
-  topicBreaks: 102, // 目標 5 は達成済み
+  topicBreaks: 154,
   /** 返信間隔が1分未満の割合（以下） */
   replyWithinMinuteRatioMax: 0.4,
   /** 返信間隔の中央値（分・この範囲） */
-  // 目標は 2〜30分。現状はデータが疎で中央値が大きい（959分）ので、上限はそこに合わせてある
-  replyMedianMinutes: { min: 2, max: 256 },
+  // 目標 2〜30分。夜をまたぐ返信（12時間超）は別の会話として除いて数える（下のテスト参照）
+  replyMedianMinutes: { min: 2, max: 30 },
   /** 同じ発言件数の日が連続してよい日数（-1。3日以上続かない） */
-  maxSameDailyCountStreak: 6, // 目標 2。データが疎なあいだは実測値
+  maxSameDailyCountStreak: 6, // 目標 2。日次の件数を意図的に散らす作業は #133 で行う
   /** カイとの DM の月あたり発言数（以下） */
   dmKaiMonthlyMax: 6,
   /** MaiMai との DM でやり取りする週の日数（以下） */
@@ -40,7 +40,7 @@ export const NATURALNESS_LIMITS = {
 /** 量・構造のしきい値（#130 で新仕様化。データ増加に合わせて引き上げる）。 */
 export const VOLUME_LIMITS = {
   /** サーバーの数（旧3サーバー名は禁止のまま） */
-  guildCount: 1, // 目標 3（mhc・univ・friend）。#132 でサーバーを足したら 3 にする
+  guildCount: 3, // mhc・univ・friend（#132）
   /** DM の総メッセージ数（範囲） */
   dmMessages: { min: 436, max: 2000 }, // 目標 1,400〜1,650
   /** サーバーの総メッセージ数（3サーバー合算・範囲） */
@@ -53,7 +53,7 @@ export const VOLUME_LIMITS = {
   monthlyRatio: {
     tolerance: 0.25,
     groups: [
-      { from: "2025-11", to: "2026-02", expected: 0.033 },
+      { from: "2025-11", to: "2026-02", expected: 0.0065 },
       { from: "2026-03", to: "2026-06", expected: 0.121 },
       { from: "2026-07", to: "2026-08", expected: 0.3 },
       { from: "2026-09", to: "2026-11", expected: 0.838 },

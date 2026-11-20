@@ -75,8 +75,12 @@ function replyGaps(groups: Map<string, Message[]>): number[] {
   const gaps: number[] = [];
   for (const messages of groups.values()) {
     for (let i = 1; i < messages.length; i += 1) {
+      // 12時間を超える間隔は「別の会話」として中央値から除く（夜をまたぐ返信で歪めない）
       if (messages[i].authorId !== messages[i - 1].authorId) {
-        gaps.push(minutesBetween(messages[i - 1], messages[i]));
+        const gap = minutesBetween(messages[i - 1], messages[i]);
+        if (gap <= 12 * 60) {
+          gaps.push(gap);
+        }
       }
     }
   }

@@ -14,9 +14,9 @@ const run = (query: string, order?: "new" | "old") => {
 };
 
 describe("インデックス", () => {
-  it("#68 の全メッセージ（サーバー1,570・DM436）を対象にする", () => {
+  it("#68 の全メッセージ（サーバー2,690・DM436）を対象にする", () => {
     // #131 で mhc に 800通（8ch）を追加した
-    expect(index.documents.filter((doc) => doc.mode === "channel")).toHaveLength(1570);
+    expect(index.documents.filter((doc) => doc.mode === "channel")).toHaveLength(2690);
     expect(index.documents.filter((doc) => doc.mode === "dm")).toHaveLength(436);
   });
 });
