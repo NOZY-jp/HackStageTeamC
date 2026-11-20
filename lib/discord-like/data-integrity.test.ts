@@ -388,6 +388,24 @@ describe("謎解きの手がかり（順序1・4・5・6・9・11）", () => {
     expect(last.body).toBe("住所を特定しました");
     expect(all.some((message) => /丁目|番地|号室/.test(message.body))).toBe(false);
   });
+
+  it("結末を宣言するのはリョウで、カイは「住所を特定しました」を発言しない（#121）", () => {
+    const all = [...serverMessages(), ...dmMessages()];
+    const ending = all.filter((message) => message.body.includes("住所を特定しました"));
+    expect(ending).toHaveLength(1);
+    // 黒幕（カイ）に結末を言わせない
+    expect(ending[0].authorId).not.toBe("kai");
+    expect(ending[0].authorId).toBe("hal");
+    // カイの発言は助言・進捗の確認までで、答え（住所）を宣言しない
+    const kaiLines = all
+      .filter((message) => message.authorId === "kai")
+      .map((message) => message.body);
+    expect(kaiLines.length).toBeGreaterThan(0);
+    for (const body of kaiLines) {
+      expect(body).not.toContain("住所を特定");
+      expect(body).not.toContain("黒幕");
+    }
+  });
 });
 
 describe("名前の差し替え（#76 の確定値）", () => {

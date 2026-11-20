@@ -4699,9 +4699,10 @@ export const messagesByChannelMhc: Record<string, Message[]> = {
       body: "どこで作ったの",
     },
     {
+      // 結末の報告はカイではなくリョウ（カイは黒幕なので結末を宣言しない・#121）
       id: "mhc-chat-0234",
       channelId: "mhc-chat",
-      authorId: "kai",
+      authorId: "hal",
       sentAt: "2026-11-19T23:52:00+09:00",
       body: "住所を特定しました",
     },
