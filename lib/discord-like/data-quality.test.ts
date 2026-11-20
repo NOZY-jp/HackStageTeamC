@@ -108,7 +108,7 @@ describe("データ品質（#131 / D9・D10）", () => {
   it("生成器は同じ seed で同じ結果になる（再現性）", () => {
     // 生成時に渡した「既存の時刻」だけで再生成する（生成済みの時刻を混ぜると入力が変わる）
     const isBase = (message: Message) =>
-      /^mhc-(lfg|chat|questions|clips|notice)-d{4}$/.test(message.id) ||
+      /^mhc-(lfg|chat|questions|clips|notice)-\d{4}$/.test(message.id) ||
       message.channelId.startsWith("dm-");
     const times = [...new Set(messages.filter(isBase).map((message) => message.sentAt))];
     const first = buildMhcHistory(times);
