@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="800" height="600" viewBox="0 0 800 600" role="img" aria-label="桜の咲く高校の門の前で、制服姿で立つ写真">
+  <rect width="800" height="600" fill="#f6e7ea"/>
+  <circle cx="120" cy="110" r="70" fill="#f4c6d0" opacity="0.7"/>
+  <circle cx="690" cy="150" r="90" fill="#f4c6d0" opacity="0.5"/>
+  <rect y="430" width="800" height="170" fill="#cfc3b4"/>
+  <rect x="250" y="210" width="300" height="220" fill="#8d7b6a"/>
+  <rect x="285" y="250" width="230" height="180" fill="#6f5f51"/>
+  <rect x="230" y="190" width="340" height="26" fill="#5b4c41"/>
+  <g fill="#463a34">
+    <circle cx="400" cy="300" r="26"/>
+    <path d="M376 322h48l10 110h-68z"/>
+  </g>
+  <g fill="#f2b8c6">
+    <circle cx="180" cy="200" r="30"/><circle cx="220" cy="170" r="36"/><circle cx="150" cy="160" r="24"/>
+    <circle cx="620" cy="220" r="32"/><circle cx="660" cy="190" r="28"/>
+  </g>
+</svg>

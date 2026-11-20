@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="800" height="600" viewBox="0 0 800 600" role="img" aria-label="テーブルをはさんで笑う二人">
+  <rect width="800" height="600" fill="#efe4d6"/>
+  <rect y="430" width="800" height="170" fill="#c2a68a"/>
+  <rect x="260" y="370" width="280" height="70" rx="10" fill="#8c6b4f"/>
+  <g fill="#463a34">
+    <circle cx="300" cy="240" r="42"/>
+    <path d="M258 280h84l14 110h-112z"/>
+    <circle cx="510" cy="250" r="40"/>
+    <path d="M470 288h80l12 102h-104z"/>
+  </g>
+  <path d="M326 306q28 22 56 0M476 316q24 20 48 0" stroke="#463a34" stroke-width="9" fill="none" stroke-linecap="round"/>
+</svg>
