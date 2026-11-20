@@ -150,6 +150,10 @@ describe("通話画面のUI（ホバーで操作を出す）", () => {
       fs.readFile("app/globals.css", "utf8"),
     );
     expect(css).toMatch(/\.call-controls \{[^}]*position: absolute/);
+    // 非表示中はクリックも受けない（透明なボタンが押せてしまうのを防ぐ）
+    expect(css).toMatch(/\.call-controls \{[^}]*pointer-events: none/);
+    // 表示中は操作できる
+    expect(css).toMatch(/\.call-controls\[data-visible="true"\] \{[^}]*pointer-events: auto/);
 
     fireEvent.pointerEnter(stage);
     expect(controls.getAttribute("data-visible")).toBe("true");
