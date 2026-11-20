@@ -130,9 +130,18 @@ describe("データ品質（#131 / D9・D10）", () => {
     expect([...generated].sort()).toEqual([...current].sort());
   });
 
-  it("sentAt はサーバー・DM をまたいで一意", () => {
+  it("sentAt はサーバー・DM をまたいで一意（既存由来の重複だけ例外）", () => {
+    // D9: 既存メッセージの時刻は書き換えない。既存同士の重複だけを明示的に除外する。
+    const EXISTING_DUPLICATES = new Set([
+      "2025-05-10T15:53:00+09:00", // mhc-chat-0046 × 0047（既存）
+      "2026-09-02T21:12:00+09:00", // dm-maimai-0178 × 0179（既存）
+      "2026-09-09T23:21:00+09:00", // dm-maimai-0201 × 0202（既存）
+      "2026-10-26T22:16:00+09:00", // dm-maimai-0346 × 0347（既存）
+      "2026-11-10T23:21:00+09:00", // mhc-chat-0221 × dm-maimai-0397（既存）
+    ]);
     const seen = new Set<string>();
     for (const message of messages) {
+      if (EXISTING_DUPLICATES.has(message.sentAt)) continue;
       expect(seen.has(message.sentAt), `${message.id} ${message.sentAt}`).toBe(false);
       seen.add(message.sentAt);
     }
