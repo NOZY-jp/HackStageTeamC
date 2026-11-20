@@ -17,11 +17,14 @@ export function DmCallView({
   threadUrlId,
   self,
   other,
+  otherHandle,
 }: {
   threadId: string;
   threadUrlId: string;
   self: { displayName: string; avatarColor: string };
   other: { displayName: string; avatarColor: string };
+  /** ヘッダーに出す相手のハンドル（例: maimaimaimai） */
+  otherHandle?: string;
 }) {
   const router = useRouter();
   const { addMessage } = useLocalMessages();
@@ -36,12 +39,20 @@ export function DmCallView({
       return;
     }
     logged.current = true;
-    addMessage(threadId, "通話を開始しました");
+    addMessage(threadId, "通話を開始しました", { system: true });
   }, [addMessage, threadId]);
 
-  const hangUp = () => {
-    addMessage(threadId, "通話を終了しました");
+  /** 通話を終える（切断ボタン・「チャットに戻る」のどちらでも同じ処理を通す）。 */
+  const endCall = () => {
+    if (!connected) {
+      return;
+    }
+    addMessage(threadId, "通話を終了しました", { system: true });
     setConnected(false);
+  };
+
+  const hangUp = () => {
+    endCall();
     router.push(dmThreadPath(threadUrlId));
   };
 
@@ -49,11 +60,15 @@ export function DmCallView({
     <main id="app-main" className="app-main" aria-label={`${other.displayName} との通話`}>
       <header className="pane-header voice-header">
         <PaneToggles />
-        <h1 className="voice-header-title">{other.displayName} との通話</h1>
+        <div className="voice-header-text">
+          <h1 className="voice-header-title">{other.displayName} との通話</h1>
+          {otherHandle ? <p className="voice-header-handle">@{otherHandle}</p> : null}
+        </div>
         <Link
           href={dmThreadPath(threadUrlId)}
           className="message-header-icon message-header-button"
           aria-label="チャットに戻る"
+          onClick={endCall}
         >
           <svg
             aria-hidden="true"

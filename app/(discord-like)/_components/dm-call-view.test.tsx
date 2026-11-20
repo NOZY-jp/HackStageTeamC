@@ -17,12 +17,13 @@ const other = { displayName: "MaiMai", avatarColor: "#eb459e" };
 
 function Log() {
   const { messagesFor } = useLocalMessages();
+  const messages = messagesFor("dm-maimai");
   return (
-    <p data-testid="log">
-      {messagesFor("dm-maimai")
-        .map((m) => m.body)
-        .join(" / ")}
-    </p>
+    <>
+      <p data-testid="log">{messages.map((m) => m.body).join(" / ")}</p>
+      {/* 文言だけでなく、システム行として積まれていること（system === true）を検査する */}
+      <p data-testid="log-system">{messages.map((m) => String(m.system === true)).join(" / ")}</p>
+    </>
   );
 }
 
@@ -87,5 +88,40 @@ describe("DM の通話画面（#137）", () => {
     });
     expect(screen.getByTestId("log").textContent).toContain("通話を終了しました");
     expect(screen.queryByRole("button", { name: "切断" })).not.toBeInTheDocument();
+  });
+});
+
+describe("通話の終了と重複防止（#140）", () => {
+  it("「チャットに戻る」でも通話を終了し、開始ログが孤立しない", async () => {
+    const { unmount } = render(view());
+    await screen.findByRole("main", { name: "MaiMai との通話" });
+    await waitFor(() => {
+      expect(screen.getByTestId("log").textContent).toContain("通話を開始しました");
+    });
+
+    // ヘッダーの「チャットに戻る」で終了ログを残す（開始だけの孤立を作らない）
+    fireEvent.click(screen.getByRole("link", { name: "チャットに戻る" }));
+    await waitFor(() => {
+      expect(screen.getByTestId("log").textContent).toContain("通話を終了しました");
+    });
+    expect(screen.getByTestId("log-system").textContent).toBe("true / true");
+    unmount();
+  });
+});
+
+describe("「チャットに戻る」で通話を終える（#140）", () => {
+  it("「チャットに戻る」でも通話を終了し、開始ログが孤立しない", async () => {
+    render(view());
+    await screen.findByRole("main", { name: "MaiMai との通話" });
+    await waitFor(() => {
+      expect(screen.getByTestId("log").textContent).toContain("通話を開始しました");
+    });
+
+    // ヘッダーの「チャットに戻る」で終了ログを残す（開始だけの孤立を作らない）
+    fireEvent.click(screen.getByRole("link", { name: "チャットに戻る" }));
+    await waitFor(() => {
+      expect(screen.getByTestId("log").textContent).toContain("通話を終了しました");
+    });
+    expect(screen.getByTestId("log-system").textContent).toBe("true / true");
   });
 });

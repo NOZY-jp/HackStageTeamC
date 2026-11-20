@@ -41,6 +41,7 @@ export default async function DmCallPage({
         avatarColor: self?.avatarColor ?? "transparent",
       }}
       other={{ displayName: otherName, avatarColor: other?.avatarColor ?? "transparent" }}
+      otherHandle={other?.handle}
     />
   );
 }

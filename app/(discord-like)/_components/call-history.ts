@@ -2,6 +2,8 @@ import type { Message } from "@/lib/discord-like/types";
 
 /** 通話履歴の1件（開始と終了のシステムメッセージから作る）。 */
 export type CallHistory = {
+  /** 開始時刻（#129 の VoiceSession へ差し替えやすいよう、IDではなく時刻で持つ） */
+  startedAt: string;
   /** 開始メッセージのID */
   startId: string;
   /** 終了メッセージのID（対になる終了が無ければ undefined＝不在着信） */
@@ -12,9 +14,12 @@ export type CallHistory = {
   missed: boolean;
 };
 
-const isStart = (message: Message) => message.body.includes("通話を開始しました");
+// システム行だけを対象にする（通常のチャットに同じ文言を書かれてもカードにしない）
+const isStart = (message: Message) =>
+  message.system === true && message.body.includes("通話を開始しました");
 const isEnd = (message: Message) =>
-  message.body.includes("通話を終了しました") || message.body.includes("応答がありませんでした");
+  message.system === true &&
+  (message.body.includes("通話を終了しました") || message.body.includes("応答がありませんでした"));
 
 /**
  * システムメッセージの並びから通話履歴を作る（純粋関数）。
@@ -27,7 +32,7 @@ export function buildCallHistory(messages: Message[]): CallHistory[] {
     if (isStart(message)) {
       if (open) {
         // 終了が来ないまま次の開始（前の通話は不在着信扱い）
-        history.push({ startId: open.id, missed: true });
+        history.push({ startedAt: open.sentAt, startId: open.id, missed: true });
       }
       open = message;
       continue;
@@ -37,12 +42,18 @@ export function buildCallHistory(messages: Message[]): CallHistory[] {
       const minutes = missed
         ? undefined
         : Math.max(1, Math.round((Date.parse(message.sentAt) - Date.parse(open.sentAt)) / 60000));
-      history.push({ startId: open.id, endId: message.id, minutes, missed });
+      history.push({
+        startedAt: open.sentAt,
+        startId: open.id,
+        endId: message.id,
+        minutes,
+        missed,
+      });
       open = undefined;
     }
   }
   if (open) {
-    history.push({ startId: open.id, missed: true });
+    history.push({ startedAt: open.sentAt, startId: open.id, missed: true });
   }
   return history;
 }
