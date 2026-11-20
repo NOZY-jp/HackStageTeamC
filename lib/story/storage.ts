@@ -24,7 +24,7 @@ function migrateProgress(value: unknown): unknown {
   }
   const candidate = value as { choices?: unknown; completedScenes?: unknown };
   const choices =
-    candidate.choices && typeof candidate.choices === "object"
+    candidate.choices && typeof candidate.choices === "object" && !Array.isArray(candidate.choices)
       ? Object.fromEntries(
           Object.entries(candidate.choices).map(([sceneId, picked]) => [
             RENAMED_SCENES[sceneId] ?? sceneId,

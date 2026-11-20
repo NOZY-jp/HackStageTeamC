@@ -30,6 +30,12 @@ describe("進行状態の保存（#81）", () => {
     expect(loadProgress(fakeStorage())).toEqual(emptyProgress());
     expect(loadProgress(fakeStorage({ [STORAGE_KEY]: "{壊れた" }))).toEqual(emptyProgress());
     expect(loadProgress(fakeStorage({ [STORAGE_KEY]: '{"flags":"x"}' }))).toEqual(emptyProgress());
+    // choices が配列だと場面IDをキーに作り替えられてしまうので、そのまま捨てる
+    expect(
+      loadProgress(
+        fakeStorage({ [STORAGE_KEY]: '{"flags":[],"completedScenes":[],"choices":["a"]}' }),
+      ),
+    ).toEqual(emptyProgress());
   });
 
   it("localStorage が無い環境（SSR）でも落ちない", () => {
