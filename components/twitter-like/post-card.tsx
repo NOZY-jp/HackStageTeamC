@@ -20,10 +20,9 @@ import { isVerified } from "./lookup";
 export function PostMediaList({ media }: { media: NonNullable<Post["media"]> }) {
   return (
     <div className={media.length > 1 ? "mt-2 grid grid-cols-2 gap-2" : "mt-2"}>
-      {media.map((item, index) => (
-        // biome-ignore lint/suspicious/noArrayIndexKey: 添付写真は固定データで並び替えない
+      {media.map((item) => (
         <Image
-          key={`${item.src}-${index}`}
+          key={item.src}
           src={item.src}
           alt={item.alt}
           width={item.width}
