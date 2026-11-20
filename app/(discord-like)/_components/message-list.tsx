@@ -119,15 +119,29 @@ export function MessageList({
     }
   }, [resetKey]);
 
-  // ジャンプ先のメッセージ（追加読み込みで増えたときも）を画面中央に出す
+  // ジャンプ先のメッセージを画面中央に出す。
+  // 件数が増えるたび（追加読み込み・送信）に再実行すると、利用者のスクロールを打ち消して
+  // しまうため、同じジャンプ（focusMessageId + resetKey）は一度だけ適用する。
+  // ジャンプ先が未読込のうちは target が無いので、messages.length を依存に残して
+  // target が現れた最初の1回だけ適用する。
+  const appliedFocusRef = useRef<string | null>(null);
   // biome-ignore lint/correctness/useExhaustiveDependencies: messages.length はページ読み込みの合図
   useEffect(() => {
     if (!focusMessageId) {
+      appliedFocusRef.current = null;
+      return;
+    }
+    const focusKey = `${focusMessageId}:${resetKey ?? ""}`;
+    if (appliedFocusRef.current === focusKey) {
       return;
     }
     const root = scrollElement.current;
     const target = root?.querySelector<HTMLElement>(`[data-message-id="${focusMessageId}"]`);
-    target?.scrollIntoView({ block: "center" });
+    if (!target) {
+      return;
+    }
+    target.scrollIntoView({ block: "center" });
+    appliedFocusRef.current = focusKey;
   }, [focusMessageId, resetKey, messages.length]);
 
   // 上端の sentinel を監視して、古いメッセージを追加で読み込む

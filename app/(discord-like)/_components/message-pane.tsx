@@ -79,7 +79,8 @@ export function MessagePane({
    * ResizeObserver で高さ変化のたびに「基準メッセージのずれ」を打ち消す。
    */
   const loadAnchorRef = useRef<{ key: string; node: HTMLElement; top: number } | null>(null);
-  const wasAtBottomRef = useRef(true);
+  // 検索からジャンプしてきたときは最下部にいないので、初回の「送信で下端へ」は働かせない
+  const wasAtBottomRef = useRef(!focusMessageId);
 
   /** 位置補正の基準を捨てる（送信・「最新へ」・ユーザー操作で呼ぶ）。 */
   const releaseAnchor = useCallback(() => {
