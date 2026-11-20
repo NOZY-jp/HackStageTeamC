@@ -13,9 +13,9 @@ describe("LinkifiedText", () => {
   });
 
   it("@handle をプロフィールへのリンクにする", () => {
-    render(<LinkifiedText text="@mai その人、いまも毎日インしてるらしい。" />);
-    const link = screen.getByRole("link", { name: "@mai" });
-    expect(link).toHaveAttribute("href", "/twitter/profile/mai");
+    render(<LinkifiedText text="@mai2mai2 その人、いまも毎日インしてるらしい。" />);
+    const link = screen.getByRole("link", { name: "@mai2mai2" });
+    expect(link).toHaveAttribute("href", "/twitter/profile/mai2mai2");
     expect(link).toHaveClass("tw-inline-link");
   });
 
@@ -61,10 +61,10 @@ describe("LinkifiedText", () => {
   });
 
   it("存在する handle でも末尾ハイフンはリンクに含めない", () => {
-    const { container } = render(<LinkifiedText text="@mai-さん に確認" />);
-    expect(screen.getByRole("link", { name: "@mai" })).toHaveAttribute(
+    const { container } = render(<LinkifiedText text="@mai2mai2-さん に確認" />);
+    expect(screen.getByRole("link", { name: "@mai2mai2" })).toHaveAttribute(
       "href",
-      "/twitter/profile/mai",
+      "/twitter/profile/mai2mai2",
     );
     expect(container).toHaveTextContent("-さん に確認");
   });

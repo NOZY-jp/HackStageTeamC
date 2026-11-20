@@ -1,3 +1,4 @@
+import Image from "next/image";
 import Link from "next/link";
 import { twitterViewCounts } from "@/lib/twitter-like/data/twitter";
 import type { Post, TwitterUser } from "@/lib/twitter-like/types";
@@ -14,6 +15,25 @@ import {
 } from "./icons";
 import { LinkifiedText } from "./linkify";
 import { isVerified } from "./lookup";
+
+/** 投稿の添付写真。2枚以上は2列に並べる（表示のみ）。 */
+export function PostMediaList({ media }: { media: NonNullable<Post["media"]> }) {
+  return (
+    <div className={media.length > 1 ? "mt-2 grid grid-cols-2 gap-2" : "mt-2"}>
+      {media.map((item) => (
+        <Image
+          key={item.src}
+          src={item.src}
+          alt={item.alt}
+          width={item.width}
+          height={item.height}
+          unoptimized
+          className="h-40 w-full rounded-lg object-cover"
+        />
+      ))}
+    </div>
+  );
+}
 
 /** カウントはすべて表示専用（押せない）。読み上げ用に件数と名称を持たせる。 */
 export function PostStats({ post }: { post: Post }) {
@@ -103,6 +123,7 @@ export function PostCard({
         <p className="tw-post-body">
           <LinkifiedText text={post.body} />
         </p>
+        {post.media && post.media.length > 0 ? <PostMediaList media={post.media} /> : null}
         <PostStats post={post} />
       </div>
     </article>

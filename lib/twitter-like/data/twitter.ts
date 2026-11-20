@@ -8,7 +8,7 @@ import type { Post, Profile, Trend, TwitterUser } from "../types";
  */
 export const twitterUsers: TwitterUser[] = [
   { id: "tw-hal", displayName: "Hal", handle: "hal", avatarColor: "#3b6fd4" },
-  { id: "tw-mai", displayName: "Mai", handle: "mai", avatarColor: "#c2417c" },
+  { id: "tw-mai", displayName: "Mai", handle: "mai2mai2", avatarColor: "#c2417c" },
   { id: "tw-ren", displayName: "れん", handle: "ren", avatarColor: "#2f8f6b" },
   { id: "tw-yuki", displayName: "ゆき", handle: "yuki", avatarColor: "#8a5cc2" },
   { id: "tw-sou", displayName: "ソウ", handle: "sou", avatarColor: "#b86a1f" },
@@ -26,6 +26,15 @@ export const twitterUsers: TwitterUser[] = [
     avatarColor: "#5c677d",
     protected: true,
   },
+  // 古いアカウント。改名して鍵垢になった（旧 @hunter_denden0102 → 現 @maimai_mhw）
+  {
+    id: "tw-old-denden",
+    displayName: "まいまい",
+    handle: "maimai_mhw",
+    avatarColor: "#7a6a3f",
+    protected: true,
+  },
+  { id: "tw-kanon", displayName: "かのん", handle: "kanon__dayo", avatarColor: "#c2563f" },
 ];
 
 export const twitterProfiles: Profile[] = [
@@ -39,7 +48,8 @@ export const twitterProfiles: Profile[] = [
   {
     userId: "tw-mai",
     bio: "ゲームでは mai。顔も名前も教えてない人がいるけど、それでいいと思ってる。",
-    joinedAt: "2026-11-01",
+    // 2019年の投稿（post-101 など）より前から使っているアカウント
+    joinedAt: "2019-05-12",
     followingCount: 96,
     followersCount: 141,
   },
@@ -85,6 +95,23 @@ export const twitterProfiles: Profile[] = [
     followingCount: 27,
     followersCount: 34,
   },
+  {
+    // 記事の名前で検索すると見つかる（bio に記事名を残している）。
+    // 改名したことと旧ハンドル・旧表示名を bio に残す（今は誰も使っていない）
+    userId: "tw-old-denden",
+    bio: "前は @hunter_denden0102（表示名 hunter_denden）で活動していました。「写真コンテストで賞をもらいました！」を書いた頃のアカウントです。BFF: @kanon__dayo",
+    // 旧ブログの最古記事（2018-01-27）より前から使っているアカウント
+    joinedAt: "2017-12-01",
+    followingCount: 38,
+    followersCount: 64,
+  },
+  {
+    userId: "tw-kanon",
+    bio: "写真を撮るのが好き。古い友達とよく出かけてます。",
+    joinedAt: "2017-11-20",
+    followingCount: 120,
+    followersCount: 98,
+  },
 ];
 
 export const twitterPosts: Post[] = [
@@ -119,7 +146,7 @@ export const twitterPosts: Post[] = [
     id: "post-004",
     authorId: "tw-hal",
     postedAt: "2026-11-03T23:55:00+09:00",
-    body: "@mai その人、いまも毎日インしてるらしい。",
+    body: "@mai2mai2 その人、いまも毎日インしてるらしい。",
     replyToId: "post-003",
     replyCount: 1,
     repostCount: 0,
@@ -323,11 +350,72 @@ export const twitterPosts: Post[] = [
     id: "post-026",
     authorId: "tw-nagi",
     postedAt: "2026-11-18T09:20:00+09:00",
-    body: "@mai 私も一度、同じところで迷ったことがある。",
+    body: "@mai2mai2 私も一度、同じところで迷ったことがある。",
     replyToId: "post-003",
     replyCount: 0,
     repostCount: 0,
     likeCount: 2,
+  },
+  // 2019年の攻略投稿と、リア友かのんの「ブログにも書いてたよな」リプライ
+  {
+    id: "post-101",
+    authorId: "tw-mai",
+    postedAt: "2019-09-08T22:10:00+09:00",
+    body: "双剣、クラッチクローから弱点に当てるのがまだ安定しない。装備はこのままでいいのかな。",
+    replyCount: 1,
+    repostCount: 0,
+    likeCount: 12,
+  },
+  {
+    id: "post-102",
+    authorId: "tw-kanon",
+    postedAt: "2019-09-09T21:40:00+09:00",
+    body: "それ、前にブログにも書いてたよな。読んでたよ。",
+    replyToId: "post-101",
+    replyCount: 0,
+    repostCount: 0,
+    likeCount: 3,
+  },
+  // かのんの写真つき投稿（第五章の照合用。名前は書かない）
+  {
+    id: "post-103",
+    authorId: "tw-kanon",
+    postedAt: "2026-11-10T19:05:00+09:00",
+    body: "高校のときの。この子とはいつも一緒だった。",
+    replyCount: 0,
+    repostCount: 1,
+    likeCount: 28,
+    media: [
+      {
+        src: "/twitter-like/photo-01.svg",
+        alt: "制服姿で並ぶ二人。左の子は黒髪のボブ",
+        width: 800,
+        height: 600,
+      },
+      {
+        src: "/twitter-like/photo-02.svg",
+        alt: "テーブルをはさんで笑う二人。手前の子は茶髪のロング",
+        width: 800,
+        height: 600,
+      },
+    ],
+  },
+  {
+    id: "post-104",
+    authorId: "tw-kanon",
+    postedAt: "2026-11-14T08:30:00+09:00",
+    body: "アルバムを整理してたら出てきた。また会いたいな。",
+    replyCount: 0,
+    repostCount: 0,
+    likeCount: 19,
+    media: [
+      {
+        src: "/twitter-like/photo-03.svg",
+        alt: "古いアルバムから。並んで笑う二人。左は黒髪のボブ、右は茶髪のロング",
+        width: 800,
+        height: 600,
+      },
+    ],
   },
 ];
 
@@ -358,6 +446,10 @@ export const twitterViewCounts: Record<string, number> = {
   "post-023": 1690,
   "post-024": 95,
   "post-025": 61,
+  "post-101": 180,
+  "post-102": 240,
+  "post-103": 96,
+  "post-104": 55,
 };
 
 export const twitterTrends: Trend[] = [

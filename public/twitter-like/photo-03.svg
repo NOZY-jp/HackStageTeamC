@@ -1,0 +1,20 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="800" height="600" viewBox="0 0 800 600" role="img" aria-label="古いアルバムから。並んで笑う二人。左は黒髪のボブ、右は茶髪のロング">
+  <rect width="800" height="600" fill="#f6efe3"/>
+  <rect y="450" width="800" height="150" fill="#d9c8ae"/>
+  <g>
+    <circle cx="330" cy="270" r="66" fill="#f3d3bd"/>
+    <path d="M256 270c0-56 32-94 74-94s74 38 74 94c0 20-8 32-8 32l-8-46-116 2-8 44s-8-12-8-32Z" fill="#2f2a28"/>
+    <circle cx="308" cy="266" r="7" fill="#2f2a28"/>
+    <circle cx="352" cy="266" r="7" fill="#2f2a28"/>
+    <path d="M312 306q18 16 36 0" stroke="#b5654f" stroke-width="5" fill="none" stroke-linecap="round"/>
+    <path d="M292 340h76l18 120H274z" fill="#b98c5a"/>
+  </g>
+  <g>
+    <circle cx="500" cy="282" r="62" fill="#f7dcc4"/>
+    <path d="M434 282c0-60 30-96 66-96 42 0 66 40 66 96l-6 128-10-8-6-112-88 2-6 110-10 8Z" fill="#7a4a2c"/>
+    <circle cx="480" cy="278" r="6" fill="#3a2a20"/>
+    <circle cx="520" cy="278" r="6" fill="#3a2a20"/>
+    <path d="M482 318q18 16 36 0" stroke="#c2664f" stroke-width="5" fill="none" stroke-linecap="round"/>
+    <path d="M464 344h72l16 116H448z" fill="#9caf8a"/>
+  </g>
+</svg>
