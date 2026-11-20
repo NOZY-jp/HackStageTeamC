@@ -1,10 +1,11 @@
 /**
  * 進行チェック: 謎解きの段階（steps.ts、正本 #76）の手がかりが、各プラットフォームのデータに本当にあるかを確かめる。
- * 共有の lib/story から各プラットフォームの lib を読むのはこのテストだけ（本体のコードは他の名前空間を import しない）。
+ * 共有の lib/story から各プラットフォームの lib を読むのはこのテストだけ（本体のコードは名前の定数しか import しない）。
  * 段階の status を done にしたら、ここに確認を足す。
  */
 import { describe, expect, it } from "vitest";
 import { getEntry, getMylist, listMylistEntries, listPublicEntries } from "@/lib/blog-like";
+import { channelMessages, dmMessages } from "@/lib/discord-like/data/messages";
 import { users } from "@/lib/discord-like/data/users";
 import { characters } from "./characters";
 import { STEP_IDS, steps } from "./steps";
@@ -28,7 +29,31 @@ describe("謎解きの段階の定義", () => {
   });
 });
 
+/** Discord の過去の会話（DM とサーバーのチャンネル）を全部 */
+const allDiscordMessages = [
+  ...Object.values(dmMessages).flat(),
+  ...Object.values(channelMessages).flat(),
+];
+
 describe("進行チェック（各プラットフォームのデータに手がかりがあるか）", () => {
+  it("段階1: MaiMai との DM に、中学生の頃に攻略ブログを書いていたという話がある", () => {
+    const talk = (dmMessages["dm-maimai"] ?? []).filter(
+      (message) => message.authorId === "maimai" && message.body.includes("攻略ブログ"),
+    );
+    expect(talk.length).toBeGreaterThan(0);
+  });
+
+  it("段階9: カイが、本名で検索すれば出てくると言う", () => {
+    const hint = allDiscordMessages.filter(
+      (message) => message.authorId === "kai" && message.body.includes("本名で検索"),
+    );
+    expect(hint.length).toBeGreaterThan(0);
+  });
+
+  it("段階11: 「住所を特定しました」で終わる", () => {
+    expect(allDiscordMessages.some((message) => message.body === "住所を特定しました")).toBe(true);
+  });
+
   it("段階3: 元のブログのトップは、閉鎖のお知らせだけが公開されている", () => {
     const visible = listPublicEntries("denden0102");
     expect(visible.map((entry) => entry.title)).toEqual(["ブログ閉鎖のお知らせ"]);
