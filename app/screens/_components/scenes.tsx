@@ -49,7 +49,7 @@ function Slot({ n }: { n: number }) {
   );
 }
 
-/** 2018年・狩猟中のゲーム画面（1200×675）。プレイヤー名は hunter_denden。 */
+/** 2018年・狩猟中のゲーム画面（1200×675）。ゲーム内IDは hunter_denden3243（旧表示名 hunter_denden を別ラベルで併記）。 */
 export function GameScene() {
   return (
     <div
@@ -380,7 +380,7 @@ function PartyMember({ handle, rank, color }: { handle: string; rank: string; co
   );
 }
 
-/** 2019年・ロビー/パーティ画面（800×600）。hunter_denden と hunter_denden3243 が写る。 */
+/** 2019年・ロビー/パーティ画面（800×600）。ゲーム内ID hunter_denden3243（旧表示名 hunter_denden）が写る。 */
 export function LobbyScene() {
   return (
     <div
