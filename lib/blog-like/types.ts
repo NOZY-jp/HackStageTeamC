@@ -24,9 +24,9 @@ export type EntryBlock =
   | { kind: "image"; src: string; alt: string; width: number; height: number; caption?: string }
   /**
    * 1行のリンク。url は作中の URL（例: "twixer.com/hunter_denden0102/status/..."）。
-   * broken は当時のアカウントが残っていないリンク（表示だけして遷移しない）。
+   * href を渡すと、そのアプリ内パスへ普通のリンクとして飛ぶ（当時のリンクのまま）。
    */
-  | { kind: "link"; lead: string; url: string; label?: string; broken?: boolean };
+  | { kind: "link"; lead: string; url: string; label?: string; href?: string };
 
 /** 記事につくコメント。投稿者名はハンドル風のものだけ（本名は出さない）。 */
 export type Comment = {

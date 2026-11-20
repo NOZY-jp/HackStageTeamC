@@ -32,20 +32,9 @@ function Block({ block }: { block: EntryBlock }) {
         </figure>
       );
     case "link": {
-      const href = externalHref(block.url);
+      const href = block.href ?? externalHref(block.url);
       const label = block.label ?? `https://${block.url}`;
-      // 当時のアカウントは残っていない（リンク切れ）。遷移できないことが分かる形で出す
-      if (block.broken) {
-        return (
-          <p className="pb-entry-link">
-            {block.lead}
-            <br />
-            <span aria-disabled="true" title="リンク切れ（当時のアカウントは残っていません）">
-              {label}
-            </span>
-          </p>
-        );
-      }
+      // 当時のリンクのまま。行き先が無くなっていれば、押した先で「存在しません」になる
       return (
         <p className="pb-entry-link">
           {block.lead}
