@@ -19,7 +19,7 @@ export const blogs: Blog[] = [
     description: "モンハン大好き中学生の攻略メモと日記です！",
     authorName: "でんでん",
     authorProfile:
-      "モンハン歴3年（3DSから）。ワールドは双剣メイン、たまにライトボウガン。のんびり更新です。Twixer: @hunter_denden0102（Discord では hunter_denden3243）",
+      "モンハン歴3年（3DSから）。ワールドは双剣メイン、たまにライトボウガン。のんびり更新です。Twixer: @hunter_denden0102",
     avatar: "/blog-like/avatars/denden.svg",
     visitorCount: 18342,
   },

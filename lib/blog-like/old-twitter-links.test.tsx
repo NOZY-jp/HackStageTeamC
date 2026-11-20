@@ -42,8 +42,9 @@ describe("旧ブログから旧 Twitter へのリンク（#97）", () => {
     const blog = getBlog(BLOG_ID);
     expect(blog?.authorName).toBe("でんでん");
     expect(blog?.authorProfile).toContain(`@${OLD_TWIXER_HANDLE}`);
-    expect(blog?.authorProfile).toContain("hunter_denden3243");
     expect(blog?.authorProfile).not.toContain("（旧）");
+    // Discord の旧IDは書かない（順序4は添付画像のゲーマーID比較で気づく段階）
+    expect(blog?.authorProfile).not.toContain("hunter_denden3243");
   });
 
   it("描画したリンクは当時のまま普通のリンクで、旧垢の画面へ飛ぶ", () => {
