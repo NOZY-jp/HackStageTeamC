@@ -18,6 +18,7 @@ describe("第五章: 本名で見つかる TalkUp アカウント（#95）", () 
     expect(target).toBeDefined();
     // 照合相手（BFF）のアカウントではなく、本人のアカウント
     expect(target?.id).toBe("u40");
+    expect(target?.handle).toBe("yui__photo");
     expect(result.users.some((user) => user.handle === "kanon__dayo")).toBe(false);
   });
 
@@ -33,13 +34,30 @@ describe("第五章: 本名で見つかる TalkUp アカウント（#95）", () 
     expect(entrance[0].attachment?.alt?.length).toBeGreaterThan(0);
   });
 
-  it("プライベートな写真つき投稿が複数ある", () => {
+  it("写真つき投稿が複数あり、当時そのまま公開設定になっている", () => {
     const photoPosts = listPostsByAuthor("u40").filter(
       (post) => post.attachment?.kind === "photo" && Boolean(post.attachment.src),
     );
     expect(photoPosts.length).toBeGreaterThanOrEqual(2);
-    // 友達限定の投稿も含む（公開だけではない）
-    expect(photoPosts.some((post) => post.audience === "friends")).toBe(true);
+    // 絞り忘れて公開のまま（新しい閲覧制御は作らない）
+    for (const post of photoPosts) {
+      expect(post.audience).toBe("public");
+      // 投稿日時は2018〜2020年（2026年の失踪と矛盾させない）
+      const year = post.createdAt.slice(0, 4);
+      expect(year >= "2018").toBe(true);
+      expect(year <= "2020").toBe(true);
+    }
+  });
+
+  it("handle は本名ローマ字ではなく yui__photo、写真の題名は旧ブログの受賞作と別", () => {
+    expect(getUserById("u40")?.handle).toBe("yui__photo");
+    const titles = listPostsByAuthor("u40")
+      .map((post) => post.attachment?.title ?? "")
+      .filter(Boolean);
+    expect(titles).toContain("冬の海");
+    expect(titles).toContain("高校の友達と");
+    expect(titles).not.toContain("帰り道");
+    expect(titles).not.toContain("大学の友達と");
   });
 
   it("説明から出身地域（都道府県）が分かる", () => {

@@ -36,14 +36,16 @@ describe("TalkUp のフィードと検索（#95）", () => {
     const users = screen.getByRole("region", { name: "該当するユーザー" });
     expect(within(users).getByRole("link", { name: /服部 由比/ })).toHaveAttribute(
       "href",
-      "/talkup/profile/yui_hattori",
+      "/talkup/profile/yui__photo",
     );
     // (b) 関係ない投稿は出ない（全件フィードにならない）
     expect(screen.queryByText(/HackStage TeamC の新しいポータル画面/)).not.toBeInTheDocument();
     expect(container.querySelectorAll("article").length).toBeLessThan(5);
 
     // 該当する投稿（本人の投稿）は出る
-    expect(screen.getByText(/アルバムを整理してたら入学式の写真が出てきた/)).toBeInTheDocument();
+    expect(
+      screen.getByText(/アルバムを整理していたら入学式の写真が出てきました/),
+    ).toBeInTheDocument();
   });
 
   it("ヒットしない語では 0 件の表示になる", () => {

@@ -140,7 +140,7 @@ export const fbUsers: FbUser[] = [
   {
     id: "u40",
     displayName: "服部 由比",
-    handle: "yui_hattori",
+    handle: "yui__photo",
     avatarColor: "#d98c6a",
     coverColor: "#b06a4f",
     status: "offline",

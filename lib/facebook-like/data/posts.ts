@@ -115,8 +115,8 @@ export const fbPosts: FbPost[] = [
   {
     id: "fbp-201",
     authorId: "u40",
-    body: "アルバムを整理してたら入学式の写真が出てきた。桜がまだ咲いてた年。地元の神奈川の高校で、写真部に入ったのがきっかけでカメラを触りはじめたんだよな。",
-    createdAt: "2026-11-19T10:20:00Z",
+    body: "アルバムを整理していたら入学式の写真が出てきました。桜がまだ咲いていた年。地元の神奈川の高校で、写真部に入ったのがきっかけでカメラを触りはじめたんです。",
+    createdAt: "2018-04-08T10:20:00Z",
     feeling: "なつかしい",
     audience: "public",
     attachment: {
@@ -136,7 +136,7 @@ export const fbPosts: FbPost[] = [
         postId: "fbp-201",
         authorId: "u40",
         body: "この門、今も残ってるのかな。",
-        createdAt: "2026-11-19T10:35:00Z",
+        createdAt: "2018-04-08T10:35:00Z",
         likes: 2,
       },
     ],
@@ -145,12 +145,12 @@ export const fbPosts: FbPost[] = [
   {
     id: "fbp-202",
     authorId: "u40",
-    body: "地元に帰ったときの写真。冬の海も人がいるんだなあ。湘南は夕方の色がきれいで、つい歩いてしまう。",
-    createdAt: "2026-11-20T08:05:00Z",
-    audience: "friends",
+    body: "地元に帰ったときの写真です。冬の海も人がいるんですね。湘南は夕方の色がきれいで、つい歩いてしまいます。",
+    createdAt: "2019-12-15T08:05:00Z",
+    audience: "public",
     attachment: {
       kind: "photo",
-      title: "帰り道",
+      title: "冬の海",
       subtitle: "神奈川・湘南 / 夕方",
       accentColor: "#8fa3b0",
       src: "/talkup/seaside-sunset.svg",
@@ -165,12 +165,12 @@ export const fbPosts: FbPost[] = [
   {
     id: "fbp-203",
     authorId: "u40",
-    body: "友達と出かけたときの一枚。この写真、どこかで見たことある気がする。撮ってくれたのは昔からの友達。",
-    createdAt: "2026-11-20T09:10:00Z",
-    audience: "friends",
+    body: "友達と出かけたときの一枚です。撮ってくれたのは昔からの友達。",
+    createdAt: "2020-03-21T09:10:00Z",
+    audience: "public",
     attachment: {
       kind: "photo",
-      title: "大学の友達と",
+      title: "高校の友達と",
       subtitle: "神奈川県内 / 休日",
       accentColor: "#c9973f",
       src: "/talkup/cafe-two.svg",
