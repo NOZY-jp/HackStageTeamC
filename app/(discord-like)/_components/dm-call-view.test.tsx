@@ -126,22 +126,22 @@ describe("「チャットに戻る」で通話を終える（#140）", () => {
   });
 });
 
-describe("入場→退出→再入場（#140）", () => {
-  function Harness({ showCall }: { showCall: boolean }) {
-    return (
-      <AppShell rail={<span />}>
-        <LocalMessagesProvider>
-          {showCall ? (
-            <DmCallView threadId="dm-maimai" threadUrlId={threadUrlId} self={self} other={other} />
-          ) : (
-            <p>チャット</p>
-          )}
-          <Log />
-        </LocalMessagesProvider>
-      </AppShell>
-    );
-  }
+function Harness({ showCall }: { showCall: boolean }) {
+  return (
+    <AppShell rail={<span />}>
+      <LocalMessagesProvider>
+        {showCall ? (
+          <DmCallView threadId="dm-maimai" threadUrlId={threadUrlId} self={self} other={other} />
+        ) : (
+          <p>チャット</p>
+        )}
+        <Log />
+      </LocalMessagesProvider>
+    </AppShell>
+  );
+}
 
+describe("入場→退出→再入場（#140）", () => {
   it("2回目の入場でも connected が true で、開始/終了が履歴に積まれる", async () => {
     const { container, rerender } = render(<Harness showCall />);
     await screen.findByRole("main", { name: "MaiMai との通話" });
