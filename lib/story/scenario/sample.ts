@@ -74,6 +74,12 @@ export const samples: Beat[] = [
     choices: [
       { id: "a", label: "見本：選択肢A", reply: [say("kai", "見本：Aを選んだときの返事")] },
       { id: "b", label: "見本：選択肢B" },
+      {
+        id: "detour",
+        label: "見本：寄り道（選んでも場面は続く）",
+        completes: false,
+        reply: [say("kai", "見本：寄り道の返事。このあと、また選択肢が出る")],
+      },
     ],
   },
 ];
