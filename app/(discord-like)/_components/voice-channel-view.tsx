@@ -150,7 +150,13 @@ export function VoiceChannelView({
         ) : null}
         <CallStage
           title={channelName}
-          subtitle={tiles.length > 1 ? `${tiles.length}人が参加中` : "ひとりで接続しています"}
+          subtitle={
+            !joined
+              ? undefined
+              : tiles.length > 1
+                ? `${tiles.length}人が参加中`
+                : "ひとりで接続しています"
+          }
           joined={joined}
           muted={muted}
           deafened={deafened}
