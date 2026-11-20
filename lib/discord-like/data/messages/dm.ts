@@ -406,11 +406,34 @@ export const messagesByDMThread: Record<string, Message[]> = {
       body: "ねむいのにゲームしてる",
     },
     {
+      // ゲームの話の流れで、いまの画面を1枚だけ送る（ブログの話の前）
+      id: "dm-maimai-0062",
+      channelId: "dm-maimai",
+      sentAt: "2026-04-18T23:06:00+09:00",
+      authorId: "maimai",
+      body: "今こんな感じ",
+      attachments: [
+        {
+          id: "dm-maimai-att-2026",
+          name: "screenshot-2026.png",
+          kind: "image",
+          sizeLabel: "412 KB",
+        },
+      ],
+    },
+    {
       id: "dm-maimai-0058",
       channelId: "dm-maimai",
       sentAt: "2026-04-18T23:10:00+09:00",
       authorId: "hal",
       body: "明日休み？",
+    },
+    {
+      id: "dm-maimai-0065",
+      channelId: "dm-maimai",
+      sentAt: "2026-04-18T23:11:00+09:00",
+      authorId: "maimai",
+      body: "休み",
     },
     {
       id: "dm-maimai-0059",
@@ -431,43 +454,21 @@ export const messagesByDMThread: Record<string, Message[]> = {
       channelId: "dm-maimai",
       sentAt: "2026-04-18T23:17:00+09:00",
       authorId: "hal",
-      body: "攻略ブログ！読んでたかも",
+      body: "読んでみたい",
     },
     {
-      id: "dm-maimai-0062",
+      id: "dm-maimai-0064",
       channelId: "dm-maimai",
       sentAt: "2026-04-18T23:19:00+09:00",
       authorId: "maimai",
-      body: "今のアカウントのスクショ。画像だけ貼る",
-      attachments: [
-        {
-          id: "dm-maimai-att-2026",
-          name: "screenshot-2026.png",
-          kind: "image",
-          sizeLabel: "412 KB",
-        },
-      ],
+      body: "もう閉じちゃった。2020年の2月にnoteに移行したの",
     },
     {
       id: "dm-maimai-0063",
       channelId: "dm-maimai",
       sentAt: "2026-04-18T23:21:00+09:00",
       authorId: "hal",
-      body: "なつかしい。このブログ、noteに移行したんだよね？",
-    },
-    {
-      id: "dm-maimai-0064",
-      channelId: "dm-maimai",
-      sentAt: "2026-04-18T23:23:00+09:00",
-      authorId: "maimai",
-      body: "うん、2020年の2月に移した。前の記事は残してあるよ",
-    },
-    {
-      id: "dm-maimai-0065",
-      channelId: "dm-maimai",
-      sentAt: "2026-04-18T23:11:00+09:00",
-      authorId: "maimai",
-      body: "休み",
+      body: "そうなんだ",
     },
     {
       id: "dm-maimai-0066",

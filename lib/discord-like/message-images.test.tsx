@@ -56,9 +56,11 @@ describe("順序4の画像の向きとパス（#102）", () => {
         }
         expect(attachment.name).toBe(DM_IMAGE);
         expect(getMessageImage(attachment.name).owner).toBe("current");
-        // 貼るのは MaiMai 自身で、「今のアカウント」の画像だと分かる本文
+        // 貼るのは MaiMai 自身で、いま遊んでいる画面のスクショ（ゲームの話の流れ）
         expect(message.authorId).toBe("maimai");
-        expect(message.body).toContain("今のアカウント");
+        expect(message.body).toBe("今こんな感じ");
+        const index = messages.findIndex((candidate) => candidate.id === "dm-maimai-0057");
+        expect(messages[index + 1]?.id).toBe(message.id);
       }
     }
   });
@@ -120,14 +122,14 @@ describe("実体が無い画像の扱い（#102 追補）", () => {
 });
 
 describe("撮影画像の取り残し防止（#102 / #103）", () => {
-  // #105 d0b940a（2026年を MaiMai 本人視点にし、旧注記とカイを外して撮り直した画像）。撮り直したら更新する
+  // #105 acf684f（2026年のフレンドから かのん を外して撮り直した画像）。撮り直したら更新する
   const EXPECTED_SHA256: Record<string, string> = {
     "public/discord-like/screenshot-2018-game.png":
       "514f51c50c8842b66134f33ca8fbb39c95e491960afa1d58189dc6c9d7abdb79",
     "public/discord-like/screenshot-2019-lobby.png":
       "c1815ed3edbe3dca106bc855530621d1764d9633d4db4ef63465867a147043eb",
     "public/discord-like/screenshot-2026-friends.png":
-      "abf5afc17a27ee3c95fa467f73d255b2e770c75462a13032f4e59aa252682d2d",
+      "bfede6db342b13c64b88da9eac8127cac491ea5544cdb1862605cae8a3eeacfa",
   };
 
   it("ゲーム画面の画像が最新（古い ID の画像が残っていない）", async () => {

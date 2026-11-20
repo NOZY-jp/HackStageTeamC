@@ -338,12 +338,23 @@ describe("謎解きの手がかり（順序1・4・5・6・9・11）", () => {
     expect(byId("dm-maimai-0059")?.authorId).toBe("hal");
     expect(byId("dm-maimai-0060")?.authorId).toBe("maimai");
     expect(byId("dm-maimai-0060")?.body).toContain("攻略ブログ");
-    // スクショを貼るのも MaiMai 本人
+    // スクショを貼るのも MaiMai 本人（ゲームの話の流れで、ブログの話より前）
     expect(byId("dm-maimai-0062")?.authorId).toBe("maimai");
-    // 旧ブログは 2020-02 に note へ移行済み、という振り返りになっている
-    expect(byId("dm-maimai-0063")?.authorId).toBe("hal");
-    expect(byId("dm-maimai-0063")?.body).toContain("note");
+    expect(byId("dm-maimai-0062")?.body).not.toContain("なつかしい");
+    const shotOrder = messages.findIndex((message) => message.id === "dm-maimai-0062");
+    const blogOrder = messages.findIndex((message) => message.id === "dm-maimai-0059");
+    expect(shotOrder).toBeGreaterThanOrEqual(0);
+    expect(shotOrder).toBeLessThan(blogOrder);
+    // ブログは閉鎖済み（2020-02 に note へ移行）として運ぶ。リョウは聞かされていない知識を先に言わない
+    expect(byId("dm-maimai-0061")?.authorId).toBe("hal");
+    expect(byId("dm-maimai-0061")?.body).toBe("読んでみたい");
+    expect(byId("dm-maimai-0064")?.authorId).toBe("maimai");
+    expect(byId("dm-maimai-0064")?.body).toContain("note");
     expect(byId("dm-maimai-0064")?.body).toMatch(/2020年.*2月|2020-02/);
+    // 「前の記事は残してある」は閉鎖済みと矛盾するので書かない
+    expect(byId("dm-maimai-0064")?.body).not.toContain("残してある");
+    expect(byId("dm-maimai-0063")?.authorId).toBe("hal");
+    expect(byId("dm-maimai-0063")?.body).toBe("そうなんだ");
   });
 
   it("IDが違うスクショが添付されている（順序4・本文で説明しない）", () => {
@@ -486,6 +497,23 @@ describe("DM の同一発言の重複（#88）", () => {
       }
     }
     expect(offenders).toEqual([]);
+  });
+
+  it("DM は時刻順に並び、同じ人の3連投が無い（スクショの1枚送りまでは許す）", () => {
+    const messages = dmMessages();
+    for (let i = 1; i < messages.length; i += 1) {
+      expect(messages[i].sentAt >= messages[i - 1].sentAt, messages[i].id).toBe(true);
+    }
+    // 連投は「10分以内の同じ人の続き」とみなす（時間が空けば別の会話）
+    const BURST_MS = 10 * 60 * 1000;
+    let streak = 1;
+    for (let i = 1; i < messages.length; i += 1) {
+      const sameAuthor = messages[i].authorId === messages[i - 1].authorId;
+      const gap = Date.parse(messages[i].sentAt) - Date.parse(messages[i - 1].sentAt);
+      // スクショの1枚送りのように、2連投までは自然に許す（3連投はNG）
+      streak = sameAuthor && gap <= BURST_MS ? streak + 1 : 1;
+      expect(streak, messages[i].id).toBeLessThan(3);
+    }
   });
 
   it("2026-04-18 23:11 の「休み」のあとに「休み」で始まる発言が続かない", () => {
