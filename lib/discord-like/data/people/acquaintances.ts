@@ -47,7 +47,7 @@ export const acquaintances: User[] = [
     displayName: "ユウト",
     handle: "yuuto_0908",
     avatarColor: "#e67e22",
-    status: "idle",
+    status: "offline",
   },
   {
     id: "yama",
@@ -82,7 +82,7 @@ export const acquaintances: User[] = [
     displayName: "タカハシ",
     handle: "takahashi_0930",
     avatarColor: "#e74c3c",
-    status: "idle",
+    status: "offline",
   },
   {
     id: "tanaka",
@@ -110,14 +110,14 @@ export const acquaintances: User[] = [
     displayName: "ヤマモト",
     handle: "yamamoto_0227",
     avatarColor: "#f1c40f",
-    status: "dnd",
+    status: "offline",
   },
   {
     id: "nakamura",
     displayName: "ナカムラ",
     handle: "nakamura_0704",
     avatarColor: "#8e44ad",
-    status: "idle",
+    status: "offline",
   },
   {
     id: "kobayashi",
@@ -152,14 +152,14 @@ export const acquaintances: User[] = [
     displayName: "ササキ",
     handle: "sasaki_0124",
     avatarColor: "#9b59b6",
-    status: "idle",
+    status: "offline",
   },
   {
     id: "matsui",
     displayName: "マツイ",
     handle: "matsui_0529",
     avatarColor: "#e67e22",
-    status: "dnd",
+    status: "offline",
   },
   {
     id: "inoue",
@@ -187,7 +187,7 @@ export const acquaintances: User[] = [
     displayName: "クボ",
     handle: "kubo_0713",
     avatarColor: "#7289da",
-    status: "idle",
+    status: "offline",
   },
   {
     id: "nishimura",
@@ -208,7 +208,7 @@ export const acquaintances: User[] = [
     displayName: "フジタ",
     handle: "fujita_0627",
     avatarColor: "#f47fff",
-    status: "dnd",
+    status: "offline",
   },
   {
     id: "ogawa",
@@ -257,7 +257,7 @@ export const acquaintances: User[] = [
     displayName: "イシカワ",
     handle: "ishikawa_0109",
     avatarColor: "#fee75c",
-    status: "idle",
+    status: "offline",
   },
   {
     id: "hasegawa",

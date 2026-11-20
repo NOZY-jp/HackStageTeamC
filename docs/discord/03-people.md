@@ -92,10 +92,10 @@
 
 ## 4. 背景アカウント350人（生成規則）
 
-- `backgroundNames`（50個の語幹）× 接尾辞（`_`, 数字2桁）で**決定的に**生成。`Math.random` は使わない（SSR/テストの再現性）
-- 表示名は「○○ハンター」「◯◯」など mhc らしいもの＋学科サーバー用に汎用的なもの
-- `status` は大半 `offline`、`idle` 10・`dnd` 4 を混ぜる（オンライン合計30に合わせる）
-- 背景アカウントは**発言しない**。`data-integrity.test.ts` で「背景アカウントの発言が0件」を固定
+- 実装（`lib/discord-like/data/people/background.ts`）は `ハンター0001`〜`ハンター0350`、ハンドル `hunter_0001`〜`hunter_0350` を**規則で決定的に**生成する（`Math.random` は使わない）。IDは `bg-0001`〜`bg-0350`
+- `status` は固定のインデックス集合で決める: オンライン12・離席中9・取り込み中3、残り326はオフライン（ネームドと合わせて全体で **online 30・idle 10・dnd 4・offline 356**）
+- 背景アカウントは**発言しない**。`data-people.test.ts` で「背景アカウントの発言が0件」を固定
+- 呼び名・関係の正本は `data/people/acquaintance-notes.ts` と本ドキュメントの39人表。`lib/discord-like/data/names.ts` はネームドの表示名・ハンドルだけを持ち、`people/index.ts` が `users` を再輸出する
 - メンバー一覧のページング（100件超）が壊れないことをテスト（サーバーあたり 150〜250人）
 
 ## 5. サーバーごとの参加人数
