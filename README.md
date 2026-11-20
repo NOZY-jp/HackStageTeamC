@@ -56,6 +56,12 @@ npm run dev   # http://localhost:3000
 - 画面: `app/(blog-like)/`、部品: `components/blog-like/`、データ: `lib/blog-like/`（記事 `data/blog.ts`）
 - 他プラットフォームと揃える仮の値（古い Twixer のハンドルなど）は `lib/blog-like/data/names.ts` に集めている
 
+## シナリオの仕組み（Issue #81）
+
+台本・登場人物・謎解きの段階（正本 #76）をコードで持つ仕組み。共有の名前空間 `lib/story/` と `components/common/story/` に置く。進行チェックの画面は `/story`（開発時だけ開ける）。
+
+決まりと手順は **`docs/story.md`** にまとめている（人も AI もここに従う）。
+
 ## ファイル配置（Discord like UI と新プラットフォーム）
 
 Discord like UI は次の 3 つの名前空間にまとめている。名前だけで用途が分かるようにするための置き場で、機能ごとの分割ではない。

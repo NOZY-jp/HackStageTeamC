@@ -1,0 +1,85 @@
+import {
+  animate,
+  background,
+  call,
+  change,
+  clear,
+  custom,
+  effect,
+  flag,
+  hide,
+  move,
+  narrate,
+  portrait,
+  say,
+  show,
+  system,
+  think,
+  title,
+  todo,
+  wait,
+} from "../stage";
+import type { Beat } from "../types";
+
+/**
+ * 見本の場面。すべての命令を一度ずつ使う（文面は「見本」）。新しい場面を作るときの手本にする。
+ * 確認画面（/story）からだけ再生でき、ゲームの進行では始まらない（previewOnly）。
+ */
+export const samples: Beat[] = [
+  {
+    id: "sample-all-cues",
+    chapter: 0,
+    layout: "fullscreen",
+    when: [],
+    previewOnly: true,
+    source: "見本（文面は仮）",
+    script: [
+      // ---- 統一の部品だけで作る部分 ----
+      background("black", { transition: "cut" }),
+      title("見本：場面転換"),
+      background("room-night", { transition: "fade", duration: "slow" }),
+      narrate("見本：地の文。背景をフェードで切り替えた"),
+      think("見本：心の声（独り言）"),
+      show("kai", portrait("kai"), { at: "right", enter: "slide-in-right" }),
+      say("kai", "見本：対面の会話。カイが右から入ってきた"),
+      say("kai", "見本：この行で表情を「笑顔」に変える", { expression: "smile" }),
+      show("phone", { prop: "smartphone" }, { at: { x: 30, y: 85 }, enter: "pop-in", z: 2 }),
+      narrate("見本：小物を座標で置いた（左寄り・少し上）"),
+      animate("kai", "jump"),
+      say("kai", "見本：動きの型「jump」"),
+      move("kai", "center", { duration: "slow" }),
+      change("kai", portrait("kai", "surprised")),
+      say("kai", "見本：中央へ移動して、表情を差し替えた"),
+      effect("shake"),
+      effect("tint", { tint: "night" }),
+      narrate("見本：画面を揺らし、夜の色を重ねた"),
+      effect("clear-tint"),
+      hide("phone", "fade-out"),
+      call("maimai", "見本：通話の枠"),
+      system("見本：システム表示（通話を開始しました、など）"),
+      todo(say("kai"), "文面が未定の行はこうなる"),
+      // ---- 自由に書く部分（統一の型に無い動き・カスタム演出） ----
+      animate("kai", { keyframes: { rotate: [0, -8, 8, 0], scale: [1, 1.1, 1] }, duration: 600 }),
+      say("kai", "見本：キーフレームを自由に書いた動き"),
+      custom("phone-screen", { messages: ["見本：スマホの画面", "見本：2通目"] }, { wait: true }),
+      narrate("見本：カスタム演出（スマホの画面）が終わってから進んだ"),
+      animate("screen", "pulse"),
+      wait("fast"),
+      flag("started"),
+      effect("fade-to-black", { wait: true }),
+      clear(),
+      effect("fade-from-black"),
+      narrate("見本：暗転して、立ち絵を全部消した。最後に選択肢が出る"),
+    ],
+    choices: [
+      { id: "a", label: "見本：選択肢A", reply: [say("kai", "見本：Aを選んだときの返事")] },
+      { id: "b", label: "見本：選択肢B" },
+      {
+        id: "detour",
+        label: "見本：寄り道（選んでも場面は続く）",
+        completes: false,
+        reply: [say("kai", "見本：寄り道の返事。このあと、また選択肢が出る")],
+      },
+    ],
+  },
+];
