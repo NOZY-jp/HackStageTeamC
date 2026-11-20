@@ -32,7 +32,7 @@ export const cast: CastMember[] = [
       { platform: "twixer", handle: "hunter_denden0102", displayName: "hunter_denden" },
       { platform: "discord", handle: "maimaimaimai" },
       { platform: "discord", handle: "hunter_denden3243", displayName: "hunter_denden" },
-      { platform: "leaf", handle: "mai_yoru" },
+      { platform: "leaf", handle: "maimai" },
     ],
     // 呼び名の根拠は旧ブログのコメント欄1件だけ（知っている人としての紐付けはしない）
     oldNames: [
