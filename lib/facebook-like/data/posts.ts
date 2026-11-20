@@ -1,6 +1,8 @@
 import type { FbPost } from "../types";
+import { fbCommunityPosts } from "./posts-community";
+import { fbYuiPosts } from "./posts-yui";
 
-export const fbPosts: FbPost[] = [
+const seedPosts: FbPost[] = [
   {
     id: "fbp-101",
     authorId: "u4",
@@ -183,3 +185,5 @@ export const fbPosts: FbPost[] = [
     shares: 0,
   },
 ];
+
+export const fbPosts: FbPost[] = [...seedPosts, ...fbCommunityPosts, ...fbYuiPosts];
