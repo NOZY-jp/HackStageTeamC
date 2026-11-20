@@ -27,6 +27,9 @@ export const articles: Article[] = [
         width: 1200,
         height: 675,
         caption: "当時のゲーム画面。左上に出てるのが私のハンター名とハンターIDです",
+        // 縮小表示だと左上のIDが読めないので、クリックで原寸（1200×675）を開けるようにする
+        href: "/discord-like/screenshot-2018-game.png",
+        hrefLabel: "2018年のゲーム画面を原寸で開く",
       },
       {
         kind: "paragraph",

@@ -90,8 +90,8 @@
    * 3行目=VC接続パネル。無い行は高さ0になる。
    */
   grid-template-rows: minmax(0, 1fr) auto auto;
-  height: 100dvh;
-  max-height: 100dvh;
+  height: var(--story-viewport, 100dvh);
+  max-height: var(--story-viewport, 100dvh);
   overflow: hidden;
   background-color: var(--color-bg-app);
 }
@@ -1532,8 +1532,8 @@
 
   display: flex;
   justify-content: center;
-  height: 100dvh;
-  max-height: 100dvh;
+  height: var(--story-viewport, 100dvh);
+  max-height: var(--story-viewport, 100dvh);
   overflow: hidden;
   background-color: var(--tw-bg);
   color: var(--tw-text);
@@ -2872,7 +2872,7 @@ a.tw-dm-item:focus-visible {
   --note-width-list: 768px;
   --note-width-article: 620px;
 
-  height: 100dvh;
+  height: var(--story-viewport, 100dvh);
   overflow-y: auto;
   background-color: var(--note-bg);
   color: var(--note-text);
@@ -3483,8 +3483,8 @@ a.tw-dm-item:focus-visible {
 
   display: flex;
   flex-direction: column;
-  height: 100dvh;
-  max-height: 100dvh;
+  height: var(--story-viewport, 100dvh);
+  max-height: var(--story-viewport, 100dvh);
   overflow: hidden;
   background-color: var(--fb-bg);
   color: var(--fb-text);
@@ -3954,7 +3954,7 @@ a.tw-dm-item:focus-visible {
  */
 .pb-page {
   color-scheme: light;
-  height: 100dvh;
+  height: var(--story-viewport, 100dvh);
   overflow-y: auto;
 }
 
@@ -4863,4 +4863,1113 @@ a.tw-dm-item:focus-visible {
 .route-state--main {
   grid-column: 3;
   grid-row: 1 / span 2;
+}
+
+/* ---- 進行チェック（/story、開発用）。ゲームの見た目ではない ---- */
+
+.st-shell {
+  color-scheme: light;
+
+  --st-bg: #f5f6f8;
+  --st-surface: #ffffff;
+  --st-text: #1f2328;
+  --st-muted: #5f6670;
+  --st-line: #d9dde3;
+  --st-accent: #4752c4;
+  --st-on: #e7f5ec;
+  --st-on-text: #1e6b3a;
+  --st-todo: #fff4c2;
+  --st-todo-text: #7a5a00;
+  --st-kai: #eef0ff;
+  --st-ryo: #fff6e6;
+  --st-maimai: #fdeef4;
+
+  height: 100dvh;
+  overflow-y: auto;
+  background-color: var(--st-bg);
+  color: var(--st-text);
+  font-size: 14px;
+}
+
+.st-shell :focus-visible {
+  outline-color: var(--st-accent);
+}
+
+.st-header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px 20px;
+  padding: 12px 16px;
+  border-bottom: var(--pane-border) solid var(--st-line);
+  background-color: var(--st-surface);
+}
+
+.st-title {
+  font-size: 18px;
+  font-weight: 700;
+}
+
+.st-chapter {
+  font-weight: 700;
+}
+
+.st-reset {
+  margin-left: auto;
+  padding: 6px 12px;
+  border: var(--pane-border) solid var(--st-line);
+  border-radius: 6px;
+  background-color: var(--st-surface);
+}
+
+.st-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 20px;
+  padding: 16px;
+}
+
+.st-panel,
+.st-main {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  min-width: 0;
+}
+
+.st-panel-title {
+  margin-top: 6px;
+  font-size: 15px;
+  font-weight: 700;
+}
+
+.st-help {
+  color: var(--st-muted);
+  font-size: 12px;
+}
+
+.st-steps {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.st-step {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 10px;
+  border: var(--pane-border) solid var(--st-line);
+  border-radius: 8px;
+  background-color: var(--st-surface);
+  font-size: 13px;
+}
+
+.st-step[data-reached="true"] {
+  background-color: var(--st-on);
+}
+
+.st-step-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+  color: var(--st-muted);
+  font-size: 12px;
+}
+
+.st-step-order {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background-color: var(--st-text);
+  color: var(--st-surface);
+  font-weight: 700;
+}
+
+.st-badge {
+  padding: 0 6px;
+  border-radius: 4px;
+  font-size: 11px;
+}
+
+.st-badge[data-kind="done"] {
+  background-color: var(--st-on);
+  color: var(--st-on-text);
+}
+
+.st-badge[data-kind="todo"] {
+  background-color: var(--st-todo);
+  color: var(--st-todo-text);
+}
+
+.st-places {
+  color: var(--st-muted);
+  font-size: 12px;
+}
+
+.st-places a {
+  color: var(--st-accent);
+  text-decoration: underline;
+}
+
+.st-trigger,
+.st-secondary {
+  align-self: flex-start;
+  padding: 4px 12px;
+  border: var(--pane-border) solid var(--st-line);
+  border-radius: 6px;
+  background-color: var(--st-surface);
+}
+
+.st-trigger:disabled {
+  color: var(--st-muted);
+}
+
+.st-beat {
+  padding: 12px;
+  border: var(--pane-border) solid var(--st-line);
+  border-radius: 8px;
+  background-color: var(--st-surface);
+}
+
+.st-beat[data-playing="true"] {
+  border-color: var(--st-accent);
+}
+
+.st-beat-title {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 10px;
+  margin-bottom: 8px;
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.st-beat-id {
+  color: var(--st-muted);
+  font-family: ui-monospace, monospace;
+  font-weight: 400;
+}
+
+.st-lines {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.st-line {
+  display: flex;
+  gap: 8px;
+  padding: 6px 10px;
+  border-radius: 6px;
+  line-height: 1.6;
+}
+
+.st-line[data-from="kai"] {
+  background-color: var(--st-kai);
+}
+
+.st-line[data-from="ryo"] {
+  background-color: var(--st-ryo);
+}
+
+.st-line[data-from="maimai"] {
+  background-color: var(--st-maimai);
+}
+
+.st-line[data-from="system"] {
+  color: var(--st-muted);
+  font-size: 12px;
+}
+
+.st-line[data-todo="true"] {
+  background-color: var(--st-todo);
+  color: var(--st-todo-text);
+}
+
+.st-speaker {
+  flex: none;
+  min-width: 4em;
+  font-weight: 700;
+}
+
+.st-choices {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 10px;
+}
+
+.st-choice {
+  align-self: flex-start;
+  padding: 8px 14px;
+  border-radius: 999px;
+  background-color: var(--st-accent);
+  color: var(--st-surface);
+  font-weight: 700;
+}
+
+.st-choice:disabled {
+  opacity: 0.5;
+}
+
+.st-waiting {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  color: var(--st-muted);
+  font-size: 12px;
+}
+
+.st-people {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.st-person {
+  padding: 10px;
+  border: var(--pane-border) solid var(--st-line);
+  border-radius: 8px;
+  background-color: var(--st-surface);
+  font-size: 12px;
+}
+
+.st-person dt {
+  font-weight: 700;
+}
+
+.st-accounts {
+  margin-top: 4px;
+  color: var(--st-muted);
+  overflow-wrap: anywhere;
+}
+
+@media (min-width: 1100px) {
+  .st-layout {
+    grid-template-columns: 340px minmax(0, 1fr) 300px;
+    align-items: start;
+  }
+}
+
+/* ---- ストーリーの文章の窓（全プラットフォームの上に重ねる・#83）。ノベルゲーム風に画面下へ固定 ---- */
+
+.sw-stage {
+  --sw-bg: rgb(10 12 20 / 0.78);
+  --sw-bg-strong: rgb(10 12 20 / 0.92);
+  --sw-line: rgb(255 255 255 / 0.12);
+  --sw-text: #f6f4ef;
+  --sw-muted: rgb(246 244 239 / 0.55);
+  --sw-accent: #f0c36a;
+  --sw-control-hover: rgb(255 255 255 / 0.1);
+
+  position: fixed;
+  inset: auto 0 0;
+  z-index: 1000;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  color: var(--sw-text);
+  font-family: "Hiragino Mincho ProN", "Yu Mincho", "Noto Serif JP", serif;
+  /* 窓の外（ページ）はそのまま操作できる */
+  pointer-events: none;
+}
+
+.sw-stage > * {
+  pointer-events: auto;
+}
+
+/* 窓・タブの入れ物。この高さぶんだけ各画面を縮める（--story-viewport） */
+.sw-dock {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+}
+
+/* 窓の左右の帯はページに通す（窓・タブ・舞台など中身だけがクリックを受ける） */
+.sw-stage > .sw-dock {
+  pointer-events: none;
+}
+
+.sw-dock > * {
+  pointer-events: auto;
+}
+
+/* 文章の窓：画面の幅いっぱいの帯。上に向かって透ける */
+.sw-window {
+  --sw-speaker: var(--sw-accent);
+
+  position: relative;
+  width: 100%;
+  padding: 26px max(24px, calc((100% - 960px) / 2)) 10px;
+  background: linear-gradient(
+    to bottom,
+    rgb(10 12 20 / 0) 0,
+    var(--sw-bg) 22px,
+    var(--sw-bg-strong) 100%
+  );
+  /* backdrop-filter は付けない（選択肢の暗幕など、中の position: fixed が窓に閉じ込められるため） */
+}
+
+/* 名前の札。帯の上の縁にかかる */
+.sw-speaker {
+  position: absolute;
+  top: 0;
+  left: max(24px, calc((100% - 960px) / 2));
+  translate: 0 -40%;
+  min-width: 7.5em;
+  padding: 4px 18px 5px 14px;
+  border-left: 4px solid var(--sw-speaker);
+  background: linear-gradient(to right, var(--sw-bg-strong) 60%, rgb(10 12 20 / 0));
+  color: var(--sw-text);
+  font-size: 15px;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+}
+
+/* 右上の小さな札（確認画面での出どころ・通話中） */
+.sw-badges {
+  position: absolute;
+  top: 6px;
+  right: max(24px, calc((100% - 960px) / 2));
+  display: flex;
+  gap: 10px;
+  font-family: system-ui, sans-serif;
+  font-size: 11px;
+}
+
+.sw-channel {
+  color: var(--sw-muted);
+}
+
+.sw-body {
+  position: relative;
+  min-height: 7.2em;
+  padding: 6px 4px 4px;
+  cursor: pointer;
+  user-select: none;
+}
+
+.sw-text {
+  min-height: 3.8em;
+  font-size: 18px;
+  line-height: 1.9;
+  letter-spacing: 0.04em;
+  white-space: pre-wrap;
+  text-shadow: 0 1px 2px rgb(0 0 0 / 0.6);
+}
+
+/* 次へ進める印。右下で小さく上下する */
+.sw-hint {
+  position: absolute;
+  right: 4px;
+  bottom: 0;
+  color: var(--sw-accent);
+  font-size: 12px;
+  animation: sw-bob 1s ease-in-out infinite;
+}
+
+/* 選択肢：文章の帯より上の空いたところの真ん中に、縦に並べる。後ろは少し暗くする */
+.sw-window[data-choosing="true"]::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  background: radial-gradient(ellipse at 50% 42%, rgb(0 0 0 / 0.25), rgb(0 0 0 / 0.55));
+  pointer-events: none;
+  animation: sw-fade 0.3s ease-out;
+}
+
+.sw-choices {
+  min-width: 0;
+  margin: 0;
+  border: 0;
+  position: fixed;
+  inset: 0 0 var(--sw-window-height, 200px);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 14px;
+  padding: 24px 16px;
+  pointer-events: none;
+}
+
+/*
+ * 選択肢の1つ：ノベルゲームでよくある、横に長い帯。左右の端は背景に溶かし、上下に細い線を引く。
+ * かざしたときは、帯を少しだけ明るくして線を金色にするだけ（控えめに）
+ */
+.sw-choice {
+  --sw-choice-bg: rgb(10 12 20 / 0.82);
+  --sw-choice-line: rgb(255 255 255 / 0.18);
+
+  position: relative;
+  width: min(760px, 100%);
+  padding: 18px 48px;
+  color: var(--sw-text);
+  background: linear-gradient(
+    to right,
+    transparent,
+    var(--sw-choice-bg) 18%,
+    var(--sw-choice-bg) 82%,
+    transparent
+  );
+  border: 0;
+  font: inherit;
+  font-size: 18px;
+  letter-spacing: 0.1em;
+  text-align: center;
+  cursor: pointer;
+  pointer-events: auto;
+  opacity: 0;
+  animation: sw-rise 0.35s ease-out forwards;
+  transition: color 0.2s;
+}
+
+.sw-choice::before,
+.sw-choice::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: linear-gradient(
+    to right,
+    transparent,
+    var(--sw-choice-line) 25%,
+    var(--sw-choice-line) 75%,
+    transparent
+  );
+  transition: opacity 0.2s;
+}
+
+.sw-choice::before {
+  top: 0;
+}
+
+.sw-choice::after {
+  bottom: 0;
+}
+
+.sw-choice:nth-child(2) {
+  animation-delay: 0.07s;
+}
+
+.sw-choice:nth-child(3) {
+  animation-delay: 0.14s;
+}
+
+.sw-choice:nth-child(n + 4) {
+  animation-delay: 0.21s;
+}
+
+.sw-choice:hover,
+.sw-choice:focus-visible {
+  --sw-choice-bg: rgb(34 30 24 / 0.86);
+  --sw-choice-line: rgb(240 195 106 / 0.55);
+
+  color: #fff3d6;
+  outline: none;
+}
+
+/* 操作の行：帯の下に小さく、目立たせない */
+.sw-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 2px 14px;
+  margin-top: 4px;
+  font-family: system-ui, sans-serif;
+  font-size: 11px;
+  letter-spacing: 0.08em;
+}
+
+.sw-modes {
+  display: inline-flex;
+  gap: 2px;
+  min-width: 0;
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+
+.sw-mode,
+.sw-tool {
+  padding: 3px 6px;
+  color: var(--sw-muted);
+  background: none;
+  border: 0;
+  border-radius: 3px;
+  font: inherit;
+  cursor: pointer;
+}
+
+.sw-mode:hover,
+.sw-tool:hover {
+  color: var(--sw-text);
+  background-color: var(--sw-control-hover);
+}
+
+.sw-mode[aria-pressed="true"] {
+  color: var(--sw-accent);
+  font-weight: 700;
+}
+
+/* 文字の速さ：右に行くほど高くなる目盛り。押したところまで点く */
+.sw-speed {
+  display: inline-flex;
+  align-items: flex-end;
+  gap: 3px;
+  min-width: 0;
+  margin: 0;
+  padding: 0 4px;
+  border: 0;
+  color: var(--sw-muted);
+}
+
+.sw-speed-label {
+  margin-right: 4px;
+  align-self: center;
+}
+
+.sw-speed-step {
+  width: 6px;
+  height: calc(6px + var(--step) * 3px);
+  padding: 0;
+  border: 0;
+  border-radius: 1px;
+  background-color: rgb(255 255 255 / 0.2);
+  cursor: pointer;
+  transition: background-color 0.15s;
+}
+
+/* 当たり判定を目盛りより広くする */
+.sw-speed-step {
+  position: relative;
+}
+
+.sw-speed-step::after {
+  content: "";
+  position: absolute;
+  inset: -6px -2px;
+}
+
+.sw-speed-step[data-on="true"] {
+  background-color: var(--sw-accent);
+}
+
+.sw-speed-step:hover {
+  background-color: rgb(255 255 255 / 0.5);
+}
+
+.sw-speed-value {
+  min-width: 2.5em;
+  margin-left: 4px;
+  align-self: center;
+}
+
+.sw-stage :focus-visible {
+  outline: 2px solid var(--sw-accent);
+  outline-offset: 2px;
+}
+
+/* たたんだとき・探索中の小さな札（画面右下） */
+.sw-tab {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  align-self: flex-end;
+  max-width: min(560px, calc(100% - 32px));
+  margin: 0 16px 12px;
+  padding: 6px 6px 6px 14px;
+  border-left: 3px solid var(--sw-accent);
+  background-color: var(--sw-bg-strong);
+  box-shadow: 0 6px 20px rgb(0 0 0 / 0.35);
+  font-family: system-ui, sans-serif;
+  font-size: 13px;
+}
+
+.sw-tab-open {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--sw-text);
+  background: none;
+  border: 0;
+  font: inherit;
+  font-weight: 700;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.sw-tab-badge {
+  color: var(--sw-accent);
+  font-size: 11px;
+  animation: sw-pulse 1.6s ease-in-out infinite;
+}
+
+.sw-tab-memo {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 8px;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.sw-tab-label {
+  color: var(--sw-accent);
+  font-size: 11px;
+  font-weight: 700;
+}
+
+/* 物語の中でチャットが届いたときの知らせ（画面右上） */
+.sw-notice {
+  position: fixed;
+  top: 16px;
+  right: 16px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  max-width: min(360px, calc(100% - 32px));
+  padding: 10px 14px;
+  border-radius: 8px;
+  background-color: #2b2d31;
+  box-shadow: 0 8px 24px rgb(0 0 0 / 0.4);
+  color: #f2f3f5;
+  font-family: system-ui, sans-serif;
+  font-size: 13px;
+  text-decoration: none;
+  animation: sw-drop 0.35s ease-out;
+}
+
+.sw-notice:hover {
+  background-color: #35373c;
+}
+
+.sw-notice-dot {
+  width: 10px;
+  height: 10px;
+  flex: none;
+  border-radius: 50%;
+  background-color: #f23f43;
+}
+
+.sw-notice-text {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.sw-notice-from {
+  font-weight: 700;
+}
+
+/* 場面を流しているあいだ、後ろの画面の操作を止める幕（見た目は変えない）。舞台・窓より下 */
+.sw-veil {
+  position: fixed;
+  inset: 0;
+  z-index: -2;
+}
+
+/* たたんで絵を見ているときは、舞台（背景・立ち絵）より上に置いて、どこを押しても戻れるようにする */
+.sw-veil[data-minimized="true"] {
+  z-index: 0;
+  cursor: pointer;
+}
+
+/* ログ：画面全体を覆い、新しい行が下 */
+.sw-log {
+  position: fixed;
+  inset: 0;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  background-color: rgb(6 7 12 / 0.94);
+  backdrop-filter: blur(4px);
+}
+
+.sw-log-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px max(24px, calc((100% - 880px) / 2)) 12px;
+  border-bottom: 1px solid var(--sw-line);
+}
+
+.sw-log-title {
+  font-size: 15px;
+  font-weight: 700;
+  letter-spacing: 0.3em;
+}
+
+.sw-log-list {
+  flex: 1;
+  margin: 0;
+  padding: 24px max(24px, calc((100% - 880px) / 2)) 40px;
+  overflow-y: auto;
+  list-style: none;
+}
+
+.sw-log-beat + .sw-log-beat {
+  margin-top: 14px;
+  padding-top: 14px;
+  border-top: 1px dashed var(--sw-line);
+}
+
+.sw-log-chapter {
+  margin-bottom: 6px;
+  color: var(--sw-muted);
+  font-family: system-ui, sans-serif;
+  font-size: 11px;
+}
+
+.sw-log-line {
+  font-size: 15px;
+  line-height: 1.8;
+}
+
+.sw-log-line[data-frame="narration"],
+.sw-log-line[data-frame="system"] {
+  color: var(--sw-muted);
+}
+
+.sw-log-speaker {
+  margin-right: 10px;
+  color: var(--sw-accent);
+  font-weight: 700;
+}
+
+.sw-log-empty {
+  padding: 16px 20px;
+  color: var(--sw-muted);
+  font-size: 13px;
+}
+
+@keyframes sw-bob {
+  50% {
+    translate: 0 3px;
+    opacity: 0.6;
+  }
+}
+
+@keyframes sw-pulse {
+  50% {
+    opacity: 0.55;
+  }
+}
+
+@keyframes sw-fade {
+  from {
+    opacity: 0;
+  }
+}
+
+@keyframes sw-rise {
+  from {
+    translate: 0 8px;
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes sw-drop {
+  from {
+    translate: 0 -12px;
+    opacity: 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .sw-hint,
+  .sw-tab-badge,
+  .sw-notice,
+  .sw-choice,
+  .sw-window[data-choosing="true"]::before {
+    animation: none;
+    opacity: 1;
+  }
+}
+
+/* ---- 演出の舞台（#83）。背景・立ち絵・小物・画面効果。文章の窓（.sw-*）の後ろに敷く ---- */
+
+.sp-stage {
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  overflow: hidden;
+  /* 重ねる場面ではページを操作できるように、舞台はクリックを受けない（カスタム演出だけ受ける） */
+  pointer-events: none;
+}
+
+.sp-stage[data-fullscreen="true"] {
+  background-color: #000;
+  pointer-events: auto;
+}
+
+.sp-screen,
+.sp-background,
+.sp-sprites,
+.sp-fill,
+.sp-tint,
+.sp-blackout,
+.sp-flash {
+  position: absolute;
+  inset: 0;
+}
+
+.sp-cover {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.sp-tint,
+.sp-blackout,
+.sp-flash {
+  pointer-events: none;
+}
+
+.sp-blackout {
+  background-color: #000;
+  opacity: 0;
+}
+
+.sp-flash {
+  background-color: #fff;
+  opacity: 0;
+}
+
+/* 立ち絵・小物。left・top は中心の x と下端の y（％）。高さ基準で縮める */
+.sp-sprite {
+  position: absolute;
+  aspect-ratio: 3 / 5;
+  translate: 0 -100%;
+}
+
+.sp-sprite-inner {
+  width: 100%;
+  height: 100%;
+}
+
+.sp-image {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  object-position: bottom;
+}
+
+/* 画像が未用意のときの仮の板（名前入り） */
+.sp-placeholder {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+  border: 2px dashed rgb(255 255 255 / 0.5);
+  color: rgb(255 255 255 / 0.9);
+  font-size: 14px;
+  font-weight: 700;
+  text-align: center;
+}
+
+.sp-placeholder[data-kind="character"] {
+  border-radius: 40% 40% 8px 8px;
+}
+
+.sp-placeholder[data-kind="prop"] {
+  border-radius: 12px;
+}
+
+.sp-placeholder[data-kind="background"] {
+  border: 0;
+  font-size: 18px;
+}
+
+.sp-placeholder-label {
+  padding: 4px 10px;
+  border-radius: 6px;
+  background-color: rgb(0 0 0 / 0.35);
+}
+
+/* カスタム演出：スマホの画面 */
+.sp-phone {
+  position: absolute;
+  top: 8%;
+  left: 50%;
+  width: min(320px, 80vw);
+  height: 60%;
+  margin-left: calc(min(320px, 80vw) / -2);
+  padding: 18px 12px;
+  border-radius: 32px;
+  background-color: #111;
+  box-shadow: 0 20px 60px rgb(0 0 0 / 0.5);
+  pointer-events: auto;
+}
+
+.sp-phone-screen {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  height: calc(100% - 40px);
+  padding: 12px;
+  overflow-y: auto;
+  border-radius: 20px;
+  background-color: #f2f3f5;
+}
+
+.sp-phone-message {
+  align-self: flex-start;
+  max-width: 85%;
+  padding: 8px 12px;
+  border-radius: 14px;
+  background-color: #fff;
+  color: #222;
+  font-size: 14px;
+}
+
+.sp-phone-close {
+  display: block;
+  margin: 8px auto 0;
+}
+
+/* カスタム演出：画面いっぱいの文字 */
+.sp-big-text {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #fff;
+  font-size: clamp(28px, 6vw, 64px);
+  font-weight: 700;
+  text-shadow: 0 2px 16px rgb(0 0 0 / 0.6);
+}
+
+/* ---- 文章の枠の種類（統一の見た目）。.sw-window[data-frame] ---- */
+
+.sw-window[data-frame="think"] .sw-text {
+  color: #d6e0ff;
+}
+
+.sw-window[data-frame="think"] .sw-text::before {
+  content: "（";
+}
+
+.sw-window[data-frame="think"] .sw-text::after {
+  content: "）";
+}
+
+/* 心の声の括弧と、未定の行の括弧が二重にならないようにする */
+.sw-window[data-frame="think"][data-todo="true"] .sw-text::before,
+.sw-window[data-frame="think"][data-todo="true"] .sw-text::after {
+  content: none;
+}
+
+.sw-window[data-frame="narration"] .sw-text {
+  color: #ebe4d3;
+}
+
+.sw-window[data-frame="title"] .sw-text {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.5em;
+  letter-spacing: 0.3em;
+}
+
+.sw-window[data-frame="system"] .sw-text {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--sw-muted);
+  font-family: system-ui, sans-serif;
+  font-size: 13px;
+  letter-spacing: 0.1em;
+}
+
+.sw-window[data-todo="true"] .sw-text {
+  color: var(--sw-accent);
+}
+
+/* ---- 進行チェックの場面一覧・単体再生 ---- */
+
+.st-scenes {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.st-scene {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 10px;
+  border: var(--pane-border) solid var(--st-line);
+  border-radius: 8px;
+  background-color: var(--st-surface);
+}
+
+.st-catalog {
+  display: grid;
+  gap: 4px;
+  font-size: 12px;
+}
+
+.st-catalog dt {
+  margin-top: 6px;
+  font-weight: 700;
+}
+
+.st-catalog dd {
+  color: var(--st-muted);
+  overflow-wrap: anywhere;
+}
+
+.st-preview {
+  height: 100dvh;
+  background-color: #000;
+}
+
+.st-preview-bar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 2000;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px 16px;
+  padding: 8px 16px;
+  background-color: rgb(255 255 255 / 0.9);
+  color: #1f2328;
+  font-size: 13px;
+}
+
+.st-preview-bar a {
+  color: #4752c4;
+  text-decoration: underline;
+}
+
+.st-preview .st-badge[data-kind="done"] {
+  background-color: #e7f5ec;
+  color: #1e6b3a;
+}
+
+.st-preview .st-badge[data-kind="todo"] {
+  background-color: #fff4c2;
+  color: #7a5a00;
 }

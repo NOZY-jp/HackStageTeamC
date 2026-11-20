@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import type { ReactNode } from "react";
+import { HAL_HANDLE } from "@/lib/discord-like/data/names";
 import { getUserByHandle } from "@/lib/twitter-like";
 import { Avatar } from "./avatar";
 import {
@@ -17,8 +18,8 @@ import {
 
 type Item = { label: string; href: string; icon: ReactNode; match: (path: string) => boolean };
 
-/** 左ナビは本家の構成に合わせて3項目だけ。プロフィールは「自分」として hal を使う。 */
-const ME_HANDLE = "hal";
+/** 左ナビは本家の構成に合わせて3項目だけ。プロフィールは「自分」として kohakunchos0117 を使う。 */
+const ME_HANDLE = HAL_HANDLE;
 
 const items: Item[] = [
   {

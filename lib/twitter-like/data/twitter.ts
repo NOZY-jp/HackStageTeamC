@@ -1,3 +1,4 @@
+import { HAL_HANDLE } from "@/lib/discord-like/data/names";
 import type { Post, Profile, Trend, TwitterUser } from "../types";
 
 /**
@@ -7,11 +8,11 @@ import type { Post, Profile, Trend, TwitterUser } from "../types";
  * 日時は 2026-11 固定（JST）。劇中世界の投稿のみ（開発用語は入れない）。
  */
 export const twitterUsers: TwitterUser[] = [
-  { id: "tw-hal", displayName: "Hal", handle: "hal", avatarColor: "#3b6fd4" },
+  { id: "tw-hal", displayName: "Hal", handle: HAL_HANDLE, avatarColor: "#3b6fd4" },
   { id: "tw-mai", displayName: "Mai", handle: "mai2mai2", avatarColor: "#c2417c" },
   { id: "tw-ren", displayName: "れん", handle: "ren", avatarColor: "#2f8f6b" },
   { id: "tw-yuki", displayName: "ゆき", handle: "yuki", avatarColor: "#8a5cc2" },
-  { id: "tw-sou", displayName: "ソウ", handle: "sou", avatarColor: "#b86a1f" },
+  { id: "tw-sou", displayName: "ソウ", handle: "kaiser018023071", avatarColor: "#b86a1f" },
   { id: "tw-sana", displayName: "さな", handle: "sana", avatarColor: "#1f8a9e" },
   {
     id: "tw-gameinfo",
@@ -156,7 +157,7 @@ export const twitterPosts: Post[] = [
     id: "post-005",
     authorId: "tw-mai",
     postedAt: "2026-11-04T00:10:00+09:00",
-    body: "@hal らしいね。",
+    body: "@kohakunchos0117 らしいね。",
     replyToId: "post-004",
     replyCount: 0,
     repostCount: 0,
@@ -211,7 +212,7 @@ export const twitterPosts: Post[] = [
     id: "post-011",
     authorId: "tw-mai",
     postedAt: "2026-11-08T22:30:00+09:00",
-    body: "@hal 待ってる。無理しないでね。",
+    body: "@kohakunchos0117 待ってる。無理しないでね。",
     replyToId: "post-010",
     replyCount: 0,
     repostCount: 0,
@@ -248,7 +249,7 @@ export const twitterPosts: Post[] = [
     id: "post-015",
     authorId: "tw-sou",
     postedAt: "2026-11-12T21:40:00+09:00",
-    body: "@hal お、ついにか。服装は相手が見つけやすいよう目立つ色にしとけ。あと最初の一声は決めておくと安心だ。",
+    body: "@kohakunchos0117 お、ついにか。服装は相手が見つけやすいよう目立つ色にしとけ。あと最初の一声は決めておくと安心だ。",
     replyToId: "post-014",
     replyCount: 1,
     repostCount: 0,
@@ -294,7 +295,7 @@ export const twitterPosts: Post[] = [
     id: "post-020",
     authorId: "tw-sou",
     postedAt: "2026-11-15T22:05:00+09:00",
-    body: "@hal 教えた言い回し、試したか？きっと効くから。",
+    body: "@kohakunchos0117 教えた言い回し、試したか？きっと効くから。",
     replyToId: "post-016",
     replyCount: 0,
     repostCount: 0,
@@ -313,7 +314,7 @@ export const twitterPosts: Post[] = [
     id: "post-022",
     authorId: "tw-mai",
     postedAt: "2026-11-16T20:02:00+09:00",
-    body: "@hal ……うん。楽しみだね。",
+    body: "@kohakunchos0117 ……うん。楽しみだね。",
     replyToId: "post-021",
     replyCount: 0,
     repostCount: 0,

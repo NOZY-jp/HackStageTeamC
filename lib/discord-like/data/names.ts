@@ -15,7 +15,7 @@ export const MAIMAI_HANDLE = "maimaimaimai";
 
 /**
  * 旧アカウント（順序4のスクショに映る旧ハンドル）。
- * 連鎖: ブログ「でんでんの狩猟記録」→ 旧Twixer（別PF側の旧アカウント）→ 旧Discord。
+ * 連鎖: ブログ「でんでんの狩猟日記」→ 旧Twixer（別PF側の旧アカウント）→ 旧Discord。
  * 現在のハンドルとは別ID（別人に見えることが手がかり）。
  */
 export const OLD_HANDLE = "hunter_denden3243";

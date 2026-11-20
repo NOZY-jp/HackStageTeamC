@@ -1,0 +1,92 @@
+"use client";
+
+import { AnimatePresence, motion } from "motion/react";
+import { type ComponentType, useEffect, useState } from "react";
+import type { CustomCueName } from "@/lib/story";
+
+/**
+ * カスタム演出（自由にするもの）。場面の custom("名前", props) で呼ばれる。
+ * 部品は props と onDone を受け取り、終わったら onDone を呼ぶ（wait: true の場面は onDone まで待つ）。
+ * 新しく足すときは lib/story/stage/custom.ts に名前を足し、ここに部品を登録する（登録漏れは型エラーになる）。
+ * 動きは Motion（motion/react）で自由に書いてよい。スキップ中は instant が true になるので、すぐ onDone を呼ぶ。
+ */
+export type CustomCueProps = {
+  props: Record<string, unknown>;
+  onDone: () => void;
+  /** スキップ中など、演出を省くとき */
+  instant: boolean;
+};
+
+function PhoneScreen({ props, onDone, instant }: CustomCueProps) {
+  const messages = Array.isArray(props.messages) ? props.messages.map(String) : [];
+  const [shown, setShown] = useState(instant ? messages.length : 0);
+
+  useEffect(() => {
+    if (instant) {
+      onDone();
+      return;
+    }
+    if (shown >= messages.length) {
+      return;
+    }
+    const timer = window.setTimeout(() => setShown((count) => count + 1), 700);
+    return () => window.clearTimeout(timer);
+  }, [shown, messages.length, instant, onDone]);
+
+  return (
+    <motion.div
+      className="sp-phone"
+      initial={{ opacity: 0, y: 40, scale: 0.95 }}
+      animate={{ opacity: 1, y: 0, scale: 1 }}
+      exit={{ opacity: 0, y: 40 }}
+    >
+      <div className="sp-phone-screen">
+        <AnimatePresence>
+          {messages.slice(0, shown).map((message, index) => (
+            <motion.p
+              // biome-ignore lint/suspicious/noArrayIndexKey: メッセージは順に増えるだけ
+              key={index}
+              className="sp-phone-message"
+              initial={{ opacity: 0, x: 20 }}
+              animate={{ opacity: 1, x: 0 }}
+            >
+              {message}
+            </motion.p>
+          ))}
+        </AnimatePresence>
+      </div>
+      {shown >= messages.length ? (
+        <button type="button" className="sw-tool sp-phone-close" onClick={onDone}>
+          閉じる
+        </button>
+      ) : null}
+    </motion.div>
+  );
+}
+
+function BigText({ props, onDone, instant }: CustomCueProps) {
+  const text = typeof props.text === "string" ? props.text : "";
+  const ms = typeof props.duration === "number" ? props.duration : 1600;
+
+  useEffect(() => {
+    const timer = window.setTimeout(onDone, instant ? 0 : ms);
+    return () => window.clearTimeout(timer);
+  }, [instant, ms, onDone]);
+
+  return (
+    <motion.p
+      className="sp-big-text"
+      initial={{ opacity: 0, letterSpacing: "0.6em" }}
+      animate={{ opacity: 1, letterSpacing: "0.2em" }}
+      exit={{ opacity: 0 }}
+      transition={{ duration: 0.8 }}
+    >
+      {text}
+    </motion.p>
+  );
+}
+
+export const CUSTOM_CUE_COMPONENTS: Record<CustomCueName, ComponentType<CustomCueProps>> = {
+  "phone-screen": PhoneScreen,
+  "big-text": BigText,
+};

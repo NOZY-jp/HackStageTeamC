@@ -1,5 +1,7 @@
 import { existsSync } from "node:fs";
+import { render } from "@testing-library/react";
 import { describe, expect, it } from "vitest";
+import { ArticleBody } from "@/components/note-like/article-body";
 import { getEntry } from "@/lib/blog-like";
 import { externalHref } from "@/lib/blog-like/url";
 import { getCreator, listArticles, listArticlesByCreator } from "./index";
@@ -47,6 +49,33 @@ describe("leaf の移行記事（順序4の導線・#118）", () => {
     expect(caption).not.toContain("旧");
     // 実体がある（404 を出さない）
     expect(existsSync(`public${image.src}`)).toBe(true);
+  });
+
+  it("画像は原寸（PNG）へのリンクで開ける（縮小表示でIDが読めないため）", () => {
+    if (!article) throw new Error("article missing");
+    const { container } = render(<ArticleBody blocks={article.body} />);
+    const figure = container.querySelector("figure");
+    expect(figure).not.toBeNull();
+
+    // 画像そのものが原寸へのリンクになっている
+    const imageLink = figure?.querySelector("a");
+    expect(imageLink?.getAttribute("href")).toBe(GAME_SCREEN);
+    expect(imageLink?.getAttribute("target")).toBe("_blank");
+    expect(imageLink?.getAttribute("rel")).toContain("noreferrer");
+    expect(imageLink?.getAttribute("aria-label")).toBe("2018年のゲーム画面を原寸で開く");
+    expect(imageLink?.querySelector("img")).not.toBeNull();
+
+    // figcaption にも「原寸で見る」を置く
+    const captionLink = figure?.querySelector("figcaption a");
+    expect(captionLink?.getAttribute("href")).toBe(GAME_SCREEN);
+    expect(captionLink?.getAttribute("target")).toBe("_blank");
+    expect(captionLink?.getAttribute("rel")).toContain("noreferrer");
+    expect(captionLink?.textContent).toBe("原寸で見る");
+
+    // 原寸画像の実寸は 1200×675
+    const img = figure?.querySelector("img");
+    expect(img?.getAttribute("width")).toBe("1200");
+    expect(img?.getAttribute("height")).toBe("675");
   });
 
   it("記事に本名・呼び名を書かない", () => {

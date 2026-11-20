@@ -105,7 +105,7 @@ describe("searchPosts", () => {
   });
 
   it("空白区切りの語をすべて含む投稿だけに絞る", () => {
-    const posts = searchPosts("hal 待ってる");
+    const posts = searchPosts("kohakunchos0117 待ってる");
     expect(posts.map((post) => post.id)).toEqual(["post-011"]);
   });
 
@@ -113,14 +113,14 @@ describe("searchPosts", () => {
     expect(searchPosts("#紅葉").map((post) => post.id)).toEqual(
       searchPosts("紅葉").map((post) => post.id),
     );
-    expect(searchPosts("@hal").map((post) => post.id)).toEqual(
-      searchPosts("hal").map((post) => post.id),
+    expect(searchPosts("@kohakunchos0117").map((post) => post.id)).toEqual(
+      searchPosts("kohakunchos0117").map((post) => post.id),
     );
   });
 
   it("大文字小文字は区別しない", () => {
-    expect(searchPosts("HAL").map((post) => post.id)).toEqual(
-      searchPosts("hal").map((post) => post.id),
+    expect(searchPosts("KOHAKUNCHOS0117").map((post) => post.id)).toEqual(
+      searchPosts("kohakunchos0117").map((post) => post.id),
     );
   });
 
@@ -134,8 +134,8 @@ describe("searchPosts", () => {
     // 片方の経路が壊れても検出できるようにそれぞれ独立に検証する
     expect(searchPosts("げーむ通信").map((post) => post.id)).toContain("post-001");
     expect(searchPosts("game-info").map((post) => post.id)).toContain("post-001");
-    // 本文に "hal" を含まない Hal 本人の投稿も返る
-    expect(searchPosts("hal").map((post) => post.id)).toContain("post-002");
+    // 本文に handle を含まない tw-hal 本人の投稿も返る
+    expect(searchPosts("kohakunchos0117").map((post) => post.id)).toContain("post-002");
   });
 
   it("鍵アカウントの投稿は検索結果に出さない", () => {
@@ -148,7 +148,7 @@ describe("searchPosts", () => {
 
 describe("searchUsers", () => {
   it("handle・displayName・bio を対象に検索する", () => {
-    expect(searchUsers("hal").map((user) => user.id)).toEqual(["tw-hal"]);
+    expect(searchUsers("kohakunchos0117").map((user) => user.id)).toEqual(["tw-hal"]);
     expect(searchUsers("げーむ通信").map((user) => user.id)).toEqual(["tw-gameinfo"]);
     const bioMatch = searchUsers("カフェ");
     expect(bioMatch.map((user) => user.id)).toEqual(["tw-sana"]);
