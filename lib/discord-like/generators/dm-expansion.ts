@@ -200,27 +200,27 @@ const BODY_TEMPLATES: Record<string, (() => string)[]> = {
     () => `${pickM(MONSTER)}の話、${pickM(TIME)}にしよう`,
     () =>
       `おつかれ。${pickM(["今日", "明日", "週末"])}は${pickM(["ゆっくり", "のんびり", "早め"])}に`,
-    () => `${pickM(REACT)}よ。${pickM(["写真", "動画", "スクショ"])}送る`,
+    () => `${pickM(["了解", "わかった", "いいね"])}。${pickM(["写真", "動画", "スクショ"])}送る`,
     () => `${pickM(TIME)}の件、${pickM(REACT)}`,
     () => `${pickM(["ゲーム", "通話", "配信"])}の${pickM(["調子", "準備", "予定"])}どう？`,
     () => `${pickM(MOOD)}。${pickM(TIME)}に${pickM(["ゲーム", "通話"])}しよ`,
     () =>
-      `${pickM(["今日", "明日", "週末"])}は${pickM(["家", "バイト", "用事"])}で${pickM(["ゆっくり", "ばたばた", "のんびり"])}`,
+      `${pickM(["今日", "明日", "週末"])}は${pickM(["仕事", "残業", "休み"])}で${pickM(["ゆっくり", "ばたばた", "のんびり"])}`,
     () => `${pickM(["写真", "動画", "スクショ"])}ありがとう。${pickM(MOOD)}`,
   ],
   "dm-kai": [
     () =>
       `${pickM(["今日は", "明日は", "週末は"])}${pickM(["予定ありますか", "空いてますか", "連絡つきますか"])}`,
     () =>
-      `${pickM(["了解", "承知", "確認済み"])}です。${pickM(["また連絡します", "追って共有します", "予定を合わせます"])}`,
+      `${pickM(["了解", "承知"])}です。${pickM(["また連絡します", "予定を合わせます", "日程を見ます"])}`,
     () =>
       `${pickM(["ありがとうございます", "助かります", "お手数かけます"])}。${pickM(["助かりました", "参考にします", "進めておきます"])}`,
     () =>
       `${pickM(["体調", "予定", "天気"])}は${pickM(["大丈夫ですか", "問題ないですか", "落ち着いてますか"])}`,
     () =>
-      `${pickM(["今日", "明日", "週末", "来週"])}の${pickM(["件", "話", "予定"])}、${pickM(["進めます", "合わせます", "見ておきます"])}`,
+      `${pickM(["今日", "明日", "週末", "来週"])}の${pickM(["件", "話", "予定"])}、${pickM(["合わせます", "見ておきます", "連絡します"])}`,
     () =>
-      `${pickM(["先ほど", "さっき", "昨日"])}の${pickM(["連絡", "話", "件"])}、${pickM(["了解しました", "受け取りました", "確認済みです"])}`,
+      `${pickM(["先ほど", "さっき", "昨日"])}の${pickM(["連絡", "話", "件"])}、${pickM(["了解しました", "受け取りました", "把握しました"])}`,
     () =>
       `${pickM(["念のため", "一応", "あとで"])}${pickM(["共有します", "連絡します", "送ります"])}`,
     () =>
@@ -248,9 +248,9 @@ const BODY_TEMPLATES: Record<string, (() => string)[]> = {
     () => `${pickM(REACT)}、${pickM(TIME)}に${pickM(PLACE)}で`,
   ],
   "dm-ootsuka": [
-    () => `${pickM(["履修", "研究室", "就活", "レポート"])}の件、${pickM(TIME)}なら大丈夫だよ`,
-    () => `${pickM(REACT)}。${pickM(["資料", "プリント"])}は${pickM(PLACE)}にあるから見ておいて`,
-    () => `${pickM(TIME)}に${pickM(PLACE)}来られる？`,
+    () => `${pickM(["履修", "研究室", "就活", "レポート"])}の件、${pickM(TIME)}なら大丈夫ですか`,
+    () => `${pickM(["資料", "プリント"])}は${pickM(PLACE)}にあります。確認してください`,
+    () => `${pickM(TIME)}に${pickM(PLACE)}来られますか`,
   ],
   // 先輩（ootsuka）への返信は hal が敬語
   "dm-ootsuka__hal": [
@@ -261,9 +261,16 @@ const BODY_TEMPLATES: Record<string, (() => string)[]> = {
   ],
   "dm-hayashi": [
     () =>
+      `${pickM(["履修", "課題", "レポート"])}の${pickM(["書き方", "提出先", "範囲"])}どうしてる？`,
+    () => `${pickM(TIME)}に${pickM(PLACE)}行くよ`,
+    () => `${pickM(["見ておく", "教える", "確認する"])}ね`,
+  ],
+  // 後輩（hayashi）へは hal がタメ口、後輩は敬語
+  "dm-hayashi__person": [
+    () =>
       `${pickM(["履修", "課題", "レポート"])}の${pickM(["書き方", "提出先", "範囲"])}教えてください`,
-    () => `${pickM(TIME)}に${pickM(PLACE)}行きます`,
-    () => `${pickM(REACT)}です。${pickM(["助かります", "確認します"])}`,
+    () => `${pickM(TIME)}に${pickM(PLACE)}行きます。よろしいですか`,
+    () => `${pickM(["助かります", "確認します", "承知しました"])}`,
   ],
   "dm-gunlance": [
     () => `${pickM(MONSTER)}の${pickM(["装備", "スキル", "立ち回り"])}どうしてますか`,
@@ -554,7 +561,8 @@ export function generateDmExpansion(input: DMExpansionInput): DMExpansionResult 
           `${month}-${pad(day)}T${pad(int(9, 23))}:${pad(int(0, 59))}:00+09:00`,
         );
         const { key } = nextTime(at);
-        const fromMe = list.length % 2 === 0;
+        // fromMe = hal の番（偶数番目は相手、奇数番目は hal）
+        const fromMe = list.length % 2 === 1;
         const poolKey =
           target.threadId === "dm-ootsuka" && fromMe
             ? "dm-ootsuka__hal"
@@ -572,7 +580,7 @@ export function generateDmExpansion(input: DMExpansionInput): DMExpansionResult 
         list.push({
           id: `${target.threadId}-x${String(list.length + 1).padStart(4, "0")}`,
           channelId: target.threadId,
-          authorId: fromMe ? target.personId : "hal",
+          authorId: fromMe ? "hal" : target.personId,
           sentAt: key,
           body: body ?? "うん",
         });

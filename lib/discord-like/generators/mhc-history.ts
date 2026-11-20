@@ -212,6 +212,8 @@ export function generateMhcHistory(
 
   const TEMPLATES = buildTemplates(pick);
   const usedTimes = new Set(existingTimes);
+  // 物語の最後（2026-11-19 23:52 の「住所を特定しました」）より前で止める
+  const CAP = Date.parse("2026-11-19T23:45:00+09:00");
   const all: { ch: string; at: number; key: string; body: string; author: string }[] = [];
 
   for (const [month, total] of MONTHS) {
@@ -221,11 +223,10 @@ export function generateMhcHistory(
         : new Date(Date.UTC(Number(month.slice(0, 4)), Number(month.slice(5, 7)), 0)).getUTCDate();
     // 活動日: 6日以降を中心に、必ず10日以上。どの活動日にも1通以上置く
     const active = new Set<number>();
-    for (let day = 6; day <= days; day += 1) if (rand() < 0.5) active.add(day);
-    active.add(6);
-    active.add(7);
-    active.add(8);
-    for (let day = 1; day <= 5 && active.size < 10; day += 1) active.add(day);
+    const targetDays = Math.max(10, Math.min(13, Math.ceil(total / 6)));
+    for (let day = 6; day <= days && active.size < targetDays; day += 1)
+      if (rand() < 0.6) active.add(day);
+    for (let day = 1; active.size < targetDays && day <= days; day += 1) active.add(day);
     const activeDays = [...active].sort((a, b) => a - b);
     const counts = activeDays.map(() => 1);
     let left = total - activeDays.length;
@@ -243,7 +244,7 @@ export function generateMhcHistory(
         const size = Math.min(remaining, int(1, 4));
         const ch = pick(MHC_HISTORY_CHANNELS.map(([id]) => id));
         for (let k = 0; k < size; k += 1) {
-          let at = burstStart + (k === 0 ? 0 : int(1, 15)) * 60000;
+          let at = Math.min(burstStart + (k === 0 ? 0 : int(1, 15)) * 60000, CAP - 60000);
           let key = jst(at);
           let guard = 0;
           while (usedTimes.has(key) && guard < 400) {
