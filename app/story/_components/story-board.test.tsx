@@ -34,16 +34,30 @@ describe("シナリオ確認画面（#81）", () => {
     expect(screen.getByText(/マイリスト、開いてみた/)).toBeInTheDocument();
 
     // 選択肢
-    await user.click(screen.getByRole("button", { name: "覚えてる。見に行く" }));
+    await user.click(screen.getByRole("button", { name: "見に行く" }));
 
     // 1場面終わると 1/4。次は本名が分かった後の「痕跡」なので、まだ場面は出ない
     expect(screen.getByText(/終わった場面: 1 \/ 4/)).toBeInTheDocument();
     // 履歴に残る（選んだ答えつき）
-    expect(screen.getByText("選んだ答え: 覚えてる。見に行く")).toBeInTheDocument();
+    expect(screen.getByText("選んだ答え: 見に行く")).toBeInTheDocument();
     // localStorage に保存されている
     await waitFor(() => {
       expect(window.localStorage.getItem(STORAGE_KEY)).toContain("ch1-mylist");
     });
+  });
+
+  it("「でんちゃん」を見つけるまで、カイへの相談は選べない（選択肢ゲート）", async () => {
+    const user = userEvent.setup();
+    render(<StoryBoard />);
+    await screen.findByRole("heading", { name: "シナリオ確認" });
+
+    await user.click(screen.getByRole("button", { name: "コンテスト結果を見る" }));
+    const consult = screen.getByRole("button", { name: "カイに相談する" });
+    expect(consult).toBeDisabled();
+    expect(screen.getByText("（まだ選べません）")).toBeInTheDocument();
+
+    await user.click(screen.getByRole("button", { name: "旧ブログのコメント欄を読む" }));
+    expect(screen.getByRole("button", { name: "カイに相談する" })).toBeEnabled();
   });
 
   it("台帳の表示は1か所の型から引き、アカウント行の key が重複しない", async () => {
@@ -71,7 +85,7 @@ describe("シナリオ確認画面（#81）", () => {
     await screen.findByRole("heading", { name: "シナリオ確認" });
 
     await user.click(screen.getByRole("button", { name: "マイリストを開く" }));
-    await user.click(screen.getByRole("button", { name: "覚えてる。見に行く" }));
+    await user.click(screen.getByRole("button", { name: "見に行く" }));
     expect(screen.getByText(/終わった場面: 1 \/ 4/)).toBeInTheDocument();
 
     await user.click(screen.getByRole("button", { name: "最初からやり直す" }));

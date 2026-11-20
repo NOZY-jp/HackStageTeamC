@@ -1,5 +1,5 @@
 import { scenes as defaultScenes } from "./script";
-import type { Progress, Scene, TranscriptEntry, Trigger } from "./types";
+import type { Progress, Scene, SceneChoice, TranscriptEntry, Trigger } from "./types";
 
 /** 何も見つけていない初期状態。 */
 export function emptyProgress(): Progress {
@@ -14,6 +14,11 @@ function withFlags(base: string[], added: string[]): string[] {
 /** 要求フラグがすべて立っているか。 */
 export function hasAllFlags(progress: Progress, required: string[]): boolean {
   return required.every((flag) => progress.flags.includes(flag));
+}
+
+/** その選択肢をいま選べるか（選択肢の requires がそろっている）。 */
+export function isChoiceAvailable(progress: Progress, choice: SceneChoice): boolean {
+  return hasAllFlags(progress, choice.requires ?? []);
 }
 
 /** その場面をいま始められるか（未完了で、要求フラグがそろっている）。 */
@@ -49,6 +54,9 @@ export function completeScene(progress: Progress, scene: Scene, choiceId?: strin
     : undefined;
   if (choiceId && !choice) {
     throw new Error(`場面 ${scene.id} に選択肢 ${choiceId} はありません`);
+  }
+  if (choice && !isChoiceAvailable(progress, choice)) {
+    throw new Error(`選択肢 ${choice.id} はまだ選べません（${choice.requires?.join(", ")}）`);
   }
   if (!choice && scene.choices.length > 0) {
     throw new Error(`場面 ${scene.id} は選択肢が必要です`);

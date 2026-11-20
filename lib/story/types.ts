@@ -64,6 +64,8 @@ export type SceneChoice = {
   id: string;
   label: string;
   setsFlags: FlagId[];
+  /** このフラグがそろうまで選べない（選択肢単位のゲート） */
+  requires?: FlagId[];
 };
 
 /** 場面。要求フラグがそろい、まだ終わっていなければ始まる。 */

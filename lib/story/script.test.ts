@@ -67,13 +67,14 @@ describe("台本の整合性（#81）", () => {
     ]);
     expect(flagsUsed).toContain("denchan_found");
     expect(flagsUsed).toContain("denchan_confirmed");
-    // かのんは「リョウが問い、かのんが答える」向き（撮影場所を知っているのはかのん）
+    // かのんはリョウと知り合いではないので、ch4 もリョウの独白にする
     const ch4 = scenes.find((scene) => scene.id === "ch4-kanon");
-    const ryoLine = ch4?.lines.find((line) => line.speakerId === "ryo")?.text ?? "";
-    expect(ryoLine).toContain("？");
-    expect(
-      ch4?.lines.some((line) => line.speakerId === "kanon" && line.text.includes("うん")),
-    ).toBe(true);
+    expect(ch4?.lines.every((line) => line.speakerId === "ryo")).toBe(true);
+    expect(ch4?.lines.some((line) => line.speakerId === "kanon")).toBe(false);
+    // 最後は「その場所に行く」ではなく、本名での照合（TalkUp 検索）へつなぐ
+    expect(ch4?.choices.map((choice) => choice.id)).toEqual(["search-name"]);
+    expect(ch4?.choices[0].label).toContain("本名");
+    expect(ch4?.choices[0].setsFlags).toContain("facebook_search");
   });
 
   it("台本とフラグ定義のIDが一致する（未定義のフラグを使わない）", () => {

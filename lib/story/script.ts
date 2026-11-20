@@ -24,7 +24,7 @@ export const scenes: Scene[] = [
       { speakerId: "ryo", text: "写真の記事、あった。賞をもらったやつだ。" },
     ],
     choices: [
-      { id: "remember", label: "覚えてる。見に行く", setsFlags: ["photo_hint"] },
+      { id: "remember", label: "見に行く", setsFlags: ["photo_hint"] },
       { id: "later", label: "あとで見る", setsFlags: ["photo_hint"] },
     ],
     completesFlags: [],
@@ -55,7 +55,13 @@ export const scenes: Scene[] = [
       { speakerId: "kai", text: "その写真、撮った場所に心当たりある？" },
     ],
     choices: [
-      { id: "ask-kai", label: "カイに相談する", setsFlags: ["denchan_confirmed"] },
+      // 「でんちゃん」を旧ブログのコメント欄で見つけた人だけが相談できる
+      {
+        id: "ask-kai",
+        label: "カイに相談する",
+        setsFlags: ["denchan_confirmed"],
+        requires: ["denchan_found"],
+      },
       { id: "go", label: "その場所に行ってみる", setsFlags: [] },
     ],
     completesFlags: ["kai_contacted"],
@@ -63,14 +69,21 @@ export const scenes: Scene[] = [
   {
     id: "ch4-kanon",
     chapter: "現実",
-    title: "かのんの記憶",
+    title: "写真の二人",
     requires: ["denchan_found", "denchan_confirmed", "photo_hint"],
     lines: [
-      { speakerId: "kanon", text: "久しぶり。あの写真、覚えてるよ。" },
-      { speakerId: "ryo", text: "あの写真、橋のたもとで撮ったんだよね？" },
-      { speakerId: "kanon", text: "うん。今も残ってるかは分からないけど、行ってみたら？" },
+      {
+        speakerId: "ryo",
+        text: "かのんって人の写真、この子と写ってるのは…彼女かな。確信は持てない。",
+      },
+      {
+        speakerId: "ryo",
+        text: "写真の子は、たしかに同じ人に見える。名前で探せば、何か分かるかもしれない。",
+      },
     ],
-    choices: [{ id: "thanks", label: "ありがとう。行ってみる", setsFlags: [] }],
+    choices: [
+      { id: "search-name", label: "本名で TalkUp を検索する", setsFlags: ["facebook_search"] },
+    ],
     completesFlags: [],
   },
 ];

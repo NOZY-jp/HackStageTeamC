@@ -4,6 +4,7 @@ import {
   availableScenes,
   completeScene,
   emptyProgress,
+  isChoiceAvailable,
   nextScene,
   replayTranscript,
   resetProgress,
@@ -65,6 +66,19 @@ describe("進行ロジック（#81）", () => {
 
     started = completeScene(started, scene("ch1-mylist"), "remember");
     expect(() => completeScene(started, scene("ch1-mylist"), "remember")).toThrow();
+  });
+
+  it("選択肢のゲート: 「でんちゃん」を見つけるまでカイに相談できない", () => {
+    let progress = applyTrigger(emptyProgress(), trigger("read-contest-result"));
+    const consult = scene("ch3-kai").choices[0];
+    expect(isChoiceAvailable(progress, consult)).toBe(false);
+    expect(() => completeScene(progress, scene("ch3-kai"), "ask-kai")).toThrow();
+
+    // 旧ブログのコメント欄を読むと相談できるようになる
+    progress = applyTrigger(progress, trigger("find-denchan"));
+    expect(isChoiceAvailable(progress, consult)).toBe(true);
+    const after = completeScene(progress, scene("ch3-kai"), "ask-kai");
+    expect(after.flags).toContain("denchan_confirmed");
   });
 
   it("履歴は終わった場面だけを台本の順に、選んだ選択肢つきで組み立てる", () => {

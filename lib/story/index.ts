@@ -1,4 +1,4 @@
-export { cast, castName, getCastMember } from "./cast";
+export { cast, castCallName, castName, getCastMember } from "./cast";
 export {
   applyTrigger,
   availableScenes,
@@ -6,6 +6,7 @@ export {
   emptyProgress,
   findScene,
   hasAllFlags,
+  isChoiceAvailable,
   isSceneAvailable,
   nextScene,
   replayTranscript,

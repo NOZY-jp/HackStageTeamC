@@ -33,7 +33,12 @@ export const flags: StoryFlag[] = [
   {
     id: "denchan_confirmed",
     label: "呼び名の由来を知った",
-    description: "カイに相談して、「でんちゃん」が誰の呼び名かを教えてもらった。",
+    description: "カイに相談したら、でんちゃんと呼ぶと喜ぶと助言された。",
+  },
+  {
+    id: "facebook_search",
+    label: "本名で TalkUp を検索した",
+    description: "写真の人物を本名で検索し、住んでいる県まで分かった（住所は特定しない）。",
   },
 ];
 

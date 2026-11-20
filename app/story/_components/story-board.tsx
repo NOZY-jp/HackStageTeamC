@@ -9,6 +9,7 @@ import {
   clearProgress,
   completeScene,
   flags,
+  isChoiceAvailable,
   loadProgress,
   PROGRESS_EVENT,
   type Progress,
@@ -140,18 +141,28 @@ export function StoryBoard() {
                 aria-label={`${scene.title} の選択肢`}
                 className="flex flex-wrap gap-2 border-0 p-0"
               >
-                {scene.choices.map((choice) => (
-                  <button
-                    key={choice.id}
-                    type="button"
-                    className="rounded bg-white/10 px-3 py-1 text-sm"
-                    onClick={() => {
-                      update(completeScene(progress, scene, choice.id));
-                    }}
-                  >
-                    {choice.label}
-                  </button>
-                ))}
+                {scene.choices.map((choice) => {
+                  // 選択肢ごとのゲート（例: 「でんちゃん」を見つけるまでカイに相談できない）
+                  const selectable = isChoiceAvailable(progress, choice);
+                  return (
+                    <span key={choice.id} className="inline-flex items-center gap-1">
+                      <button
+                        type="button"
+                        className="rounded bg-white/10 px-3 py-1 text-sm disabled:opacity-50"
+                        disabled={!selectable}
+                        title={selectable ? undefined : "まだ選べません"}
+                        onClick={() => {
+                          update(completeScene(progress, scene, choice.id));
+                        }}
+                      >
+                        {choice.label}
+                      </button>
+                      {selectable ? null : (
+                        <span className="text-xs text-fg-muted">（まだ選べません）</span>
+                      )}
+                    </span>
+                  );
+                })}
               </fieldset>
             </article>
           ))
