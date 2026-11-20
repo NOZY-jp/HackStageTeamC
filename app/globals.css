@@ -1183,13 +1183,16 @@
 .call-tiles[data-layout="dm"] {
   position: relative;
   display: flex;
-  align-items: center;
+  align-items: stretch;
   justify-content: center;
+  /* 相手のタイルを stage の高さいっぱいに使う */
+  height: 100%;
 }
 
 .call-tiles[data-layout="dm"] .call-tile:first-child {
-  width: min(520px, 100%);
-  aspect-ratio: 16 / 9;
+  width: 100%;
+  height: 100%;
+  max-width: 100%;
 }
 
 .call-tiles[data-layout="dm"] .call-tile:nth-child(2) {
