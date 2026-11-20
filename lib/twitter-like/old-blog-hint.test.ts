@@ -1,13 +1,17 @@
 import { describe, expect, it } from "vitest";
 import {
   getPost,
+  getProfile,
   getUserByHandle,
   isProtected,
   listPosts,
   listReplies,
+  listUsers,
   searchUsers,
 } from "./index";
 
+/** 旧アカウントの今の handle（改名後）。旧 @hunter_denden0102 はもう誰も使っていない。 */
+const RENAMED_HANDLE = "maimai_mhw";
 const OLD_HANDLE = "hunter_denden0102";
 const KANON_HANDLE = "kanon__dayo";
 const ARTICLE_TITLE = "写真コンテストで賞をもらいました！";
@@ -20,6 +24,14 @@ const FAMILY_NAME = word(0x670d, 0x90e8);
 const GIVEN_NAME = word(0x7531, 0x6bd4);
 
 const kanon = getUserByHandle(KANON_HANDLE);
+
+/** ユーザーとプロフィール（bio・joinedAt）を合わせた一覧。 */
+const accounts = () =>
+  listUsers().map((user) => ({
+    ...user,
+    bio: getProfile(user.id)?.bio ?? "",
+    joinedAt: getProfile(user.id)?.joinedAt ?? "",
+  }));
 
 describe("第三章 Twitter 側（#94）", () => {
   it("順序2: 攻略の投稿に、かのんの「ブログにも書いてたよな」リプライが読める", () => {
@@ -41,29 +53,45 @@ describe("第三章 Twitter 側（#94）", () => {
 
   it("8b: 記事名で検索すると、改名して鍵垢になった旧アカウントが出る", () => {
     const results = searchUsers(ARTICLE_TITLE);
-    expect(results.map((user) => user.handle)).toContain(OLD_HANDLE);
+    expect(results.map((user) => user.handle)).toContain(RENAMED_HANDLE);
 
-    const old = results.find((user) => user.handle === OLD_HANDLE);
+    const old = results.find((user) => user.handle === RENAMED_HANDLE);
     expect(isProtected(old)).toBe(true);
-    // 旧名がプロフィールから読める（改名したことが分かる）。現在のアカウントとは別物
-    expect(old?.handle).toBe("hunter_denden0102");
-    const profile = searchUsers(ARTICLE_TITLE).find((user) => user.handle === OLD_HANDLE);
-    expect(profile).toBeDefined();
-    // bio に旧名 hunter_denden が書かれている
-    expect(JSON.stringify(searchUsers("hunter_denden").map((user) => user.handle))).toContain(
-      OLD_HANDLE,
-    );
+    // 今の表示名は「まいまい」（改名後）
+    expect(old?.displayName).toBe("まいまい");
+
+    // 旧ハンドルは誰の handle でもない（改名済みで、リンクは 404 になる）
+    expect(accounts().some((account) => account.handle === OLD_HANDLE)).toBe(false);
+    expect(accounts().every((account) => !account.handle.includes("hunter_denden"))).toBe(true);
+
+    // 旧名は bio から直接読める（handle の先頭一致では通らない形で検査する）
+    const profile = accounts().find((candidate) => candidate.handle === RENAMED_HANDLE);
+    expect(profile?.bio).toContain(OLD_HANDLE);
+    expect(profile?.bio).toContain("hunter_denden");
+    // 記事名も bio にあり、記事名検索でこのアカウントに届く
+    expect(profile?.bio).toContain(ARTICLE_TITLE);
     expect(old?.handle).not.toBe("maimaimaimai");
+    expect(old?.handle).not.toContain("hunter_denden");
 
     // 鍵垢なので投稿本文は読めない（プロフィールだけ）
     expect(listPosts().some((post) => post.authorId === old?.id)).toBe(false);
     expect(getPost("post-103")).toBeDefined();
   });
 
+  it("8b: 旧アカウントの作者が2019年の投稿を書いている（現在のアカウントで読める）", () => {
+    const post = getPost("post-101");
+    expect(post?.authorId).toBe("tw-mai");
+    const mai = accounts().find((account) => account.handle === "mai");
+    expect(mai).toBeDefined();
+    // アカウント作成が投稿日より前（投稿できない矛盾を作らない）
+    expect((mai?.joinedAt ?? "") < (post?.postedAt ?? "")).toBe(true);
+    expect(mai?.joinedAt.startsWith("2019")).toBe(true);
+  });
+
   it("8c: 旧アカウントの Bio に BFF かのんのアカウントがある", () => {
     const result = searchUsers(`@${KANON_HANDLE}`).map((user) => user.handle);
-    expect(result).toContain(OLD_HANDLE);
-    const old = searchUsers(ARTICLE_TITLE).find((user) => user.handle === OLD_HANDLE);
+    expect(result).toContain(RENAMED_HANDLE);
+    const old = searchUsers(ARTICLE_TITLE).find((user) => user.handle === RENAMED_HANDLE);
     expect(old).toBeDefined();
   });
 

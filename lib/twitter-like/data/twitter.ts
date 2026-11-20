@@ -26,11 +26,11 @@ export const twitterUsers: TwitterUser[] = [
     avatarColor: "#5c677d",
     protected: true,
   },
-  // 古いアカウント。改名して鍵垢になった（今のアカウントとは別物）
+  // 古いアカウント。改名して鍵垢になった（旧 @hunter_denden0102 → 現 @maimai_mhw）
   {
     id: "tw-old-denden",
-    displayName: "でんでん",
-    handle: "hunter_denden0102",
+    displayName: "まいまい",
+    handle: "maimai_mhw",
     avatarColor: "#7a6a3f",
     protected: true,
   },
@@ -48,7 +48,8 @@ export const twitterProfiles: Profile[] = [
   {
     userId: "tw-mai",
     bio: "ゲームでは mai。顔も名前も教えてない人がいるけど、それでいいと思ってる。",
-    joinedAt: "2026-11-01",
+    // 2019年の投稿（post-101 など）より前から使っているアカウント
+    joinedAt: "2019-05-12",
     followingCount: 96,
     followersCount: 141,
   },
@@ -96,9 +97,9 @@ export const twitterProfiles: Profile[] = [
   },
   {
     // 記事の名前で検索すると見つかる（bio に記事名を残している）。
-    // 前の名前（hunter_denden）も書いて、改名したことが分かるようにする
+    // 改名したことと旧ハンドル・旧表示名を bio に残す（今は誰も使っていない）
     userId: "tw-old-denden",
-    bio: "前は hunter_denden で活動していました。「写真コンテストで賞をもらいました！」を書いた頃のアカウントです。BFF: @kanon__dayo",
+    bio: "前は @hunter_denden0102（表示名 hunter_denden）で活動していました。「写真コンテストで賞をもらいました！」を書いた頃のアカウントです。BFF: @kanon__dayo",
     joinedAt: "2018-05-03",
     followingCount: 38,
     followersCount: 64,
