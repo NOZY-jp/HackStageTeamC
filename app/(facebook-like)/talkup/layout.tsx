@@ -13,15 +13,17 @@ export const metadata: Metadata = {
 
 export default function FacebookLayout({ children }: { children: ReactNode }) {
   return (
-    <FacebookProvider>
-      <div className="fb-shell">
-        <Suspense fallback={<div className="fb-header" />}>
-          <FacebookHeader />
-        </Suspense>
-        <main className="fb-main">
-          <Suspense fallback={null}>{children}</Suspense>
-        </main>
-      </div>
-    </FacebookProvider>
+    <Suspense fallback={<div className="fb-shell" />}>
+      <FacebookProvider>
+        <div className="fb-shell">
+          <Suspense fallback={<div className="fb-header" />}>
+            <FacebookHeader />
+          </Suspense>
+          <main className="fb-main">
+            <Suspense fallback={null}>{children}</Suspense>
+          </main>
+        </div>
+      </FacebookProvider>
+    </Suspense>
   );
 }

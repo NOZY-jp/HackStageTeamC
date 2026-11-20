@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import Link from "next/link";
 import { type FormEvent, useState } from "react";
 import { getUserById } from "@/lib/facebook-like";
@@ -91,6 +92,16 @@ export function PostCard({ post, showAllComments = false }: PostCardProps) {
         {post.body}
       </div>
 
+      {post.attachment?.kind === "photo" && post.attachment.src ? (
+        <Image
+          src={post.attachment.src}
+          alt={post.attachment.alt ?? post.attachment.title}
+          width={post.attachment.width ?? 800}
+          height={post.attachment.height ?? 600}
+          unoptimized
+          className="h-auto w-full"
+        />
+      ) : null}
       {post.attachment ? (
         <div
           className="fb-attachment"
