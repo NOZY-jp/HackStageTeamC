@@ -26,12 +26,13 @@ export const twitterUsers: TwitterUser[] = [
     avatarColor: "#5c677d",
     protected: true,
   },
-  // 2018〜2020年ごろの古いアカウント（今のアカウントとは別物）
+  // 古いアカウント。改名して鍵垢になった（今のアカウントとは別物）
   {
     id: "tw-old-denden",
-    displayName: "hunter_denden",
+    displayName: "でんでん",
     handle: "hunter_denden0102",
     avatarColor: "#7a6a3f",
+    protected: true,
   },
   { id: "tw-kanon", displayName: "かのん", handle: "kanon__dayo", avatarColor: "#c2563f" },
 ];
@@ -94,15 +95,16 @@ export const twitterProfiles: Profile[] = [
     followersCount: 34,
   },
   {
+    // 記事の名前で検索すると見つかる（bio に記事名を残している）
     userId: "tw-old-denden",
-    bio: "モンハンときどき写真。装備のメモを残していく。",
+    bio: "昔の記事:「写真コンテストで賞をもらいました！」／装備メモも書いてました。BFF: @kanon__dayo",
     joinedAt: "2018-05-03",
     followingCount: 38,
     followersCount: 64,
   },
   {
     userId: "tw-kanon",
-    bio: "のんびり遊んでます。知ってる人は知ってる。",
+    bio: "写真を撮るのが好き。古い友達とよく出かけてます。",
     joinedAt: "2017-11-20",
     followingCount: 120,
     followersCount: 98,
@@ -351,53 +353,61 @@ export const twitterPosts: Post[] = [
     repostCount: 0,
     likeCount: 2,
   },
-  // 旧アカウント（2018〜2020）。今のアカウントとは別物だと分かるように古い日付だけ置く
+  // 攻略に言及した投稿と、リア友かのんの「前にも書いてたよな」リプライ
   {
     id: "post-101",
-    authorId: "tw-old-denden",
-    postedAt: "2018-08-12T22:41:00+09:00",
-    body: "夏休み、毎日マルチばっかり。双剣の立ち回り、ちょっとずつ分かってきた。",
+    authorId: "tw-mai",
+    postedAt: "2026-11-18T22:10:00+09:00",
+    body: "双剣、クラッチクローから弱点に当てるのがまだ安定しない。装備はこのままでいいのかな。",
     replyCount: 1,
     repostCount: 0,
-    likeCount: 4,
+    likeCount: 12,
   },
   {
     id: "post-102",
-    authorId: "tw-old-denden",
-    postedAt: "2019-09-08T07:12:00+09:00",
-    body: "アイスボーン初日。クラッチクロー、まだ慣れないけど楽しい。",
-    replyCount: 1,
-    repostCount: 1,
-    likeCount: 6,
-  },
-  {
-    id: "post-103",
-    authorId: "tw-old-denden",
-    postedAt: "2020-02-10T21:05:00+09:00",
-    body: "装備のメモ、まとめておいた。しばらくはこれで行く。",
+    authorId: "tw-kanon",
+    postedAt: "2026-11-18T22:40:00+09:00",
+    body: "その装備の組み方、前にも長いこと書いてたよな。読んでたよ。",
+    replyToId: "post-101",
     replyCount: 0,
     repostCount: 0,
-    likeCount: 2,
+    likeCount: 3,
+  },
+  // かのんの写真つき投稿（第五章の照合材料。本人かどうかは断定しない）
+  {
+    id: "post-103",
+    authorId: "tw-kanon",
+    postedAt: "2026-11-10T19:05:00+09:00",
+    body: "この前の写真。仲良さそうに見えるでしょ。本人かどうかは、まだ分からないけど。",
+    replyCount: 0,
+    repostCount: 1,
+    likeCount: 28,
+    media: [
+      { src: "/twitter-like/photo-01.svg", alt: "並んで歩く二人の後ろ姿", width: 800, height: 600 },
+      {
+        src: "/twitter-like/photo-02.svg",
+        alt: "テーブルをはさんで笑う二人",
+        width: 800,
+        height: 600,
+      },
+    ],
   },
   {
     id: "post-104",
     authorId: "tw-kanon",
-    postedAt: "2019-09-09T21:30:00+09:00",
-    body: "その立ち回り、前にも長いこと書いてたよな。読んでたよ。",
-    replyToId: "post-102",
+    postedAt: "2026-11-14T08:30:00+09:00",
+    body: "アルバムを整理してたら出てきた。この二人、ずっと一緒だったんだよな。",
     replyCount: 0,
     repostCount: 0,
-    likeCount: 1,
-  },
-  {
-    id: "post-105",
-    authorId: "tw-kanon",
-    postedAt: "2018-08-13T08:20:00+09:00",
-    body: "双剣の話、前にもじっくり書いてたよな。覚えてる。",
-    replyToId: "post-101",
-    replyCount: 0,
-    repostCount: 0,
-    likeCount: 2,
+    likeCount: 19,
+    media: [
+      {
+        src: "/twitter-like/photo-02.svg",
+        alt: "古いアルバムから。並んで写る二人",
+        width: 800,
+        height: 600,
+      },
+    ],
   },
 ];
 
@@ -432,7 +442,6 @@ export const twitterViewCounts: Record<string, number> = {
   "post-102": 240,
   "post-103": 96,
   "post-104": 55,
-  "post-105": 62,
 };
 
 export const twitterTrends: Trend[] = [

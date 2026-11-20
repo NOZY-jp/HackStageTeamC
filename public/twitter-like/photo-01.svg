@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="800" height="600" viewBox="0 0 800 600" role="img" aria-label="並んで歩く二人の後ろ姿">
+  <defs>
+    <linearGradient id="sky" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#f3c9a4"/>
+      <stop offset="1" stop-color="#d98c6a"/>
+    </linearGradient>
+  </defs>
+  <rect width="800" height="600" fill="url(#sky)"/>
+  <path d="M0 470h800v130H0z" fill="#6f5a4e"/>
+  <g fill="#3c3230">
+    <circle cx="330" cy="250" r="42"/>
+    <path d="M288 290h84l18 180h-120z"/>
+    <circle cx="470" cy="270" r="38"/>
+    <path d="M432 306h76l14 164h-104z"/>
+  </g>
+  <g fill="none" stroke="#3c3230" stroke-width="14" stroke-linecap="round">
+    <path d="M372 340l40 18"/>
+  </g>
+</svg>
