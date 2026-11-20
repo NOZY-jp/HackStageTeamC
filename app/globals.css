@@ -1379,6 +1379,17 @@
   }
 }
 
+/* 小窓（右下）はアバターと名前を小さくする */
+.call-tiles[data-layout="dm"] .call-tile:nth-child(2) .call-tile-avatar {
+  width: 44px;
+  height: 44px;
+  font-size: 18px;
+}
+
+.call-tiles[data-layout="dm"] .call-tile:nth-child(2) .call-tile-name {
+  font-size: 11px;
+}
+
 .sr-only {
   position: absolute;
   width: 1px;
