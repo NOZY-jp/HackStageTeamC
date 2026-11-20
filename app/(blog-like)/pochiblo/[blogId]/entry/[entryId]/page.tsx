@@ -15,6 +15,12 @@ import {
   listPublicEntries,
 } from "@/lib/blog-like";
 
+// 記事は params から引くので、トップレベルで params を待つ＝URL データを読むことになる。
+// Cache Components（PPR）のままだと「params が <Suspense> の外で読まれている」警告が出るため、
+// この区画はブロックを許可する（twitter-like の詳細ルートと同じ扱い）。
+// ここは静的データだけなので待ち時間は無く、存在しない記事は 404 のまま返せる。
+export const instant = false;
+
 type Props = PageProps<"/pochiblo/[blogId]/entry/[entryId]">;
 
 export function generateStaticParams() {
