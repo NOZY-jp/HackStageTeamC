@@ -2,7 +2,8 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { ArticleListItem } from "@/components/note-like/article-list-item";
 import { CreatorAvatar } from "@/components/note-like/creator-avatar";
-import { getCreator, listArticlesByCreator, listCreators } from "@/lib/note-like";
+import { creatorHref, getCreator, listArticlesByCreator, listCreators } from "@/lib/note-like";
+import { canonicalUrl } from "@/lib/seo/site";
 
 type Props = PageProps<"/note/[creatorId]">;
 
@@ -13,7 +14,14 @@ export function generateStaticParams() {
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { creatorId } = await params;
   const creator = getCreator(creatorId);
-  return creator ? { title: creator.displayName, description: creator.bio } : {};
+  if (!creator) {
+    return {};
+  }
+  return {
+    title: creator.displayName,
+    description: creator.bio,
+    alternates: { canonical: canonicalUrl(creatorHref(creator.id)) },
+  };
 }
 
 export default async function CreatorPage({ params }: Props) {
