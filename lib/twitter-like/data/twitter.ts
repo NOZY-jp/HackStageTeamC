@@ -26,6 +26,14 @@ export const twitterUsers: TwitterUser[] = [
     avatarColor: "#5c677d",
     protected: true,
   },
+  // 2018〜2020年ごろの古いアカウント（今のアカウントとは別物）
+  {
+    id: "tw-old-denden",
+    displayName: "hunter_denden",
+    handle: "hunter_denden0102",
+    avatarColor: "#7a6a3f",
+  },
+  { id: "tw-kanon", displayName: "かのん", handle: "kanon__dayo", avatarColor: "#c2563f" },
 ];
 
 export const twitterProfiles: Profile[] = [
@@ -84,6 +92,20 @@ export const twitterProfiles: Profile[] = [
     joinedAt: "2026-11-06",
     followingCount: 27,
     followersCount: 34,
+  },
+  {
+    userId: "tw-old-denden",
+    bio: "モンハンときどき写真。装備のメモを残していく。",
+    joinedAt: "2018-05-03",
+    followingCount: 38,
+    followersCount: 64,
+  },
+  {
+    userId: "tw-kanon",
+    bio: "のんびり遊んでます。知ってる人は知ってる。",
+    joinedAt: "2017-11-20",
+    followingCount: 120,
+    followersCount: 98,
   },
 ];
 
@@ -329,6 +351,54 @@ export const twitterPosts: Post[] = [
     repostCount: 0,
     likeCount: 2,
   },
+  // 旧アカウント（2018〜2020）。今のアカウントとは別物だと分かるように古い日付だけ置く
+  {
+    id: "post-101",
+    authorId: "tw-old-denden",
+    postedAt: "2018-08-12T22:41:00+09:00",
+    body: "夏休み、毎日マルチばっかり。双剣の立ち回り、ちょっとずつ分かってきた。",
+    replyCount: 1,
+    repostCount: 0,
+    likeCount: 4,
+  },
+  {
+    id: "post-102",
+    authorId: "tw-old-denden",
+    postedAt: "2019-09-08T07:12:00+09:00",
+    body: "アイスボーン初日。クラッチクロー、まだ慣れないけど楽しい。",
+    replyCount: 1,
+    repostCount: 1,
+    likeCount: 6,
+  },
+  {
+    id: "post-103",
+    authorId: "tw-old-denden",
+    postedAt: "2020-02-10T21:05:00+09:00",
+    body: "装備のメモ、まとめておいた。しばらくはこれで行く。",
+    replyCount: 0,
+    repostCount: 0,
+    likeCount: 2,
+  },
+  {
+    id: "post-104",
+    authorId: "tw-kanon",
+    postedAt: "2019-09-09T21:30:00+09:00",
+    body: "その立ち回り、前にも長いこと書いてたよな。読んでたよ。",
+    replyToId: "post-102",
+    replyCount: 0,
+    repostCount: 0,
+    likeCount: 1,
+  },
+  {
+    id: "post-105",
+    authorId: "tw-kanon",
+    postedAt: "2018-08-13T08:20:00+09:00",
+    body: "双剣の話、前にもじっくり書いてたよな。覚えてる。",
+    replyToId: "post-101",
+    replyCount: 0,
+    repostCount: 0,
+    likeCount: 2,
+  },
 ];
 
 /** ポストの表示数（インプレッション）のダミー値。Post.id → 件数。 */
@@ -358,6 +428,11 @@ export const twitterViewCounts: Record<string, number> = {
   "post-023": 1690,
   "post-024": 95,
   "post-025": 61,
+  "post-101": 180,
+  "post-102": 240,
+  "post-103": 96,
+  "post-104": 55,
+  "post-105": 62,
 };
 
 export const twitterTrends: Trend[] = [
