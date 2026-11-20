@@ -15,9 +15,9 @@ export const acquaintances: User[] = [
     status: "online",
   },
   {
-    id: "sou",
-    displayName: "ソウ",
-    handle: "sou_0502",
+    id: "jun",
+    displayName: "ジュン",
+    handle: "jun_0502",
     avatarColor: "#eb459e",
     status: "online",
   },
