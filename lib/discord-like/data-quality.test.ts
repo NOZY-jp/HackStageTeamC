@@ -6,6 +6,7 @@ import { describe, expect, it } from "vitest";
 import { buildMhcHistory } from "./data/messages/mhc-history";
 import { ACQUAINTANCE_NOTES } from "./data/people/acquaintance-notes";
 import { generateDmExpansion } from "./generators/dm-expansion";
+import { KAI_LIMIT_IN_MHC, looksTwoTopic, PERSON_FORBIDDEN } from "./generators/mhc-history";
 import { FIRST_SEEN } from "./generators/people-rules";
 import { FRIEND_MEMBERS, looksPadded, UNIV_MEMBERS } from "./generators/servers";
 import { listChannels, listDMMessages, listDMThreads, listGuilds, listMessages } from "./index";
@@ -317,6 +318,23 @@ describe("データ品質（#131 / D9・D10）", () => {
       existingLastMaimaiAt: "2026-11-19T21:48:00+09:00",
     });
     expect(second.additions).toEqual(first.additions);
+  });
+
+  it("学生でない人（MaiMai・じじい・マスター）は学生語彙を使わない（0件）", () => {
+    for (const message of newMessages()) {
+      const rule = PERSON_FORBIDDEN[message.authorId];
+      if (!rule) continue;
+      expect(rule.test(message.body), `${message.id} ${message.authorId}: ${message.body}`).toBe(
+        false,
+      );
+    }
+    expect(KAI_LIMIT_IN_MHC).toBeLessThanOrEqual(5);
+  });
+
+  it("1文に2つの話題（時刻＋別の話題）を連結しない", () => {
+    for (const message of messages) {
+      expect(looksTwoTopic(message.body), `${message.id}: ${message.body}`).toBe(false);
+    }
   });
 
   it("voice チャンネルには入室/退出のシステムメッセージしか無い（#129 で VoiceSession を追加）", () => {

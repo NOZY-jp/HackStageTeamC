@@ -224,7 +224,7 @@ const BODY_TEMPLATES: Record<string, (() => string)[]> = {
     () =>
       `${pickM(["念のため", "一応", "あとで"])}${pickM(["共有します", "連絡します", "送ります"])}`,
     () =>
-      `${pickM(["無理せず", "焦らず", "ゆっくりで"])}${pickM(["で大丈夫です", "お願いします", "どうぞ"])}`,
+      `${pickM(["無理せず", "焦らず", "ゆっくり"])}${pickM(["で大丈夫です", "お願いします", "どうぞ"])}`,
   ],
   "dm-taku": [
     () => `${pickM(MONSTER)}行く？${pickM(TIME)}から`,
@@ -278,6 +278,19 @@ const BODY_TEMPLATES: Record<string, (() => string)[]> = {
     () => `${pickM(REACT)}、${pickM(TIME)}に集会で`,
   ],
 };
+
+const KAI_SCHEDULE: (() => string)[] = [
+  () => `${pickM(["今日", "明日", "週末"])}の${pickM(TIME)}、予定ありますか`,
+  () => `${pickM(["了解", "承知"])}です。${pickM(TIME)}にまた連絡します`,
+  () => `${pickM(["今日", "明日", "週末", "来週"])}の予定、${pickM(TIME)}に合わせます`,
+  () => `${pickM(["先ほど", "さっき", "昨日"])}の連絡、${pickM(TIME)}に確認しました`,
+  () => `${pickM(["念のため", "一応", "あとで"])}${pickM(TIME)}に連絡します`,
+  () => `${pickM(["今日", "明日"])}は${pickM(TIME)}だけ予定を空けます`,
+  () => `${pickM(["来週", "再来週"])}の${pickM(TIME)}、空いてますか`,
+  () => `${pickM(TIME)}の件、${pickM(["了解しました", "受け取りました"])}`,
+  () => `${pickM(["予定", "連絡"])}は${pickM(TIME)}までに${pickM(["送ります", "まとめます"])}`,
+  () => `${pickM(["今日", "明日"])}の${pickM(TIME)}、${pickM(["大丈夫ですか", "いけますか"])}`,
+];
 
 const KAI_INVESTIGATION: (() => string)[] = [
   () => `ログの${pickM(["3ページ目", "日付", "時刻", "添付"])}を確認しました`,
@@ -522,7 +535,7 @@ export function generateDmExpansion(input: DMExpansionInput): DMExpansionResult 
         const pool =
           month >= "2026-10"
             ? [...KAI_INVESTIGATION, ...(templates.get("dm-kai") ?? [])]
-            : (templates.get("dm-kai") ?? []);
+            : KAI_SCHEDULE;
         const candidate = pick(pool)();
         if (!additions["dm-kai"].some((message) => message.body === candidate)) {
           body = candidate;
