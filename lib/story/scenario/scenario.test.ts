@@ -1,5 +1,13 @@
 import { describe, expect, it } from "vitest";
 import { characters, FORBIDDEN_WORDS, nicknames } from "../characters";
+import {
+  completeBeat,
+  completedChats,
+  initialState,
+  nextBeat,
+  setFlag,
+  transcript,
+} from "../engine";
 import { EXTRA_FLAGS, type FlagId } from "../flags";
 import { say, textsOf, validateBeat } from "../stage";
 import { STEP_IDS } from "../steps";
@@ -96,5 +104,36 @@ describe("台本の整合性", () => {
         }
       }
     }
+  });
+});
+
+describe("ゲームでの場面の進行", () => {
+  it("序章で通話を終える選択をすると第二章が始まる", () => {
+    expect(nextBeat(initialState)).toBeUndefined();
+
+    const started = setFlag(initialState, "started");
+    const prologue = nextBeat(started);
+    expect(prologue?.id).toBe("ch1-prologue");
+    if (!prologue) throw new Error("序章が始まりません");
+    expect(() => completeBeat(started, prologue)).toThrow("選択肢が必要です");
+
+    const afterCall = completeBeat(started, prologue, "leave-call");
+    expect(afterCall.choices[prologue.id]).toEqual(["leave-call"]);
+    expect(transcript(afterCall)[0]?.lines.at(-1)?.text).toBe(
+      "明日は遅れるわけにはいかないし、今日はもう寝るか",
+    );
+
+    const disappearance = nextBeat(afterCall);
+    expect(disappearance?.id).toBe("ch2-disappearance");
+    if (!disappearance) throw new Error("第二章が始まりません");
+
+    const afterDisappearance = completeBeat(afterCall, disappearance);
+    expect(completedChats(afterDisappearance)).toMatchObject([
+      {
+        channel: "discord:dm-maimai",
+        from: "ryo",
+        text: "こっちはもう着いたけどゆっくり来ていいよ",
+      },
+    ]);
   });
 });

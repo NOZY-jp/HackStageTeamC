@@ -65,9 +65,13 @@ export const chapter1: Beat[] = [
       title("……"),
       narrate("1時間は経っただろうか、戻ってくる様子はなかった。"),
       call("ryo", "うーんそんな長電話してるのかな、それとも寝落ち？"),
-      call("ryo", "明日は遅れるわけにはいかないし、今日はもう寝るか"),
-      voice("discord:mhc-vc-3", "ryo", "leave"),
-      wait("slow"),
+    ],
+    choices: [
+      {
+        id: "leave-call",
+        label: "明日は遅れるわけにはいかないし、今日はもう寝るか",
+        reply: [voice("discord:mhc-vc-3", "ryo", "leave"), wait("slow")],
+      },
     ],
   },
 ];
