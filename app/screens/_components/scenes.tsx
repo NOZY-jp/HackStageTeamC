@@ -1,5 +1,5 @@
 import type { CSSProperties, ReactNode } from "react";
-import { CURRENT_ID, GAME_OLD_ID, OLD_DISCORD_ID } from "../scenes";
+import { CURRENT_ID, GAME_OLD_DISPLAY_NAME, GAME_OLD_ID } from "../scenes";
 
 /**
  * 撮影用のモック画面（#103）。文字はすべて HTML テキストで描く。
@@ -87,6 +87,7 @@ export function GameScene() {
         <div style={{ display: "flex", alignItems: "baseline", gap: 8, marginBottom: 6 }}>
           <span style={{ fontSize: 13, letterSpacing: 0.5, color: "#cfe3d6" }}>{GAME_OLD_ID}</span>
           <span style={{ fontSize: 10, color: "#9fb3a6" }}>HR 52</span>
+          <span style={{ fontSize: 9, color: "#8fa697" }}>（旧: {GAME_OLD_DISPLAY_NAME}）</span>
         </div>
         <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
           <Bar width="82%" color="#c0392b" />
@@ -422,8 +423,12 @@ export function LobbyScene() {
 
         <div style={{ width: 300 }}>
           <div style={{ fontSize: 11, color: "#a9b6c0", marginBottom: 8 }}>パーティメンバー</div>
-          <PartyMember handle={GAME_OLD_ID} rank="HR 52・双剣" color="#7a6a3f" />
-          <PartyMember handle={OLD_DISCORD_ID} rank="HR 49・太刀" color="#4f6f8a" />
+          <PartyMember
+            handle={GAME_OLD_ID}
+            rank="HR 52・双剣（旧: hunter_denden）"
+            color="#7a6a3f"
+          />
+          <PartyMember handle="imperial_chi" rank="HR 49・太刀" color="#4f6f8a" />
           <PartyMember handle="gunlance_taro" rank="HR 61・ガンランス" color="#57f287" />
           <PartyMember handle="bow_haruka" rank="HR 44・弓" color="#9b59b6" />
         </div>
