@@ -54,6 +54,7 @@ export function MessagePane({
   showHash,
   headerAvatar,
   members = [],
+  focusMessageId,
 }: {
   channelKey: string;
   mode: Mode;
@@ -64,6 +65,8 @@ export function MessagePane({
   headerAvatar?: { displayName: string; avatarColor: string };
   /** メンバー一覧（サーバー側で作って渡す）。 */
   members?: MemberView[];
+  /** 検索結果からジャンプしてきたメッセージ（強調して表示する）。 */
+  focusMessageId?: string;
 }) {
   const { messagesFor, addMessage } = useLocalMessages();
   const localMessages = messagesFor(channelKey);
@@ -76,7 +79,8 @@ export function MessagePane({
    * ResizeObserver で高さ変化のたびに「基準メッセージのずれ」を打ち消す。
    */
   const loadAnchorRef = useRef<{ key: string; node: HTMLElement; top: number } | null>(null);
-  const wasAtBottomRef = useRef(true);
+  // 検索からジャンプしてきたときは最下部にいないので、初回の「送信で下端へ」は働かせない
+  const wasAtBottomRef = useRef(!focusMessageId);
 
   /** 位置補正の基準を捨てる（送信・「最新へ」・ユーザー操作で呼ぶ）。 */
   const releaseAnchor = useCallback(() => {
@@ -265,6 +269,7 @@ export function MessagePane({
       showHash={showHash}
       headerAvatar={headerAvatar}
       members={members}
+      focusMessageId={focusMessageId}
       onLoadOlder={loadOlder}
       loadingOlder={current.loading}
       hasMore={current.hasMore}

@@ -13,6 +13,7 @@ export function MessageRow({
   grouped,
   replyTarget,
   time,
+  focused = false,
 }: {
   message: Message;
   /** サーバーから渡された書き手情報（クライアントはデータ層を import しない） */
@@ -20,6 +21,8 @@ export function MessageRow({
   grouped: boolean;
   replyTarget: Message | undefined;
   time: string;
+  /** 検索結果からジャンプしてきた1件（強調表示する） */
+  focused?: boolean;
 }) {
   const author = authors[message.authorId];
   const displayName = author?.displayName ?? message.authorId;
@@ -33,6 +36,7 @@ export function MessageRow({
       className="message"
       data-message-id={message.id}
       data-grouped={grouped ? "true" : undefined}
+      data-focused={focused ? "true" : undefined}
     >
       {grouped ? null : (
         <span
@@ -84,6 +88,11 @@ export function MessageRow({
         )}
 
         <p className="message-body" data-system={message.system ? "true" : undefined}>
+          {message.pinned ? (
+            <span role="img" aria-label="ピン留め" title="ピン留め" className="message-pin">
+              📌
+            </span>
+          ) : null}
           {message.body}
           {grouped && message.editedAt ? <span className="message-edited"> (編集済み)</span> : null}
         </p>
