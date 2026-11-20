@@ -379,6 +379,7 @@ export const looksPadded = (body: string): boolean => {
 export function generateServers(
   seed = SERVERS_SEED,
   existingTimes: Iterable<string> = [],
+  firstSeen: Record<string, string> = {},
 ): Record<string, Message[]> {
   let state = seed;
   const rand = () => {
@@ -403,8 +404,10 @@ export function generateServers(
             ).getUTCDate();
       // 各月10日以上。全活動日に1通以上置く
       const active = new Set<number>();
-      for (let day = 1; day <= days; day += 1) if (rand() < 0.45) active.add(day);
-      for (let day = 1; active.size < 10 && day <= days; day += 1) active.add(day);
+      const targetDays = Math.max(10, Math.min(13, Math.ceil(count / 6)));
+      for (let day = 1; day <= days && active.size < targetDays; day += 1)
+        if (rand() < 0.6) active.add(day);
+      for (let day = 1; active.size < targetDays && day <= days; day += 1) active.add(day);
       const daysList = [...active].sort((a, b) => a - b);
       const counts = daysList.map(() => 1);
       let left = count - daysList.length;
@@ -414,6 +417,8 @@ export function generateServers(
       }
       daysList.forEach((day, index) => {
         let at = Date.parse(`${month}-${pad(day)}T${pad(int(8, 22))}:${pad(int(0, 59))}:00+09:00`);
+        // 1日の発言は同じチャンネルにまとめる（チャンネル内で会話が続くように）
+        const dayChannel = pick(server.channels.map(([id]) => id));
         for (let i = 0; i < counts[index]; i += 1) {
           at += int(1, 25) * 60000;
           let key = jst(at);
@@ -424,7 +429,7 @@ export function generateServers(
             guard += 1;
           }
           usedTimes.add(key);
-          queue.push({ ch: pick(server.channels.map(([id]) => id)), at });
+          queue.push({ ch: dayChannel, at });
         }
       });
     }
@@ -498,8 +503,10 @@ export function generateServers(
         }
       }
       usedBody.add(body);
-      const members = server.members;
-      const author = pick(members);
+      // 初出より前には発言させない（docs の初出と整合）
+      const month = jst(item.at).slice(0, 7);
+      const eligible = server.members.filter((id) => !firstSeen[id] || month >= firstSeen[id]);
+      const author = pick(eligible.length > 0 ? eligible : ["hal"]);
       out[item.ch].push({
         id: `${item.ch}-m${String(out[item.ch].length + 1).padStart(4, "0")}`,
         channelId: item.ch,
@@ -531,7 +538,15 @@ export function generateServers(
       const person = speakers[index % speakers.length];
       // 既存の mhc・DM と衝突したら1分ずらす（時刻は全横断で一意）
       let startMs = Date.parse(startedAt);
-      while (usedTimes.has(jst(startMs))) startMs += 60000;
+      let guard = 0;
+      // 開始・終了の両方が空くまで1分ずつずらす（無限ループ防止の上限つき）
+      while (
+        (usedTimes.has(jst(startMs)) || usedTimes.has(jst(startMs + 30 * 60000))) &&
+        guard < 600
+      ) {
+        startMs += 60000;
+        guard += 1;
+      }
       const endMs = startMs + 30 * 60000;
       const startedKey = jst(startMs);
       const end = jst(endMs);

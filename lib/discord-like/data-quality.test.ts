@@ -4,6 +4,7 @@
  */
 import { describe, expect, it } from "vitest";
 import { buildMhcHistory } from "./data/messages/mhc-history";
+import { ACQUAINTANCE_NOTES } from "./data/people/acquaintance-notes";
 import { FRIEND_MEMBERS, looksPadded, UNIV_MEMBERS } from "./generators/servers";
 import { listChannels, listDMMessages, listDMThreads, listGuilds, listMessages } from "./index";
 import { QUALITY_LIMITS as Q } from "./test-thresholds";
@@ -12,7 +13,7 @@ import type { Message } from "./types";
 const allMessages = (): Message[] => {
   const server = listGuilds().flatMap((guild) =>
     listChannels(guild.id)
-      .filter((channel) => channel.kind === "text")
+      // voice も含める（VC の開始/終了も sentAt 一意の対象）
       .flatMap((channel) => listMessages({ channelId: channel.id, limit: 5000 }).messages),
   );
   const dm = listDMThreads().flatMap(
@@ -166,6 +167,22 @@ describe("データ品質（#131 / D9・D10）", () => {
       }
     }
     expect(speakers.size).toBe(34);
+  });
+
+  it("#144: 初出より前に発言しない（docs の初出と一致）", () => {
+    const firstSeen = new Map<string, string>();
+    for (const [id, note] of Object.entries(ACQUAINTANCE_NOTES)) {
+      const match = /^(d{4})-(d{2})/.exec(note.firstSeen);
+      if (match) firstSeen.set(id, `${match[1]}-${match[2]}`);
+    }
+    for (const message of messages) {
+      const seen = firstSeen.get(message.authorId);
+      if (!seen) continue;
+      expect(
+        message.sentAt.slice(0, 7) >= seen,
+        `${message.id} ${message.authorId} ${message.sentAt} < ${seen}`,
+      ).toBe(true);
+    }
   });
 
   it("voice チャンネルには入室/退出のシステムメッセージしか無い（#129 で VoiceSession を追加）", () => {
