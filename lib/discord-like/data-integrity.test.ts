@@ -235,7 +235,7 @@ describe("ダミーデータの整合性", () => {
     expect(server).toBeLessThanOrEqual(VOLUME_LIMITS.serverMessages.max);
   });
 
-  it("月次の 個人:サーバー 比がしきい値の±25%に収まる", () => {
+  it("後半ほど DM が濃くなる傾向がある（データ量で絶対値は動くため傾向で見る）", () => {
     const dm = allDMMessages();
     // 期間比はサーバー全体（3サーバー合算）で見る
     const server = allServerMessages();

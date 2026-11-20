@@ -5,7 +5,12 @@
  */
 import { describe, expect, it } from "vitest";
 import { buildMhcHistory } from "./data/messages/mhc-history";
-import { KAI_LIMIT_IN_MHC, looksMechanical, PERSON_FORBIDDEN } from "./generators/mhc-history";
+import {
+  KAI_LIMIT_IN_MHC,
+  looksMechanical,
+  looksTwoTopic,
+  PERSON_FORBIDDEN,
+} from "./generators/mhc-history";
 import { listChannels, listDMMessages, listDMThreads, listGuilds, listMessages } from "./index";
 import { QUALITY_LIMITS as Q } from "./test-thresholds";
 import type { Message } from "./types";
@@ -63,6 +68,12 @@ describe("データ品質（#131 / D9・D10）", () => {
     }
   });
 
+  it("1文に2つの話題（時刻＋別の話題）を連結しない", () => {
+    for (const message of messages) {
+      expect(looksTwoTopic(message.body), `${message.id}: ${message.body}`).toBe(false);
+    }
+  });
+
   it("「〜の件／〜の話」の継ぎはぎで水増ししない", () => {
     for (const message of messages) {
       expect(
@@ -100,7 +111,7 @@ describe("データ品質（#131 / D9・D10）", () => {
     }
   });
 
-  it("人物の属性に合わない語彙を使わない（MaiMai は学生語彙なし・じじいは5限なし）", () => {
+  it("学生でない人（MaiMai・じじい・マスター）は学生語彙を使わない（0件）", () => {
     // 既存メッセージは書き換えない（D9）。新規追加分だけを検査する
     for (const message of newMessages()) {
       const rule = PERSON_FORBIDDEN[message.authorId];

@@ -50,14 +50,26 @@ export const looksMechanical = (body: string): boolean =>
   );
 
 /** 人物ごとの禁止語彙（属性から機械的に決まる。#143） */
+/** 学生でない人に使わせない語彙（人物属性で決まる。#148） */
+export const STUDENT_VOCAB =
+  /大学|生協|購買|1限|2限|3限|4限|5限|ゼミ|駅前|公園|学食|履修|レポート|講義|サークル|課題|バイト|小テスト|期末|試験/;
+
 export const PERSON_FORBIDDEN: Record<string, RegExp> = {
   // MaiMai は社会人（学生語彙を一切使わない）
-  maimai: /大学|1限|2限|3限|4限|5限|ゼミ|駅前|公園|学食|履修|レポート|講義|サークル/,
-  // 笛じじいは学生ではない（「5限」を使わない）
-  jijii: /大学|1限|2限|3限|4限|5限|ゼミ|駅前|公園|学食|履修|レポート|講義|サークル/,
+  maimai: STUDENT_VOCAB,
+  // 笛じじいは学生ではない（年配）
+  jijii: STUDENT_VOCAB,
+  // 集会所マスターも学生ではない
+  master: STUDENT_VOCAB,
   // kai は mhc では雑談とゲームだけ（調査・進捗を書かない。D10）
   kai: /ログ|照合|矛盾|Exif|メタ情報|進捗|調査|特定/,
 };
+
+/** 1文に2つの話題（時刻＋別の話題）を連結した文か（#148） */
+export const looksTwoTopic = (body: string): boolean =>
+  /(かな|だと思う|かも).*(時|限|週末の昼|今夜|明日の夜|金曜の夜).*(いけそう|むりそう|空いてる)/.test(
+    body,
+  );
 
 const P = {
   time: [
@@ -324,7 +336,7 @@ export function generateMhcHistory(
       typoCount += 1;
     } else if (roll < 0.28 && topicCount < 120) {
       for (let attempt = 0; attempt < 2000; attempt += 1) {
-        const candidate = `${pick(P.topic)}${pick(P.topicTail)}。${pick(P.time)}は${pick(["空いてる", "むりそう", "いけそう"])}`;
+        const candidate = `${pick(P.topic)}${pick(P.topicTail)}。${pick(["それはそう", "いいと思う", "どうだろう"])}`;
         if (!usedBody.has(candidate)) {
           body = candidate;
           break;
@@ -343,8 +355,8 @@ export function generateMhcHistory(
     }
     if (body === null) {
       for (let attempt = 0; attempt < 2000; attempt += 1) {
-        const candidate = `${pick(TEMPLATES[item.ch])()}${pick(["。", "！", "…", " かな", " だと思う"])}${pick(P.time)}は${pick(["空いてる", "むりそう", "いけそう"])}`;
-        if (!usedBody.has(candidate) && !looksMechanical(candidate)) {
+        const candidate = `${pick(TEMPLATES[item.ch])()}${pick(["。", "！", "…", " かな", " だと思う"])}`;
+        if (!usedBody.has(candidate) && !looksMechanical(candidate) && !looksTwoTopic(candidate)) {
           body = candidate;
           break;
         }
@@ -387,7 +399,8 @@ export function generateMhcHistory(
   for (const item of merged) {
     if (item.author !== "kai") continue;
     kaiCount += 1;
-    if (kaiCount > KAI_LIMIT_IN_MHC) item.author = pick(REGULARS);
+    if (kaiCount > KAI_LIMIT_IN_MHC)
+      item.author = pick(["hal", "gunlance", "mina", "haruka", "slime"]);
   }
 
   // スタンプのみを最低12件は確保する（自然さのしきい値のため）
