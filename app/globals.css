@@ -1236,7 +1236,6 @@
   display: inline-flex;
   align-items: center;
   color: var(--color-text-muted);
-  transform: scale(clamp(1, 1.4vh, 1.6));
 }
 
 .call-tile-badge[data-state="muted"] {

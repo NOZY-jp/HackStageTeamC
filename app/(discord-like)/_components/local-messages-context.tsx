@@ -28,7 +28,8 @@ function toMessage(channelKey: string, chat: ChatMessage): Message {
 
 type LocalMessages = {
   messagesFor: (channelKey: string) => Message[];
-  addMessage: (channelKey: string, body: string) => void;
+  /** 送信（表示のみ）。`system` はデータを変えずにシステム行として描くための印。 */
+  addMessage: (channelKey: string, body: string, options?: { system?: boolean }) => void;
 };
 
 const LocalMessagesContext = createContext<LocalMessages | null>(null);
@@ -52,20 +53,24 @@ export function LocalMessagesProvider({ children }: { children: ReactNode }) {
   const storyDm = useStoryChats("discord:dm-maimai");
   const sequence = useRef(0);
 
-  const addMessage = useCallback((channelKey: string, body: string) => {
-    sequence.current += 1;
-    const message: Message = {
-      id: `local-${channelKey}-${sequence.current}`,
-      channelId: channelKey,
-      authorId: SELF_USER_ID,
-      sentAt: new Date().toISOString(),
-      body,
-    };
-    setByKey((previous) => ({
-      ...previous,
-      [channelKey]: [...(previous[channelKey] ?? []), message],
-    }));
-  }, []);
+  const addMessage = useCallback(
+    (channelKey: string, body: string, options?: { system?: boolean }) => {
+      sequence.current += 1;
+      const message: Message = {
+        id: `local-${channelKey}-${sequence.current}`,
+        channelId: channelKey,
+        authorId: SELF_USER_ID,
+        sentAt: new Date().toISOString(),
+        body,
+        ...(options?.system ? { system: true } : {}),
+      };
+      setByKey((previous) => ({
+        ...previous,
+        [channelKey]: [...(previous[channelKey] ?? []), message],
+      }));
+    },
+    [],
+  );
 
   const controls = useMemo<LocalMessages>(
     () => ({
