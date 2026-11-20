@@ -1,6 +1,15 @@
 "use client";
 
-import { createContext, type ReactNode, useCallback, useContext, useMemo, useState } from "react";
+import { useSearchParams } from "next/navigation";
+import {
+  createContext,
+  type ReactNode,
+  useCallback,
+  useContext,
+  useEffect,
+  useMemo,
+  useState,
+} from "react";
 import { getSelfUser, listPosts } from "@/lib/facebook-like";
 import type { FbComment, FbPost, FbReactionType, FbUser } from "@/lib/facebook-like/types";
 
@@ -24,9 +33,17 @@ type FacebookContextValue = {
 const FacebookContext = createContext<FacebookContextValue | null>(null);
 
 export function FacebookProvider({ children }: { children: ReactNode }) {
+  // URL の ?q= を検索状態の初期値にする（/talkup?q=… を直接開いても検索結果を出す）
+  const searchParams = useSearchParams();
+  const urlQuery = searchParams.get("q") ?? "";
   const selfUser = useMemo(() => getSelfUser(), []);
   const [posts, setPosts] = useState<FbPost[]>(() => listPosts());
-  const [searchQuery, setSearchQuery] = useState("");
+  const [searchQuery, setSearchQuery] = useState(urlQuery);
+
+  // クライアント遷移で ?q= が変わったら検索語も追従する（初期マウント時だけ読むのをやめる）
+  useEffect(() => {
+    setSearchQuery(urlQuery);
+  }, [urlQuery]);
 
   const createPost = useCallback(
     ({ body, feeling, audience }: CreatePostInput) => {

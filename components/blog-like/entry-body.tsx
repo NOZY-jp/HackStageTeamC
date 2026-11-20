@@ -32,12 +32,14 @@ function Block({ block }: { block: EntryBlock }) {
         </figure>
       );
     case "link": {
-      const href = externalHref(block.url);
+      const href = block.href ?? externalHref(block.url);
+      const label = block.label ?? `https://${block.url}`;
+      // 当時のリンクのまま。行き先が無くなっていれば、押した先で「存在しません」になる
       return (
         <p className="pb-entry-link">
           {block.lead}
           <br />
-          {href ? <Link href={href}>https://{block.url}</Link> : <span>https://{block.url}</span>}
+          {href ? <Link href={href}>{label}</Link> : <span>{label}</span>}
         </p>
       );
     }
