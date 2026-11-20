@@ -1,5 +1,5 @@
 import type { CSSProperties, ReactNode } from "react";
-import { CURRENT_ID, GAME_OLD_DISPLAY_NAME, GAME_OLD_ID } from "../scenes";
+import { CURRENT_ID, GAME_OLD_DISPLAY_NAME, GAME_OLD_ID, KANON_DISCORD_HANDLE } from "../scenes";
 
 /**
  * 撮影用のモック画面（#103）。文字はすべて HTML テキストで描く。
@@ -49,7 +49,7 @@ function Slot({ n }: { n: number }) {
   );
 }
 
-/** 2018年・狩猟中のゲーム画面（1200×675）。ゲーム内IDは hunter_denden3243（旧表示名 hunter_denden を別ラベルで併記）。 */
+/** 2018年・狩猟中のゲーム画面（1200×675）。名前欄 hunter_denden と ID欄 hunter_denden3243 を別項目で併記する。 */
 export function GameScene() {
   return (
     <div
@@ -82,13 +82,15 @@ export function GameScene() {
         }}
       />
 
-      {/* 左上: 名前とHP/スタミナ */}
+      {/* 左上: 名前欄・ID欄とHP/スタミナ */}
       <div style={{ position: "absolute", left: 28, top: 24, width: 320 }}>
-        <div style={{ display: "flex", alignItems: "baseline", gap: 8, marginBottom: 6 }}>
-          <span style={{ fontSize: 13, letterSpacing: 0.5, color: "#cfe3d6" }}>{GAME_OLD_ID}</span>
+        <div style={{ display: "flex", alignItems: "baseline", gap: 8, marginBottom: 2 }}>
+          <span style={{ fontSize: 13, letterSpacing: 0.5, color: "#eaf4ed" }}>
+            {GAME_OLD_DISPLAY_NAME}
+          </span>
           <span style={{ fontSize: 10, color: "#9fb3a6" }}>HR 52</span>
-          <span style={{ fontSize: 9, color: "#8fa697" }}>（旧: {GAME_OLD_DISPLAY_NAME}）</span>
         </div>
+        <div style={{ fontSize: 9, color: "#8fa697", marginBottom: 6 }}>ID {GAME_OLD_ID}</div>
         <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
           <Bar width="82%" color="#c0392b" />
           <Bar width="64%" color="#e0b34a" height={7} />
@@ -225,7 +227,7 @@ function FriendRow({ name, handle, color }: { name: string; handle: string; colo
   );
 }
 
-/** 2026年・Discord のフレンド一覧（800×600）。相手の ID は maimaimaimai。 */
+/** 2026年・Discord のフレンド一覧（800×600）。MaiMai 本人視点（左下が自分 maimaimaimai、フレンドに 琥珀・かのん）。 */
 export function DiscordFriendsScene() {
   return (
     <div id="screen" style={frame(800, 600, "#1e1f22")}>
@@ -248,7 +250,15 @@ export function DiscordFriendsScene() {
         </div>
 
         {/* チャンネル一覧 */}
-        <div style={{ width: 210, background: "#2b2d31", padding: "12px 8px" }}>
+        <div
+          style={{
+            width: 210,
+            background: "#2b2d31",
+            padding: "12px 8px",
+            display: "flex",
+            flexDirection: "column",
+          }}
+        >
           <div style={{ fontSize: 12, fontWeight: 700, padding: "4px 8px" }}>
             ダイレクトメッセージ
           </div>
@@ -270,6 +280,39 @@ export function DiscordFriendsScene() {
           <div style={{ marginTop: 4, padding: "6px 8px", fontSize: 13, color: "#b5bac1" }}>
             すべて
           </div>
+
+          {/* 左下: 自分のユーザーパネル（MaiMai 本人視点） */}
+          <div
+            style={{
+              marginTop: "auto",
+              background: "#232428",
+              borderRadius: 8,
+              padding: "8px 10px",
+              display: "flex",
+              alignItems: "center",
+              gap: 8,
+              fontSize: 12,
+            }}
+          >
+            <div
+              style={{
+                width: 30,
+                height: 30,
+                borderRadius: "50%",
+                background: "#c2417c",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                fontWeight: 700,
+              }}
+            >
+              ま
+            </div>
+            <div style={{ lineHeight: 1.35 }}>
+              <div style={{ fontSize: 13, fontWeight: 700 }}>まいまい</div>
+              <div style={{ fontSize: 10, color: "#9aa3ad" }}>{CURRENT_ID}</div>
+            </div>
+          </div>
         </div>
 
         {/* メイン */}
@@ -290,53 +333,8 @@ export function DiscordFriendsScene() {
           </div>
           <div style={{ padding: 12 }}>
             <div style={{ fontSize: 11, color: "#b5bac1", padding: "0 10px 4px" }}>オンライン</div>
-            <FriendRow name="まいまい" handle={CURRENT_ID} color="#c2417c" />
-            <FriendRow name="かのん" handle="kanon__dayo" color="#c2563f" />
-          </div>
-
-          <div style={{ marginTop: "auto", padding: 10 }}>
-            <div
-              style={{
-                background: "#232428",
-                borderRadius: 10,
-                padding: 12,
-                fontSize: 12,
-                lineHeight: 1.6,
-              }}
-            >
-              <div style={{ color: "#b5bac1" }}>プロフィール</div>
-              <div style={{ fontSize: 15, fontWeight: 700, marginTop: 4 }}>まいまい</div>
-              <div style={{ color: "#b5bac1" }}>{CURRENT_ID}</div>
-            </div>
-          </div>
-
-          {/* 左下: 自分のユーザーパネル */}
-          <div
-            style={{
-              height: 52,
-              background: "#232428",
-              display: "flex",
-              alignItems: "center",
-              gap: 8,
-              padding: "0 12px",
-              fontSize: 12,
-            }}
-          >
-            <div
-              style={{
-                width: 30,
-                height: 30,
-                borderRadius: "50%",
-                background: "#5865f2",
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                fontWeight: 700,
-              }}
-            >
-              琥
-            </div>
-            琥珀
+            <FriendRow name="琥珀" handle="kohakunchos0117" color="#4f6f8a" />
+            <FriendRow name="かのん" handle={KANON_DISCORD_HANDLE} color="#c2563f" />
           </div>
         </div>
       </div>
@@ -344,7 +342,17 @@ export function DiscordFriendsScene() {
   );
 }
 
-function PartyMember({ handle, rank, color }: { handle: string; rank: string; color: string }) {
+function PartyMember({
+  name,
+  id,
+  rank,
+  color,
+}: {
+  name: string;
+  id?: string;
+  rank: string;
+  color: string;
+}) {
   return (
     <div
       style={{
@@ -370,17 +378,18 @@ function PartyMember({ handle, rank, color }: { handle: string; rank: string; co
           fontWeight: 700,
         }}
       >
-        {handle.slice(0, 1)}
+        {name.slice(0, 1)}
       </div>
-      <div>
-        <div style={{ fontSize: 13, fontWeight: 600 }}>{handle}</div>
+      <div style={{ lineHeight: 1.4 }}>
+        <div style={{ fontSize: 13, fontWeight: 600 }}>{name}</div>
+        {id ? <div style={{ fontSize: 10, color: "#8fa0ad" }}>ID {id}</div> : null}
         <div style={{ fontSize: 11, color: "#a9b6c0" }}>{rank}</div>
       </div>
     </div>
   );
 }
 
-/** 2019年・ロビー/パーティ画面（800×600）。ゲーム内ID hunter_denden3243（旧表示名 hunter_denden）が写る。 */
+/** 2019年・ロビー/パーティ画面（800×600）。名前欄 hunter_denden と ID欄 hunter_denden3243 が写る。 */
 export function LobbyScene() {
   return (
     <div
@@ -424,13 +433,14 @@ export function LobbyScene() {
         <div style={{ width: 300 }}>
           <div style={{ fontSize: 11, color: "#a9b6c0", marginBottom: 8 }}>パーティメンバー</div>
           <PartyMember
-            handle={GAME_OLD_ID}
-            rank="HR 52・双剣（旧: hunter_denden）"
+            name={GAME_OLD_DISPLAY_NAME}
+            id={GAME_OLD_ID}
+            rank="HR 52・双剣"
             color="#7a6a3f"
           />
-          <PartyMember handle="imperial_chi" rank="HR 49・太刀" color="#4f6f8a" />
-          <PartyMember handle="gunlance_taro" rank="HR 61・ガンランス" color="#57f287" />
-          <PartyMember handle="bow_haruka" rank="HR 44・弓" color="#9b59b6" />
+          <PartyMember name="gunlance_taro" rank="HR 61・ガンランス" color="#57f287" />
+          <PartyMember name="bow_haruka" rank="HR 44・弓" color="#9b59b6" />
+          <PartyMember name="switchaxe_mio" rank="HR 38・スラアク" color="#8a6fb0" />
         </div>
       </div>
 

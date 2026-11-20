@@ -10,8 +10,8 @@ export const GAME_OLD_ID = "hunter_denden3243";
 export const GAME_OLD_DISPLAY_NAME = "hunter_denden";
 /** 現在の Discord のハンドル（2026年のフレンド一覧に写る）。 */
 export const CURRENT_ID = "maimaimaimai";
-/** 旧 Discord のハンドル（lobby2019 の別メンバー表記に使う）。 */
-export const OLD_DISCORD_ID = "hunter_denden3243";
+/** かのんの Discord 表記（Twixer の `kanon__dayo` とは別物）。 */
+export const KANON_DISCORD_HANDLE = "kanon_dayo";
 
 export type ScreenScene = {
   id: "game2018" | "discord2026" | "lobby2019";
@@ -45,7 +45,8 @@ export const SCREEN_SCENES: Record<ScreenScene["id"], ScreenScene> = {
     id: "lobby2019",
     width: 800,
     height: 600,
-    ids: [GAME_OLD_ID, OLD_DISCORD_ID],
+    // 2019年の画面に写るのは自分（hunter_denden3243）だけ。カイ（imperial_chi）は同席しない
+    ids: [GAME_OLD_ID],
     output: "/discord-like/screenshot-2019-lobby.png",
     title: "2019年 ロビー",
   },

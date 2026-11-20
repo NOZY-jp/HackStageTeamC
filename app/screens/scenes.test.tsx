@@ -7,7 +7,7 @@ import {
   CURRENT_ID,
   GAME_OLD_DISPLAY_NAME,
   GAME_OLD_ID,
-  OLD_DISCORD_ID,
+  KANON_DISCORD_HANDLE,
   SCENE_IDS,
   SCREEN_SCENES,
 } from "./scenes";
@@ -33,7 +33,7 @@ describe("順序4の撮影用モック画面（#103）", () => {
     expect(GAME_OLD_ID).not.toBe(OLD_DISPLAY_NAME);
     expect(CURRENT_ID).toBe("maimaimaimai");
     expect(CURRENT_ID).toBe(MAIMAI_HANDLE);
-    expect(OLD_DISCORD_ID).toBe(OLD_HANDLE);
+    expect(KANON_DISCORD_HANDLE).toBe("kanon_dayo");
   });
 
   it("各画面の HTML テキストに、その画面のIDがそのまま出る", () => {
@@ -51,7 +51,27 @@ describe("順序4の撮影用モック画面（#103）", () => {
 
     const lobby = render(<LobbyScene />);
     expect(lobby.container.textContent).toContain(GAME_OLD_ID);
-    expect(lobby.container.textContent).toContain(OLD_DISCORD_ID);
+    expect(lobby.container.textContent).toContain(GAME_OLD_DISPLAY_NAME);
+    // カイ（imperial_chi）は別ゲームで知り合う前提なので、2019年の同席者に出さない
+    expect(lobby.container.textContent).not.toContain("imperial_chi");
+    expect(lobby.container.textContent).not.toContain("旧:");
+  });
+
+  it("2026年のスクショは MaiMai 本人視点（左下が自分・フレンドは琥珀とかのん）", () => {
+    const { container } = render(<DiscordFriendsScene />);
+    const text = container.textContent ?? "";
+    // 自分（左下のユーザーパネル）が「まいまい」で、IDが現在のハンドル
+    expect(text).toContain("まいまい");
+    expect(text).toContain(CURRENT_ID);
+    // フレンド一覧は 琥珀・かのん（Discord 表記は kanon_dayo）
+    expect(text).toContain("琥珀");
+    expect(text).toContain("かのん");
+    expect(text).toContain(KANON_DISCORD_HANDLE);
+    expect(text).not.toContain("kanon__dayo");
+    // 「（旧: …）」のような未来視点の注記は書かない
+    expect(text).not.toContain("旧:");
+    // フレンド一覧の行（ハンドル表示）は 琥珀 と かのん の2件
+    expect(text.match(/kohakunchos0117/g)).toHaveLength(1);
   });
 
   it("Twixer の旧ハンドル（別物）は撮影画面に出さない", async () => {
