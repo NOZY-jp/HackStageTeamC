@@ -94,4 +94,32 @@ describe("旧ブログのゲーム画面（順序4の証拠画像・#101）", ()
     // リンク（Twixer）は従来どおり残る
     expect(container.querySelectorAll("a").length).toBeGreaterThan(0);
   });
+
+  it("画像は原寸（PNG）へのリンクで開ける（縮小表示でIDが読めないため）", () => {
+    const { container } = render(<EntryBody blocks={body} />);
+    const figure = container.querySelector("figure");
+    expect(figure).not.toBeNull();
+
+    // 画像そのものが原寸へのリンクになっている
+    const imageLink = figure?.querySelector("a");
+    expect(imageLink).not.toBeNull();
+    expect(imageLink?.getAttribute("href")).toBe(GAME_SCREEN);
+    expect(imageLink?.getAttribute("target")).toBe("_blank");
+    expect(imageLink?.getAttribute("rel")).toContain("noreferrer");
+    expect(imageLink?.getAttribute("aria-label")).toBe("2018年のゲーム画面を原寸で開く");
+    expect(imageLink?.querySelector("img")).not.toBeNull();
+
+    // figcaption にも原寸リンクを置く（当時のブログらしい「原寸で見る」）
+    const captionLink = figure?.querySelector("figcaption a");
+    expect(captionLink?.getAttribute("href")).toBe(GAME_SCREEN);
+    expect(captionLink?.getAttribute("target")).toBe("_blank");
+    expect(captionLink?.getAttribute("rel")).toContain("noreferrer");
+    expect(captionLink?.textContent).toBe("原寸で見る");
+
+    // 画像の alt と寸法は維持
+    const img = figure?.querySelector("img");
+    expect(img?.getAttribute("alt")).toContain("ゲーム画面");
+    expect(img?.getAttribute("width")).toBe("1200");
+    expect(img?.getAttribute("height")).toBe("675");
+  });
 });
