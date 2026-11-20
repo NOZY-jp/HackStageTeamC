@@ -1,11 +1,12 @@
 /**
  * Discord で送られる画像の定義（順序4）。
- * 画像の実体はまだ public に置いていない（人の承認後に配置する）。ここでは
- * 「どの画像が誰のIDか」と「public からのパス（1か所の定数）」だけを持つ。
+ * 画像の実体は `public/discord-like/` に置いてある。ここでは
+ * 「どの画像が誰のIDか」と「public からのパス（1か所の定数）」を持つ。
  *
  * 人の決定（2026-11-20）: 順序4の向きは原文どおり
  * - Discord で送られたスクショ = 現在のID `maimaimaimai`
- * - 旧ブログの添付画像 = 旧ID `hunter_denden`（@hunter_denden0102）
+ * - 旧ブログの添付画像 = 旧ゲーマーID `hunter_denden3243`
+ *   （Twixer の旧ハンドル `@hunter_denden0102` とは別物）
  */
 
 /**
@@ -28,7 +29,7 @@ export type MessageImage = {
   owner: MessageImageOwner;
   /** 写っているハンドル（@ なし） */
   handle: string;
-  /** public からの実体パス。実体は承認後に置く */
+  /** public からの実体パス（実体は `public/discord-like/` に置く） */
   src: string;
   width: number;
   height: number;
