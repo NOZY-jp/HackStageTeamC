@@ -1,5 +1,9 @@
-import { LoadingNotice } from "@/components/discord-like/loading-notice";
+import { MessageLoadingSkeleton } from "@/components/discord-like/message-loading-skeleton";
 
+/**
+ * チャンネル／DM の切替中はメッセージ欄だけをスケルトンにする（#70）。
+ * 左の一覧は [guildId]/layout.tsx が持つので置き換わらない。
+ */
 export default function ChannelLoading() {
-  return <LoadingNotice label="チャンネルを読み込んでいます" />;
+  return <MessageLoadingSkeleton />;
 }

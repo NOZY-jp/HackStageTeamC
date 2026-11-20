@@ -24,3 +24,21 @@ export function dmThreadPath(threadUrlId: string): string {
 export function guildChannelPath(guildUrlId: string, channelUrlId: string): string {
   return `/${APP_PREFIX}/channels/${guildUrlId}/${channelUrlId}`;
 }
+
+/** 末尾スラッシュとパーセントエンコードの差をならす（`%40me` と `@me`）。 */
+function normalizePath(path: string): string {
+  const trimmed = path.replace(/\/+$/, "");
+  try {
+    return decodeURIComponent(trimmed);
+  } catch {
+    return trimmed;
+  }
+}
+
+/** 現在の pathname がリンク先と一致するか（サイドバーの aria-current 用）。 */
+export function isActiveHref(pathname: string | null | undefined, href: string): boolean {
+  if (!pathname) {
+    return false;
+  }
+  return normalizePath(pathname) === normalizePath(href);
+}

@@ -1,24 +1,20 @@
-import Link from "next/link";
+import { Suspense } from "react";
 import { SidebarPane } from "@/components/discord-like/sidebar-pane";
 import { getUser, listDMMessages, listDMThreads } from "@/lib/discord-like";
-import { dmThreadPath } from "@/lib/platform/app-prefix";
+import { type DmThreadItem, DmThreadList } from "./dm-thread-list";
 import { EmptyState } from "./empty-state";
 import { SELF_USER_ID } from "./self-user";
 
-const STATUS_LABELS: Record<string, string> = {
-  online: "オンライン",
-  idle: "離席中",
-  dnd: "取り込み中",
-  offline: "オフライン",
-};
+/** 一覧が読み込み中でも中ペインの骨格を保つための行（#70）。 */
+const SKELETON_ROWS = [88, 72, 64, 78, 58, 70, 62];
 
 /**
- * DM一覧（中ペイン）。/<app>/channels/@me と /<app>/channels/@me/<dmChannelId> で使う。
+ * DM一覧（中ペイン）。`/<app>/channels/@me` 配下の layout から描画する。
  * 相手は participantIds から自分（SELF_USER_ID）以外を選ぶ。
  * データ上どのスレッドにも自分が入っていない場合は先頭の参加者を相手として扱う。
  */
-export function DmList({ activeThreadId }: { activeThreadId?: string }) {
-  const threads = listDMThreads().map((thread) => {
+export function DmList() {
+  const threads: DmThreadItem[] = listDMThreads().map((thread) => {
     const otherId =
       thread.participantIds.find((participantId) => participantId !== SELF_USER_ID) ??
       thread.participantIds[0];
@@ -57,62 +53,24 @@ export function DmList({ activeThreadId }: { activeThreadId?: string }) {
           title="DMがありません"
           description="レールから相手を選んで開始できます。"
         />
-      ) : null}
-
-      <ul>
-        {threads.map((thread) => {
-          const statusLabel = STATUS_LABELS[thread.status] ?? STATUS_LABELS.offline;
-          const label = [
-            thread.name,
-            thread.unread > 0 ? `未読${thread.unread}件` : "",
-            `最新 ${thread.time}`,
-            statusLabel,
-          ]
-            .filter(Boolean)
-            .join("、");
-
-          return (
-            <li key={thread.id}>
-              <Link
-                href={dmThreadPath(thread.urlId)}
-                className="sidebar-item dm-item"
-                aria-label={label}
-                aria-current={activeThreadId === thread.id ? "page" : undefined}
-              >
-                <span className="dm-avatar-wrap">
-                  <span
-                    aria-hidden="true"
-                    className="dm-avatar"
-                    style={{ backgroundColor: thread.avatarColor }}
-                  >
-                    {thread.name.slice(0, 1)}
-                  </span>
-                  <span
-                    role="img"
-                    aria-label={`ステータス: ${statusLabel}`}
-                    className="status-dot"
-                    data-status={thread.status}
-                  />
-                </span>
-
-                <span className="dm-text">
-                  <span className="dm-name">{thread.name}</span>
-                  <span className="dm-preview">{thread.preview}</span>
-                </span>
-
-                <span className="dm-meta">
-                  {thread.unread > 0 ? (
-                    <span aria-hidden="true" className="dm-badge">
-                      {thread.unread > 99 ? "99+" : thread.unread}
-                    </span>
-                  ) : null}
-                  <span className="dm-time">{thread.time}</span>
-                </span>
-              </Link>
-            </li>
-          );
-        })}
-      </ul>
+      ) : (
+        // 選択中スレッドは pathname から決めるため、境界で囲む（cacheComponents）
+        <Suspense
+          fallback={
+            <div className="skeleton-pane" aria-hidden="true">
+              {SKELETON_ROWS.map((width) => (
+                <span
+                  key={width}
+                  className="skeleton-block skeleton-row"
+                  style={{ width: `${width}%` }}
+                />
+              ))}
+            </div>
+          }
+        >
+          <DmThreadList threads={threads} />
+        </Suspense>
+      )}
     </SidebarPane>
   );
 }
