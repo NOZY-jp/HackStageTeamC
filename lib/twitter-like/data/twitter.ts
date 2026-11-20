@@ -95,9 +95,10 @@ export const twitterProfiles: Profile[] = [
     followersCount: 34,
   },
   {
-    // 記事の名前で検索すると見つかる（bio に記事名を残している）
+    // 記事の名前で検索すると見つかる（bio に記事名を残している）。
+    // 前の名前（hunter_denden）も書いて、改名したことが分かるようにする
     userId: "tw-old-denden",
-    bio: "昔の記事:「写真コンテストで賞をもらいました！」／装備メモも書いてました。BFF: @kanon__dayo",
+    bio: "前は hunter_denden で活動していました。「写真コンテストで賞をもらいました！」を書いた頃のアカウントです。BFF: @kanon__dayo",
     joinedAt: "2018-05-03",
     followingCount: 38,
     followersCount: 64,
@@ -353,11 +354,11 @@ export const twitterPosts: Post[] = [
     repostCount: 0,
     likeCount: 2,
   },
-  // 攻略に言及した投稿と、リア友かのんの「前にも書いてたよな」リプライ
+  // 2019年の攻略投稿と、リア友かのんの「ブログにも書いてたよな」リプライ
   {
     id: "post-101",
     authorId: "tw-mai",
-    postedAt: "2026-11-18T22:10:00+09:00",
+    postedAt: "2019-09-08T22:10:00+09:00",
     body: "双剣、クラッチクローから弱点に当てるのがまだ安定しない。装備はこのままでいいのかな。",
     replyCount: 1,
     repostCount: 0,
@@ -366,27 +367,32 @@ export const twitterPosts: Post[] = [
   {
     id: "post-102",
     authorId: "tw-kanon",
-    postedAt: "2026-11-18T22:40:00+09:00",
-    body: "その装備の組み方、前にも長いこと書いてたよな。読んでたよ。",
+    postedAt: "2019-09-09T21:40:00+09:00",
+    body: "それ、前にブログにも書いてたよな。読んでたよ。",
     replyToId: "post-101",
     replyCount: 0,
     repostCount: 0,
     likeCount: 3,
   },
-  // かのんの写真つき投稿（第五章の照合材料。本人かどうかは断定しない）
+  // かのんの写真つき投稿（第五章の照合用。名前は書かない）
   {
     id: "post-103",
     authorId: "tw-kanon",
     postedAt: "2026-11-10T19:05:00+09:00",
-    body: "この前の写真。仲良さそうに見えるでしょ。本人かどうかは、まだ分からないけど。",
+    body: "高校のときの。この子とはいつも一緒だった。",
     replyCount: 0,
     repostCount: 1,
     likeCount: 28,
     media: [
-      { src: "/twitter-like/photo-01.svg", alt: "並んで歩く二人の後ろ姿", width: 800, height: 600 },
+      {
+        src: "/twitter-like/photo-01.svg",
+        alt: "制服姿で並ぶ二人。左の子は黒髪のボブ",
+        width: 800,
+        height: 600,
+      },
       {
         src: "/twitter-like/photo-02.svg",
-        alt: "テーブルをはさんで笑う二人",
+        alt: "テーブルをはさんで笑う二人。手前の子は茶髪のロング",
         width: 800,
         height: 600,
       },
@@ -396,14 +402,14 @@ export const twitterPosts: Post[] = [
     id: "post-104",
     authorId: "tw-kanon",
     postedAt: "2026-11-14T08:30:00+09:00",
-    body: "アルバムを整理してたら出てきた。この二人、ずっと一緒だったんだよな。",
+    body: "アルバムを整理してたら出てきた。また会いたいな。",
     replyCount: 0,
     repostCount: 0,
     likeCount: 19,
     media: [
       {
-        src: "/twitter-like/photo-02.svg",
-        alt: "古いアルバムから。並んで写る二人",
+        src: "/twitter-like/photo-03.svg",
+        alt: "古いアルバムから。並んで笑う二人。左は黒髪のボブ、右は茶髪のロング",
         width: 800,
         height: 600,
       },

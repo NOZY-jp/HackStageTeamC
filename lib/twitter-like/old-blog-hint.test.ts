@@ -19,20 +19,23 @@ const DEN = word(0x3067, 0x3093, 0x3061, 0x3083, 0x3093);
 const FAMILY_NAME = word(0x670d, 0x90e8);
 const GIVEN_NAME = word(0x7531, 0x6bd4);
 
-const _oldUser = getUserByHandle(OLD_HANDLE);
 const kanon = getUserByHandle(KANON_HANDLE);
 
 describe("第三章 Twitter 側（#94）", () => {
-  it("順序2: 攻略の投稿に、かのんの「前にも書いてたよな」リプライが読める", () => {
+  it("順序2: 攻略の投稿に、かのんの「ブログにも書いてたよな」リプライが読める", () => {
     const strategyPost = listPosts().find((post) => post.id === "post-101");
     expect(strategyPost).toBeDefined();
     expect(strategyPost?.body).toContain("双剣");
+    // 2018〜2020年ごろ（クラッチクローは2019年のアイスボーン）
+    const year = strategyPost?.postedAt.slice(0, 4) ?? "";
+    expect(year >= "2018").toBe(true);
+    expect(year <= "2020").toBe(true);
 
     const replies = listReplies("post-101");
     const fromKanon = replies.filter((reply) => reply.authorId === kanon?.id);
     expect(fromKanon).toHaveLength(1);
-    expect(fromKanon[0].body).toContain("書いて");
-    // 誰の投稿かを限定しない（投稿者はかのん本人ではない）
+    // 「別の場所にも」の含み（ブログ名そのものは出さない）
+    expect(fromKanon[0].body).toContain("ブログにも書いて");
     expect(strategyPost?.authorId).not.toBe(kanon?.id);
   });
 
@@ -42,8 +45,14 @@ describe("第三章 Twitter 側（#94）", () => {
 
     const old = results.find((user) => user.handle === OLD_HANDLE);
     expect(isProtected(old)).toBe(true);
-    // 旧名（ハンドル）が読める。現在のアカウントとは別物
+    // 旧名がプロフィールから読める（改名したことが分かる）。現在のアカウントとは別物
     expect(old?.handle).toBe("hunter_denden0102");
+    const profile = searchUsers(ARTICLE_TITLE).find((user) => user.handle === OLD_HANDLE);
+    expect(profile).toBeDefined();
+    // bio に旧名 hunter_denden が書かれている
+    expect(JSON.stringify(searchUsers("hunter_denden").map((user) => user.handle))).toContain(
+      OLD_HANDLE,
+    );
     expect(old?.handle).not.toBe("maimaimaimai");
 
     // 鍵垢なので投稿本文は読めない（プロフィールだけ）
@@ -58,7 +67,7 @@ describe("第三章 Twitter 側（#94）", () => {
     expect(old).toBeDefined();
   });
 
-  it("8d: かのんの写真つき投稿が複数あり、断定しない語彙で仲が良さそうと読める", () => {
+  it("8d: かのんの写真つき投稿が複数あり、人物の名前を断定しない", () => {
     const photoPosts = listPosts().filter(
       (post) => post.authorId === kanon?.id && (post.media?.length ?? 0) > 0,
     );
@@ -71,8 +80,13 @@ describe("第三章 Twitter 側（#94）", () => {
       }
     }
     const text = photoPosts.map((post) => post.body).join("\n");
-    expect(text).toMatch(/仲良さそう/);
-    expect(text).toMatch(/分からない/);
+    // 投稿は撮影者の普通の思い出。名前（本名・呼び名）は書かない
+    expect(text).not.toContain(FAMILY_NAME);
+    expect(text).not.toContain(GIVEN_NAME);
+    expect(text).not.toContain(DEN);
+    // 同じ写真を2つの投稿で使い回さない
+    const sources = photoPosts.flatMap((post) => (post.media ?? []).map((media) => media.src));
+    expect(new Set(sources).size).toBe(sources.length);
   });
 
   it("リプライの本文にブログ名・本名・家族内の呼び名を出さない", () => {
