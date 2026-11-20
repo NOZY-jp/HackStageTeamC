@@ -94,16 +94,6 @@ export const mhc: Guild = {
       position: 7,
     },
     {
-      id: "mhc-ochiba",
-      urlId: "1187002356428840969",
-      guildId: "mhc",
-      name: "落ち葉",
-      kind: "text",
-      topic: "雑談の続き置き場",
-      categoryId: "mhc-cat-text",
-      position: 8,
-    },
-    {
       id: "mhc-vc-1",
       urlId: "1187002356428840971",
       guildId: "mhc",
