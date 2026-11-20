@@ -1,13 +1,18 @@
+import { Suspense } from "react";
 import { SELF_USER_ID } from "@/app/(discord-like)/_components/self-user";
 import { getGuild, getUser, listChannels, listVoiceStates } from "@/lib/discord-like";
 import { ChannelTree, type SidebarSection } from "./channel-tree";
 import { SidebarPane } from "./sidebar-pane";
 
+/** 一覧が読み込み中でも中ペインの骨格を保つための行（#70）。 */
+const SKELETON_ROWS = [88, 72, 64, 78, 58, 70, 62, 66];
+
 /**
  * チャンネル一覧の中ペイン（サーバー画面用）。
- * 外枠は SidebarPane なので、#10 は SidebarPane に DM 用の中身を渡せば差し替えられる。
+ * layout から描画し、チャンネル移動で作り直さない（#70）。
+ * 選択中のチャンネルは一覧側が pathname から決める。
  */
-export function ChannelSidebar({ guildId, channelId }: { guildId: string; channelId: string }) {
+export function ChannelSidebar({ guildId }: { guildId: string }) {
   const guild = getGuild(guildId);
 
   if (!guild) {
@@ -50,12 +55,22 @@ export function ChannelSidebar({ guildId, channelId }: { guildId: string; channe
 
   return (
     <SidebarPane label="チャンネル一覧" title={guild.name}>
-      <ChannelTree
-        guildUrlId={guild.urlId}
-        activeChannelId={channelId}
-        sections={sections}
-        currentUser={currentUser}
-      />
+      {/* 選択中チャンネルは pathname から決めるため、境界で囲む（cacheComponents） */}
+      <Suspense
+        fallback={
+          <div className="skeleton-pane" aria-hidden="true">
+            {SKELETON_ROWS.map((width) => (
+              <span
+                key={width}
+                className="skeleton-block skeleton-row"
+                style={{ width: `${width}%` }}
+              />
+            ))}
+          </div>
+        }
+      >
+        <ChannelTree guildUrlId={guild.urlId} sections={sections} currentUser={currentUser} />
+      </Suspense>
     </SidebarPane>
   );
 

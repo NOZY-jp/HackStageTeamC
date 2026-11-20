@@ -1,5 +1,12 @@
 import { describe, expect, it } from "vitest";
-import { APP_PREFIX, dmListPath, dmThreadPath, guildChannelPath, isAppPrefix } from "./app-prefix";
+import {
+  APP_PREFIX,
+  dmListPath,
+  dmThreadPath,
+  guildChannelPath,
+  isActiveHref,
+  isAppPrefix,
+} from "./app-prefix";
 
 const GUILD = "1074210658438352001";
 const CHANNEL = "1074210658438352101";
@@ -26,5 +33,19 @@ describe("app-prefix", () => {
     expect(isAppPrefix(APP_PREFIX)).toBe(true);
     expect(isAppPrefix("example.test")).toBe(false);
     expect(isAppPrefix("")).toBe(false);
+  });
+
+  it("選択中のリンク判定は末尾スラッシュとエンコード差を吸収する", () => {
+    expect(isActiveHref(guildChannelPath(GUILD, CHANNEL), guildChannelPath(GUILD, CHANNEL))).toBe(
+      true,
+    );
+    expect(
+      isActiveHref(`${guildChannelPath(GUILD, CHANNEL)}/`, guildChannelPath(GUILD, CHANNEL)),
+    ).toBe(true);
+    expect(isActiveHref(dmListPath().replace("@me", "%40me"), dmListPath())).toBe(true);
+    expect(isActiveHref(guildChannelPath(GUILD, CHANNEL), guildChannelPath(GUILD, "1"))).toBe(
+      false,
+    );
+    expect(isActiveHref(null, guildChannelPath(GUILD, CHANNEL))).toBe(false);
   });
 });
