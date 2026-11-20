@@ -171,6 +171,44 @@ describe("会話の自然さ（#130）", () => {
     expect(Math.abs(starts - ends)).toBeLessThanOrEqual(L.callPairTolerance);
   });
 
+  it("各通話は1分〜6時間で、スレッド単位でも開始と終了が対になっている", () => {
+    const byThread = byContainer(
+      messages.filter(
+        (message) =>
+          message.body.includes("通話を開始") ||
+          message.body.includes("通話を終了") ||
+          message.body.includes("応答がありませんでした"),
+      ),
+    );
+    expect(byThread.size).toBeGreaterThan(0);
+    for (const [thread, list] of byThread) {
+      let open: Message | undefined;
+      for (const message of list) {
+        if (message.body.includes("通話を開始")) {
+          // 開始の連続は浮き（前の通話が終わっていない）
+          expect(open, `${thread}: 開始が連続`).toBeUndefined();
+          open = message;
+          continue;
+        }
+        // 終了・不在着信は開始と対でだけ現れる
+        if (!open) {
+          throw new Error(`${thread}: 開始なしの終了 ${message.id}`);
+        }
+        const minutes = (Date.parse(message.sentAt) - Date.parse(open.sentAt)) / 60000;
+        expect(minutes, `${thread}: 通話の長さ`).toBeGreaterThanOrEqual(1);
+        expect(minutes, `${thread}: 通話の長さ`).toBeLessThanOrEqual(6 * 60);
+        open = undefined;
+      }
+      expect(open, `${thread}: 開始だけで終了が無い`).toBeUndefined();
+    }
+  });
+
+  it("時刻はすべて +09:00 固定（タイムゾーンの混在を許さない）", () => {
+    for (const message of messages) {
+      expect(message.sentAt, message.id).toMatch(/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:00\+09:00$/);
+    }
+  });
+
   it("通話は夜〜深夜に始まり、早朝（4〜7時）には始まらない", () => {
     const starts = messages.filter((message) => message.body.includes("通話を開始しました"));
     expect(starts.length).toBeGreaterThan(0);
