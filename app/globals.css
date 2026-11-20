@@ -1317,14 +1317,67 @@
   opacity: 0.7;
 }
 
-.call-tiles[data-layout="dm"] .call-tile:nth-child(2) .call-tile-avatar {
-  width: 44px;
-  height: 44px;
-  font-size: 18px;
+/* 操作はホバー中・フォーカス中だけ出す（absolute なのでレイアウトは動かない） */
+.call-controls {
+  position: absolute;
+  bottom: 16px;
+  left: 50%;
+  display: flex;
+  gap: 8px;
+  padding: 8px 10px;
+  border-radius: 999px;
+  background-color: var(--color-bg-panel);
+  box-shadow: 0 4px 16px rgb(0 0 0 / 35%);
+  opacity: 0;
+  visibility: hidden;
+  /* 非表示中はクリックも受けない（透明なボタンが押せてしまうのを防ぐ） */
+  pointer-events: none;
+  transform: translate(-50%, 4px);
+  transition:
+    opacity 120ms ease,
+    transform 120ms ease,
+    visibility 0s linear 120ms;
 }
 
-.call-tiles[data-layout="dm"] .call-tile:nth-child(2) .call-tile-name {
-  font-size: 11px;
+.call-stage:hover .call-controls,
+.call-stage:focus-within .call-controls,
+.call-controls[data-visible="true"] {
+  opacity: 1;
+  visibility: visible;
+  pointer-events: auto;
+  transform: translate(-50%, 0);
+  transition:
+    opacity 120ms ease,
+    transform 120ms ease;
+}
+
+/* タッチ端末では常に出す（ホバーが無いため） */
+@media (hover: none) {
+  .call-controls {
+    opacity: 1;
+    visibility: visible;
+    pointer-events: auto;
+    transform: translate(-50%, 0);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .call-controls,
+  .call-stage:hover .call-controls,
+  .call-stage:focus-within .call-controls {
+    /* 遅延（visibility の 120ms）も残さない */
+    transition-duration: 0s;
+    transition-delay: 0s;
+  }
+}
+
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
 }
 
 /* 狭い画面では、小窓が中央の操作バーに重ならないよう上へ逃がす */
