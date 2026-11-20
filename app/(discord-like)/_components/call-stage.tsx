@@ -147,8 +147,11 @@ function Tile({ participant }: { participant: CallParticipant }) {
       </span>
       <span className="call-tile-label">
         <span className="call-tile-name">{participant.displayName}</span>
-        <span className="call-tile-badge" data-state={participant.muted ? "muted" : "on"}>
-          <MicIcon muted={Boolean(participant.muted)} />
+        <span
+          className="call-tile-badge"
+          data-state={participant.muted || participant.deafened ? "muted" : "on"}
+        >
+          <MicIcon muted={Boolean(participant.muted || participant.deafened)} />
           <span className="sr-only">{status}</span>
         </span>
       </span>
@@ -251,7 +254,8 @@ export function CallStage({
             className="voice-button"
             tabIndex={tabIndex}
             aria-label="画面共有（準備中）"
-            onClick={() => setShareNotice(true)}
+            aria-pressed={shareNotice}
+            onClick={() => setShareNotice((value) => !value)}
           >
             <ShareIcon />
             <span>画面共有</span>

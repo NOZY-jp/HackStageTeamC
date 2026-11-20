@@ -1242,6 +1242,39 @@
   color: var(--color-danger);
 }
 
+/* マイク状態のアイコンは clamp でサイズを決める（scale(clamp(数値, 長さ)) は無効なCSS） */
+.call-tile-badge svg {
+  width: clamp(14px, 1.8vh, 20px);
+  height: clamp(14px, 1.8vh, 20px);
+}
+
+/* 通話履歴カード（DM のログ。#137 要件5） */
+.call-history-card {
+  display: inline-flex;
+  gap: 8px;
+  align-items: center;
+  margin: 8px 16px;
+  padding: 8px 14px;
+  border: 1px solid var(--color-divider);
+  border-radius: 10px;
+  background-color: var(--color-bg-panel);
+  color: var(--color-text);
+  font-size: 13px;
+}
+
+.call-history-icon {
+  color: var(--color-status-online);
+  font-size: 15px;
+  line-height: 1;
+}
+
+.call-controls-note {
+  align-self: center;
+  color: var(--color-text-muted);
+  font-size: 12px;
+  white-space: nowrap;
+}
+
 .call-tile[data-muted="true"] .call-tile-avatar {
   opacity: 0.7;
 }
@@ -1294,7 +1327,9 @@
   .call-controls,
   .call-stage:hover .call-controls,
   .call-stage:focus-within .call-controls {
+    /* 遅延（visibility の 120ms）も残さない */
     transition-duration: 0s;
+    transition-delay: 0s;
   }
 }
 

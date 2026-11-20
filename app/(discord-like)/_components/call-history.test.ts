@@ -49,3 +49,23 @@ describe("通話履歴カードの算出（#137）", () => {
     expect(callHistoryByMessage(messages).byId.size).toBe(0);
   });
 });
+
+describe("通話履歴カードの誤変換防止（#134）", () => {
+  it("system でない通常発言に同じ文言が入っていてもカードにしない", () => {
+    const messages = [
+      message("x", "通話を開始しました", "2026-11-19T21:00:00+09:00", false),
+      message("y", "通話を終了しました", "2026-11-19T21:10:00+09:00", false),
+    ];
+    expect(buildCallHistory(messages)).toEqual([]);
+    expect(callHistoryByMessage(messages).byId.size).toBe(0);
+  });
+
+  it("開始は startedAt を持つ（VoiceSession へ差し替えやすい）", () => {
+    const history = buildCallHistory([
+      message("a", "通話を開始しました", "2026-11-19T21:00:00+09:00"),
+      message("b", "通話を終了しました", "2026-11-19T21:03:00+09:00"),
+    ]);
+    expect(history[0].startedAt).toBe("2026-11-19T21:00:00+09:00");
+    expect(history[0].minutes).toBe(3);
+  });
+});
