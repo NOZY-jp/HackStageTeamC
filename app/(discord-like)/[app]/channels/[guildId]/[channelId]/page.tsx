@@ -13,6 +13,7 @@ import {
   listDMMessages,
   listMessages,
   listVoiceStates,
+  loadUntil,
 } from "@/lib/discord-like";
 import { resolveChannelRoute } from "@/lib/discord-like/route-resolution";
 import { listMemberViews, toMessageView } from "@/lib/discord-like/view";
@@ -24,26 +25,37 @@ import { listMemberViews, toMessageView } from "@/lib/discord-like/view";
  */
 export default async function ChannelPage({
   params,
+  searchParams,
 }: {
   params: Promise<{ guildId: string; channelId: string }>;
+  searchParams: Promise<{ m?: string | string[] }>;
 }) {
-  const { guildId, channelId } = await params;
+  const [{ guildId, channelId }, query] = await Promise.all([params, searchParams]);
+  const focus = typeof query.m === "string" ? query.m : undefined;
   const route = resolveChannelRoute(guildId, channelId);
 
   switch (route.kind) {
     case "dm":
-      return <DmThread threadId={route.threadId} />;
+      return <DmThread threadId={route.threadId} focusMessageId={focus} />;
     case "dm-missing":
       // DM は旧画面と同じ専用の未検出UI（not-found.tsx は動的パラメータを受け取れない）
       return <DmNotFound />;
     case "channel":
-      return <GuildChannel guildId={route.guildId} channelId={route.channelId} />;
+      return (
+        <GuildChannel guildId={route.guildId} channelId={route.channelId} focusMessageId={focus} />
+      );
     default:
       notFound();
   }
 }
 
-async function DmThread({ threadId }: { threadId: string }) {
+async function DmThread({
+  threadId,
+  focusMessageId,
+}: {
+  threadId: string;
+  focusMessageId?: string;
+}) {
   const thread = getDMThread(threadId);
   if (!thread) {
     return <DmNotFound />;
@@ -55,22 +67,37 @@ async function DmThread({ threadId }: { threadId: string }) {
   const other = getUser(otherId);
   const otherName = other?.displayName ?? otherId;
 
+  // 検索からジャンプしてきたときは、そのメッセージを含むところまで遡って表示する
+  const focused = focusMessageId
+    ? loadUntil({ threadId: thread.id, messageId: focusMessageId })
+    : undefined;
+  const page = focused?.found ? focused : listDMMessages({ threadId: thread.id });
+
   return (
     <>
       <DmList activeThreadId={thread.id} />
       <MessagePane
         channelKey={thread.id}
         mode="dm"
-        initialView={toMessageView(listDMMessages({ threadId: thread.id }))}
+        initialView={toMessageView(page)}
         title={otherName}
         showHash={false}
         headerAvatar={{ displayName: otherName, avatarColor: other?.avatarColor ?? "transparent" }}
+        focusMessageId={focused?.found ? focusMessageId : undefined}
       />
     </>
   );
 }
 
-async function GuildChannel({ guildId, channelId }: { guildId: string; channelId: string }) {
+async function GuildChannel({
+  guildId,
+  channelId,
+  focusMessageId,
+}: {
+  guildId: string;
+  channelId: string;
+  focusMessageId?: string;
+}) {
   const guild = getGuild(guildId);
   const channel = getChannel(channelId);
 
@@ -79,6 +106,11 @@ async function GuildChannel({ guildId, channelId }: { guildId: string; channelId
   }
 
   const members = listMemberViews();
+  // 検索からジャンプしてきたときは、そのメッセージを含むところまで遡って表示する
+  const focused = focusMessageId
+    ? loadUntil({ channelId: channel.id, messageId: focusMessageId })
+    : undefined;
+  const page = focused?.found ? focused : listMessages({ channelId: channel.id });
   const selfUser = getUser(SELF_USER_ID);
   const currentUser = {
     id: SELF_USER_ID,
@@ -94,11 +126,12 @@ async function GuildChannel({ guildId, channelId }: { guildId: string; channelId
         <MessagePane
           channelKey={channel.id}
           mode="channel"
-          initialView={toMessageView(listMessages({ channelId: channel.id }))}
+          initialView={toMessageView(page)}
           title={channel.name}
           topic={channel.topic}
           showHash
           members={members}
+          focusMessageId={focused?.found ? focusMessageId : undefined}
         />
       ) : (
         <VoiceChannelView

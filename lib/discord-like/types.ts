@@ -74,6 +74,8 @@ export type Message = {
   reactions?: MessageReaction[];
   editedAt?: string;
   system?: boolean;
+  /** ピン留めされているか（サーバーのお知らせなど） */
+  pinned?: boolean;
 };
 
 export type DMThread = {
