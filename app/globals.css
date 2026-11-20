@@ -1074,58 +1074,272 @@
 .voice-body {
   display: flex;
   flex-direction: column;
-  gap: 20px;
-  padding: 24px 16px;
+  padding: 16px;
 }
 
-.voice-participants {
+/* ---- 通話画面（サーバーVC・DM通話で共通） ---- */
+.call-stage {
+  position: relative;
   display: flex;
-  flex-wrap: wrap;
-  gap: 16px;
-  align-content: flex-start;
+  flex: 1;
+  flex-direction: column;
+  gap: 12px;
+  min-height: 380px;
+  padding: 16px;
+  border-radius: 12px;
+  background: radial-gradient(
+    120% 90% at 50% 0%,
+    var(--color-bg-input) 0%,
+    var(--color-bg-app) 70%
+  );
+  outline: none;
 }
 
-.voice-tile {
+.call-stage:focus-visible {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 2px;
+}
+
+.call-stage-info {
   display: flex;
   flex-direction: column;
+  gap: 2px;
   align-items: center;
-  gap: 6px;
-  width: 112px;
-  padding: 12px 8px;
-  border: 2px solid transparent;
-  border-radius: 10px;
-  background-color: var(--color-bg-app);
+  text-align: center;
 }
 
-.voice-tile[data-speaking="true"] {
-  border-color: var(--color-status-online);
-}
-
-.voice-tile-avatar {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 64px;
-  height: 64px;
-  border-radius: 50%;
-  color: var(--color-text-on-danger);
-  font-size: 22px;
+.call-stage-title {
+  margin: 0;
+  color: var(--color-text);
+  font-size: clamp(17px, 2.2vh, 22px);
   font-weight: 700;
 }
 
-.voice-tile-name {
+.call-stage-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 0;
+  color: var(--color-text-muted);
+  font-size: clamp(13px, 1.6vh, 16px);
+  align-items: center;
+}
+
+.call-stage-status[data-connected="true"] {
+  color: var(--color-status-online);
+  font-weight: 700;
+}
+
+.call-stage-timer {
+  font-variant-numeric: tabular-nums;
+}
+
+.call-stage-flag {
+  padding: 1px 6px;
+  border-radius: 999px;
+  background-color: var(--color-bg-input);
+  color: var(--color-text);
+  font-size: 11px;
+}
+
+.call-stage-subtitle {
+  margin: 0;
+  color: var(--color-text-muted);
+  font-size: clamp(12px, 1.5vh, 15px);
+}
+
+.call-tiles {
+  display: grid;
+  flex: 1;
+  gap: 12px;
+  height: 100%;
+  min-height: 0;
+  /* 余白が残るときは中央に置く（上に寄せない）。行は stage の高さいっぱいに伸ばす */
+  align-content: center;
+  justify-content: center;
+  grid-auto-rows: minmax(120px, 1fr);
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  margin: 0;
+  /* 下端の操作バー（absolute）に重ならないよう、常時の余白を確保する（ホバーで動かない） */
+  padding: 0 0 72px;
+  list-style: none;
+}
+
+/* 人数に応じて stage を埋める: 1人=大きく / 2人=2列 / 3〜4人=2×2 / 5人以上=グリッド */
+.call-tiles[data-count="1"] {
+  grid-template-columns: minmax(0, 1fr);
+}
+
+.call-tiles[data-count="2"],
+.call-tiles[data-count="3"],
+.call-tiles[data-count="4"] {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.call-tiles[data-count="3"] .call-tile:first-child {
+  grid-row: span 2;
+}
+
+.call-tile {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  align-items: center;
+  justify-content: center;
+  min-height: 0;
+  padding: 16px;
+  border: 2px solid var(--color-divider);
+  border-radius: 12px;
+  background-color: var(--color-bg-panel);
+}
+
+.call-tiles[data-count="1"] .call-tile {
+  width: 100%;
+  height: 100%;
+  max-height: 100%;
+}
+
+.call-tile[data-speaking="true"] {
+  border-color: var(--color-status-online);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--color-status-online) 30%, transparent);
+}
+
+.call-tile-avatar {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: clamp(72px, 12vh, 120px);
+  height: clamp(72px, 12vh, 120px);
+  border-radius: 50%;
+  color: var(--color-text-on-danger);
+  font-size: clamp(28px, 5vh, 48px);
+  font-weight: 700;
+}
+
+.call-tile-label {
+  display: flex;
+  gap: 6px;
+  align-items: center;
   max-width: 100%;
+}
+
+.call-tile-name {
   overflow: hidden;
   color: var(--color-text);
-  font-size: 13px;
+  font-size: clamp(15px, 2vh, 22px);
   font-weight: 700;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
 
-.voice-tile-status {
+.call-tile-badge {
+  display: inline-flex;
+  align-items: center;
   color: var(--color-text-muted);
-  font-size: 11px;
+}
+
+.call-tile-badge[data-state="muted"] {
+  color: var(--color-danger);
+}
+
+/* マイク状態のアイコンは clamp でサイズを決める（scale(clamp(数値, 長さ)) は無効なCSS） */
+.call-tile-badge svg {
+  width: clamp(14px, 1.8vh, 20px);
+  height: clamp(14px, 1.8vh, 20px);
+}
+
+/* 通話履歴カード（DM のログ。#137 要件5） */
+.call-history-card {
+  display: inline-flex;
+  gap: 8px;
+  align-items: center;
+  margin: 8px 16px;
+  padding: 8px 14px;
+  border: 1px solid var(--color-divider);
+  border-radius: 10px;
+  background-color: var(--color-bg-panel);
+  color: var(--color-text);
+  font-size: 13px;
+}
+
+.call-history-icon {
+  color: var(--color-status-online);
+  font-size: 15px;
+  line-height: 1;
+}
+
+.call-controls-note {
+  align-self: center;
+  color: var(--color-text-muted);
+  font-size: 12px;
+  white-space: nowrap;
+}
+
+.call-tile[data-muted="true"] .call-tile-avatar {
+  opacity: 0.7;
+}
+
+/* 操作はホバー中・フォーカス中だけ出す（absolute なのでレイアウトは動かない） */
+.call-controls {
+  position: absolute;
+  bottom: 16px;
+  left: 50%;
+  display: flex;
+  gap: 8px;
+  padding: 8px 10px;
+  border-radius: 999px;
+  background-color: var(--color-bg-panel);
+  box-shadow: 0 4px 16px rgb(0 0 0 / 35%);
+  opacity: 0;
+  visibility: hidden;
+  /* 非表示中はクリックも受けない（透明なボタンが押せてしまうのを防ぐ） */
+  pointer-events: none;
+  transform: translate(-50%, 4px);
+  transition:
+    opacity 120ms ease,
+    transform 120ms ease,
+    visibility 0s linear 120ms;
+}
+
+.call-stage:hover .call-controls,
+.call-stage:focus-within .call-controls,
+.call-controls[data-visible="true"] {
+  opacity: 1;
+  visibility: visible;
+  pointer-events: auto;
+  transform: translate(-50%, 0);
+  transition:
+    opacity 120ms ease,
+    transform 120ms ease;
+}
+
+/* タッチ端末では常に出す（ホバーが無いため） */
+@media (hover: none) {
+  .call-controls {
+    opacity: 1;
+    visibility: visible;
+    pointer-events: auto;
+    transform: translate(-50%, 0);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .call-controls,
+  .call-stage:hover .call-controls,
+  .call-stage:focus-within .call-controls {
+    /* 遅延（visibility の 120ms）も残さない */
+    transition-duration: 0s;
+    transition-delay: 0s;
+  }
+}
+
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
 }
 
 .voice-actions {
