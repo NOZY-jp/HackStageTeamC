@@ -5,17 +5,20 @@
  */
 import { describe, expect, it } from "vitest";
 import { MAIMAI_NAME } from "./data/names";
-import { listChannels, listDMMessages, listDMThreads, listMessages } from "./index";
+import { listChannels, listDMMessages, listDMThreads, listGuilds, listMessages } from "./index";
 import { NATURALNESS_LIMITS as L } from "./test-thresholds";
 import type { Message } from "./types";
 
 const SELF = "hal";
 const MINUTE = 60 * 1000;
 
+/** 全サーバー（#132 で増えても自動で対象になる）と全 DM のメッセージ。 */
 const allMessages = (): Message[] => {
-  const server = listChannels("mhc")
-    .filter((channel) => channel.kind === "text")
-    .flatMap((channel) => listMessages({ channelId: channel.id, limit: 5000 }).messages);
+  const server = listGuilds().flatMap((guild) =>
+    listChannels(guild.id)
+      .filter((channel) => channel.kind === "text")
+      .flatMap((channel) => listMessages({ channelId: channel.id, limit: 5000 }).messages),
+  );
   const dm = listDMThreads().flatMap(
     (thread) => listDMMessages({ threadId: thread.id, limit: 5000 }).messages,
   );
@@ -166,6 +169,71 @@ describe("会話の自然さ（#130）", () => {
     const { starts, ends } = callSessions(messages);
     expect(starts).toBeGreaterThan(0);
     expect(Math.abs(starts - ends)).toBeLessThanOrEqual(L.callPairTolerance);
+  });
+
+  it("各通話は1分〜6時間で、スレッド単位でも開始と終了が対になっている", () => {
+    const byThread = byContainer(
+      messages.filter(
+        (message) =>
+          message.body.includes("通話を開始") ||
+          message.body.includes("通話を終了") ||
+          message.body.includes("応答がありませんでした"),
+      ),
+    );
+    expect(byThread.size).toBeGreaterThan(0);
+    for (const [thread, list] of byThread) {
+      let open: Message | undefined;
+      for (const message of list) {
+        if (message.body.includes("通話を開始")) {
+          // 開始の連続は浮き（前の通話が終わっていない）
+          expect(open, `${thread}: 開始が連続`).toBeUndefined();
+          open = message;
+          continue;
+        }
+        // 終了・不在着信は開始と対でだけ現れる
+        if (!open) {
+          throw new Error(`${thread}: 開始なしの終了 ${message.id}`);
+        }
+        const minutes = (Date.parse(message.sentAt) - Date.parse(open.sentAt)) / 60000;
+        expect(minutes, `${thread}: 通話の長さ`).toBeGreaterThanOrEqual(1);
+        expect(minutes, `${thread}: 通話の長さ`).toBeLessThanOrEqual(6 * 60);
+        open = undefined;
+      }
+      expect(open, `${thread}: 開始だけで終了が無い`).toBeUndefined();
+    }
+  });
+
+  it("時刻はすべて +09:00 固定（タイムゾーンの混在を許さない）", () => {
+    for (const message of messages) {
+      expect(message.sentAt, message.id).toMatch(/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:00\+09:00$/);
+    }
+  });
+
+  it("通話は夜〜深夜に始まり、早朝（4〜7時）には始まらない", () => {
+    const starts = messages.filter((message) => message.body.includes("通話を開始しました"));
+    expect(starts.length).toBeGreaterThan(0);
+    const hours = starts.map((message) => Number(message.sentAt.slice(11, 13)));
+    // 19時〜翌2時のあいだに大半が始まる
+    const evening = hours.filter((hour) => hour >= 19 || hour <= 2);
+    expect(evening.length / hours.length).toBeGreaterThanOrEqual(0.5);
+    // 早朝 4〜7 時には始めない
+    expect(hours.some((hour) => hour >= 4 && hour <= 7)).toBe(false);
+  });
+
+  it("未返信・既読スルーはスレッド単位でも数えられる", () => {
+    const threads = listDMThreads();
+    expect(threads.length).toBeGreaterThan(0);
+    const perThread = threads.map((thread) => {
+      const list = listDMMessages({ threadId: thread.id, limit: 5000 }).messages;
+      const groups = byContainer(list);
+      return {
+        id: thread.id,
+        unreplied: list[list.length - 1]?.authorId === SELF,
+        readThrough: readThroughCount(groups),
+      };
+    });
+    // どこかのスレッドに、未返信か既読スルーのどちらかがある
+    expect(perThread.some((entry) => entry.unreplied || entry.readThrough > 0)).toBe(true);
   });
 
   it("関係性ごとの頻度の上限", () => {
