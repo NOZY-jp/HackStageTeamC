@@ -4,11 +4,13 @@
  * ID はここ（1か所）に置き、データ側の定数と一致することをテストで固定する。
  */
 
-/** 旧 Twixer のハンドル（2018年の狩猟画面に写る）。 */
-export const GAME_OLD_ID = "hunter_denden";
+/** ゲーム内の旧ID（2018年の狩猟画面・2019年のロビーに写る。段階5の完全一致対象）。 */
+export const GAME_OLD_ID = "hunter_denden3243";
+/** 旧表示名（ゲーム内IDとは別。画面には別ラベルで出す）。 */
+export const GAME_OLD_DISPLAY_NAME = "hunter_denden";
 /** 現在の Discord のハンドル（2026年のフレンド一覧に写る）。 */
 export const CURRENT_ID = "maimaimaimai";
-/** 旧 Discord のハンドル（2019年のロビーに写る）。 */
+/** 旧 Discord のハンドル（lobby2019 の別メンバー表記に使う）。 */
 export const OLD_DISCORD_ID = "hunter_denden3243";
 
 export type ScreenScene = {
