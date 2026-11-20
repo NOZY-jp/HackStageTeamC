@@ -95,8 +95,8 @@ export type Scene = {
 export type Progress = {
   flags: FlagId[];
   completedScenes: string[];
-  /** 場面ID → 選んだ選択肢ID */
-  choices: Record<string, string>;
+  /** 場面ID → 選んだ選択肢ID（選んだ順。寄り道も残る） */
+  choices: Record<string, string[]>;
 };
 
 /** 組み立て直した会話の1場面分。 */
@@ -105,7 +105,6 @@ export type TranscriptEntry = {
   chapter: Chapter;
   title: string;
   lines: SceneLine[];
-  choice?: { id: string; label: string };
-  /** 選んだ直後に続く台詞 */
-  replyLines?: SceneLine[];
+  /** この場面で選んだ選択肢（寄り道を含めて選んだ順） */
+  choices: { id: string; label: string; replyLines?: SceneLine[] }[];
 };

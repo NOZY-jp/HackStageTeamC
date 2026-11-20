@@ -30,8 +30,8 @@ export const scenes: Scene[] = [
       { speakerId: "ryo", text: "写真の記事、あった。賞をもらったやつだ。" },
     ],
     choices: [
-      { id: "remember", label: "見に行く", setsFlags: ["photo_hint"] },
-      { id: "later", label: "あとで見る", setsFlags: ["photo_hint"] },
+      { id: "remember", label: "見に行く", setsFlags: [] },
+      { id: "later", label: "あとで見る", setsFlags: [] },
     ],
     completesFlags: [],
   },
@@ -42,7 +42,7 @@ export const scenes: Scene[] = [
     requires: ["real_name_known"],
     lines: [
       { speakerId: "ryo", text: "結果ページを見た。名前まで載ってるなんて思わなかった。" },
-      { speakerId: "ryo", text: "……この名前、どこかで聞いた気がする。" },
+      { speakerId: "ryo", text: "……この人が、でんでん？" },
     ],
     choices: [
       { id: "see-photo", label: "かのんの写真を見に行く", setsFlags: ["bff_photos_seen"] },
@@ -85,7 +85,7 @@ export const scenes: Scene[] = [
     completesFlags: ["kai_contacted"],
   },
   {
-    id: "ch4-kanon",
+    id: "ch4-matching",
     chapter: "現実",
     title: "写真の照合",
     // 順序10→11: 検索で見つけた人と、かのんの写真の人物を照合して終わる
