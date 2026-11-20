@@ -64,8 +64,13 @@ const allServerMessages = (): Message[] =>
       .filter((channel) => channel.kind === "text")
       .flatMap((channel) => listMessages({ channelId: channel.id, limit: 2000 }).messages),
   );
-/** Discord 全体（サーバーの公開チャンネル＋DM すべて）。 */
-const discordMessages = (): Message[] => [...serverMessages(), ...dmMessages(), ...kaiDMMessages()];
+/** Discord 全体（全サーバーの text チャンネル＋全 DM スレッド）。#132 以降のサーバーも含む。 */
+const discordMessages = (): Message[] => [
+  ...allServerMessages(),
+  ...listDMThreads().flatMap(
+    (thread) => listDMMessages({ threadId: thread.id, limit: 3000 }).messages,
+  ),
+];
 
 describe("ダミーデータの整合性", () => {
   it("サーバーは決められた数だけあり、旧3サーバーは残っていない", () => {
@@ -276,10 +281,10 @@ describe("ダミーデータの整合性", () => {
     for (const [week, weekDays] of fullWeeks) {
       expect(weekDays.size, week).toBeGreaterThanOrEqual(VOLUME_LIMITS.datingWeek.minDays);
     }
-    // 連続して空く日数
+    // 連続して空く日数（日付の差 − 1。隣り合う日は 0 日空き）
     let maxGap = 0;
     for (let i = 1; i < days.length; i += 1) {
-      const gap = Math.round((Date.parse(days[i]) - Date.parse(days[i - 1])) / 86_400_000);
+      const gap = Math.round((Date.parse(days[i]) - Date.parse(days[i - 1])) / 86_400_000) - 1;
       maxGap = Math.max(maxGap, gap);
     }
     expect(maxGap).toBeLessThanOrEqual(VOLUME_LIMITS.datingWeek.maxGapDays);

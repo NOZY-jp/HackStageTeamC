@@ -250,14 +250,16 @@ describe("会話の自然さ（#130）", () => {
 
     // MaiMai との DM は週7日を超えない（週ごとに数える）
     const mai = listDMMessages({ threadId: "dm-maimai", limit: 5000 }).messages;
+    // 週の区切りは日本時間（+09:00）で計算する（ローカルTZやUTCに依存させない）
     const weeks = new Map<string, Set<string>>();
     for (const message of mai) {
-      const date = new Date(message.sentAt);
-      const weekStart = new Date(date);
-      weekStart.setDate(date.getDate() - date.getDay());
+      const day = message.sentAt.slice(0, 10);
+      const jstDate = new Date(`${day}T00:00:00+09:00`);
+      const weekday = jstDate.getUTCDay();
+      const weekStart = new Date(jstDate.getTime() - weekday * 86_400_000);
       const key = weekStart.toISOString().slice(0, 10);
       const days = weeks.get(key) ?? new Set<string>();
-      days.add(message.sentAt.slice(0, 10));
+      days.add(day);
       weeks.set(key, days);
     }
     for (const [week, days] of weeks) {
