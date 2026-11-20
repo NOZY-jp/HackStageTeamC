@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import { PaneToggles } from "@/components/discord-like/pane-toggles";
 import { dmThreadPath } from "@/lib/platform/app-prefix";
@@ -27,20 +27,31 @@ export function DmCallView({
   otherHandle?: string;
 }) {
   const router = useRouter();
+  const pathname = usePathname();
   const { addMessage } = useLocalMessages();
   const [muted, setMuted] = useState(false);
   const [deafened, setDeafened] = useState(false);
   const [connected, setConnected] = useState(true);
-  const logged = useRef(false);
+  // 通話画面に「入り直した」ことを検知する（SPA で同じ画面が再利用されても初期化する）
+  const callPath = `${dmThreadPath(threadUrlId)}/call`;
+  const enteredRef = useRef(false);
+  const [entry, setEntry] = useState(0);
 
-  // 開始はこの画面に入った時点（1回だけログに残す）
   useEffect(() => {
-    if (logged.current) {
-      return;
+    const onCall = pathname === callPath;
+    if (onCall && !enteredRef.current) {
+      // 入口で必ず初期化する（前回の connected=false を持ち越さない）
+      enteredRef.current = true;
+      setConnected(true);
+      setMuted(false);
+      setDeafened(false);
+      setEntry((value) => value + 1);
+      addMessage(threadId, "通話を開始しました", { system: true });
     }
-    logged.current = true;
-    addMessage(threadId, "通話を開始しました", { system: true });
-  }, [addMessage, threadId]);
+    if (!onCall && enteredRef.current) {
+      enteredRef.current = false;
+    }
+  }, [addMessage, callPath, pathname, threadId]);
 
   /** 通話を終える（切断ボタン・「チャットに戻る」のどちらでも同じ処理を通す）。 */
   const endCall = () => {
@@ -57,7 +68,12 @@ export function DmCallView({
   };
 
   return (
-    <main id="app-main" className="app-main" aria-label={`${other.displayName} との通話`}>
+    <main
+      id="app-main"
+      className="app-main"
+      aria-label={`${other.displayName} との通話`}
+      data-call-entry={entry}
+    >
       <header className="pane-header voice-header">
         <PaneToggles />
         <div className="voice-header-text">

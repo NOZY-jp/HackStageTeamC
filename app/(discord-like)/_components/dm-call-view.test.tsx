@@ -125,3 +125,45 @@ describe("「チャットに戻る」で通話を終える（#140）", () => {
     expect(screen.getByTestId("log-system").textContent).toBe("true / true");
   });
 });
+
+describe("入場→退出→再入場（#140）", () => {
+  function Harness({ showCall }: { showCall: boolean }) {
+    return (
+      <AppShell rail={<span />}>
+        <LocalMessagesProvider>
+          {showCall ? (
+            <DmCallView threadId="dm-maimai" threadUrlId={threadUrlId} self={self} other={other} />
+          ) : (
+            <p>チャット</p>
+          )}
+          <Log />
+        </LocalMessagesProvider>
+      </AppShell>
+    );
+  }
+
+  it("2回目の入場でも connected が true で、開始/終了が履歴に積まれる", async () => {
+    const { container, rerender } = render(<Harness showCall />);
+    await screen.findByRole("main", { name: "MaiMai との通話" });
+    await waitFor(() => {
+      expect(screen.getByTestId("log").textContent).toContain("通話を開始しました");
+    });
+    fireEvent.click(screen.getByRole("link", { name: "チャットに戻る" }));
+    await waitFor(() => {
+      expect(screen.getByTestId("log").textContent).toContain("通話を終了しました");
+    });
+
+    // チャットへ（同じ Provider のまま）。SPA で同じ画面へ戻る想定
+    rerender(<Harness showCall={false} />);
+    expect(screen.getByText("チャット")).toBeInTheDocument();
+
+    rerender(<Harness showCall />);
+    await screen.findByRole("main", { name: "MaiMai との通話" });
+    // 2回目も接続状態から始まる（前回の connected=false を持ち越さない）
+    expect(container.querySelector(".call-stage")?.getAttribute("data-connected")).toBe("true");
+    await waitFor(() => {
+      expect(screen.getByTestId("log-system").textContent).toBe("true / true / true");
+    });
+    expect(screen.getByTestId("log").textContent?.match(/通話を開始しました/g)).toHaveLength(2);
+  });
+});
