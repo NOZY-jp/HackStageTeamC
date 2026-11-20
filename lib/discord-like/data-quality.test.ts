@@ -47,10 +47,16 @@ describe("データ品質（#131 / D9・D10）", () => {
     }
   });
 
-  it("新規追加分の本文ユニーク率は95%以上、全体は85%以上", () => {
-    const added = newMessages();
+  it("新規追加分の本文ユニーク率は95%以上、全体は85%以上（システム行・スタンプ・画像のみは除く）", () => {
+    // 入室/退出のシステム行、スタンプのみ、画像のみは仕様上どうしても同じ文言になるため対象外（D9）
+    const isText = (message: Message) =>
+      message.system !== true &&
+      !/^:[a-z0-9_]+:$/.test(message.body.trim()) &&
+      !((message.attachments?.length ?? 0) > 0 && message.body.trim().length === 0);
+    const added = newMessages().filter(isText);
+    const texts = messages.filter(isText);
     const addedUnique = new Set(added.map((message) => message.body)).size / added.length;
-    const overallUnique = new Set(messages.map((message) => message.body)).size / messages.length;
+    const overallUnique = new Set(texts.map((message) => message.body)).size / texts.length;
     expect(addedUnique).toBeGreaterThanOrEqual(Q.newUniqueRate);
     expect(overallUnique).toBeGreaterThanOrEqual(Q.overallUniqueRate);
   });
