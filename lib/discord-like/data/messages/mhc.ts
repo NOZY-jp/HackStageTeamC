@@ -3383,7 +3383,7 @@ const existingMessagesByChannelMhc: Record<string, Message[]> = {
       id: "mhc-chat-0047",
       channelId: "mhc-chat",
       authorId: "haruka",
-      sentAt: "2025-05-10T15:54:00+09:00",
+      sentAt: "2025-05-10T15:53:00+09:00",
       body: "どこで作ったの",
     },
     {

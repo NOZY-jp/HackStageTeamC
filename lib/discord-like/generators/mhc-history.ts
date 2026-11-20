@@ -43,6 +43,16 @@ const SPEAKERS = ["hal", "maimai", "gunlance", "mina", "haruka", "slime", "jijii
 const REGULARS = ["gunlance", "mina", "haruka", "slime", "jijii"];
 export const KAI_LIMIT_IN_MHC = 5;
 
+/** 人物ごとの禁止語彙（属性から機械的に決まる。#143） */
+export const PERSON_FORBIDDEN: Record<string, RegExp> = {
+  // MaiMai は社会人（学生語彙を一切使わない）
+  maimai: /大学|1限|2限|3限|4限|5限|ゼミ|駅前|公園|学食|履修|レポート|講義|サークル/,
+  // 笛じじいは学生ではない（「5限」を使わない）
+  jijii: /5限/,
+  // kai は mhc では雑談とゲームだけ（調査・進捗を書かない。D10）
+  kai: /ログ|照合|矛盾|Exif|メタ情報|進捗|調査|特定/,
+};
+
 const P = {
   time: [
     "20時",
@@ -146,7 +156,7 @@ const buildTemplates = (pick: <T>(list: T[]) => T): Record<string, (() => string
     () => `${pick(P.class)}つらい`,
     () => `${pick(P.task)}終わらない`,
     () => `${pick(P.time)}から${pick(P.quest)}行く人いる？`,
-    () => `${pick(P.replyShort)}、${pick(P.topicTail)}`,
+    () => `${pick(P.replyShort)}。${pick(P.topicTail)}`,
     () => `${pick(P.topic)}${pick(P.topicTail)}`,
     () => `${pick(P.morning)}。${pick(P.weather)}`,
     () => `${pick(P.night)}。${pick(P.time)}まで`,
@@ -299,7 +309,7 @@ export function generateMhcHistory(
       if (!body) body = `https://example.com/notes/${int(10000, 99999)}`;
     } else if (roll < 0.09 && typoCount < 40) {
       for (let attempt = 0; attempt < 300; attempt += 1) {
-        const candidate = `${pick(["誤字った", "言い直すと", "いや、違う", "間違えた"])}。${pick(P.quest)}の${pick(["話", "件", "やつ"])}、${pick(P.time)}のこと`;
+        const candidate = `${pick(["誤字った", "言い直すと", "いや、違う", "間違えた"])}。${pick(P.quest)}、${pick(P.time)}のこと`;
         if (!usedBody.has(candidate)) {
           body = candidate;
           break;
@@ -308,7 +318,7 @@ export function generateMhcHistory(
       typoCount += 1;
     } else if (roll < 0.28 && topicCount < 120) {
       for (let attempt = 0; attempt < 2000; attempt += 1) {
-        const candidate = `${pick(P.topic)}${pick(P.topicTail)}、${pick(P.time)}の${pick(["話", "件", "やつ"])}`;
+        const candidate = `${pick(P.topic)}${pick(P.topicTail)}。${pick(P.time)}は${pick(["空いてる", "むりそう", "いけそう"])}`;
         if (!usedBody.has(candidate)) {
           body = candidate;
           break;
@@ -356,6 +366,14 @@ export function generateMhcHistory(
     ) {
       merged[i].body = `${merged[i].body}。`;
     }
+  }
+
+  // 3連続の話者差し替えで制約に反したら、もう一度直す
+  const STUDENT_SPEAKERS = ["hal", "gunlance", "mina", "haruka", "slime"];
+  for (const item of merged) {
+    const rule = PERSON_FORBIDDEN[item.author];
+    if (!rule?.test(item.body)) continue;
+    item.author = pick(STUDENT_SPEAKERS);
   }
 
   // kai は D10 の上限まで（残りは他の常連へ）

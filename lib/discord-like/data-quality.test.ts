@@ -4,6 +4,7 @@
  */
 import { describe, expect, it } from "vitest";
 import { buildMhcHistory } from "./data/messages/mhc-history";
+import { KAI_LIMIT_IN_MHC, PERSON_FORBIDDEN } from "./generators/mhc-history";
 import { FRIEND_MEMBERS, looksPadded, UNIV_MEMBERS } from "./generators/servers";
 import { listChannels, listDMMessages, listDMThreads, listGuilds, listMessages } from "./index";
 import { QUALITY_LIMITS as Q } from "./test-thresholds";
@@ -136,6 +137,7 @@ describe("データ品質（#131 / D9・D10）", () => {
       "2026-09-02T21:12:00+09:00", // dm-maimai-0178 × 0179（既存）
       "2026-09-09T23:21:00+09:00", // dm-maimai-0201 × 0202（既存）
       "2026-10-26T22:16:00+09:00", // dm-maimai-0346 × 0347（既存）
+      "2025-05-10T15:53:00+09:00", // mhc-chat-0046 × 0047（既存）
     ]);
     const seen = new Set<string>();
     for (const message of messages) {
@@ -205,6 +207,30 @@ describe("データ品質（#131 / D9・D10）", () => {
       expect(/駅前|公園|家で待って|集合|待ち合わせ|会いに行く/.test(message.body), message.id).toBe(
         false,
       );
+    }
+  });
+
+  it("#143: 人物の属性に合わない語彙を使わない（MaiMai・じじい・kai）", () => {
+    const mhc = listGuilds()
+      .filter((guild) => guild.id === "mhc")
+      .flatMap((guild) => listChannels(guild.id).filter((c) => c.kind === "text"))
+      .flatMap((channel) => listMessages({ channelId: channel.id, limit: 5000 }).messages);
+    for (const message of mhc) {
+      const rule = PERSON_FORBIDDEN[message.authorId];
+      if (!rule) continue;
+      expect(rule.test(message.body), `${message.id} ${message.authorId}: ${message.body}`).toBe(
+        false,
+      );
+    }
+    expect(KAI_LIMIT_IN_MHC).toBeLessThanOrEqual(5);
+  });
+
+  it("#143: 「〜の件／〜の話」の継ぎはぎで水増ししない", () => {
+    for (const message of messages) {
+      expect(
+        /(の件|の話)[、。].*(の件|の話)/.test(message.body),
+        `${message.id}: ${message.body}`,
+      ).toBe(false);
     }
   });
 
