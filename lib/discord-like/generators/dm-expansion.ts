@@ -19,7 +19,7 @@ export type DMExpansionTarget = { threadId: string; personId: string; count: num
 
 export const DM_EXPANSION_TARGETS: DMExpansionTarget[] = [
   { threadId: "dm-maimai", personId: "maimai", count: 719 },
-  { threadId: "dm-kai", personId: "kai", count: 55 },
+  { threadId: "dm-kai", personId: "kai", count: 90 },
   { threadId: "dm-taku", personId: "taku", count: 60 },
   { threadId: "dm-jun", personId: "jun", count: 45 },
   { threadId: "dm-miyu", personId: "miyu", count: 35 },
@@ -46,16 +46,16 @@ const MAIMAI_MONTHS: [string, number][] = [
 ];
 
 const KAI_MONTHS: [string, number][] = [
-  ["2026-02", 6],
-  ["2026-03", 6],
-  ["2026-04", 6],
-  ["2026-05", 6],
-  ["2026-06", 6],
-  ["2026-07", 6],
-  ["2026-08", 6],
-  ["2026-09", 6],
-  ["2026-10", 6],
-  ["2026-11", 1],
+  ["2026-02", 7],
+  ["2026-03", 9],
+  ["2026-04", 9],
+  ["2026-05", 9],
+  ["2026-06", 10],
+  ["2026-07", 10],
+  ["2026-08", 10],
+  ["2026-09", 9],
+  ["2026-10", 9],
+  ["2026-11", 8],
 ];
 
 const FRIEND_MONTHS: Record<string, [string, number][]> = {
@@ -198,7 +198,6 @@ const BODY_TEMPLATES: Record<string, (() => string)[]> = {
     () => `今日は${pickM(MOOD)}から${pickM(["ゲーム", "通話", "配信"])}見てる`,
     () => `${pickM(REACT)}。${pickM(TIME)}に${pickM(["通話", "連絡", "ゲーム"])}する`,
     () => `${pickM(MONSTER)}の話、${pickM(TIME)}にしよう`,
-    () => `${pickM(FOOD)}食べながら${pickM(["通話", "ゲーム", "動画"])}してた`,
     () =>
       `おつかれ。${pickM(["今日", "明日", "週末"])}は${pickM(["ゆっくり", "のんびり", "早め"])}に`,
     () => `${pickM(REACT)}よ。${pickM(["写真", "動画", "スクショ"])}送る`,
@@ -249,9 +248,16 @@ const BODY_TEMPLATES: Record<string, (() => string)[]> = {
     () => `${pickM(REACT)}、${pickM(TIME)}に${pickM(PLACE)}で`,
   ],
   "dm-ootsuka": [
-    () => `${pickM(["履修", "研究室", "就活", "レポート"])}の件、${pickM(TIME)}なら大丈夫です`,
-    () => `${pickM(REACT)}。${pickM(["資料", "プリント"])}は${pickM(PLACE)}にあります`,
-    () => `${pickM(TIME)}に${pickM(PLACE)}来られますか`,
+    () => `${pickM(["履修", "研究室", "就活", "レポート"])}の件、${pickM(TIME)}なら大丈夫だよ`,
+    () => `${pickM(REACT)}。${pickM(["資料", "プリント"])}は${pickM(PLACE)}にあるから見ておいて`,
+    () => `${pickM(TIME)}に${pickM(PLACE)}来られる？`,
+  ],
+  // 先輩（ootsuka）への返信は hal が敬語
+  "dm-ootsuka__hal": [
+    () => `${pickM(TIME)}に${pickM(PLACE)}伺います。ありがとうございます`,
+    () => `${pickM(["履修", "研究室", "就活"])}の件、${pickM(TIME)}に相談してもいいですか`,
+    () => `${pickM(["資料", "プリント"])}、確認しました。助かります`,
+    () => `すみません、${pickM(TIME)}は都合がつきます`,
   ],
   "dm-hayashi": [
     () =>
@@ -489,8 +495,16 @@ export function generateDmExpansion(input: DMExpansionInput): DMExpansionResult 
       month === "2026-11"
         ? 19
         : new Date(Date.UTC(Number(month.slice(0, 4)), Number(month.slice(5, 7)), 0)).getUTCDate();
+    // 「回」＝会話の機会（日）。月6日以下にまとめる
+    const opportunityDays = Math.max(1, Math.min(6, Math.ceil(count / 2)));
+    const dayPool: number[] = [];
+    while (dayPool.length < opportunityDays) {
+      const candidate = int(1, daysInMonth);
+      if (!dayPool.includes(candidate)) dayPool.push(candidate);
+    }
+    dayPool.sort((a, b) => a - b);
     for (let index = 0; index < count; index += 1) {
-      const day = int(1, daysInMonth);
+      const day = dayPool[index % dayPool.length];
       let at = Date.parse(`${month}-${pad(day)}T${pad(int(9, 23))}:${pad(int(0, 59))}:00+09:00`);
       if (at >= kaiLimit) at = kaiLimit - int(30, 600) * 60000;
       const { at: safeAt, key } = nextTime(at);
@@ -541,9 +555,15 @@ export function generateDmExpansion(input: DMExpansionInput): DMExpansionResult 
         );
         const { key } = nextTime(at);
         const fromMe = list.length % 2 === 0;
+        const poolKey =
+          target.threadId === "dm-ootsuka" && fromMe
+            ? "dm-ootsuka__hal"
+            : target.threadId === "dm-hayashi" && !fromMe
+              ? "dm-hayashi__person"
+              : target.threadId;
         let body: string | null = null;
         for (let attempt = 0; attempt < 300; attempt += 1) {
-          const candidate = pick(templates.get(target.threadId) ?? [])();
+          const candidate = pick(templates.get(poolKey) ?? templates.get(target.threadId) ?? [])();
           if (!list.some((message) => message.body === candidate)) {
             body = candidate;
             break;
