@@ -48,11 +48,30 @@ function load(): StoryState {
     return {
       flags: Array.isArray(parsed.flags) ? parsed.flags : [],
       completed: Array.isArray(parsed.completed) ? parsed.completed : [],
-      choices: parsed.choices && typeof parsed.choices === "object" ? parsed.choices : {},
+      choices: readChoices(parsed.choices),
     };
   } catch {
     return initialState;
   }
+}
+
+/**
+ * 選んだ選択肢を読む。前の形（場面ごとに1つの文字列）も、選んだ順の配列として読み直す。
+ * 壊れた値は捨てる。
+ */
+export function readChoices(value: unknown): StoryState["choices"] {
+  if (!value || typeof value !== "object" || Array.isArray(value)) {
+    return {};
+  }
+  const choices: StoryState["choices"] = {};
+  for (const [beatId, chosen] of Object.entries(value)) {
+    if (typeof chosen === "string") {
+      choices[beatId] = [chosen];
+    } else if (Array.isArray(chosen) && chosen.every((id) => typeof id === "string")) {
+      choices[beatId] = chosen;
+    }
+  }
+  return choices;
 }
 
 function save(state: StoryState) {

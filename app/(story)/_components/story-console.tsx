@@ -9,11 +9,14 @@ import {
   CHAPTER_TITLES,
   type Channel,
   characters,
+  chosenIn,
   currentChapter,
   flagLabel,
   type Line,
+  linesOf,
   missingFor,
   nicknames,
+  remainingChoices,
   steps,
   transcript,
 } from "@/lib/story";
@@ -47,16 +50,19 @@ function BeatHeader({ beat }: { beat: Beat }) {
 
 /** 次の場面を1行ずつ流し、選択肢があれば選ばせる。無ければ「次へ」で終える */
 function BeatPlayer({ beat }: { beat: Beat }) {
-  const { completeBeat } = useStory();
+  const { state, completeBeat } = useStory();
+  const choices = remainingChoices(state, beat);
+  // 寄り道を選んだら、その発言と返事も続けて出す
+  const lines = linesOf(beat, chosenIn(state, beat.id));
   // 場面が変わると key で作り直されるので、表示した行数はここで 0 から始まる
   const [shown, setShown] = useState(0);
-  const finished = shown >= beat.lines.length;
-  const hasChoices = (beat.choices?.length ?? 0) > 0;
+  const finished = shown >= lines.length;
+  const hasChoices = choices.length > 0;
 
   const showNext = () => {
     const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
     if (reduce) {
-      setShown(beat.lines.length);
+      setShown(lines.length);
       return;
     }
     setShown((count) => count + 1);
@@ -66,7 +72,7 @@ function BeatPlayer({ beat }: { beat: Beat }) {
     <section className="st-beat" data-playing="true">
       <BeatHeader beat={beat} />
       <ol className="st-lines" aria-live="polite">
-        {beat.lines.slice(0, shown).map((line, index) => (
+        {lines.slice(0, shown).map((line, index) => (
           // biome-ignore lint/suspicious/noArrayIndexKey: 台本の行は固定で並び替えない
           <LineView key={index} line={line} />
         ))}
@@ -77,16 +83,12 @@ function BeatPlayer({ beat }: { beat: Beat }) {
             <button type="button" className="st-choice" onClick={showNext}>
               次の行
             </button>
-            <button
-              type="button"
-              className="st-secondary"
-              onClick={() => setShown(beat.lines.length)}
-            >
+            <button type="button" className="st-secondary" onClick={() => setShown(lines.length)}>
               場面を最後まで表示
             </button>
           </>
         ) : hasChoices ? (
-          beat.choices?.map((choice) => (
+          choices.map((choice) => (
             <button
               key={choice.id}
               type="button"
@@ -94,6 +96,7 @@ function BeatPlayer({ beat }: { beat: Beat }) {
               onClick={() => completeBeat(beat, choice.id)}
             >
               {choice.label}
+              {choice.completes === false ? "（寄り道）" : ""}
             </button>
           ))
         ) : (

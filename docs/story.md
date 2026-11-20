@@ -61,6 +61,27 @@ beat({
 }),
 ```
 
+#### 選択肢
+
+場面の最後に `choices` を書くと、プレイヤーが選びます。選んだ文はリョウの発言として会話に残り、`reply` が続きます。
+
+- `sets`: 選んだら立つフラグ
+- `requires`: このフラグがそろうまで、その選択肢は出ない（手がかりを見つけた人だけが選べる、など）
+- `completes: false`: **寄り道**。選んでも場面は終わらず、返事のあとに残りの選択肢から選び直せる（同じ寄り道は二度出ない）。寄り道の発言と返事も、選んだ順に会話の履歴に残る
+
+```ts
+choices: [
+  { id: "search", label: "本名で検索する", sets: ["s10-talkup-match"] },
+  {
+    id: "ask",
+    label: "カイに相談する",
+    requires: ["s03-blog-found"],
+    completes: false,
+    reply: [todo("kai", "カイの返事")],
+  },
+],
+```
+
 ### 段階の手がかりを各プラットフォームに入れた
 
 1. `lib/story/steps.ts` のその段階の `status` を `{ done: true }` にし、`places` に場所（`href`）を書く

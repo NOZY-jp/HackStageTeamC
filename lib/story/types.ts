@@ -62,6 +62,13 @@ export type Choice = {
   sets?: FlagId[];
   /** 選んだあとに続く相手の返事 */
   reply?: Line[];
+  /** このフラグがそろうまで出さない（手がかりを見つけた人だけが選べる、など） */
+  requires?: FlagId[];
+  /**
+   * 選んだら場面を終えるか（既定は true）。
+   * false は「寄り道」: 返事のあとも場面は続き、残りの選択肢から選び直せる（同じ寄り道は二度出ない）
+   */
+  completes?: boolean;
 };
 
 export type Beat = {
@@ -88,6 +95,6 @@ export type StoryState = {
   flags: FlagId[];
   /** 終わった場面（終わった順） */
   completed: string[];
-  /** 場面ID → 選んだ選択肢ID */
-  choices: Record<string, string>;
+  /** 場面ID → 選んだ選択肢ID（選んだ順。寄り道も残る） */
+  choices: Record<string, string[]>;
 };
