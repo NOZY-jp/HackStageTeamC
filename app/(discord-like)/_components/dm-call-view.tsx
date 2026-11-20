@@ -1,7 +1,9 @@
 "use client";
 
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
+import { PaneToggles } from "@/components/discord-like/pane-toggles";
 import { dmThreadPath } from "@/lib/platform/app-prefix";
 import { CallStage } from "./call-stage";
 import { useLocalMessages } from "./local-messages-context";
@@ -46,7 +48,27 @@ export function DmCallView({
   return (
     <main id="app-main" className="app-main" aria-label={`${other.displayName} との通話`}>
       <header className="pane-header voice-header">
+        <PaneToggles />
         <h1 className="voice-header-title">{other.displayName} との通話</h1>
+        <Link
+          href={dmThreadPath(threadUrlId)}
+          className="message-header-icon message-header-button"
+          aria-label="チャットに戻る"
+        >
+          <svg
+            aria-hidden="true"
+            viewBox="0 0 24 24"
+            width="18"
+            height="18"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          >
+            <path d="M21 15a4 4 0 0 1-4 4H8l-5 3V6a4 4 0 0 1 4-4h10a4 4 0 0 1 4 4Z" />
+          </svg>
+        </Link>
       </header>
 
       <div className="pane-scroll voice-body">
