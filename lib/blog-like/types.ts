@@ -22,8 +22,11 @@ export type EntryBlock =
   | { kind: "heading"; text: string }
   /** 本文中の画像。alt は内容の説明、caption は画像の下に出す一言 */
   | { kind: "image"; src: string; alt: string; width: number; height: number; caption?: string }
-  /** 1行のリンク。url は作中の URL（例: "twixer.com/hunter_denden0102/status/..."） */
-  | { kind: "link"; lead: string; url: string };
+  /**
+   * 1行のリンク。url は作中の URL（例: "twixer.com/hunter_denden0102/status/..."）。
+   * href を渡すと、そのアプリ内パスへ普通のリンクとして飛ぶ（当時のリンクのまま）。
+   */
+  | { kind: "link"; lead: string; url: string; label?: string; href?: string };
 
 /** 記事につくコメント。投稿者名はハンドル風のものだけ（本名は出さない）。 */
 export type Comment = {
