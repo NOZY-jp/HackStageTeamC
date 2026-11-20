@@ -59,6 +59,17 @@ export const MESSAGE_IMAGES: Record<string, MessageImage> = {
     height: 675,
     label: "2018年の狩猟画面のスクリーンショット",
   },
+  // #clips の動画サムネイル相当（mhc.ts の添付名は .png のまま、実体は WebP）
+  "clip-0312-2.png": {
+    name: "clip-0312-2.png",
+    status: "ready",
+    owner: "unknown",
+    handle: "",
+    src: "/discord-like/clips/clip-0312-2.webp",
+    width: 1200,
+    height: 675,
+    label: "夕暮れの渓谷と吊り橋",
+  },
 };
 
 /** 画像名から定義を引く。未定義の名前はパスだけ組み立てる（プレースホルダ表示になる）。 */
