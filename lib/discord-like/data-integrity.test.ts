@@ -446,3 +446,21 @@ describe("メンバー一覧と順序9のヒント", () => {
     }
   });
 });
+
+describe("DM の同一発言の重複（#88）", () => {
+  it("同じ発言者が続けて同じ本文（または接頭辞）を送っていない", () => {
+    const messages = dmMessages();
+    const offenders: string[] = [];
+    for (let i = 1; i < messages.length; i += 1) {
+      const prev = messages[i - 1];
+      const current = messages[i];
+      if (prev.authorId !== current.authorId) continue;
+      const a = prev.body.trim();
+      const b = current.body.trim();
+      if (a === b || a.startsWith(b) || b.startsWith(a)) {
+        offenders.push(`${prev.id} "${a}" -> ${current.id} "${b}"`);
+      }
+    }
+    expect(offenders).toEqual([]);
+  });
+});
