@@ -64,6 +64,17 @@ export const twitterProfiles: Profile[] = [
   },
 ];
 
+/**
+ * フォロー関係（見る側の user id → フォローしている user id の一覧）。
+ * ホームのタイムラインとおすすめユーザーの母集団に使う。
+ * リョウ（tw-hal）がこの SNS で知っているのはゲーム仲間の Mai とソウだけ。
+ * かのんはまだ知らないのでフォローしていない — 旧アカウントの bio の
+ * 「BFF: @kanon__dayo」から見つけるのが筋書き。
+ */
+export const twitterFollows: Record<string, string[]> = {
+  "tw-hal": ["tw-mai", "tw-sou"],
+};
+
 export const twitterPosts: Post[] = [
   {
     id: "post-002",
@@ -219,7 +230,7 @@ export const twitterPosts: Post[] = [
     id: "post-023",
     authorId: "tw-hal",
     postedAt: "2026-11-17T08:05:00+09:00",
-    body: "あと5日。緊張して、夜ちゃんと眠れなくなってきた。",
+    body: "あと4日。緊張して、夜ちゃんと眠れなくなってきた。",
     replyCount: 2,
     repostCount: 6,
     likeCount: 83,

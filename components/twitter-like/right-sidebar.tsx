@@ -1,14 +1,22 @@
 import Link from "next/link";
-import { HAL_HANDLE } from "@/lib/discord-like/data/names";
-import { isProtected, listTrends, listUsers } from "@/lib/twitter-like";
+import {
+  isProtected,
+  listFollowingIds,
+  listTrends,
+  listUsers,
+  TWITTER_ME_ID,
+} from "@/lib/twitter-like";
 import { Avatar } from "./avatar";
 import { formatCount } from "./format";
 import { SearchIcon } from "./icons";
 
 export function RightSidebar({ hideSearch = false }: { hideSearch?: boolean }) {
   const trends = listTrends();
+  // おすすめはリョウ（閲覧者）が知っている人＝フォロー中のアカウントから出す。
+  // かのんはまだ知らないので出さない。
+  const following = new Set(listFollowingIds(TWITTER_ME_ID));
   const suggestions = listUsers()
-    .filter((user) => user.handle !== HAL_HANDLE && !isProtected(user))
+    .filter((user) => following.has(user.id) && !isProtected(user))
     .slice(0, 3);
   return (
     <aside className="tw-right" aria-label="サイドバー">

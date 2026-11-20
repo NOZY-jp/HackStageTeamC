@@ -4,12 +4,15 @@ import {
   getUser,
   getUserByHandle,
   isProtected,
+  listFollowingIds,
+  listHomePosts,
   listPosts,
   listPostsByAuthor,
   listReplies,
   listUsers,
   searchPosts,
   searchUsers,
+  TWITTER_ME_ID,
 } from "./index";
 
 describe("lib/twitter-like のアクセサ", () => {
@@ -41,6 +44,41 @@ describe("lib/twitter-like のアクセサ", () => {
       post.body = "書き換え";
     }
     expect(getPost("post-002")?.body).toBe(before);
+  });
+});
+
+describe("ホームのタイムライン（listHomePosts）", () => {
+  it("フォロー中のアカウントと自分の投稿だけを新しい順で返す", () => {
+    const home = listHomePosts(TWITTER_ME_ID);
+    const authors = new Set(home.map((post) => post.authorId));
+    // リョウ（tw-hal）がフォローしているのは Mai・ソウだけ
+    expect(listFollowingIds(TWITTER_ME_ID).sort()).toEqual(["tw-mai", "tw-sou"]);
+    expect([...authors].sort()).toEqual(["tw-hal", "tw-mai", "tw-sou"]);
+    const times = home.map((post) => post.postedAt);
+    expect(times).toEqual([...times].sort().reverse());
+  });
+
+  it("かのんの投稿と開設前の古い投稿はホームに出ないが他の面からは辿れる", () => {
+    const ids = listHomePosts(TWITTER_ME_ID).map((post) => post.id);
+    // かのんの投稿（フォローしていないので出ない）
+    expect(ids).not.toContain("post-102");
+    expect(ids).not.toContain("post-103");
+    expect(ids).not.toContain("post-104");
+    // フォロー中の Mai の投稿でも、リョウの開設（2026-11）前の2019年の投稿は出ない
+    expect(ids).not.toContain("post-101");
+    // それらは検索・個別ページから従来どおり辿れる（消してはいない）
+    expect(getPost("post-101")).toBeDefined();
+    expect(getPost("post-103")).toBeDefined();
+    expect(listReplies("post-101").map((post) => post.id)).toEqual(["post-102"]);
+    expect(searchPosts("クラッチクロー").map((post) => post.id)).toEqual(["post-101"]);
+    // フォロー中・自分の近況の投稿は出る
+    expect(ids).toContain("post-014");
+    expect(ids).toContain("post-023");
+  });
+
+  it("返信はホームに出さない", () => {
+    const home = listHomePosts(TWITTER_ME_ID);
+    expect(home.every((post) => !post.replyToId)).toBe(true);
   });
 });
 
