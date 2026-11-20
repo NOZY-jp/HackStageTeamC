@@ -60,12 +60,16 @@ for (const [channelId, messages] of groupByChannel()) {
   // 開始は待ち行列に積み、終了/不在着信が来たら最も古い開始と対にする
   const pending: Message[] = [];
   for (const message of messages) {
+    // システム行だけを対象にする（通常発言に同じ文言があってもセッションにしない）
+    if (message.system !== true) continue;
     if (START.test(message.body)) {
       pending.push(message);
       continue;
     }
     if (pending.length === 0) continue;
     if (MISSED.test(message.body)) {
+      if (pending.length === 0)
+        throw new Error(`応答なしの前に対応する開始がありません: ${message.id}`);
       pushSession(pending.shift() as Message, undefined, "missed");
       continue;
     }
@@ -73,14 +77,16 @@ for (const [channelId, messages] of groupByChannel()) {
     const starter = pending[0];
     const minutes = (Date.parse(message.sentAt) - Date.parse(starter.sentAt)) / 60_000;
     if (minutes < 1 || minutes > MAX_MINUTES) {
-      // 対にならない終了（長すぎる/短すぎる）は開始側を不在着信として扱う
-      pushSession(pending.shift() as Message, undefined, "missed");
-      continue;
+      // 黙って missed に読み替えない（データの異常として落とす）
+      throw new Error(`通話の長さが範囲外: ${starter.id} → ${message.id} (${minutes}分)`);
     }
     pending.shift();
     pushSession(starter, message, "hangup");
   }
-  for (const starter of pending) pushSession(starter, undefined, "missed");
+  if (pending.length > 0) {
+    // 開始だけで終了が無いものは異常（不在着信は「応答がありませんでした」で表す）
+    throw new Error(`開始だけで終了がありません: ${pending.map((m) => m.id).join(", ")}`);
+  }
 }
 
 /** 通話1回分の長さ（分）。不在着信は0分。 */

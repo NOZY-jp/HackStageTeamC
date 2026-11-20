@@ -183,10 +183,12 @@ export function listVoiceSessions(options?: {
   channelId?: string;
   scope?: "dm" | "guild";
 }): VoiceSession[] {
-  return voiceSessions.filter(
-    (session) =>
-      (!options?.channelId || session.channelId === options.channelId) &&
-      (!options?.scope || session.scope === options.scope),
+  return copyOf(
+    voiceSessions.filter(
+      (session) =>
+        (!options?.channelId || session.channelId === options.channelId) &&
+        (!options?.scope || session.scope === options.scope),
+    ),
   );
 }
 

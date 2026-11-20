@@ -81,6 +81,28 @@ describe("VoiceSession（#129）", () => {
     }
   });
 
+  it("通常発言に同じ文言があってもセッションを作らない（system 行だけを対象）", () => {
+    const normal = messages.filter(
+      (message) =>
+        message.system !== true &&
+        (message.body.includes("通話を開始しました") ||
+          message.body.includes("通話を終了しました") ||
+          message.body.includes("応答がありませんでした")),
+    );
+    const invented = normal.filter((message) =>
+      sessions.some((session) => session.startedAt === message.sentAt),
+    );
+    expect(invented).toHaveLength(0);
+  });
+
+  it("listVoiceSessions はコピーを返す（書き換えても内部が変わらない）", () => {
+    const first = listVoiceSessions();
+    const before = JSON.stringify(listVoiceSessions());
+    first[0].participantIds.push("denden");
+    first[0].channelId = "broken";
+    expect(JSON.stringify(listVoiceSessions())).toBe(before);
+  });
+
   it("scope で絞り込める（dm / guild）", () => {
     const dm = listVoiceSessions({ scope: "dm" });
     const guild = listVoiceSessions({ scope: "guild" });

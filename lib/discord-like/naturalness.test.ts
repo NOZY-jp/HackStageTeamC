@@ -98,14 +98,31 @@ function replyGaps(groups: Map<string, Message[]>): number[] {
  * 通話の開始/終了の対応（不在着信は「終了」として数える）。
  * #129 で `VoiceSession` が入ったら、この関数の中だけを差し替える。
  */
-function callSessions(): { starts: number; ends: number } {
-  // #129: 通話は VoiceSession を正とする（不在着信もセッションとして数える）
-  const sessions = listVoiceSessions();
+function callSessions(messages: Message[]): {
+  sessions: number;
+  startMessages: number;
+  endMessages: number;
+  missedMessages: number;
+} {
+  // VoiceSession とシステムメッセージの件数が一致することを見る（同じ値の言い換えにしない）
+  const system = messages.filter((message) => message.system === true);
+  // このテストが見ている範囲（テキストch＋DM）のセッションだけを数える
+  const channelIds = new Set(messages.map((message) => message.channelId));
+  const sessions = listVoiceSessions().filter((session) => channelIds.has(session.channelId));
   return {
-    starts: sessions.length,
-    ends:
-      sessions.filter((session) => session.endedReason === "hangup").length +
-      sessions.filter((session) => session.endedReason === "missed").length,
+    sessions: sessions.length,
+    startMessages: system.filter(
+      (message) =>
+        message.body.includes("通話を開始しました") ||
+        message.body.includes("ボイスチャンネルに参加しました"),
+    ).length,
+    endMessages: system.filter(
+      (message) =>
+        message.body.includes("通話を終了しました") ||
+        message.body.includes("ボイスチャンネルから退出しました"),
+    ).length,
+    missedMessages: system.filter((message) => message.body.includes("応答がありませんでした"))
+      .length,
   };
 }
 
@@ -172,10 +189,16 @@ describe("会話の自然さ（#130）", () => {
     expect(max).toBeLessThanOrEqual(L.maxSameDailyCountStreak);
   });
 
-  it("通話の開始と終了が対になっている（不在着信は終了として数える）", () => {
-    const { starts, ends } = callSessions();
-    expect(starts).toBeGreaterThan(0);
-    expect(Math.abs(starts - ends)).toBeLessThanOrEqual(L.callPairTolerance);
+  it("通話の開始と終了が対になっている（VoiceSession とシステム行の件数が一致）", () => {
+    const counts = callSessions(messages);
+    expect(counts.sessions).toBeGreaterThan(0);
+    expect(counts.sessions).toBe(counts.startMessages);
+    const channelIds = new Set(messages.map((message) => message.channelId));
+    const scoped = listVoiceSessions().filter((session) => channelIds.has(session.channelId));
+    const hangup = scoped.filter((session) => session.endedReason === "hangup").length;
+    const missed = scoped.filter((session) => session.endedReason === "missed").length;
+    expect(hangup).toBe(counts.endMessages);
+    expect(missed).toBe(counts.missedMessages);
   });
 
   it("各通話は1分〜6時間で、スレッド単位でも開始と終了が対になっている", () => {
