@@ -14,16 +14,17 @@ import {
   completeBeat,
   type FlagId,
   initialState,
+  loadState,
   nextBeat,
   type StoryState,
+  saveState,
   setFlag,
 } from "@/lib/story";
 
 /**
  * シナリオの進行状態を、全プラットフォームで共有する。
- * 保存先が無いので localStorage に持つ（このブラウザでだけ続きから遊べる）。
+ * 保存先が無いので localStorage に持つ（このブラウザでだけ続きから遊べる。読み書きは lib/story/storage.ts）。
  */
-const STORAGE_KEY = "hackstage:story:v1";
 
 type StoryContextValue = {
   state: StoryState;
@@ -38,45 +39,23 @@ type StoryContextValue = {
 
 const StoryContext = createContext<StoryContextValue | null>(null);
 
-function load(): StoryState {
+function browserStorage(): Storage | undefined {
   try {
-    const raw = window.localStorage.getItem(STORAGE_KEY);
-    if (!raw) {
-      return initialState;
-    }
-    const parsed = JSON.parse(raw) as Partial<StoryState>;
-    return {
-      flags: Array.isArray(parsed.flags) ? parsed.flags : [],
-      completed: Array.isArray(parsed.completed) ? parsed.completed : [],
-      choices: readChoices(parsed.choices),
-    };
+    return window.localStorage;
   } catch {
-    return initialState;
+    return undefined;
   }
 }
 
-/**
- * 選んだ選択肢を読む。前の形（場面ごとに1つの文字列）も、選んだ順の配列として読み直す。
- * 壊れた値は捨てる。
- */
-export function readChoices(value: unknown): StoryState["choices"] {
-  if (!value || typeof value !== "object" || Array.isArray(value)) {
-    return {};
-  }
-  const choices: StoryState["choices"] = {};
-  for (const [beatId, chosen] of Object.entries(value)) {
-    if (typeof chosen === "string") {
-      choices[beatId] = [chosen];
-    } else if (Array.isArray(chosen) && chosen.every((id) => typeof id === "string")) {
-      choices[beatId] = chosen;
-    }
-  }
-  return choices;
+function load(): StoryState {
+  const storage = browserStorage();
+  return storage ? loadState(storage) : initialState;
 }
 
 function save(state: StoryState) {
+  const storage = browserStorage();
   try {
-    window.localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+    if (storage) saveState(storage, state);
   } catch {
     // 保存できなくても、開いているあいだは遊べる
   }
