@@ -1,9 +1,16 @@
 import { fireEvent, render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 import { listPosts } from "@/lib/facebook-like";
 import { FacebookProvider, useFacebook } from "./facebook-context";
 import { PostCard } from "./post-card";
+
+// FacebookProvider は URL の ?q= を初期検索値に使う（このテストでは検索なし）
+vi.mock("next/navigation", () => ({
+  useSearchParams: () => new URLSearchParams(),
+  usePathname: () => "/talkup",
+  useRouter: () => ({ push: vi.fn(), replace: vi.fn(), refresh: vi.fn() }),
+}));
 
 describe("PostCard", () => {
   it("toggles reaction and appends a new comment", async () => {

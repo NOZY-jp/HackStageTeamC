@@ -41,6 +41,11 @@ export type FbPostAttachment = {
   title: string;
   subtitle?: string;
   accentColor?: string;
+  /** 写真のときの画像（public からのパス） */
+  src?: string;
+  alt?: string;
+  width?: number;
+  height?: number;
 };
 
 export type FbPost = {
