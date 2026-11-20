@@ -2,17 +2,8 @@
 
 import Image from "next/image";
 import { useState } from "react";
+import { getMessageImage } from "@/lib/discord-like/data/message-images";
 import type { MessageAttachment } from "@/lib/discord-like/types";
-
-/** public/mock/ のダミー画像の実寸（アスペクト比を保つために使う）。 */
-const IMAGE_SIZES: Record<string, { width: number; height: number }> = {
-  "mock-wide.png": { width: 1200, height: 800 },
-  "mock-tall.png": { width: 600, height: 1200 },
-  "mock-square.png": { width: 800, height: 800 },
-  "mock-small.png": { width: 120, height: 120 },
-  "screenshot-2019.svg": { width: 800, height: 600 },
-};
-const FALLBACK_SIZE = { width: 800, height: 800 };
 
 export function MessageAttachments({ attachments }: { attachments: MessageAttachment[] }) {
   const images = attachments.filter((attachment) => attachment.kind === "image");
@@ -58,19 +49,24 @@ export function MessageAttachments({ attachments }: { attachments: MessageAttach
   );
 }
 
-/** 読み込みに失敗したらファイル名を出して、行のレイアウトを壊さない。 */
+/**
+ * 画像のパスと大きさは message-images.ts の1か所で解決する。
+ * 実体がまだ無い画像は、行のレイアウトを壊さないプレースホルダを出す。
+ */
 function MessageImage({ name }: { name: string }) {
   const [failed, setFailed] = useState(false);
-  const size = IMAGE_SIZES[name] ?? FALLBACK_SIZE;
+  const image = getMessageImage(name);
+  const size = { width: image.width, height: image.height };
 
-  if (failed) {
-    return <span className="message-image-fallback">画像を読み込めません: {name}</span>;
+  // 実体がまだ無い画像は、そもそもリクエストを出さない（404 を起こさない）
+  if (image.status === "pending" || failed) {
+    return <span className="message-image-fallback">画像は準備中です: {image.label}</span>;
   }
 
   return (
     <Image
-      src={`/mock/${name}`}
-      alt={name}
+      src={image.src}
+      alt={image.label}
       width={size.width}
       height={size.height}
       sizes="(max-width: 640px) 90vw, 420px"
