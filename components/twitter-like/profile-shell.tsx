@@ -1,5 +1,6 @@
 import Link from "next/link";
 import type { ReactNode } from "react";
+import { HAL_HANDLE } from "@/lib/discord-like/data/names";
 import { isProtected } from "@/lib/twitter-like";
 import type { Profile, TwitterUser } from "@/lib/twitter-like/types";
 import { Avatar } from "./avatar";
@@ -53,6 +54,11 @@ export function ProfileShell({
         <div className="tw-profile-body">
           <div className="tw-profile-avatar">
             <Avatar user={user} size="xl" />
+          </div>
+          <div className="tw-profile-action">
+            <button type="button" className="tw-follow-button" disabled>
+              {user.handle === HAL_HANDLE ? "プロフィールを編集" : "フォロー"}
+            </button>
           </div>
           <h2 className="tw-profile-name">
             {user.displayName}
