@@ -529,15 +529,19 @@ export function generateServers(
     out[channelId] = out[channelId] ?? [];
     starts.forEach((startedAt, index) => {
       const person = speakers[index % speakers.length];
-      const start = Date.parse(startedAt);
-      const end = jst(start + 30 * 60000);
-      usedTimes.add(startedAt);
+      // 既存の mhc・DM と衝突したら1分ずらす（時刻は全横断で一意）
+      let startMs = Date.parse(startedAt);
+      while (usedTimes.has(jst(startMs))) startMs += 60000;
+      const endMs = startMs + 30 * 60000;
+      const startedKey = jst(startMs);
+      const end = jst(endMs);
+      usedTimes.add(startedKey);
       usedTimes.add(end);
       out[channelId].push({
         id: `${channelId}-vc${index}a`,
         channelId,
         authorId: person,
-        sentAt: startedAt,
+        sentAt: startedKey,
         body: "通話を開始しました",
         system: true,
       });
