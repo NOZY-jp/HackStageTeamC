@@ -25,7 +25,10 @@ export function generateStaticParams() {
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const mylist = getMylist((await params).mylistId);
-  return mylist ? { title: `マイリスト：${mylist.title}` } : {};
+  // マイリストは常に noindex（記事一覧が出ると全記事タイトルが検索に載るため）。リンクはたどらせる
+  return mylist
+    ? { title: `マイリスト：${mylist.title}`, robots: { index: false, follow: true } }
+    : { robots: { index: false, follow: true } };
 }
 
 /** マイリスト。限定公開の記事も、ここからなら開ける（ブログのトップからはたどれない）。 */

@@ -43,6 +43,8 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     title: { absolute: entry.title },
     description: entryDescription(entry.body),
     alternates: { canonical: canonicalUrl(entryPath(blogId, entry.id)) },
+    // 限定公開の記事はインデックスさせない（公開以外は一律・安全側）。リンクはたどらせる
+    ...(entry.visibility !== "public" ? { robots: { index: false, follow: true } } : {}),
   };
 }
 

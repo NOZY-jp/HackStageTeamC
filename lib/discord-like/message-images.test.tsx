@@ -1,3 +1,4 @@
+import { existsSync } from "node:fs";
 import fs from "node:fs/promises";
 import { render, screen } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
@@ -34,6 +35,26 @@ describe("順序4の画像の向きとパス（#102）", () => {
     }
     // 実体がある画像は ready、無い画像は pending
     expect(Object.values(MESSAGE_IMAGES).every((image) => image.status === "ready")).toBe(true);
+  });
+
+  it("ready の画像は public に実体がある（pending は実体を要求しない）", () => {
+    const ready = Object.values(MESSAGE_IMAGES).filter((image) => image.status === "ready");
+    expect(ready.length).toBeGreaterThan(0);
+    for (const image of ready) {
+      // 実体が無いのに ready にすると 404 になるので、ここで落とす
+      expect(existsSync(`public${image.src}`), image.src).toBe(true);
+    }
+
+    // #clips の受け入れ口: 添付名は .png のまま、実体は WebP（1200×675）
+    const clip = getMessageImage("clip-0312-2.png");
+    expect(clip.status).toBe("ready");
+    expect(clip.owner).toBe("unknown");
+    expect(clip.handle).toBe("");
+    expect(clip.src).toBe("/discord-like/clips/clip-0312-2.webp");
+    expect(clip.width).toBe(1200);
+    expect(clip.height).toBe(675);
+    // 未着のクリップは登録せず、既定の pending（プレースホルダ表示）に任せる
+    expect(getMessageImage("clip-0204-8.png").status).toBe("pending");
   });
 
   it("未定義の画像は向き不明（unknown）として扱う", () => {

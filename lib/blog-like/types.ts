@@ -20,8 +20,21 @@ export type Blog = {
 export type EntryBlock =
   | { kind: "paragraph"; text: string }
   | { kind: "heading"; text: string }
-  /** 本文中の画像。alt は内容の説明、caption は画像の下に出す一言 */
-  | { kind: "image"; src: string; alt: string; width: number; height: number; caption?: string }
+  /**
+   * 本文中の画像。alt は内容の説明、caption は画像の下に出す一言。
+   * href を渡すと、その画像の原寸を新しいタブで開ける（当時の無料ブログの「クリックで原寸」）。
+   */
+  | {
+      kind: "image";
+      src: string;
+      alt: string;
+      width: number;
+      height: number;
+      caption?: string;
+      href?: string;
+      /** 原寸リンクのアクセシブル名（画像とキャプションの両方で使う） */
+      hrefLabel?: string;
+    }
   /**
    * 1行のリンク。url は作中の URL（例: "twixer.com/hunter_denden0102/status/..."）。
    * href を渡すと、そのアプリ内パスへ普通のリンクとして飛ぶ（当時のリンクのまま）。

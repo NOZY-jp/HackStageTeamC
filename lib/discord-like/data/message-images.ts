@@ -3,6 +3,10 @@
  * 画像の実体は `public/discord-like/` に置いてある。ここでは
  * 「どの画像が誰のIDか」と「public からのパス（1か所の定数）」を持つ。
  *
+ * `public/discord-like/` は Discord 専用のディレクトリではなく、**旧ブログの記事（#101）とも共有**している
+ * （同じ撮影画像を2か所に複製しないため。例: `screenshot-2018-game.png` はブログの証拠画像でもある）。
+ * 新しい画像を置くときは、他プラットフォームから参照されていないかをここで確認する。
+ *
  * 人の決定（2026-11-20）: 順序4の向きは原文どおり
  * - Discord で送られたスクショ = 現在のID `maimaimaimai`
  * - 旧ブログの添付画像 = 旧ゲーマーID `hunter_denden3243`
@@ -58,6 +62,17 @@ export const MESSAGE_IMAGES: Record<string, MessageImage> = {
     width: 1200,
     height: 675,
     label: "2018年の狩猟画面のスクリーンショット",
+  },
+  // #clips の動画サムネイル相当（mhc.ts の添付名は .png のまま、実体は WebP）
+  "clip-0312-2.png": {
+    name: "clip-0312-2.png",
+    status: "ready",
+    owner: "unknown",
+    handle: "",
+    src: "/discord-like/clips/clip-0312-2.webp",
+    width: 1200,
+    height: 675,
+    label: "夕暮れの渓谷と吊り橋",
   },
 };
 
