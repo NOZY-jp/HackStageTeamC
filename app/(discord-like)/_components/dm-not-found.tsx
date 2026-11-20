@@ -1,10 +1,13 @@
 import Link from "next/link";
 import { dmListPath } from "@/lib/platform/app-prefix";
 
-/** DMスレッドの未検出UI（旧 /dm/not-found.tsx と同じ文言）。 */
+/**
+ * DMスレッドの未検出UI（旧 /dm/not-found.tsx と同じ文言）。
+ * `[guildId]/layout.tsx` が左の一覧を出したまま描くので、3列目（メイン領域）に置く。
+ */
 export function DmNotFound() {
   return (
-    <div className="route-state">
+    <div className="route-state route-state--main">
       <p className="route-state-code" aria-hidden="true">
         404
       </p>

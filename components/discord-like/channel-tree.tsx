@@ -1,9 +1,10 @@
 "use client";
 
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import { useState } from "react";
 import { useVoice } from "@/app/(discord-like)/_components/voice-context";
-import { guildChannelPath } from "@/lib/platform/app-prefix";
+import { guildChannelPath, isActiveHref } from "@/lib/platform/app-prefix";
 
 export type SidebarChannel = {
   id: string;
@@ -26,21 +27,21 @@ export type SidebarSection = {
 /**
  * カテゴリ → チャンネルの一覧。折りたたみ状態だけをクライアントで持つ
  * （リロードで初期状態＝すべて開いた状態に戻る）。
+ * 選択中のチャンネルは pathname から決める（layout に置いても追従する。#70）。
  */
 export function ChannelTree({
   guildUrlId,
-  activeChannelId,
   sections,
   currentUser,
 }: {
   /** URL に出す guild の数値ID */
   guildUrlId: string;
-  activeChannelId: string;
   sections: SidebarSection[];
   currentUser: { id: string; displayName: string; avatarColor: string };
 }) {
   const [collapsed, setCollapsed] = useState<Record<string, boolean>>({});
   const { connection } = useVoice();
+  const pathname = usePathname();
 
   return (
     <div>
@@ -87,12 +88,13 @@ export function ChannelTree({
               <ul>
                 {section.channels.map((channel) => {
                   const shown = withSelf(channel, connection?.channelId, currentUser);
+                  const href = guildChannelPath(guildUrlId, channel.urlId);
                   return (
                     <li key={channel.id}>
                       <ChannelLink
-                        guildUrlId={guildUrlId}
+                        href={href}
                         channel={shown}
-                        active={channel.id === activeChannelId}
+                        active={isActiveHref(pathname, href)}
                       />
                       {shown.kind === "voice" && shown.participants.length > 0 ? (
                         <ul className="voice-members" aria-label={`${channel.name} の参加者`}>
@@ -141,11 +143,11 @@ function selfParticipant(currentUser: { id: string; displayName: string; avatarC
 }
 
 function ChannelLink({
-  guildUrlId,
+  href,
   channel,
   active,
 }: {
-  guildUrlId: string;
+  href: string;
   channel: SidebarChannel;
   active: boolean;
 }) {
@@ -161,7 +163,7 @@ function ChannelLink({
 
   return (
     <Link
-      href={guildChannelPath(guildUrlId, channel.urlId)}
+      href={href}
       className="sidebar-item"
       aria-label={label}
       aria-current={active ? "page" : undefined}
