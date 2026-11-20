@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { listAllEntries, listBlogs } from "@/lib/blog-like";
 import { listArticles, listCreators } from "@/lib/note-like";
+import { PHOTO_CONTEST_RESULT_PATH } from "@/lib/seo/contest";
 import { SITE_URL } from "@/lib/seo/site";
 import { metadata } from "./layout";
 import robots from "./robots";
@@ -65,6 +66,10 @@ describe("SEO 基盤（#77）", () => {
     expect(urls.some((url) => url.includes("/note/search"))).toBe(false);
   });
 
+  it("コンテスト結果ページを1件だけ含む", () => {
+    expect(urls.filter((url) => url.endsWith(PHOTO_CONTEST_RESULT_PATH))).toHaveLength(1);
+  });
+
   it("件数はデータと一致する", () => {
     const blogCount = listBlogs().length;
     const publicEntryCount = listBlogs().reduce(
@@ -72,7 +77,7 @@ describe("SEO 基盤（#77）", () => {
       0,
     );
     const noteCount = 1 + listCreators().length + listArticles().length;
-    expect(urls).toHaveLength(blogCount + publicEntryCount + noteCount);
+    expect(urls).toHaveLength(blogCount + publicEntryCount + noteCount + 1);
   });
 
   it("metadataBase は本番URLで、他の metadata は変えていない", () => {

@@ -14,6 +14,8 @@ import {
   listBlogs,
   listPublicEntries,
 } from "@/lib/blog-like";
+import { entryDescription } from "@/lib/seo/description";
+import { canonicalUrl } from "@/lib/seo/site";
 
 // 記事は params から引くので、トップレベルで params を待つ＝URL データを読むことになる。
 // Cache Components（PPR）のままだと「params が <Suspense> の外で読まれている」警告が出るため、
@@ -33,7 +35,15 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { blogId, entryId } = await params;
   const blog = getBlog(blogId);
   const entry = getEntry(blogId, entryId);
-  return blog && entry ? { title: { absolute: `${entry.title} - ${blog.title}` } } : {};
+  if (!blog || !entry) {
+    return {};
+  }
+  return {
+    // 記事タイトルをそのまま title にする（ブログ名は付けない）
+    title: { absolute: entry.title },
+    description: entryDescription(entry.body),
+    alternates: { canonical: canonicalUrl(entryPath(blogId, entry.id)) },
+  };
 }
 
 export default async function EntryPage({ params }: Props) {
