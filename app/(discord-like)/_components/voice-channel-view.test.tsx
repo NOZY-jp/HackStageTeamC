@@ -120,3 +120,78 @@ describe("VoiceChannelView", () => {
     expect(await pane("雑談通話").findByRole("button", { name: "切断" })).toBeInTheDocument();
   });
 });
+
+describe("通話画面のUI（ホバーで操作を出す）", () => {
+  it("参加者タイルに名前と状態が出る（1人でも破綻しない）", async () => {
+    nav.path = vc1Path;
+    const { container } = render(shell(view("mhc-vc-1", "雑談通話", vc1UrlId)));
+
+    const main = pane("雑談通話");
+    // 参加者（自分以外）と自分のタイル
+    expect(await main.findByText("双剣ミナ")).toBeInTheDocument();
+    expect(main.getByText(/（自分）/)).toBeInTheDocument();
+    // 通話の状態と経過時間が見出しの下に出る
+    expect(main.getByText("接続中", { selector: ".call-stage-status" })).toBeInTheDocument();
+    const timer = container.querySelector(".call-stage-timer");
+    expect(timer?.textContent).toMatch(/通話時間\s*\d+:\d{2}/);
+  });
+
+  it("操作はホバー中だけ出て、外すと消える（レイアウトは動かさない）", async () => {
+    nav.path = vc1Path;
+    const { container } = render(shell(view("mhc-vc-1", "雑談通話", vc1UrlId)));
+    const stage = container.querySelector(".call-stage");
+    const controls = container.querySelector(".call-controls");
+    if (!stage || !controls) throw new Error("stage missing");
+
+    // 非ホバー: data-visible=false（CSS で opacity/visibility を消す）
+    expect(controls.getAttribute("data-visible")).toBe("false");
+    // 出し入れでレイアウトが動かないよう、操作バーは absolute 配置（CSS 側で固定）
+    const css = await import("node:fs/promises").then((fs) =>
+      fs.readFile("app/globals.css", "utf8"),
+    );
+    expect(css).toMatch(/\.call-controls \{[^}]*position: absolute/);
+    // 非表示中はクリックも受けない（透明なボタンが押せてしまうのを防ぐ）
+    expect(css).toMatch(/\.call-controls \{[^}]*pointer-events: none/);
+    // 表示中は操作できる
+    expect(css).toMatch(/\.call-controls\[data-visible="true"\] \{[^}]*pointer-events: auto/);
+
+    fireEvent.pointerEnter(stage);
+    expect(controls.getAttribute("data-visible")).toBe("true");
+
+    fireEvent.pointerLeave(stage);
+    expect(controls.getAttribute("data-visible")).toBe("false");
+  });
+
+  it("出ていないあいだ、操作ボタンは Tab で到達しない（フォーカス不可）", async () => {
+    nav.path = vc1Path;
+    const { container } = render(shell(view("mhc-vc-1", "雑談通話", vc1UrlId)));
+    const stage = container.querySelector(".call-stage");
+    if (!stage) throw new Error("stage missing");
+
+    const leave = await pane("雑談通話").findByRole("button", { name: "切断" });
+    expect(leave).toHaveProperty("tabIndex", -1);
+    expect(pane("雑談通話").getByRole("button", { name: "ミュート" })).toHaveProperty(
+      "tabIndex",
+      -1,
+    );
+
+    // キーボード: 「操作を表示」にフォーカスすると操作が出て、到達できるようになる
+    fireEvent.focus(container.querySelector(".call-reveal") as Element);
+    expect(container.querySelector(".call-controls")?.getAttribute("data-visible")).toBe("true");
+    expect(pane("雑談通話").getByRole("button", { name: "切断" })).toHaveProperty("tabIndex", 0);
+  });
+
+  it("切断ボタンは従来どおり動く（切断後は操作が出ない）", async () => {
+    nav.path = vc1Path;
+    const { container } = render(shell(view("mhc-vc-1", "雑談通話", vc1UrlId)));
+    const stage = container.querySelector(".call-stage");
+    if (!stage) throw new Error("stage missing");
+    fireEvent.pointerEnter(stage);
+
+    fireEvent.click(await pane("雑談通話").findByRole("button", { name: "切断" }));
+    await waitFor(() => {
+      expect(pane("雑談通話").queryByRole("button", { name: "切断" })).not.toBeInTheDocument();
+    });
+    expect(container.querySelector(".call-stage")?.getAttribute("data-connected")).toBe("false");
+  });
+});
