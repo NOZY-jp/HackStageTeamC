@@ -1,5 +1,7 @@
 import fs from "node:fs/promises";
-import { describe, expect, it } from "vitest";
+import { render, screen } from "@testing-library/react";
+import { afterEach, describe, expect, it, vi } from "vitest";
+import { MessageAttachments } from "@/app/(discord-like)/_components/message-attachments";
 import { getMessageImage, MESSAGE_IMAGES, OLD_TWIXER_HANDLE } from "./data/message-images";
 import { MAIMAI_HANDLE } from "./data/names";
 import { listDMMessages } from "./index";
@@ -66,5 +68,41 @@ describe("順序4の画像の向きとパス（#102）", () => {
     const text = JSON.stringify(MESSAGE_IMAGES);
     expect(text).not.toContain(FAMILY_NAME);
     expect(text).not.toContain(GIVEN_NAME);
+  });
+});
+
+describe("実体が無い画像の扱い（#102 追補）", () => {
+  afterEach(() => {
+    vi.restoreAllMocks();
+  });
+
+  it("pending の添付は <img> を描かず、最初からプレースホルダを出す", () => {
+    const errorSpy = vi.spyOn(console, "error").mockImplementation(() => {});
+    const { container } = render(
+      <MessageAttachments
+        attachments={[{ id: "att", name: DM_IMAGE, kind: "image", sizeLabel: "412 KB" }]}
+      />,
+    );
+
+    // (a) 画像要素を作らない＝リクエストを出さない
+    expect(container.querySelector("img")).toBeNull();
+    // (b) プレースホルダ文言
+    expect(screen.getByText(/画像は準備中です/)).toBeInTheDocument();
+    expect(screen.queryByText(/画像を読み込めません/)).not.toBeInTheDocument();
+    // (c) コンソールエラーを出さない
+    expect(errorSpy).not.toHaveBeenCalled();
+  });
+
+  it("ready の添付は <img> を描く", () => {
+    const { container } = render(
+      <MessageAttachments attachments={[{ id: "att", name: BLOG_IMAGE, kind: "image" }]} />,
+    );
+    expect(container.querySelector("img")).not.toBeNull();
+    expect(container.querySelector("img")?.getAttribute("src")).toContain(BLOG_IMAGE);
+  });
+
+  it("実体の有無はデータの status で決まる（pending は 2026 のスクショだけ）", () => {
+    expect(getMessageImage(DM_IMAGE).status).toBe("pending");
+    expect(getMessageImage(BLOG_IMAGE).status).toBe("ready");
   });
 });

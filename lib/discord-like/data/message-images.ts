@@ -16,6 +16,11 @@ export type MessageImageOwner = "current" | "old";
 export type MessageImage = {
   /** 画像のファイル名（MessageAttachment.name と一致させる） */
   name: string;
+  /**
+   * ready = 実体が public にある / pending = まだ置いていない。
+   * pending のあいだは <Image> を描かない（404 のリクエストを出さない）。
+   */
+  status: "ready" | "pending";
   /** 写っているアカウント: 現在 or 旧 */
   owner: MessageImageOwner;
   /** 写っているハンドル（@ なし） */
@@ -32,6 +37,8 @@ export type MessageImage = {
 export const MESSAGE_IMAGES: Record<string, MessageImage> = {
   "screenshot-2026.png": {
     name: "screenshot-2026.png",
+    // 実体は人の承認後に public へ置く。置いたらこの1行を "ready" にする
+    status: "pending",
     owner: "current",
     handle: "maimaimaimai",
     src: "/mock/screenshot-2026.png",
@@ -41,6 +48,7 @@ export const MESSAGE_IMAGES: Record<string, MessageImage> = {
   },
   "screenshot-2019.svg": {
     name: "screenshot-2019.svg",
+    status: "ready",
     owner: "old",
     handle: OLD_TWIXER_HANDLE,
     src: "/mock/screenshot-2019.svg",
@@ -55,6 +63,8 @@ export function getMessageImage(name: string): MessageImage {
   return (
     MESSAGE_IMAGES[name] ?? {
       name,
+      // 定義が無い画像は実体も不明なので、リクエストを出さずプレースホルダにする
+      status: "pending",
       owner: "current",
       handle: "",
       src: `/mock/${name}`,

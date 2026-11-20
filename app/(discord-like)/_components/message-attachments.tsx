@@ -58,7 +58,8 @@ function MessageImage({ name }: { name: string }) {
   const image = getMessageImage(name);
   const size = { width: image.width, height: image.height };
 
-  if (failed) {
+  // 実体がまだ無い画像は、そもそもリクエストを出さない（404 を起こさない）
+  if (image.status === "pending" || failed) {
     return <span className="message-image-fallback">画像は準備中です: {image.label}</span>;
   }
 
