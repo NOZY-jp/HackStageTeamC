@@ -18,19 +18,47 @@ function Block({ block }: { block: EntryBlock }) {
   switch (block.kind) {
     case "heading":
       return <h3>{block.text}</h3>;
-    case "image":
+    case "image": {
+      const picture = (
+        <Image
+          src={block.src}
+          alt={block.alt}
+          width={block.width}
+          height={block.height}
+          unoptimized
+        />
+      );
+      const href = block.href;
       return (
         <figure>
-          <Image
-            src={block.src}
-            alt={block.alt}
-            width={block.width}
-            height={block.height}
-            unoptimized
-          />
-          {block.caption ? <figcaption>{block.caption}</figcaption> : null}
+          {href ? (
+            <a
+              href={href}
+              target="_blank"
+              rel="noreferrer"
+              aria-label={block.hrefLabel ?? `${block.alt}を原寸で開く`}
+            >
+              {picture}
+            </a>
+          ) : (
+            picture
+          )}
+          {block.caption ? (
+            <figcaption>
+              {block.caption}
+              {href ? (
+                <>
+                  {" "}
+                  <a href={href} target="_blank" rel="noreferrer">
+                    原寸で見る
+                  </a>
+                </>
+              ) : null}
+            </figcaption>
+          ) : null}
         </figure>
       );
+    }
     case "link": {
       const href = block.href ?? externalHref(block.url);
       const label = block.label ?? `https://${block.url}`;
