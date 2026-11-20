@@ -1166,6 +1166,39 @@
   grid-template-columns: minmax(200px, 280px);
 }
 
+/* DM 通話: 相手を大きく中央、自分は右下の小窓 */
+.call-tiles[data-layout="dm"] {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.call-tiles[data-layout="dm"] .call-tile:first-child {
+  width: min(520px, 100%);
+  aspect-ratio: 16 / 9;
+}
+
+.call-tiles[data-layout="dm"] .call-tile:nth-child(2) {
+  position: absolute;
+  right: 8px;
+  bottom: 8px;
+  width: min(180px, 32%);
+  aspect-ratio: 16 / 9;
+  padding: 6px;
+  background-color: var(--color-bg-input);
+}
+
+.call-tiles[data-layout="dm"] .call-tile:nth-child(2) .call-tile-avatar {
+  width: 44px;
+  height: 44px;
+  font-size: 18px;
+}
+
+.call-tiles[data-layout="dm"] .call-tile:nth-child(2) .call-tile-name {
+  font-size: 11px;
+}
+
 .call-tile {
   display: flex;
   flex-direction: column;

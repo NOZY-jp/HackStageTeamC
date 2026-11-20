@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { notFound } from "next/navigation";
 import { ChannelNotFound } from "@/app/(discord-like)/_components/channel-not-found";
 import { channelFallback } from "@/app/(discord-like)/_components/channel-route-fallback";
@@ -17,6 +18,7 @@ import {
 } from "@/lib/discord-like";
 import { resolveChannelRoute } from "@/lib/discord-like/route-resolution";
 import { listMemberViews, toMessageView } from "@/lib/discord-like/view";
+import { dmThreadPath } from "@/lib/platform/app-prefix";
 
 /**
  * Discord と同じ2セグメント構成。
@@ -90,6 +92,28 @@ async function DmThread({
       title={otherName}
       showHash={false}
       headerAvatar={{ displayName: otherName, avatarColor: other?.avatarColor ?? "transparent" }}
+      headerAction={
+        // DM の通話画面への導線（通話を開始する）
+        <Link
+          href={`${dmThreadPath(thread.urlId)}/call`}
+          className="message-header-icon message-header-button"
+          aria-label="通話を開始"
+        >
+          <svg
+            aria-hidden="true"
+            viewBox="0 0 24 24"
+            width="18"
+            height="18"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          >
+            <path d="M6 3h3l2 5-2 1a11 11 0 0 0 6 6l1-2 5 2v3a3 3 0 0 1-3 3A16 16 0 0 1 3 6a3 3 0 0 1 3-3Z" />
+          </svg>
+        </Link>
+      }
       focusMessageId={focused?.found ? focusMessageId : undefined}
     />
   );

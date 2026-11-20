@@ -153,6 +153,7 @@ export function CallStage({
   onToggleDeafen,
   onLeave,
   subtitle,
+  layout = "grid",
 }: {
   title: string;
   joined: boolean;
@@ -163,6 +164,8 @@ export function CallStage({
   onToggleDeafen: () => void;
   onLeave: () => void;
   subtitle?: string;
+  /** grid = サーバーVC（並べる）/ dm = DM通話（相手を大きく、自分は右下の小窓） */
+  layout?: "grid" | "dm";
 }) {
   // ホバー中か、通話エリアの中にフォーカスがあるあいだだけ操作を出す
   const [active, setActive] = useState(false);
@@ -216,7 +219,12 @@ export function CallStage({
         {subtitle ? <p className="call-stage-subtitle">{subtitle}</p> : null}
       </div>
 
-      <ul className="call-tiles" aria-label="参加者" data-count={participants.length}>
+      <ul
+        className="call-tiles"
+        aria-label="参加者"
+        data-count={participants.length}
+        data-layout={layout}
+      >
         {participants.map((participant) => (
           <Tile key={participant.id} participant={participant} />
         ))}

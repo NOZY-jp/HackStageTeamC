@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { getChannel, getDMThread, getGuild } from "./index";
-import { resolveChannelRoute } from "./route-resolution";
+import { resolveChannelRoute, resolveDmCallRoute } from "./route-resolution";
 
 const guildUrlId = getGuild("mhc")?.urlId ?? "";
 const channelUrlId = getChannel("mhc-chat")?.urlId ?? "";
@@ -37,5 +37,26 @@ describe("resolveChannelRoute", () => {
       guildId: "mhc",
       channelId: "mhc-chat",
     });
+  });
+});
+
+describe("DM の通話URL（#137）", () => {
+  it("@me の DM は通話のルートに解決できる", () => {
+    expect(resolveDmCallRoute("@me", threadUrlId)).toEqual({
+      kind: "dm-call",
+      threadId: "dm-maimai",
+    });
+    // "@me" は URL エンコードされて渡ることがある
+    expect(resolveDmCallRoute("%40me", threadUrlId)).toEqual({
+      kind: "dm-call",
+      threadId: "dm-maimai",
+    });
+  });
+
+  it("存在しない DM・サーバーのチャンネルは通話に解決しない", () => {
+    expect(resolveDmCallRoute("@me", "9999")).toEqual({ kind: "missing" });
+    const guildUrlId = getGuild("mhc")?.urlId ?? "";
+    const channelUrlId = getChannel("mhc-vc-1")?.urlId ?? "";
+    expect(resolveDmCallRoute(guildUrlId, channelUrlId)).toEqual({ kind: "missing" });
   });
 });
