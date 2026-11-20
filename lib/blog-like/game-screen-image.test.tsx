@@ -35,10 +35,13 @@ const GAME_SCREEN = "/discord-like/screenshot-2018-game.png";
 
 describe("旧ブログのゲーム画面（順序4の証拠画像・#101）", () => {
   const entry = getEntry(BLOG_ID, ENTRY_ID);
+  if (!entry) {
+    throw new Error(`記事 ${ENTRY_ID} が見つかりません`);
+  }
+  const body = entry.body;
 
   it("記事にゲーム画面の画像ブロックが1枚だけある", () => {
-    expect(entry).toBeDefined();
-    const images = (entry?.body ?? []).filter((block) => block.kind === "image");
+    const images = body.filter((block) => block.kind === "image");
     expect(images).toHaveLength(1);
     const image = images[0];
     if (image?.kind !== "image") throw new Error("image block missing");
@@ -47,10 +50,13 @@ describe("旧ブログのゲーム画面（順序4の証拠画像・#101）", ()
     expect(image.width).toBe(1200);
     expect(image.height).toBe(675);
     expect(image.alt.length).toBeGreaterThan(0);
+    // 順序4の向き: 旧ブログの証拠画像は「当時のゲーム画面（旧ID）」側。現IDの Discord スクショではない
+    expect(image.src).not.toBe("/discord-like/screenshot-2026-friends.png");
+    expect(image.src).not.toBe("/discord-like/screenshot-2019-lobby.png");
   });
 
   it("キャプションから「当時のゲーム画面」と読め、ゲーム内IDが映っていることが分かる", () => {
-    const image = (entry?.body ?? []).find((block) => block.kind === "image");
+    const image = body.find((block) => block.kind === "image");
     if (image?.kind !== "image") throw new Error("image block missing");
     const caption = image.caption ?? "";
     expect(caption).toContain("当時のゲーム画面");
@@ -68,7 +74,7 @@ describe("旧ブログのゲーム画面（順序4の証拠画像・#101）", ()
   });
 
   it("本文・キャプションに本名・呼び名・Discord 旧IDを書かない", () => {
-    const text = JSON.stringify(entry?.body ?? []);
+    const text = JSON.stringify(body);
     expect(text).not.toContain(FAMILY_NAME);
     expect(text).not.toContain(GIVEN_NAME);
     expect(text).not.toContain(DEN);
@@ -76,7 +82,7 @@ describe("旧ブログのゲーム画面（順序4の証拠画像・#101）", ()
   });
 
   it("記事ページに画像とキャプションが出る", () => {
-    const { container } = render(<EntryBody blocks={entry?.body ?? []} />);
+    const { container } = render(<EntryBody blocks={body} />);
     const img = container.querySelector("img");
     expect(img).not.toBeNull();
     expect(decodeURIComponent(img?.getAttribute("src") ?? "")).toContain(
