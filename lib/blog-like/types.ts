@@ -25,6 +25,16 @@ export type EntryBlock =
   /** 1行のリンク。url は作中の URL（例: "twixer.com/hunter_denden0102/status/..."） */
   | { kind: "link"; lead: string; url: string };
 
+/** 記事につくコメント。投稿者名はハンドル風のものだけ（本名は出さない）。 */
+export type Comment = {
+  id: string;
+  /** 表示名（読者・家族など） */
+  authorName: string;
+  /** 日本時間の ISO 8601 */
+  postedAt: string;
+  body: string;
+};
+
 export type Entry = {
   /** URL の pochiblo.jp/<blogId>/entry/<id> */
   id: string;
@@ -33,8 +43,8 @@ export type Entry = {
   category: string;
   /** 日本時間の ISO 8601 */
   publishedAt: string;
-  /** 記事の下に出すコメント数（コメントの中身は作っていない） */
-  commentCount: number;
+  /** コメント（古い順で持つ。表示件数はこの配列の長さと一致させる） */
+  comments: Comment[];
   /**
    * 公開範囲。public はトップ・サイドバーに出る。unlisted（限定公開）は URL かマイリストからだけ開ける。
    */

@@ -4482,6 +4482,63 @@ a.tw-dm-item:focus-visible {
   text-decoration: underline;
 }
 
+/* ---- 旧ブログのコメント欄（#79・末尾追記のみ） ---- */
+.pb-comments {
+  margin-top: 28px;
+  padding-top: 16px;
+  border-top: 1px dashed var(--pb-line);
+}
+
+.pb-comments-title {
+  margin-bottom: 12px;
+  color: var(--pb-text);
+  font-size: 15px;
+  font-weight: 700;
+}
+
+.pb-comments-list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.pb-comment {
+  padding: 10px 12px;
+  border: 1px solid var(--pb-line);
+  border-radius: 6px;
+  background-color: var(--pb-surface);
+}
+
+.pb-comment + .pb-comment {
+  margin-top: 8px;
+}
+
+.pb-comment-meta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 8px;
+  margin-bottom: 4px;
+}
+
+.pb-comment-author {
+  color: var(--pb-band);
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.pb-comment-date {
+  color: var(--pb-muted);
+  font-size: 12px;
+}
+
+.pb-comment-body {
+  color: var(--pb-text);
+  font-size: 14px;
+  line-height: 1.7;
+  white-space: pre-wrap;
+}
+
 /* ---- メッセージ検索（#69・末尾追記のみ） ---- */
 .message[data-focused="true"] {
   border-radius: 4px;
