@@ -115,9 +115,19 @@ describe("ダミーデータの整合性", () => {
     expect(new Set(handles).size).toBe(handles.length);
   });
 
-  it("DM スレッドは MaiMai とカイの2件（調査の会話は公開チャンネルに置かない・#121）", () => {
+  it("DM スレッドは9本（恋人・依頼主・友人・先輩・後輩。#133）", () => {
     const threads = listDMThreads();
-    expect(threads.map((thread) => thread.id).sort()).toEqual(["dm-kai", DM_THREAD_ID]);
+    expect(threads.map((thread) => thread.id).sort()).toEqual([
+      "dm-gunlance",
+      "dm-hayashi",
+      "dm-jun",
+      "dm-kai",
+      DM_THREAD_ID,
+      "dm-miyu",
+      "dm-ootsuka",
+      "dm-taku",
+      "dm-yama",
+    ]);
     const mai = threads.find((thread) => thread.id === DM_THREAD_ID);
     expect(mai?.participantIds).toEqual([SELF_USER_ID, "maimai"]);
     const kai = threads.find((thread) => thread.id === "dm-kai");
@@ -235,11 +245,12 @@ describe("ダミーデータの整合性", () => {
     expect(server).toBeLessThanOrEqual(VOLUME_LIMITS.serverMessages.max);
   });
 
-  it("後半ほど DM が濃くなる傾向がある（データ量で絶対値は動くため傾向で見る）", () => {
+  it("月次の 個人:サーバー 比がしきい値の±25%に収まる", () => {
     const dm = allDMMessages();
     // 期間比はサーバー全体（3サーバー合算）で見る
     const server = allServerMessages();
-    // データ量で絶対値は動くため、「後半ほど DM が濃い」傾向だけを見る
+    // データ量（#131〜#133）で絶対値は動くため、「時間が進むほど DM が濃くなる」傾向を見る。
+    // 最初の期間に対して最後の期間が trendMultiplier 倍以上になっていること。
     const ratios: number[] = [];
     for (const period of PERIODS) {
       const inRange = (message: { sentAt: string }) =>

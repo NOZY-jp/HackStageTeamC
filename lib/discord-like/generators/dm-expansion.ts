@@ -214,7 +214,7 @@ const BODY_TEMPLATES: Record<string, (() => string)[]> = {
     () =>
       `${pickM(["了解", "承知"])}です。${pickM(["また連絡します", "予定を合わせます", "日程を見ます"])}`,
     () =>
-      `${pickM(["ありがとうございます", "助かります", "お手数かけます"])}。${pickM(["助かりました", "参考にします", "進めておきます"])}`,
+      `${pickM(["ありがとうございます", "助かります", "お手数かけます"])}。${pickM(["助かりました", "参考にします", "助かります"])}`,
     () =>
       `${pickM(["体調", "予定", "天気"])}は${pickM(["大丈夫ですか", "問題ないですか", "落ち着いてますか"])}`,
     () =>
@@ -224,7 +224,7 @@ const BODY_TEMPLATES: Record<string, (() => string)[]> = {
     () =>
       `${pickM(["念のため", "一応", "あとで"])}${pickM(["共有します", "連絡します", "送ります"])}`,
     () =>
-      `${pickM(["無理せず", "焦らず", "ゆっくり"])}${pickM(["進めてください", "で大丈夫です", "お願いします"])}`,
+      `${pickM(["無理せず", "焦らず", "ゆっくりで"])}${pickM(["で大丈夫です", "お願いします", "どうぞ"])}`,
   ],
   "dm-taku": [
     () => `${pickM(MONSTER)}行く？${pickM(TIME)}から`,
@@ -390,7 +390,7 @@ export function generateDmExpansion(input: DMExpansionInput): DMExpansionResult 
       let at = Date.parse(`${month}-${pad(day)}T${pad(int(8, 21))}:${pad(int(0, 59))}:00+09:00`);
       const isQuarrel = `${month}-${pad(day)}` === quarrelDay;
       for (let i = 0; i < dayMessages; i += 1) {
-        at += int(2, 25) * 60000;
+        at += int(1, 15) * 60000;
         const { key } = nextTime(at);
         // 同じ人が3連続しないよう、発言者を交互にする
         const isMaimai = additions["dm-maimai"].length % 2 === 0;
