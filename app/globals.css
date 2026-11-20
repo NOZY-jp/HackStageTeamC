@@ -4766,3 +4766,90 @@ a.tw-dm-item:focus-visible {
   font-size: 12px;
   line-height: 1;
 }
+
+/* ---- チャンネル切替中のメッセージスケルトン（#70・末尾追記のみ） ---- */
+
+/*
+ * 実メッセージと同じ寸法（左 padding 16px＋アバター40px＋gap12px、1行48px）で組み、
+ * スケルトン→実メッセージの切り替わりで枠が動かないようにする。
+ */
+.message-loading {
+  display: flex;
+  flex-direction: column;
+  padding-bottom: 24px;
+}
+
+.message-loading-row {
+  display: flex;
+  gap: 12px;
+  padding: 4px 16px;
+}
+
+.message-loading-avatar {
+  flex: none;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  /* 濃淡2段のうち濃い方（アバター円） */
+  background-color: var(--color-bg-sidebar);
+}
+
+.message-loading-lines {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 0;
+  padding-top: 2px;
+}
+
+/* 前のメッセージの続きに見えるよう、アバターだけ上端で見切れさせる */
+.message-loading-row--partial {
+  margin-top: -22px;
+}
+
+.message-loading-row--partial .message-loading-lines {
+  padding-top: 22px;
+}
+
+.message-loading-name {
+  height: 10px;
+  border-radius: 999px;
+}
+
+.message-loading-line {
+  max-width: 100%;
+  height: 10px;
+  border-radius: 999px;
+}
+
+/* 見切れ行の大きな矩形（添付や続きの本文に見える面） */
+.message-loading-block {
+  height: 56px;
+  border-radius: 8px;
+}
+
+.message-loading-title {
+  width: 160px;
+  height: 14px;
+  border-radius: 999px;
+}
+
+.message-loading-composer {
+  flex: 1;
+  height: 32px;
+  border-radius: 999px;
+}
+
+/* 動きを減らす設定では静止したままでも成立させる */
+@media (prefers-reduced-motion: no-preference) {
+  .message-loading .skeleton-block {
+    animation: message-loading-pulse 1.6s ease-in-out infinite;
+  }
+}
+
+@keyframes message-loading-pulse {
+  50% {
+    opacity: 0.55;
+  }
+}

@@ -1,10 +1,8 @@
 import { notFound } from "next/navigation";
-import { DmList } from "@/app/(discord-like)/_components/dm-list";
 import { DmNotFound } from "@/app/(discord-like)/_components/dm-not-found";
 import { MessagePane } from "@/app/(discord-like)/_components/message-pane";
 import { SELF_USER_ID } from "@/app/(discord-like)/_components/self-user";
 import { VoiceChannelView } from "@/app/(discord-like)/_components/voice-channel-view";
-import { ChannelSidebar } from "@/components/discord-like/channel-sidebar";
 import {
   getChannel,
   getDMThread,
@@ -74,18 +72,15 @@ async function DmThread({
   const page = focused?.found ? focused : listDMMessages({ threadId: thread.id });
 
   return (
-    <>
-      <DmList activeThreadId={thread.id} />
-      <MessagePane
-        channelKey={thread.id}
-        mode="dm"
-        initialView={toMessageView(page)}
-        title={otherName}
-        showHash={false}
-        headerAvatar={{ displayName: otherName, avatarColor: other?.avatarColor ?? "transparent" }}
-        focusMessageId={focused?.found ? focusMessageId : undefined}
-      />
-    </>
+    <MessagePane
+      channelKey={thread.id}
+      mode="dm"
+      initialView={toMessageView(page)}
+      title={otherName}
+      showHash={false}
+      headerAvatar={{ displayName: otherName, avatarColor: other?.avatarColor ?? "transparent" }}
+      focusMessageId={focused?.found ? focusMessageId : undefined}
+    />
   );
 }
 
@@ -120,8 +115,6 @@ async function GuildChannel({
 
   return (
     <>
-      <ChannelSidebar guildId={guild.id} channelId={channel.id} />
-
       {channel.kind === "text" ? (
         <MessagePane
           channelKey={channel.id}
