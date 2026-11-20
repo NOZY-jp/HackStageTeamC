@@ -1,9 +1,11 @@
 import { fireEvent, render, screen, waitFor, within } from "@testing-library/react";
+import { Activity } from "react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { AppShell } from "@/components/discord-like/app-shell";
 import { dmThreadPath } from "@/lib/platform/app-prefix";
 import { DmCallView } from "./dm-call-view";
 import { LocalMessagesProvider, useLocalMessages } from "./local-messages-context";
+import { StartCallLink } from "./start-call-link";
 
 const push = vi.fn();
 // pathname をテストから動かせるようにする（実際の /call → /dm → /call の遷移を再現する）
@@ -129,15 +131,25 @@ describe("「チャットに戻る」で通話を終える（#140）", () => {
   });
 });
 
+// Next はルートを Activity で保持する（アンマウントせず隠す）。
+// 実ブラウザでは /call → /dm → /call で通話画面が再マウントされないため、
+// チャット側の「通話を開始」リンク（StartCallLink）と Provider の通話状態で再入場を作る。
 function Harness({ showCall }: { showCall: boolean }) {
   return (
     <AppShell rail={<span />}>
       <LocalMessagesProvider>
-        {showCall ? (
+        <Activity mode={showCall ? "hidden" : "visible"}>
+          <StartCallLink
+            href={`${dmThreadPath(threadUrlId)}/call`}
+            threadId="dm-maimai"
+            ariaLabel="通話を開始"
+          >
+            <span>通話を開始</span>
+          </StartCallLink>
+        </Activity>
+        <Activity mode={showCall ? "visible" : "hidden"}>
           <DmCallView threadId="dm-maimai" threadUrlId={threadUrlId} self={self} other={other} />
-        ) : (
-          <p>チャット</p>
-        )}
+        </Activity>
         <Log />
       </LocalMessagesProvider>
     </AppShell>
@@ -146,27 +158,31 @@ function Harness({ showCall }: { showCall: boolean }) {
 
 describe("入場→退出→再入場（#140）", () => {
   it("2回目の入場でも connected が true で、開始/終了が履歴に積まれる", async () => {
-    const { container, rerender } = render(<Harness showCall />);
     mockPathname = "/discord.com/channels/@me/1187002356428841501/call";
+    const { container, rerender } = render(<Harness showCall />);
     await screen.findByRole("main", { name: "MaiMai との通話" });
     await waitFor(() => {
       expect(screen.getByTestId("log").textContent).toContain("通話を開始しました");
     });
+
+    // 「チャットに戻る」→ DM へ（同じ Provider のまま、通話画面は Activity で隠れる）
     fireEvent.click(screen.getByRole("link", { name: "チャットに戻る" }));
+    mockPathname = "/discord.com/channels/@me/1187002356428841501";
+    rerender(<Harness showCall={false} />);
     await waitFor(() => {
       expect(screen.getByTestId("log").textContent).toContain("通話を終了しました");
     });
+    expect(container.querySelector(".call-stage")?.getAttribute("data-connected")).toBe("false");
 
-    // チャットへ（同じ Provider のまま）。SPA で同じ画面へ戻る想定
-    mockPathname = "/discord.com/channels/@me/1187002356428841501";
-    rerender(<Harness showCall={false} />);
-    expect(screen.getByText("チャット")).toBeInTheDocument();
-
+    // チャットの「通話を開始」→ 同じスレッドへ再入場
     mockPathname = "/discord.com/channels/@me/1187002356428841501/call";
+    fireEvent.click(screen.getByRole("link", { name: "通話を開始" }));
     rerender(<Harness showCall />);
     await screen.findByRole("main", { name: "MaiMai との通話" });
-    // 2回目も接続状態から始まる（前回の connected=false を持ち越さない）
-    expect(container.querySelector(".call-stage")?.getAttribute("data-connected")).toBe("true");
+    await waitFor(() => {
+      expect(container.querySelector(".call-stage")?.getAttribute("data-connected")).toBe("true");
+    });
+    expect(container.querySelector(".call-stage-status")?.textContent).toBe("接続中");
     await waitFor(() => {
       expect(screen.getByTestId("log-system").textContent).toBe("true / true / true");
     });

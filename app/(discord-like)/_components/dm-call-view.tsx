@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import { PaneToggles } from "@/components/discord-like/pane-toggles";
 import { dmThreadPath } from "@/lib/platform/app-prefix";
 import { CallStage } from "./call-stage";
@@ -28,45 +28,38 @@ export function DmCallView({
 }) {
   const router = useRouter();
   const pathname = usePathname();
-  const { addMessage } = useLocalMessages();
+  const { activeCallThreadId, startCall, endCall } = useLocalMessages();
   const [muted, setMuted] = useState(false);
   const [deafened, setDeafened] = useState(false);
-  const [connected, setConnected] = useState(true);
+  // 通話中かどうかは Provider が持つ（ページが再マウントされなくても再入場を拾える）
+  const connected = activeCallThreadId === threadId;
   // 通話画面に「入り直した」ことを検知する（SPA で同じ画面が再利用されても初期化する）。
   // 生成したパスと完全一致で比べると、末尾スラッシュや %40 の差で一致しないことがあるため、
   // 正規化した pathname が /call で終わるかで判定する。
   const normalizedPath = (pathname ?? "").replace(/\/+$/, "").replace(/%40/gi, "@");
   const onCallPath = normalizedPath.endsWith("/call");
-  const enteredRef = useRef(false);
   const [entry, setEntry] = useState(0);
 
+  // 直リンクで開いたときも通話を開始する（同じスレッドで二重開始はしない）
   useEffect(() => {
-    const onCall = onCallPath;
-    if (onCall && !enteredRef.current) {
-      // 入口で必ず初期化する（前回の connected=false を持ち越さない）
-      enteredRef.current = true;
-      setConnected(true);
-      setMuted(false);
-      setDeafened(false);
-      setEntry((value) => value + 1);
-      addMessage(threadId, "通話を開始しました", { system: true });
-    }
-    if (!onCall && enteredRef.current) {
-      enteredRef.current = false;
-    }
-  }, [addMessage, onCallPath, threadId]);
+    startCall(threadId);
+  }, [startCall, threadId]);
+
+  useEffect(() => {
+    if (!onCallPath) return;
+    setEntry((value) => value + 1);
+  }, [onCallPath]);
+
+  // 通話に入り直したらミュート・スピーカー状態も初期化する
+  useEffect(() => {
+    if (!connected) return;
+    setMuted(false);
+    setDeafened(false);
+  }, [connected]);
 
   /** 通話を終える（切断ボタン・「チャットに戻る」のどちらでも同じ処理を通す）。 */
-  const endCall = () => {
-    if (!connected) {
-      return;
-    }
-    addMessage(threadId, "通話を終了しました", { system: true });
-    setConnected(false);
-  };
-
   const hangUp = () => {
-    endCall();
+    endCall(threadId);
     router.push(dmThreadPath(threadUrlId));
   };
 
@@ -87,7 +80,7 @@ export function DmCallView({
           href={dmThreadPath(threadUrlId)}
           className="message-header-icon message-header-button"
           aria-label="チャットに戻る"
-          onClick={endCall}
+          onClick={() => endCall(threadId)}
         >
           <svg
             aria-hidden="true"
