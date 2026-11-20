@@ -64,8 +64,11 @@ export function StoryBoard() {
     scenes.find((scene) => scene.ending && progress.completedScenes.includes(scene.id))?.ending ??
     scenes
       .flatMap((scene) => scene.choices)
-      .find((choice) => choice.ending && Object.values(progress.choices).includes(choice.id))
-      ?.ending;
+      .find(
+        (choice) =>
+          choice.ending &&
+          Object.values(progress.choices).some((picked) => picked.includes(choice.id)),
+      )?.ending;
 
   const available = availableScenes(progress);
   const transcript = replayTranscript(progress);
@@ -165,7 +168,7 @@ export function StoryBoard() {
               {(() => {
                 // 寄り道の選択肢を選んだ直後は、その場面に残ったまま反応を出す
                 const picked = scene.choices.find(
-                  (choice) => choice.id === progress.choices[scene.id],
+                  (choice) => choice.id === progress.choices[scene.id]?.at(-1),
                 );
                 if (!picked?.replyLines?.length) {
                   return null;
@@ -192,34 +195,35 @@ export function StoryBoard() {
                 >
                   この場面を終える
                 </button>
-              ) : null}
-              <fieldset
-                aria-label={`${scene.title} の選択肢`}
-                className="flex flex-wrap gap-2 border-0 p-0"
-              >
-                {scene.choices.map((choice) => {
-                  // 選択肢ごとのゲート（例: 「でんちゃん」を見つけるまでカイに相談できない）
-                  const selectable = isChoiceAvailable(progress, choice);
-                  return (
-                    <span key={choice.id} className="inline-flex items-center gap-1">
-                      <button
-                        type="button"
-                        className="rounded bg-white/10 px-3 py-1 text-sm disabled:opacity-50"
-                        disabled={!selectable}
-                        title={selectable ? undefined : "まだ選べません"}
-                        onClick={() => {
-                          update(completeScene(progress, scene, choice.id));
-                        }}
-                      >
-                        {choice.label}
-                      </button>
-                      {selectable ? null : (
-                        <span className="text-xs text-fg-muted">（まだ選べません）</span>
-                      )}
-                    </span>
-                  );
-                })}
-              </fieldset>
+              ) : (
+                <fieldset
+                  aria-label={`${scene.title} の選択肢`}
+                  className="flex flex-wrap gap-2 border-0 p-0"
+                >
+                  {scene.choices.map((choice) => {
+                    // 選択肢ごとのゲート（例: 「でんちゃん」を見つけるまでカイに相談できない）
+                    const selectable = isChoiceAvailable(progress, choice);
+                    return (
+                      <span key={choice.id} className="inline-flex items-center gap-1">
+                        <button
+                          type="button"
+                          className="rounded bg-white/10 px-3 py-1 text-sm disabled:opacity-50"
+                          disabled={!selectable}
+                          title={selectable ? undefined : "まだ選べません"}
+                          onClick={() => {
+                            update(completeScene(progress, scene, choice.id));
+                          }}
+                        >
+                          {choice.label}
+                        </button>
+                        {selectable ? null : (
+                          <span className="text-xs text-fg-muted">（まだ選べません）</span>
+                        )}
+                      </span>
+                    );
+                  })}
+                </fieldset>
+              )}
             </article>
           ))
         )}
@@ -246,20 +250,23 @@ export function StoryBoard() {
                   </li>
                 ))}
               </ol>
-              {entry.choice ? (
-                <p className="mt-2 text-xs text-fg-muted">選んだ答え: {entry.choice.label}</p>
-              ) : null}
-              {entry.replyLines?.length ? (
-                <ol className="mt-1 flex flex-col gap-1">
-                  {entry.replyLines.map((line, index) => (
-                    // biome-ignore lint/suspicious/noArrayIndexKey: 台本は固定で並び替えない
-                    <li key={`reply-${index}`} className="text-sm">
-                      <span className="font-semibold">{castName(line.speakerId)}</span>
-                      <span className="text-fg-muted">「{line.text}」</span>
-                    </li>
-                  ))}
-                </ol>
-              ) : null}
+              {entry.choices.map((picked, index) => (
+                // biome-ignore lint/suspicious/noArrayIndexKey: 選んだ順がそのまま表示順で、同じ選択肢を再度選ぶこともある
+                <div key={`pick-${index}`} className="mt-2">
+                  <p className="text-xs text-fg-muted">選んだ答え: {picked.label}</p>
+                  {picked.replyLines?.length ? (
+                    <ol className="mt-1 flex flex-col gap-1">
+                      {picked.replyLines.map((line, index) => (
+                        // biome-ignore lint/suspicious/noArrayIndexKey: 台本は固定で並び替えない
+                        <li key={`reply-${index}`} className="text-sm">
+                          <span className="font-semibold">{castName(line.speakerId)}</span>
+                          <span className="text-fg-muted">「{line.text}」</span>
+                        </li>
+                      ))}
+                    </ol>
+                  ) : null}
+                </div>
+              ))}
             </article>
           ))
         )}
