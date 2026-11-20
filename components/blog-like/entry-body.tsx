@@ -33,11 +33,24 @@ function Block({ block }: { block: EntryBlock }) {
       );
     case "link": {
       const href = externalHref(block.url);
+      const label = block.label ?? `https://${block.url}`;
+      // 当時のアカウントは残っていない（リンク切れ）。遷移できないことが分かる形で出す
+      if (block.broken) {
+        return (
+          <p className="pb-entry-link">
+            {block.lead}
+            <br />
+            <span aria-disabled="true" title="リンク切れ（当時のアカウントは残っていません）">
+              {label}
+            </span>
+          </p>
+        );
+      }
       return (
         <p className="pb-entry-link">
           {block.lead}
           <br />
-          {href ? <Link href={href}>https://{block.url}</Link> : <span>https://{block.url}</span>}
+          {href ? <Link href={href}>{label}</Link> : <span>{label}</span>}
         </p>
       );
     }

@@ -19,7 +19,7 @@ export const blogs: Blog[] = [
     description: "モンハン大好き中学生の攻略メモと日記です！",
     authorName: "でんでん",
     authorProfile:
-      "モンハン歴3年（3DSから）。ワールドは双剣メイン、たまにライトボウガン。のんびり更新です。",
+      "モンハン歴3年（3DSから）。ワールドは双剣メイン、たまにライトボウガン。のんびり更新です。Twixer（旧）: @hunter_denden0102",
     avatar: "/blog-like/avatars/denden.svg",
     visitorCount: 18342,
   },
@@ -28,8 +28,18 @@ export const blogs: Blog[] = [
 const twixerStatus = (statusId: string): string =>
   `twixer.com/${OLD_TWIXER_HANDLE}/status/${statusId}`;
 
+/**
+ * 当時の Twixer へのリンク。アカウントはもう残っていない（改名して鍵垢）ので、
+ * 表示だけして遷移しない（リンク切れ）。表示テキストから活動名が読めるようにする。
+ */
 const twixerLink = (statusId: string) =>
-  ({ kind: "link", lead: "Twixerにも投稿しました！", url: twixerStatus(statusId) }) as const;
+  ({
+    kind: "link",
+    lead: "Twixerにも投稿しました！（当時のアカウント）",
+    url: twixerStatus(statusId),
+    label: `@${OLD_TWIXER_HANDLE}`,
+    broken: true,
+  }) as const;
 
 export const entries: Entry[] = [
   {
