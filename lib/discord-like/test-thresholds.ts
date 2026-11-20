@@ -76,6 +76,10 @@ export const QUALITY_LIMITS = {
   /** mhc 内での kai の発言上限（D10） */
   kaiInMhc: 5,
   /** 各月で最低限発言がある日数（以上） */
+  /** 各月で会話しない日を最低これだけ残す（#133） */
+  silentDaysPerMonthMin: 2,
+  /** 会話が空いてよい連続日数（#133） */
+  silentGapMaxDays: 3,
   minActiveDaysPerMonth: 10,
   /** 各月で「6日以降」にも発言があること */
   activityAfterDay: 6,

@@ -243,7 +243,9 @@ describe("データ品質（#131 / D9・D10）", () => {
         expect(progress.test(message.body), `${message.id}: ${message.body}`).toBe(false);
       }
     }
-    for (const [month, set] of days) expect(set.size, month).toBeLessThanOrEqual(6);
+    for (const [month, set] of days) {
+      expect(set.size, month).toBeLessThanOrEqual(6);
+    }
   });
 
   it("#133: 恋人の DM は各月2日以上は会話せず、連続して空くのは3日まで", () => {
@@ -276,8 +278,8 @@ describe("データ品質（#131 / D9・D10）", () => {
         run += 1;
         maxRun = Math.max(maxRun, run);
       }
-      expect(silent, month).toBeGreaterThanOrEqual(2);
-      expect(maxRun, month).toBeLessThanOrEqual(3);
+      expect(silent, month).toBeGreaterThanOrEqual(Q.silentDaysPerMonthMin);
+      expect(maxRun, month).toBeLessThanOrEqual(Q.silentGapMaxDays);
     }
   });
 
