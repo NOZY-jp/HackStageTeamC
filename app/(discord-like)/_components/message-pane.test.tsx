@@ -159,7 +159,7 @@ describe("MessagePane の段階的読み込み", () => {
     const { container } = renderPane();
     const total = listMessages({ channelId: CHANNEL_ID, limit: 1000 }).messages.length;
 
-    for (let attempt = 0; attempt < 8; attempt += 1) {
+    for (let attempt = 0; attempt < 40; attempt += 1) {
       if (screen.queryByText("ここが最初のメッセージです")) break;
       const before = visibleMessages(container);
       await triggerIntersect();
@@ -248,7 +248,7 @@ describe("MessagePane の段階的読み込み", () => {
     const total = listMessages({ channelId: CHANNEL_ID, limit: 1000 }).messages.length;
 
     // 先頭まで遡って全件読み込む
-    for (let attempt = 0; attempt < 8; attempt += 1) {
+    for (let attempt = 0; attempt < 40; attempt += 1) {
       if (screen.queryByText("ここが最初のメッセージです")) break;
       await triggerIntersect();
       await new Promise((resolve) => setTimeout(resolve, 250));
