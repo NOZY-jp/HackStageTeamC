@@ -4853,3 +4853,14 @@ a.tw-dm-item:focus-visible {
     opacity: 0.55;
   }
 }
+
+/* ---- DM 未検出を一覧の右（3列目）に置く（#70） ---- */
+
+/*
+ * [guildId]/layout.tsx が左の一覧（2列目）を残したまま DmNotFound を描くため、
+ * 既定の `grid-column: 2 / -1` では一覧と重なり、404 が最下部へ押し出される。
+ */
+.route-state--main {
+  grid-column: 3;
+  grid-row: 1 / span 2;
+}
