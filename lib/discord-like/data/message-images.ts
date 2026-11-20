@@ -8,10 +8,13 @@
  * - 旧ブログの添付画像 = 旧ID `hunter_denden`（@hunter_denden0102）
  */
 
-/** 旧 Twixer のハンドル（旧ブログ側の画像に写っているID）。 */
-export const OLD_TWIXER_HANDLE = "hunter_denden0102";
+/**
+ * 旧アカウントのゲーマーID（Discord の旧垢。段階5の「完全一致」対象）。
+ * Twixer の旧ハンドル @hunter_denden0102 とは別物。
+ */
+export const OLD_GAMER_ID = "hunter_denden3243";
 
-export type MessageImageOwner = "current" | "old";
+export type MessageImageOwner = "current" | "old" | "unknown";
 
 export type MessageImage = {
   /** 画像のファイル名（MessageAttachment.name と一致させる） */
@@ -37,24 +40,23 @@ export type MessageImage = {
 export const MESSAGE_IMAGES: Record<string, MessageImage> = {
   "screenshot-2026.png": {
     name: "screenshot-2026.png",
-    // 実体は人の承認後に public へ置く。置いたらこの1行を "ready" にする
-    status: "pending",
+    status: "ready",
     owner: "current",
     handle: "maimaimaimai",
-    src: "/mock/screenshot-2026.png",
+    src: "/discord-like/screenshot-2026-friends.png",
     width: 800,
     height: 600,
     label: "今のアカウントのスクリーンショット",
   },
-  "screenshot-2019.svg": {
-    name: "screenshot-2019.svg",
+  "screenshot-2018.png": {
+    name: "screenshot-2018.png",
     status: "ready",
     owner: "old",
-    handle: OLD_TWIXER_HANDLE,
-    src: "/mock/screenshot-2019.svg",
-    width: 800,
-    height: 600,
-    label: "当時のアカウントのスクリーンショット",
+    handle: OLD_GAMER_ID,
+    src: "/discord-like/screenshot-2018-game.png",
+    width: 1200,
+    height: 675,
+    label: "2018年の狩猟画面のスクリーンショット",
   },
 };
 
@@ -65,7 +67,7 @@ export function getMessageImage(name: string): MessageImage {
       name,
       // 定義が無い画像は実体も不明なので、リクエストを出さずプレースホルダにする
       status: "pending",
-      owner: "current",
+      owner: "unknown",
       handle: "",
       src: `/mock/${name}`,
       width: 800,

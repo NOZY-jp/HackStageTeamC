@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { SELF_USER_ID } from "@/app/(discord-like)/_components/self-user";
-import { getMessageImage, OLD_TWIXER_HANDLE } from "./data/message-images";
+import { getMessageImage, OLD_GAMER_ID } from "./data/message-images";
 import {
   HAL_HANDLE,
   HAL_NAME,
@@ -28,7 +28,7 @@ import { listMemberViews } from "./view";
 const GUILD_ID = "mhc";
 const DM_THREAD_ID = "dm-maimai";
 const DISCORD_SCREENSHOT = "screenshot-2026.png";
-const OLD_BLOG_IMAGE = "screenshot-2019.svg";
+const OLD_BLOG_IMAGE = "screenshot-2018.png";
 
 const PERIODS = [
   { key: "1期", from: "2025-02-01", to: "2025-05-31", ratio: 1 / 9 },
@@ -400,11 +400,11 @@ describe("名前の差し替え（#76 の確定値）", () => {
     const discordImage = getMessageImage(DISCORD_SCREENSHOT);
     expect(discordImage.owner).toBe("current");
     expect(discordImage.handle).toBe(MAIMAI_HANDLE);
-    expect(discordImage.handle).not.toBe(OLD_TWIXER_HANDLE);
+    expect(discordImage.handle).not.toBe(OLD_GAMER_ID);
 
     const blogImage = getMessageImage(OLD_BLOG_IMAGE);
     expect(blogImage.owner).toBe("old");
-    expect(blogImage.handle).toBe(OLD_TWIXER_HANDLE);
+    expect(blogImage.handle).toBe(OLD_GAMER_ID);
     expect(blogImage.handle).not.toBe(MAIMAI_HANDLE);
     // 旧ブログの画像に現在のハンドルは写らない
     expect(blogImage.handle).not.toBe(HAL_HANDLE);

@@ -2,7 +2,7 @@ import fs from "node:fs/promises";
 import { render, screen } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { MessageAttachments } from "@/app/(discord-like)/_components/message-attachments";
-import { getMessageImage, MESSAGE_IMAGES, OLD_TWIXER_HANDLE } from "./data/message-images";
+import { getMessageImage, MESSAGE_IMAGES, OLD_GAMER_ID } from "./data/message-images";
 import { MAIMAI_HANDLE } from "./data/names";
 import { listDMMessages } from "./index";
 
@@ -12,7 +12,7 @@ const FAMILY_NAME = word(0x670d, 0x90e8);
 const GIVEN_NAME = word(0x7531, 0x6bd4);
 
 const DM_IMAGE = "screenshot-2026.png";
-const BLOG_IMAGE = "screenshot-2019.svg";
+const BLOG_IMAGE = "screenshot-2018.png";
 
 describe("順序4の画像の向きとパス（#102）", () => {
   it("Discord のスクショは現在のID、旧ブログの画像は旧ID", () => {
@@ -21,17 +21,26 @@ describe("順序4の画像の向きとパス（#102）", () => {
     expect(getMessageImage(DM_IMAGE).handle).toBe("maimaimaimai");
 
     expect(getMessageImage(BLOG_IMAGE).owner).toBe("old");
-    expect(getMessageImage(BLOG_IMAGE).handle).toBe(OLD_TWIXER_HANDLE);
-    expect(getMessageImage(BLOG_IMAGE).handle).toBe("hunter_denden0102");
+    expect(getMessageImage(BLOG_IMAGE).handle).toBe(OLD_GAMER_ID);
+    expect(getMessageImage(BLOG_IMAGE).handle).toBe("hunter_denden3243");
   });
 
-  it("画像パスは message-images.ts の1か所だけで決まる（実体が無くても解決できる）", () => {
+  it("画像パスは message-images.ts の1か所だけで決まる", () => {
     for (const image of Object.values(MESSAGE_IMAGES)) {
-      expect(image.src).toBe(`/mock/${image.name}`);
+      expect(image.src.startsWith("/")).toBe(true);
       expect(image.width).toBeGreaterThan(0);
       expect(image.height).toBeGreaterThan(0);
       expect(image.label.length).toBeGreaterThan(0);
     }
+    // 実体がある画像は ready、無い画像は pending
+    expect(Object.values(MESSAGE_IMAGES).every((image) => image.status === "ready")).toBe(true);
+  });
+
+  it("未定義の画像は向き不明（unknown）として扱う", () => {
+    const unknown = getMessageImage("not-defined.png");
+    expect(unknown.owner).toBe("unknown");
+    expect(unknown.handle).toBe("");
+    expect(unknown.status).toBe("pending");
   });
 
   it("DM の画像メッセージは、現在のIDのスクショを指している", () => {
@@ -47,7 +56,8 @@ describe("順序4の画像の向きとパス（#102）", () => {
         }
         expect(attachment.name).toBe(DM_IMAGE);
         expect(getMessageImage(attachment.name).owner).toBe("current");
-        // 「あの頃のスクショ」ではなく、今のアカウントの画像だと分かる本文
+        // 貼るのは MaiMai 自身で、「今のアカウント」の画像だと分かる本文
+        expect(message.authorId).toBe("maimai");
         expect(message.body).toContain("今のアカウント");
       }
     }
@@ -80,7 +90,7 @@ describe("実体が無い画像の扱い（#102 追補）", () => {
     const errorSpy = vi.spyOn(console, "error").mockImplementation(() => {});
     const { container } = render(
       <MessageAttachments
-        attachments={[{ id: "att", name: DM_IMAGE, kind: "image", sizeLabel: "412 KB" }]}
+        attachments={[{ id: "att", name: "not-yet.png", kind: "image", sizeLabel: "412 KB" }]}
       />,
     );
 
@@ -98,11 +108,13 @@ describe("実体が無い画像の扱い（#102 追補）", () => {
       <MessageAttachments attachments={[{ id: "att", name: BLOG_IMAGE, kind: "image" }]} />,
     );
     expect(container.querySelector("img")).not.toBeNull();
-    expect(container.querySelector("img")?.getAttribute("src")).toContain(BLOG_IMAGE);
+    const src = decodeURIComponent(container.querySelector("img")?.getAttribute("src") ?? "");
+    expect(src).toContain("screenshot-2018-game.png");
   });
 
-  it("実体の有無はデータの status で決まる（pending は 2026 のスクショだけ）", () => {
-    expect(getMessageImage(DM_IMAGE).status).toBe("pending");
+  it("実体の有無はデータの status で決まる（定義済みは ready、未定義は pending）", () => {
+    expect(getMessageImage(DM_IMAGE).status).toBe("ready");
     expect(getMessageImage(BLOG_IMAGE).status).toBe("ready");
+    expect(getMessageImage("not-yet.png").status).toBe("pending");
   });
 });

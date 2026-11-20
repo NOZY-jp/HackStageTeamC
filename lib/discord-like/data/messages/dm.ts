@@ -423,21 +423,21 @@ export const messagesByDMThread: Record<string, Message[]> = {
       id: "dm-maimai-0060",
       channelId: "dm-maimai",
       sentAt: "2026-04-18T23:15:00+09:00",
-      authorId: "hal",
+      authorId: "maimai",
       body: "中3の頃は攻略ブログ書いてた。毎日モンハンやってた",
     },
     {
       id: "dm-maimai-0061",
       channelId: "dm-maimai",
       sentAt: "2026-04-18T23:17:00+09:00",
-      authorId: "maimai",
+      authorId: "hal",
       body: "攻略ブログ！読んでたかも",
     },
     {
       id: "dm-maimai-0062",
       channelId: "dm-maimai",
       sentAt: "2026-04-18T23:19:00+09:00",
-      authorId: "hal",
+      authorId: "maimai",
       body: "今のアカウントのスクショ。画像だけ貼る",
       attachments: [
         {
@@ -452,14 +452,14 @@ export const messagesByDMThread: Record<string, Message[]> = {
       id: "dm-maimai-0063",
       channelId: "dm-maimai",
       sentAt: "2026-04-18T23:21:00+09:00",
-      authorId: "maimai",
+      authorId: "hal",
       body: "なつかしい。あとでnoteにまとめたら？",
     },
     {
       id: "dm-maimai-0064",
       channelId: "dm-maimai",
       sentAt: "2026-04-18T23:23:00+09:00",
-      authorId: "hal",
+      authorId: "maimai",
       body: "ブログの記事、noteに移行しようと思ってる",
     },
     {
