@@ -392,6 +392,13 @@ export function generateServers(
   const usedBody = new Set<string>();
   const out: Record<string, Message[]> = {};
 
+  // 初出より前には発言させない（ノイズ経路も含めて共通化）
+  const pickAuthor = (server: { members: string[] }, at: string) => {
+    const month = at.slice(0, 7);
+    const eligible = server.members.filter((id) => !firstSeen[id] || month >= firstSeen[id]);
+    return pick(eligible.length > 0 ? eligible : ["hal"]);
+  };
+
   for (const server of SERVERS) {
     for (const [channelId] of server.channels) out[channelId] = [];
     const queue: { ch: string; at: number; kind?: string }[] = [];
@@ -457,7 +464,7 @@ export function generateServers(
         out[item.ch].push({
           id: `${item.ch}-m${String(out[item.ch].length + 1).padStart(4, "0")}`,
           channelId: item.ch,
-          authorId: pick(server.members),
+          authorId: pickAuthor(server, jst(item.at)),
           sentAt: jst(item.at),
           body,
         });
@@ -469,7 +476,7 @@ export function generateServers(
         out[item.ch].push({
           id: `${item.ch}-m${String(out[item.ch].length + 1).padStart(4, "0")}`,
           channelId: item.ch,
-          authorId: pick(server.members),
+          authorId: pickAuthor(server, jst(item.at)),
           sentAt: jst(item.at),
           body,
         });
@@ -481,7 +488,7 @@ export function generateServers(
         out[item.ch].push({
           id: `${item.ch}-m${String(out[item.ch].length + 1).padStart(4, "0")}`,
           channelId: item.ch,
-          authorId: pick(server.members),
+          authorId: pickAuthor(server, jst(item.at)),
           sentAt: jst(item.at),
           body,
         });

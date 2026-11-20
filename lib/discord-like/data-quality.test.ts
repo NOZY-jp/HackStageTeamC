@@ -6,6 +6,7 @@ import { describe, expect, it } from "vitest";
 import { buildMhcHistory } from "./data/messages/mhc-history";
 import { ACQUAINTANCE_NOTES } from "./data/people/acquaintance-notes";
 import { generateDmExpansion } from "./generators/dm-expansion";
+import { FIRST_SEEN } from "./generators/people-rules";
 import { FRIEND_MEMBERS, looksPadded, UNIV_MEMBERS } from "./generators/servers";
 import { listChannels, listDMMessages, listDMThreads, listGuilds, listMessages } from "./index";
 import { QUALITY_LIMITS as Q } from "./test-thresholds";
@@ -182,9 +183,12 @@ describe("データ品質（#131 / D9・D10）", () => {
   it("#144: 初出より前に発言しない（docs の初出と一致）", () => {
     const firstSeen = new Map<string, string>();
     for (const [id, note] of Object.entries(ACQUAINTANCE_NOTES)) {
-      const match = /^(d{4})-(d{2})/.exec(note.firstSeen);
+      const match = /^(\d{4})-(\d{2})/.exec(note.firstSeen);
       if (match) firstSeen.set(id, `${match[1]}-${match[2]}`);
     }
+    // パースが空振りしていないこと（タイポでテストが素通りするのを防ぐ）
+    expect(firstSeen.size).toBeGreaterThanOrEqual(30);
+    expect(FIRST_SEEN.ishikawa).toBe("2026-01");
     for (const message of messages) {
       const seen = firstSeen.get(message.authorId);
       if (!seen) continue;
