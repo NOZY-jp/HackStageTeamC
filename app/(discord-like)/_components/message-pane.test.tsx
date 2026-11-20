@@ -1,5 +1,5 @@
 import { act, render, screen, waitFor } from "@testing-library/react";
-import { describe, expect, it, vi } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { AppShell } from "@/components/discord-like/app-shell";
 import { listMessages } from "@/lib/discord-like";
 import { toMessageView } from "@/lib/discord-like/view";
@@ -368,5 +368,69 @@ describe("MessagePane の段階的読み込み", () => {
     );
     const expected = new Set(otherChannel.messages.map((message) => message.id));
     expect(ids.every((id) => id !== null && expected.has(id))).toBe(true);
+  });
+});
+
+describe("MessagePane の検索ジャンプ", () => {
+  const originalScrollHeight = Object.getOwnPropertyDescriptor(Element.prototype, "scrollHeight");
+  const scrollIntoView = vi.fn();
+
+  const stubScrollHeight = (value: number) => {
+    Object.defineProperty(Element.prototype, "scrollHeight", {
+      configurable: true,
+      get: () => value,
+    });
+  };
+
+  const renderAt = (focusMessageId?: string) => {
+    const initialView = toMessageView(listMessages({ channelId: CHANNEL_ID, limit: PAGE_SIZE }));
+    const result = render(
+      <AppShell rail={<span />}>
+        <LocalMessagesProvider>
+          <MessagePane
+            channelKey={CHANNEL_ID}
+            mode="channel"
+            initialView={initialView}
+            title="一般"
+            topic="テスト"
+            focusMessageId={focusMessageId}
+          />
+        </LocalMessagesProvider>
+      </AppShell>,
+    );
+    return {
+      ...result,
+      scroller: result.container.querySelector(".message-scroll") as HTMLElement,
+    };
+  };
+
+  beforeEach(() => {
+    scrollIntoView.mockReset();
+    Element.prototype.scrollIntoView = scrollIntoView;
+  });
+
+  afterEach(() => {
+    if (originalScrollHeight) {
+      Object.defineProperty(Element.prototype, "scrollHeight", originalScrollHeight);
+    } else {
+      Reflect.deleteProperty(Element.prototype, "scrollHeight");
+    }
+    Reflect.deleteProperty(Element.prototype, "scrollIntoView");
+  });
+
+  it("ジャンプしていないときは、従来どおり最下部から表示する", () => {
+    stubScrollHeight(2000);
+    const { scroller } = renderAt();
+    expect(scroller.scrollTop).toBe(2000);
+  });
+
+  it("ジャンプ中は、マウント時に最下部へ寄せない（中央寄せを打ち消さない）", () => {
+    stubScrollHeight(2000);
+    const targetId = listMessages({ channelId: CHANNEL_ID, limit: 1 }).messages[0].id;
+    const { scroller } = renderAt(targetId);
+
+    expect(scroller.scrollTop).toBe(0);
+    expect(scrollIntoView).toHaveBeenCalledTimes(1);
+    expect(scrollIntoView).toHaveBeenCalledWith({ block: "center" });
   });
 });
