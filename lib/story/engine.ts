@@ -67,14 +67,20 @@ export function completeScene(progress: Progress, scene: Scene, choiceId?: strin
     return {
       flags: withFlags(progress.flags, choice.setsFlags),
       completedScenes: progress.completedScenes,
-      choices: { ...progress.choices, [scene.id]: choice.id },
+      choices: {
+        ...progress.choices,
+        [scene.id]: [...(progress.choices[scene.id] ?? []), choice.id],
+      },
     };
   }
 
   return {
     flags: withFlags(progress.flags, [...scene.completesFlags, ...(choice?.setsFlags ?? [])]),
     completedScenes: [...progress.completedScenes, scene.id],
-    choices: choice ? { ...progress.choices, [scene.id]: choice.id } : progress.choices,
+    // 寄り道の選択肢も履歴に残すため、完了させる選択肢は前の選択に続けて記録する
+    choices: choice
+      ? { ...progress.choices, [scene.id]: [...(progress.choices[scene.id] ?? []), choice.id] }
+      : progress.choices,
   };
 }
 
@@ -88,18 +94,20 @@ export function replayTranscript(
 ): TranscriptEntry[] {
   return scenes
     .filter((scene) => progress.completedScenes.includes(scene.id))
-    .map((scene) => {
-      const choiceId = progress.choices[scene.id];
-      const choice = scene.choices.find((candidate) => candidate.id === choiceId);
-      return {
-        sceneId: scene.id,
-        chapter: scene.chapter,
-        title: scene.title,
-        lines: scene.lines,
-        ...(choice ? { choice: { id: choice.id, label: choice.label } } : {}),
-        ...(choice?.replyLines ? { replyLines: choice.replyLines } : {}),
-      };
-    });
+    .map((scene) => ({
+      sceneId: scene.id,
+      chapter: scene.chapter,
+      title: scene.title,
+      lines: scene.lines,
+      choices: (progress.choices[scene.id] ?? [])
+        .map((choiceId) => scene.choices.find((candidate) => candidate.id === choiceId))
+        .filter((choice): choice is SceneChoice => choice !== undefined)
+        .map((choice) => ({
+          id: choice.id,
+          label: choice.label,
+          ...(choice.replyLines ? { replyLines: choice.replyLines } : {}),
+        })),
+    }));
 }
 
 /** 最初からやり直す。 */

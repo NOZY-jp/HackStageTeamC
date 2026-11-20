@@ -24,7 +24,7 @@ export const cast: CastMember[] = [
     // 作中の呼称（ハンドルから「まいまい」へ）
     nickname: "まいまい",
     pronoun: "わたし",
-    role: "ゲームで出会った恋人（2025年）",
+    role: "ゲームで出会った恋人（2025年春に出会い、2026年8月から交際）",
     accounts: [
       // 旧ブログ（ぽちブロ）の書き手。表示名は「でんでん」
       { platform: "pochiblo", handle: "denden0102", displayName: "でんでん" },
@@ -62,8 +62,8 @@ export const cast: CastMember[] = [
     role: "彼女の中高の大親友",
     accounts: [
       { platform: "twixer", handle: "kanon__dayo" },
-      // Discord は正本に値が無いため仮値（分かり次第差し替える）
-      { platform: "discord", handle: "kanon_23" },
+      // Discord は正本に値が無いため仮値（分かり次第差し替える）。lib/discord-like の KANON_HANDLE と揃える
+      { platform: "discord", handle: "kanon_dayo" },
     ],
     oldNames: [],
   },
