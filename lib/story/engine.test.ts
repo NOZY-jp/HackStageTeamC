@@ -68,9 +68,20 @@ describe("進行ロジック（#81）", () => {
     expect(() => completeScene(started, scene("ch1-mylist"), "remember")).toThrow();
   });
 
+  it("かのんの写真を見ないと、カイの助言（ch3）は始まらない", () => {
+    let progress = applyTrigger(emptyProgress(), trigger("read-contest-result"));
+    expect(availableScenes(progress).map((s) => s.id)).not.toContain("ch3-kai");
+
+    progress = completeScene(progress, scene("ch2-contest"), "see-photo");
+    expect(progress.flags).toContain("bff_photos_seen");
+    expect(availableScenes(progress).map((s) => s.id)).toContain("ch3-kai");
+  });
+
   it("選択肢のゲート: 「でんちゃん」を見つけるまでカイに相談できない", () => {
     let progress = applyTrigger(emptyProgress(), trigger("read-contest-result"));
-    const consult = scene("ch3-kai").choices[0];
+    progress = completeScene(progress, scene("ch2-contest"), "see-photo");
+    const consult = scene("ch3-kai").choices[1];
+    expect(consult.id).toBe("ask-kai");
     expect(isChoiceAvailable(progress, consult)).toBe(false);
     expect(() => completeScene(progress, scene("ch3-kai"), "ask-kai")).toThrow();
 

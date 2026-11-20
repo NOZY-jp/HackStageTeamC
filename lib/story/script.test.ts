@@ -44,8 +44,10 @@ describe("台本の整合性（#81）", () => {
     for (const scene of scenes) {
       const ids = scene.choices.map((choice) => choice.id);
       expect(new Set(ids).size).toBe(ids.length);
-      expect(scene.choices.length).toBeGreaterThan(0);
     }
+    // 選択肢が無い場面は「場面を終える」で完了する（ch4 だけ）
+    const withoutChoices = scenes.filter((scene) => scene.choices.length === 0).map((s) => s.id);
+    expect(withoutChoices).toEqual(["ch4-kanon"]);
   });
 
   it("出てくる人物は全員台帳にいる", () => {
@@ -63,7 +65,7 @@ describe("台本の整合性（#81）", () => {
     // 台本に「でんちゃん」の経路が2段階（コメント欄で見つける→カイに相談）で入っている
     const flagsUsed = scenes.flatMap((scene) => [
       ...scene.requires,
-      ...scene.choices.flatMap((choice) => choice.setsFlags),
+      ...scene.choices.flatMap((choice) => [...choice.setsFlags, ...(choice.requires ?? [])]),
     ]);
     expect(flagsUsed).toContain("denchan_found");
     expect(flagsUsed).toContain("denchan_confirmed");
@@ -71,13 +73,29 @@ describe("台本の整合性（#81）", () => {
     const ch4 = scenes.find((scene) => scene.id === "ch4-kanon");
     expect(ch4?.lines.every((line) => line.speakerId === "ryo")).toBe(true);
     expect(ch4?.lines.some((line) => line.speakerId === "kanon")).toBe(false);
-    // 最後は「その場所に行く」ではなく、本名での照合（TalkUp 検索）へつなぐ
-    expect(ch4?.choices.map((choice) => choice.id)).toEqual(["search-name"]);
-    expect(ch4?.choices[0].label).toContain("本名");
-    expect(ch4?.choices[0].setsFlags).toContain("facebook_search");
+    // 順序9: 検索はカイの助言（ch3）で行い、「その場所に行ってみる」は置かない
+    const ch3 = scenes.find((scene) => scene.id === "ch3-kai");
+    expect(
+      ch3?.lines.some((line) => line.speakerId === "kai" && line.text.includes("Facebook")),
+    ).toBe(true);
+    expect(ch3?.choices.map((choice) => choice.id)).toEqual(["search-name", "ask-kai"]);
+    expect(ch3?.choices.some((choice) => choice.label.includes("その場所に行って"))).toBe(false);
+    expect(
+      scenes.some((scene) => scene.choices.some((c) => c.label.includes("その場所に行って"))),
+    ).toBe(false);
+    expect(ch3?.choices[0].setsFlags).toContain("facebook_search");
+    // 順序10: 照合は ch4（選択肢なしで完了し、終了を出す）。でんちゃんは前提にしない
+    expect(ch4?.choices).toHaveLength(0);
+    expect(ch4?.requires).toEqual(["facebook_search"]);
+    expect(ch4?.requires.some((flag) => flag.startsWith("denchan_"))).toBe(false);
     // 正本の終了条件は「住所を特定しました」で終わる（住所データは作らない）
     expect(ENDING_ADDRESS_CONFIRMED).toBe("住所を特定しました");
-    expect(ch4?.choices[0].ending).toBe(ENDING_ADDRESS_CONFIRMED);
+    expect(ch4?.ending).toBe(ENDING_ADDRESS_CONFIRMED);
+    // 「カイに相談する」は任意で、選んだ直後にカイの助言が続く
+    const consult = ch3?.choices.find((choice) => choice.id === "ask-kai");
+    expect(consult?.requires).toEqual(["denchan_found"]);
+    expect(consult?.replyLines?.[0].speakerId).toBe("kai");
+    expect(consult?.replyLines?.[0].text).toContain("でんちゃん");
   });
 
   it("台本とフラグ定義のIDが一致する（未定義のフラグを使わない）", () => {

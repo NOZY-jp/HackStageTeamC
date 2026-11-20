@@ -59,10 +59,13 @@ export function StoryBoard() {
     setProgress(loadProgress());
   };
 
-  // 終わりのある選択肢を選んだら、結末を最終状態として出す
-  const ending = scenes
-    .flatMap((scene) => scene.choices)
-    .find((choice) => choice.ending && Object.values(progress.choices).includes(choice.id))?.ending;
+  // 終わりは、完了した場面（Scene.ending）か、選んだ選択肢（SceneChoice.ending）のどちらでも出せる
+  const ending =
+    scenes.find((scene) => scene.ending && progress.completedScenes.includes(scene.id))?.ending ??
+    scenes
+      .flatMap((scene) => scene.choices)
+      .find((choice) => choice.ending && Object.values(progress.choices).includes(choice.id))
+      ?.ending;
 
   const available = availableScenes(progress);
   const transcript = replayTranscript(progress);
@@ -159,6 +162,17 @@ export function StoryBoard() {
                   </li>
                 ))}
               </ol>
+              {scene.choices.length === 0 ? (
+                <button
+                  type="button"
+                  className="rounded bg-white/10 px-3 py-1 text-sm"
+                  onClick={() => {
+                    update(completeScene(progress, scene));
+                  }}
+                >
+                  この場面を終える
+                </button>
+              ) : null}
               <fieldset
                 aria-label={`${scene.title} の選択肢`}
                 className="flex flex-wrap gap-2 border-0 p-0"
@@ -214,6 +228,17 @@ export function StoryBoard() {
               </ol>
               {entry.choice ? (
                 <p className="mt-2 text-xs text-fg-muted">選んだ答え: {entry.choice.label}</p>
+              ) : null}
+              {entry.replyLines?.length ? (
+                <ol className="mt-1 flex flex-col gap-1">
+                  {entry.replyLines.map((line, index) => (
+                    // biome-ignore lint/suspicious/noArrayIndexKey: 台本は固定で並び替えない
+                    <li key={`reply-${index}`} className="text-sm">
+                      <span className="font-semibold">{castName(line.speakerId)}</span>
+                      <span className="text-fg-muted">「{line.text}」</span>
+                    </li>
+                  ))}
+                </ol>
               ) : null}
             </article>
           ))

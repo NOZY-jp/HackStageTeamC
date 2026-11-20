@@ -45,7 +45,7 @@ export const scenes: Scene[] = [
       { speakerId: "ryo", text: "……この名前、どこかで聞いた気がする。" },
     ],
     choices: [
-      { id: "see-photo", label: "写真のページを見に行く", setsFlags: [] },
+      { id: "see-photo", label: "かのんの写真を見に行く", setsFlags: ["bff_photos_seen"] },
       { id: "keep", label: "自分で調べる", setsFlags: [] },
     ],
     completesFlags: [],
@@ -53,49 +53,50 @@ export const scenes: Scene[] = [
   {
     id: "ch3-kai",
     chapter: "欠片",
-    title: "カイからの連絡",
-    requires: ["real_name_known"],
+    title: "カイの助言",
+    // 順序9: 本名が分かり、かのん（BFF）の写真を見た後に、カイが Facebook を勧める
+    requires: ["real_name_known", "bff_photos_seen"],
     lines: [
-      { speakerId: "kai", text: "本名まで辿り着いたんだな。早いじゃん。" },
-      { speakerId: "ryo", text: "まだ偶然だよ。写真のページを見つけただけ。" },
-      { speakerId: "kai", text: "その写真、撮った場所に心当たりある？" },
+      { speakerId: "kai", text: "Facebook だと、本名で検索したら結構出てくるぞ？" },
+      { speakerId: "ryo", text: "Facebook……そんなの、使ってないけど。" },
+      { speakerId: "kai", text: "写真の子と見比べるんだぞ。似てるかどうかだけでもいい。" },
     ],
     choices: [
-      // 「でんちゃん」を旧ブログのコメント欄で見つけた人だけが相談できる
+      // 順序9→10: 本名で検索する（照合は次の場面）
+      { id: "search-name", label: "本名で TalkUp を検索する", setsFlags: ["facebook_search"] },
+      // 任意: 「でんちゃん」を先に見つけた人だけがカイに相談できる
       {
         id: "ask-kai",
         label: "カイに相談する",
         setsFlags: ["denchan_confirmed"],
         requires: ["denchan_found"],
+        replyLines: [
+          {
+            speakerId: "kai",
+            text: "その呼び方、本人に言うと喜ぶぞ。『でんちゃん』って呼ばれるのが好きなんだ。",
+          },
+          { speakerId: "ryo", text: "……そうなんだ。覚えておく。" },
+        ],
       },
-      { id: "go", label: "その場所に行ってみる", setsFlags: [] },
     ],
     completesFlags: ["kai_contacted"],
   },
   {
     id: "ch4-kanon",
     chapter: "現実",
-    title: "写真の二人",
-    requires: ["denchan_found", "denchan_confirmed", "photo_hint"],
+    title: "写真の照合",
+    // 順序10→11: 検索で見つけた人と、かのんの写真の人物を照合して終わる
+    requires: ["facebook_search"],
     lines: [
+      { speakerId: "ryo", text: "かのんの写真の子と、TalkUp で見つけた人は、同じに見える。" },
       {
         speakerId: "ryo",
-        text: "かのんって人の写真、この子と写ってるのは…彼女かな。確信は持てない。",
-      },
-      {
-        speakerId: "ryo",
-        text: "写真の子は、たしかに同じ人に見える。名前で探せば、何か分かるかもしれない。",
+        text: "プロフィールの出身は神奈川県。……この人だ。間違いない。",
       },
     ],
-    choices: [
-      {
-        id: "search-name",
-        label: "本名で TalkUp を検索する",
-        setsFlags: ["facebook_search"],
-        // ここで物語は終わる（住所は作らない）
-        ending: ENDING_ADDRESS_CONFIRMED,
-      },
-    ],
+    // 選択肢なしで完了する場面。終了はこの場面の完了時に出す
+    choices: [],
+    ending: ENDING_ADDRESS_CONFIRMED,
     completesFlags: [],
   },
 ];

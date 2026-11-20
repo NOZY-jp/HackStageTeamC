@@ -68,6 +68,8 @@ export type SceneChoice = {
   requires?: FlagId[];
   /** この選択肢で物語が終わるときの結末文（確認画面に最終状態として出す） */
   ending?: string;
+  /** 選んだ直後に続く台詞（話者が反応する1〜2行） */
+  replyLines?: SceneLine[];
 };
 
 /** 場面。要求フラグがそろい、まだ終わっていなければ始まる。 */
@@ -80,6 +82,8 @@ export type Scene = {
   choices: SceneChoice[];
   /** 場面が終わったら立つフラグ */
   completesFlags: FlagId[];
+  /** この場面で物語が終わるときの結末文（選択肢なしで完了する場面用） */
+  ending?: string;
 };
 
 /** 進行状態。localStorage に保存する。 */
@@ -97,4 +101,6 @@ export type TranscriptEntry = {
   title: string;
   lines: SceneLine[];
   choice?: { id: string; label: string };
+  /** 選んだ直後に続く台詞 */
+  replyLines?: SceneLine[];
 };

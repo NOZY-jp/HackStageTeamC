@@ -26,6 +26,11 @@ export const flags: StoryFlag[] = [
     description: "受賞作の写真が、昔のブログの写真と同じだと分かった。",
   },
   {
+    id: "bff_photos_seen",
+    label: "かのんの写真を見た",
+    description: "BFF のアカウントの写真に、彼女らしい人が写っていた（まだ確信は持てない）。",
+  },
+  {
     id: "denchan_found",
     label: "「でんちゃん」を見つけた",
     description: "旧ブログのコメント欄に、祖母が一度だけ書いた呼び名が残っていた。",

@@ -88,6 +88,7 @@ export function replayTranscript(
         title: scene.title,
         lines: scene.lines,
         ...(choice ? { choice: { id: choice.id, label: choice.label } } : {}),
+        ...(choice?.replyLines ? { replyLines: choice.replyLines } : {}),
       };
     });
 }

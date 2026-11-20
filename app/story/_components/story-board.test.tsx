@@ -54,10 +54,11 @@ describe("シナリオ確認画面（#81）", () => {
     await user.click(screen.getByRole("button", { name: "マイリストを開く" }));
     await user.click(screen.getByRole("button", { name: "見に行く" }));
     await user.click(screen.getByRole("button", { name: "コンテスト結果を見る" }));
-    await user.click(screen.getByRole("button", { name: "旧ブログのコメント欄を読む" }));
-    await user.click(screen.getByRole("button", { name: "写真のページを見に行く" }));
-    await user.click(screen.getByRole("button", { name: "カイに相談する" }));
+    await user.click(screen.getByRole("button", { name: "かのんの写真を見に行く" }));
+    // 順序9: カイの助言 → 本名で検索（照合は ch4）
     await user.click(screen.getByRole("button", { name: "本名で TalkUp を検索する" }));
+    // ch4 は選択肢なしで完了する場面
+    await user.click(screen.getByRole("button", { name: "この場面を終える" }));
 
     // 結末が確認画面に読める（フラグの説明に埋もれさせない）
     expect(screen.getByRole("heading", { name: "結末" })).toBeInTheDocument();
@@ -73,6 +74,8 @@ describe("シナリオ確認画面（#81）", () => {
     await screen.findByRole("heading", { name: "シナリオ確認" });
 
     await user.click(screen.getByRole("button", { name: "コンテスト結果を見る" }));
+    // かのんの写真を見ると、カイの助言（ch3）が始まる
+    await user.click(screen.getByRole("button", { name: "かのんの写真を見に行く" }));
     const consult = screen.getByRole("button", { name: "カイに相談する" });
     expect(consult).toBeDisabled();
     expect(screen.getByText("（まだ選べません）")).toBeInTheDocument();
