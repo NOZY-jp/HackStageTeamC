@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { listAllEntries, listBlogs } from "@/lib/blog-like";
+import { listBlogs, listPublicEntries } from "@/lib/blog-like";
 import { listArticles, listCreators } from "@/lib/note-like";
 import { PHOTO_CONTEST_RESULT_PATH } from "@/lib/seo/contest";
 import { SITE_URL } from "@/lib/seo/site";
@@ -32,10 +32,10 @@ describe("SEO 基盤（#77）", () => {
     expect(new Set(urls).size).toBe(urls.length);
   });
 
-  it("ブログのトップと全記事を含む", () => {
+  it("ブログのトップと公開記事を含む（限定公開の記事は含めない・#109）", () => {
     const expected = listBlogs().flatMap((blog) => [
       `${SITE_URL}/pochiblo/${blog.id}`,
-      ...listAllEntries(blog.id).map(
+      ...listPublicEntries(blog.id).map(
         (entry) => `${SITE_URL}/pochiblo/${blog.id}/entry/${entry.id}`,
       ),
     ]);
@@ -72,8 +72,9 @@ describe("SEO 基盤（#77）", () => {
 
   it("件数はデータと一致する", () => {
     const blogCount = listBlogs().length;
+    // ブログは公開記事だけを数える（限定公開は sitemap に載せない・#109）
     const publicEntryCount = listBlogs().reduce(
-      (total, blog) => total + listAllEntries(blog.id).length,
+      (total, blog) => total + listPublicEntries(blog.id).length,
       0,
     );
     const noteCount = 1 + listCreators().length + listArticles().length;
