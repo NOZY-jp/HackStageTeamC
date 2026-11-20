@@ -1,3 +1,4 @@
+import { migrationArticles } from "../../blog-migration/articles";
 import type { Blog, Entry, Mylist } from "../types";
 import { LEAF_CREATOR_ID, LEAF_HOST, OLD_TWIXER_HANDLE } from "./names";
 
@@ -688,6 +689,18 @@ export const entries: Entry[] = [
       { kind: "link", lead: "新しい場所はこちら", url: `${LEAF_HOST}/${LEAF_CREATOR_ID}` },
     ],
   },
+  ...migrationArticles.map(
+    ({ publishedAt, category, title, paragraphs }): Entry => ({
+      id: `migration-${publishedAt.slice(0, 10)}`,
+      blogId: "denden0102",
+      title,
+      category,
+      publishedAt,
+      comments: [],
+      visibility: "unlisted",
+      body: paragraphs.map((text) => ({ kind: "paragraph", text })),
+    }),
+  ),
 ];
 
 /** 全記事を入れたマイリスト（古い Discord アカウントのプロフィールからリンクされる）。古い順。 */

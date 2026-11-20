@@ -1,7 +1,14 @@
+import { LEAF_CREATOR_ID } from "../../blog-migration/articles";
 import type { Creator } from "../types";
 
-/** 書き手。脚本（docs/）が固まるまでの仮データ。 */
+/** 書き手。移行先のアカウントと仮の書き手を含む。 */
 export const creators: Creator[] = [
+  {
+    id: LEAF_CREATOR_ID,
+    displayName: "MaiMai",
+    bio: "モンハンのプレイ日記と攻略メモ。前のブログから記事を移しました。",
+    avatarColor: "#7c9cbf",
+  },
   {
     id: "mai_yoru",
     displayName: "mai",
