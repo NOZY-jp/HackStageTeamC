@@ -1,10 +1,11 @@
-import fs from "node:fs/promises";
 import { describe, expect, it } from "vitest";
 import { listAllEntries, listBlogs, listMylists, listPublicEntries } from "@/lib/blog-like";
 import { PHOTO_CONTEST_RESULT_PATH } from "@/lib/seo/contest";
 import { SITE_URL } from "@/lib/seo/site";
 import { generateMetadata as entryMetadata } from "./(blog-like)/pochiblo/[blogId]/entry/[entryId]/page";
+import { generateMetadata as blogTopMetadata } from "./(blog-like)/pochiblo/[blogId]/page";
 import { generateMetadata as mylistMetadata } from "./(blog-like)/pochiblo/mylist/[mylistId]/page";
+import robots from "./robots";
 import sitemap from "./sitemap";
 
 const urls = sitemap().map((item) => item.url);
@@ -16,6 +17,8 @@ const entryParams = (entryId: string) =>
   >[0];
 const mylistParams = (mylistId: string) =>
   ({ params: Promise.resolve({ mylistId }) }) as Parameters<typeof mylistMetadata>[0];
+const blogParams = (blogId: string) =>
+  ({ params: Promise.resolve({ blogId }) }) as Parameters<typeof blogTopMetadata>[0];
 
 const unlisted = listBlogs().flatMap((blog) =>
   listAllEntries(blog.id).filter((entry) => entry.visibility !== "public"),
@@ -68,8 +71,11 @@ describe("限定公開を検索から外す（#109）", () => {
     const publicEntry = listPublicEntries(target.blogId)[0];
     const indexed = await entryMetadata(entryParams(publicEntry.id));
     expect(indexed.robots).toBeUndefined();
-    // ブログトップは index のまま
     expect(indexed.alternates?.canonical).toContain("/pochiblo/");
+
+    // ブログトップは index のまま（robots を付けない）
+    const top = await blogTopMetadata(blogParams(BLOG_ID));
+    expect(top.robots).toBeUndefined();
   });
 
   it("マイリストは常に noindex / follow", async () => {
@@ -78,8 +84,14 @@ describe("限定公開を検索から外す（#109）", () => {
     expect(meta.robots).toEqual({ index: false, follow: true });
   });
 
-  it("robots.txt には Disallow を書かない（noindex を読ませるため）", async () => {
-    const source = await fs.readFile("app/robots.ts", "utf8");
-    expect(source).not.toContain("disallow");
+  it("robots.txt には Disallow を書かない（noindex を読ませるため）", () => {
+    const result = robots();
+    const rules = Array.isArray(result.rules) ? result.rules : [result.rules];
+    expect(rules.length).toBeGreaterThan(0);
+    for (const rule of rules) {
+      // disallow は未指定（undefined）または空配列のどちらでもよい
+      expect(rule.disallow ?? []).toEqual([]);
+    }
+    expect(result.sitemap).toContain("/sitemap.xml");
   });
 });
