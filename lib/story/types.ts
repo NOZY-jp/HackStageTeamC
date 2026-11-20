@@ -1,10 +1,10 @@
 /**
  * シナリオを進める仕組みの型（試作）。
- * 値は lib/story/data/*.ts に置き、ロジックは lib/story/engine.ts の純関数だけにする。
+ * 値は cast.ts / flags.ts / script.ts に置き、ロジックは lib/story/engine.ts の純関数だけにする。
  */
 
 /** 登場人物のID。台帳（cast.ts）に居るIDだけを使う。 */
-export type CastId = "ryo" | "yui" | "kai" | "kanon";
+export type CastId = "ryo" | "mai" | "kai" | "kanon";
 
 /** 進行フラグのID。定義は flags.ts に置く（台本は文字列で参照する）。 */
 export type FlagId = string;

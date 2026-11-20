@@ -13,7 +13,14 @@ export {
 } from "./engine";
 export { flags, getFlag, triggers } from "./flags";
 export { sceneCount, scenes } from "./script";
-export { clearProgress, isProgress, loadProgress, STORAGE_KEY, saveProgress } from "./storage";
+export {
+  clearProgress,
+  isProgress,
+  loadProgress,
+  PROGRESS_EVENT,
+  STORAGE_KEY,
+  saveProgress,
+} from "./storage";
 export type {
   CastAccount,
   CastId,

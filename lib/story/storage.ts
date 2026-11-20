@@ -7,8 +7,32 @@ export const STORAGE_KEY = "hackstage-story-progress-v1";
 type ReadableStorage = Pick<Storage, "getItem">;
 type WritableStorage = Pick<Storage, "setItem" | "removeItem">;
 
-const browserStorage = (): Storage | undefined =>
-  typeof window === "undefined" ? undefined : window.localStorage;
+/** 進行状態が変わったことを確認画面へ知らせるイベント名。 */
+export const PROGRESS_EVENT = "hackstage-story-progress";
+
+/** localStorage はプライバシー設定などで触れないことがある（SecurityError）。 */
+const browserStorage = (): Storage | undefined => {
+  if (typeof window === "undefined") {
+    return undefined;
+  }
+  try {
+    return window.localStorage;
+  } catch {
+    return undefined;
+  }
+};
+
+/** 保存できたときだけ、同じタブの画面へ知らせる。 */
+function notifyProgress(): void {
+  if (typeof window === "undefined") {
+    return;
+  }
+  try {
+    window.dispatchEvent(new Event(PROGRESS_EVENT));
+  } catch {
+    // イベントが使えない環境では何もしない
+  }
+}
 
 /** 保存値が進行状態の形をしているか（壊れた値は捨てる）。 */
 export function isProgress(value: unknown): value is Progress {
@@ -54,6 +78,7 @@ export function saveProgress(
   }
   try {
     storage.setItem(STORAGE_KEY, JSON.stringify(progress));
+    notifyProgress();
   } catch {
     // 容量不足などで保存できないときは、その回のセッションだけ進める
   }

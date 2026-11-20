@@ -31,17 +31,15 @@ describe("シナリオ確認画面（#81）", () => {
     await user.click(screen.getByRole("button", { name: "マイリストを開く" }));
 
     expect(screen.getByRole("heading", { name: "助言：マイリストの通知" })).toBeInTheDocument();
-    expect(screen.getByText(/マイリスト開いたんだろ/)).toBeInTheDocument();
+    expect(screen.getByText(/マイリスト開いたんだ/)).toBeInTheDocument();
 
     // 選択肢
     await user.click(screen.getByRole("button", { name: "覚えてる。見に行く" }));
 
-    // 次の場面が始まる
-    expect(screen.getByRole("heading", { name: "助言：受賞作の写真" })).toBeInTheDocument();
+    // 1場面終わると 1/4。次は本名が分かった後の「痕跡」なので、まだ場面は出ない
+    expect(screen.getByText(/終わった場面: 1 \/ 4/)).toBeInTheDocument();
     // 履歴に残る（選んだ答えつき）
     expect(screen.getByText("選んだ答え: 覚えてる。見に行く")).toBeInTheDocument();
-    expect(screen.getByText(/終わった場面: 1 \/ 4/)).toBeInTheDocument();
-
     // localStorage に保存されている
     await waitFor(() => {
       expect(window.localStorage.getItem(STORAGE_KEY)).toContain("ch1-mylist");

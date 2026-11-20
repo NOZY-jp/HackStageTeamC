@@ -2,50 +2,51 @@ import type { CastMember } from "./types";
 
 /**
  * 人物の台帳（試作）。表示名はここだけを正とする。
- * 本名は置かない（作中でも本文には出さない）。
+ * 本名は置かない（本名は順序8で初めて分かる答え）。作中テキストにも出さない。
  */
 export const cast: CastMember[] = [
   {
     id: "ryo",
     displayName: "リョウ",
     pronoun: "僕",
-    role: "プレイヤー。昔のブログの書き手",
-    accounts: [
-      { platform: "pochiblo", handle: "denden0102" },
-      { platform: "discord", handle: "kohakunchos0117" },
-    ],
-    oldNames: [{ name: "でんちゃん", knownBy: ["kanon"] }],
+    role: "プレイヤー。彼女とゲームで知り合った",
+    accounts: [{ platform: "discord", handle: "kohakunchos0117" }],
+    oldNames: [],
   },
   {
-    id: "yui",
-    displayName: "ゆい",
-    pronoun: "私",
-    role: "写真コンテストで受賞した同級生",
+    id: "mai",
+    displayName: "MaiMai",
+    pronoun: "わたし",
+    role: "ゲームで出会った恋人（2025年）",
     accounts: [
+      { platform: "twixer", handle: "mai2mai2" },
+      { platform: "twixer", handle: "hunter_denden0102" },
+      { platform: "discord", handle: "maimaimaimai" },
+      { platform: "discord", handle: "hunter_denden3243" },
       { platform: "leaf", handle: "mai_yoru" },
-      { platform: "twixer", handle: "yui_photo" },
     ],
-    oldNames: [],
+    oldNames: [{ name: "でんちゃん", knownBy: ["kanon"] }],
   },
   {
     id: "kai",
     displayName: "カイ",
     pronoun: "俺",
-    role: "Discord で連絡してくる調査役",
+    role: "調査を手伝ってくれる知り合い",
     accounts: [
-      { platform: "discord", handle: "kai_lab" },
-      { platform: "twixer", handle: "kai_dev" },
+      { platform: "discord", handle: "imperial_chi" },
+      { platform: "twixer", handle: "kaiser018023071" },
     ],
     oldNames: [],
   },
   {
     id: "kanon",
     displayName: "かのん",
-    pronoun: "あたし",
-    role: "昔の呼び方を知っている幼なじみ",
+    pronoun: "私",
+    role: "彼女の中高の大親友",
     accounts: [
+      { platform: "twixer", handle: "kanon__dayo" },
+      // Discord は正本に値が無いため仮値（分かり次第差し替える）
       { platform: "discord", handle: "kanon_23" },
-      { platform: "pochiblo", handle: "kanon_days" },
     ],
     oldNames: [],
   },

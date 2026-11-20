@@ -10,6 +10,7 @@ import {
   completeScene,
   flags,
   loadProgress,
+  PROGRESS_EVENT,
   type Progress,
   replayTranscript,
   saveProgress,
@@ -17,6 +18,7 @@ import {
   scenes,
   triggers,
 } from "@/lib/story";
+import { StoryTrigger } from "./story-trigger";
 
 /**
  * シナリオの確認画面（開発・シナリオ確認用）。
@@ -25,9 +27,17 @@ import {
 export function StoryBoard() {
   // SSR では localStorage を読めないので、マウント後に読み込む
   const [progress, setProgress] = useState<Progress | null>(null);
+  const [triggerMounted, setTriggerMounted] = useState(false);
 
   useEffect(() => {
     setProgress(loadProgress());
+  }, []);
+
+  // きっかけ部品（StoryTrigger）が別の場所でフラグを立てたら読み直す
+  useEffect(() => {
+    const reload = () => setProgress(loadProgress());
+    window.addEventListener(PROGRESS_EVENT, reload);
+    return () => window.removeEventListener(PROGRESS_EVENT, reload);
   }, []);
 
   if (!progress) {
@@ -174,6 +184,31 @@ export function StoryBoard() {
               ) : null}
             </article>
           ))
+        )}
+      </section>
+
+      <section aria-labelledby="story-part" className="flex flex-col gap-2">
+        <h2 id="story-part" className="text-base font-semibold">
+          きっかけ部品（各画面に置くもの）
+        </h2>
+        <p className="text-sm text-fg-muted">
+          画面に <code>&lt;StoryTrigger triggerId="..." /&gt;</code>{" "}
+          を置くと、開いたときにフラグが立ちます。
+        </p>
+        {triggerMounted ? (
+          <StoryTrigger triggerId="open-mylist">
+            <p className="text-xs text-fg-muted">部品を置きました（open-mylist を発火）</p>
+          </StoryTrigger>
+        ) : (
+          <div>
+            <button
+              type="button"
+              className="rounded border border-white/20 px-3 py-1 text-sm"
+              onClick={() => setTriggerMounted(true)}
+            >
+              部品を置いてみる（open-mylist）
+            </button>
+          </div>
         )}
       </section>
 

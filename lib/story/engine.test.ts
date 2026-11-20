@@ -47,9 +47,12 @@ describe("進行ロジック（#81）", () => {
 
     expect(progress.completedScenes).toEqual(["ch1-mylist"]);
     expect(progress.choices["ch1-mylist"]).toBe("remember");
-    expect(progress.flags).toContain("kai_contacted");
     expect(progress.flags).toContain("photo_hint");
-    expect(nextScene(progress)?.id).toBe("ch1-photo");
+    // カイの連絡は本名が分かった後（コンテスト名で本名を知る前には始まらない）
+    expect(nextScene(progress)).toBeUndefined();
+
+    progress = applyTrigger(progress, trigger("read-contest-result"));
+    expect(nextScene(progress)?.id).toBe("ch2-contest");
   });
 
   it("始められない場面・無い選択肢・選択肢の未指定は例外", () => {
@@ -67,10 +70,11 @@ describe("進行ロジック（#81）", () => {
   it("履歴は終わった場面だけを台本の順に、選んだ選択肢つきで組み立てる", () => {
     let progress = applyTrigger(emptyProgress(), trigger("open-mylist"));
     progress = completeScene(progress, scene("ch1-mylist"), "later");
-    progress = completeScene(progress, scene("ch1-photo"), "go");
+    progress = applyTrigger(progress, trigger("read-contest-result"));
+    progress = completeScene(progress, scene("ch2-contest"), "keep");
 
     const transcript = replayTranscript(progress);
-    expect(transcript.map((entry) => entry.sceneId)).toEqual(["ch1-mylist", "ch1-photo"]);
+    expect(transcript.map((entry) => entry.sceneId)).toEqual(["ch1-mylist", "ch2-contest"]);
     expect(transcript[0].choice).toEqual({ id: "later", label: "あとで見る" });
     expect(transcript[0].lines.length).toBeGreaterThan(0);
   });
