@@ -1,5 +1,5 @@
 import type { CSSProperties, ReactNode } from "react";
-import { CURRENT_ID, GAME_OLD_DISPLAY_NAME, GAME_OLD_ID, KANON_DISCORD_HANDLE } from "../scenes";
+import { CURRENT_ID, GAME_OLD_DISPLAY_NAME, GAME_OLD_ID } from "../scenes";
 
 /**
  * 撮影用のモック画面（#103）。文字はすべて HTML テキストで描く。
@@ -227,7 +227,7 @@ function FriendRow({ name, handle, color }: { name: string; handle: string; colo
   );
 }
 
-/** 2026年・Discord のフレンド一覧（800×600）。MaiMai 本人視点（左下が自分 maimaimaimai、フレンドに 琥珀・かのん）。 */
+/** 2026年・Discord のフレンド一覧（800×600）。MaiMai 本人視点（左下が自分 maimaimaimai、フレンドはゲーム仲間と琥珀）。 */
 export function DiscordFriendsScene() {
   return (
     <div id="screen" style={frame(800, 600, "#1e1f22")}>
@@ -329,12 +329,13 @@ export function DiscordFriendsScene() {
             }}
           >
             フレンド
-            <span style={{ marginLeft: 10, fontSize: 11, color: "#b5bac1" }}>オンライン — 2</span>
+            <span style={{ marginLeft: 10, fontSize: 11, color: "#b5bac1" }}>オンライン — 3</span>
           </div>
           <div style={{ padding: 12 }}>
             <div style={{ fontSize: 11, color: "#b5bac1", padding: "0 10px 4px" }}>オンライン</div>
             <FriendRow name="琥珀" handle="kohakunchos0117" color="#4f6f8a" />
-            <FriendRow name="かのん" handle={KANON_DISCORD_HANDLE} color="#c2563f" />
+            <FriendRow name="ガンランス太郎" handle="gunlance_taro" color="#57f287" />
+            <FriendRow name="弓はるか" handle="bow_haruka" color="#9b59b6" />
           </div>
         </div>
       </div>

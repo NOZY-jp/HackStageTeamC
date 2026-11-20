@@ -10,8 +10,6 @@ export const GAME_OLD_ID = "hunter_denden3243";
 export const GAME_OLD_DISPLAY_NAME = "hunter_denden";
 /** 現在の Discord のハンドル（2026年のフレンド一覧に写る）。 */
 export const CURRENT_ID = "maimaimaimai";
-/** かのんの Discord 表記（Twixer の `kanon__dayo` とは別物）。 */
-export const KANON_DISCORD_HANDLE = "kanon_dayo";
 
 export type ScreenScene = {
   id: "game2018" | "discord2026" | "lobby2019";

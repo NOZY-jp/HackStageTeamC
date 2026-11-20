@@ -3,14 +3,7 @@ import { render } from "@testing-library/react";
 import { describe, expect, it } from "vitest";
 import { MAIMAI_HANDLE, OLD_DISPLAY_NAME, OLD_HANDLE } from "@/lib/discord-like/data/names";
 import { DiscordFriendsScene, GameScene, LobbyScene } from "./_components/scenes";
-import {
-  CURRENT_ID,
-  GAME_OLD_DISPLAY_NAME,
-  GAME_OLD_ID,
-  KANON_DISCORD_HANDLE,
-  SCENE_IDS,
-  SCREEN_SCENES,
-} from "./scenes";
+import { CURRENT_ID, GAME_OLD_DISPLAY_NAME, GAME_OLD_ID, SCENE_IDS, SCREEN_SCENES } from "./scenes";
 
 /** PNG の IHDR から幅・高さを読む（画像の実寸を確認する）。 */
 async function pngSize(path: string): Promise<{ width: number; height: number; bytes: number }> {
@@ -33,7 +26,6 @@ describe("順序4の撮影用モック画面（#103）", () => {
     expect(GAME_OLD_ID).not.toBe(OLD_DISPLAY_NAME);
     expect(CURRENT_ID).toBe("maimaimaimai");
     expect(CURRENT_ID).toBe(MAIMAI_HANDLE);
-    expect(KANON_DISCORD_HANDLE).toBe("kanon_dayo");
   });
 
   it("各画面の HTML テキストに、その画面のIDがそのまま出る", () => {
@@ -57,21 +49,22 @@ describe("順序4の撮影用モック画面（#103）", () => {
     expect(lobby.container.textContent).not.toContain("旧:");
   });
 
-  it("2026年のスクショは MaiMai 本人視点（左下が自分・フレンドは琥珀とかのん）", () => {
+  it("2026年のスクショは MaiMai 本人視点（左下が自分・フレンドはゲーム仲間と琥珀）", () => {
     const { container } = render(<DiscordFriendsScene />);
     const text = container.textContent ?? "";
     // 自分（左下のユーザーパネル）が「まいまい」で、IDが現在のハンドル
     expect(text).toContain("まいまい");
     expect(text).toContain(CURRENT_ID);
-    // フレンド一覧は 琥珀・かのん（Discord 表記は kanon_dayo）
+    // フレンド一覧は 琥珀 とゲーム仲間（2026年に かのん は出さない）
     expect(text).toContain("琥珀");
-    expect(text).toContain("かのん");
-    expect(text).toContain(KANON_DISCORD_HANDLE);
-    expect(text).not.toContain("kanon__dayo");
+    expect(text).toContain("kohakunchos0117");
+    expect(text).toContain("gunlance_taro");
+    expect(text).toContain("bow_haruka");
+    // BFF の存在は順序8で分かる情報なので、順序4の画面に名前を出さない
+    expect(text.toLowerCase()).not.toContain("kanon");
+    expect(text).not.toContain("かのん");
     // 「（旧: …）」のような未来視点の注記は書かない
     expect(text).not.toContain("旧:");
-    // フレンド一覧の行（ハンドル表示）は 琥珀 と かのん の2件
-    expect(text.match(/kohakunchos0117/g)).toHaveLength(1);
   });
 
   it("Twixer の旧ハンドル（別物）は撮影画面に出さない", async () => {
