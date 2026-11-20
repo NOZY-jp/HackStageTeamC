@@ -49,4 +49,4 @@
 ## 7. 残る作業（PM 側）
 
 - 動作確認用のスクショを `docs/screenshots/` に置くかは人が決める（現在 `docs/screenshots` あり）
-- 会話データ側で `VoiceSession` を入れる Issue（`06-issues-plan.md` の I5）と**同じPRに混ぜない**
+- 会話データ側で `VoiceSession` を入れる Issue（**#129**）と**同じPRに混ぜない**
