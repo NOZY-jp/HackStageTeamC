@@ -4,6 +4,7 @@
  */
 import { describe, expect, it } from "vitest";
 import { buildMhcHistory } from "./data/messages/mhc-history";
+import { FRIEND_MEMBERS, looksPadded, UNIV_MEMBERS } from "./generators/servers";
 import { listChannels, listDMMessages, listDMThreads, listGuilds, listMessages } from "./index";
 import { QUALITY_LIMITS as Q } from "./test-thresholds";
 import type { Message } from "./types";
@@ -134,6 +135,37 @@ describe("データ品質（#131 / D9・D10）", () => {
       expect(seen.has(message.sentAt), `${message.id} ${message.sentAt}`).toBe(false);
       seen.add(message.sentAt);
     }
+  });
+
+  it("#144: 数字・記号で一意に見せた水増し文が無い", () => {
+    for (const message of messages) {
+      expect(looksPadded(message.body), `${message.id}: ${message.body}`).toBe(false);
+    }
+  });
+
+  it("#144: friend は現実の友達だけで、MaiMai・かのんが発言しない", () => {
+    const friend = listGuilds().find((guild) => guild.id === "friend");
+    expect(friend).toBeDefined();
+    const speakers = new Set<string>();
+    for (const channel of listChannels("friend")) {
+      for (const message of listMessages({ channelId: channel.id, limit: 5000 }).messages) {
+        expect(FRIEND_MEMBERS, message.id).toContain(message.authorId);
+        speakers.add(message.authorId);
+      }
+    }
+    expect(speakers.has("maimai")).toBe(false);
+    expect(speakers.has("kanon")).toBe(false);
+  });
+
+  it("#144: univ は hal＋同級生18＋先輩6＋後輩9 の34人が発言する", () => {
+    const speakers = new Set<string>();
+    for (const channel of listChannels("univ")) {
+      for (const message of listMessages({ channelId: channel.id, limit: 5000 }).messages) {
+        expect(UNIV_MEMBERS, message.id).toContain(message.authorId);
+        if (message.system !== true) speakers.add(message.authorId);
+      }
+    }
+    expect(speakers.size).toBe(34);
   });
 
   it("voice チャンネルには入室/退出のシステムメッセージしか無い（#129 で VoiceSession を追加）", () => {
