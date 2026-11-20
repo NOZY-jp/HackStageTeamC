@@ -1,6 +1,6 @@
 import type { Guild } from "../../types";
 
-/** モンハンコミュニティ（唯一のサーバー）。テキスト5・ボイス3。 */
+/** モンハンコミュニティ（唯一のサーバー）。テキスト8・ボイス4（#131 で拡張）。 */
 export const mhc: Guild = {
   id: "mhc",
   urlId: "1187002356428840961",
@@ -74,6 +74,36 @@ export const mhc: Guild = {
       unreadCount: 1,
     },
     {
+      id: "mhc-gear",
+      urlId: "1187002356428840967",
+      guildId: "mhc",
+      name: "装備相談",
+      kind: "text",
+      topic: "構成・スキル・護石の相談",
+      categoryId: "mhc-cat-text",
+      position: 6,
+    },
+    {
+      id: "mhc-intro",
+      urlId: "1187002356428840968",
+      guildId: "mhc",
+      name: "自己紹介",
+      kind: "text",
+      topic: "はじめましてはここに",
+      categoryId: "mhc-cat-text",
+      position: 7,
+    },
+    {
+      id: "mhc-ochiba",
+      urlId: "1187002356428840969",
+      guildId: "mhc",
+      name: "落ち葉",
+      kind: "text",
+      topic: "雑談の続き置き場",
+      categoryId: "mhc-cat-text",
+      position: 8,
+    },
+    {
       id: "mhc-vc-1",
       urlId: "1187002356428840971",
       guildId: "mhc",
@@ -99,6 +129,15 @@ export const mhc: Guild = {
       kind: "voice",
       categoryId: "mhc-cat-voice",
       position: 8,
+    },
+    {
+      id: "mhc-vc-4",
+      urlId: "1187002356428840974",
+      guildId: "mhc",
+      name: "作業通話",
+      kind: "voice",
+      categoryId: "mhc-cat-voice",
+      position: 9,
     },
   ],
 };

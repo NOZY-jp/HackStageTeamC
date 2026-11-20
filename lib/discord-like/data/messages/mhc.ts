@@ -1,7 +1,8 @@
 import type { Message } from "../../types";
+import { mhcHistory } from "./mhc-history";
 
 /** モンハンコミュニティ のテキストチャンネルごとのメッセージ。キーはチャンネルID。 */
-export const messagesByChannelMhc: Record<string, Message[]> = {
+const existingMessagesByChannelMhc: Record<string, Message[]> = {
   "mhc-lfg": [
     {
       id: "mhc-lfg-0001",
@@ -5588,3 +5589,18 @@ export const messagesByChannelMhc: Record<string, Message[]> = {
     },
   ],
 };
+
+/** 既存の5ch＋#131 の追加履歴（8ch・800通）をチャンネルごとにまとめたもの（時刻順）。 */
+const merged = new Map<string, Message[]>();
+for (const source of [existingMessagesByChannelMhc, mhcHistory]) {
+  for (const [channelId, messages] of Object.entries(source)) {
+    merged.set(channelId, [...(merged.get(channelId) ?? []), ...messages]);
+  }
+}
+
+export const messagesByChannelMhc: Record<string, Message[]> = Object.fromEntries(
+  [...merged.entries()].map(([channelId, messages]) => [
+    channelId,
+    [...messages].sort((a, b) => a.sentAt.localeCompare(b.sentAt)),
+  ]),
+);

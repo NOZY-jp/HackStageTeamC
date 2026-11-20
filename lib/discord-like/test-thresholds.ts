@@ -11,22 +11,22 @@ export const NATURALNESS_LIMITS = {
   /** 既読スルー（質問のあとに返事が無いまま次の話題へ）の件数（以上） */
   readThrough: 4,
   /** 連投（5分以内の同じ人の続き）の回数（以上） */
-  consecutivePosts: 20,
+  consecutivePosts: 23,
   /** 誤字・言い直しの件数（以上） */
-  typoOrRetraction: 0, // 現状0件（#131〜#133 で追加してから 8 に上げる）
+  typoOrRetraction: 6, // 目標 8（#132/#133 で会話を増やしてから上げる）
   /** スタンプのみのメッセージ（以上） */
-  stampsOnly: 0, // 現状0件（同上）
+  stampsOnly: 7, // 目標 10（同上）
   /** 画像・リンクのみのメッセージ（以上） */
-  mediaOnly: 0, // 現状0件（同上）
+  mediaOnly: 18, // 目標 6 は達成済み
   /** 話題の中断・転換（「あ、」「そういえば」などで始まる）（以上） */
-  topicBreaks: 0, // 現状0件（同上）
+  topicBreaks: 102, // 目標 5 は達成済み
   /** 返信間隔が1分未満の割合（以下） */
   replyWithinMinuteRatioMax: 0.4,
   /** 返信間隔の中央値（分・この範囲） */
   // 目標は 2〜30分。現状はデータが疎で中央値が大きい（959分）ので、上限はそこに合わせてある
-  replyMedianMinutes: { min: 2, max: 959 },
+  replyMedianMinutes: { min: 2, max: 256 },
   /** 同じ発言件数の日が連続してよい日数（-1。3日以上続かない） */
-  maxSameDailyCountStreak: 8, // 目標は 2（3日以上続けない）。現状は 8 なのでそこを下限に置く
+  maxSameDailyCountStreak: 6, // 目標 2。データが疎なあいだは実測値
   /** カイとの DM の月あたり発言数（以下） */
   dmKaiMonthlyMax: 6,
   /** MaiMai との DM でやり取りする週の日数（以下） */
@@ -44,7 +44,7 @@ export const VOLUME_LIMITS = {
   /** DM の総メッセージ数（範囲） */
   dmMessages: { min: 436, max: 2000 }, // 目標 1,400〜1,650
   /** サーバーの総メッセージ数（3サーバー合算・範囲） */
-  serverMessages: { min: 770, max: 2000 }, // 目標 2,500〜2,900
+  serverMessages: { min: 1570, max: 2900 }, // #131 で 1,570。目標 2,500〜2,900
   /**
    * 月次の dm:server 比（±25%）。
    * 目標は 2025-11〜2026-02=1:1.2 / 2026-03〜06=1:1.5 / 2026-07〜08=1:1.8 / 2026-09〜11=1:1.3。
@@ -53,10 +53,10 @@ export const VOLUME_LIMITS = {
   monthlyRatio: {
     tolerance: 0.25,
     groups: [
-      { from: "2025-11", to: "2026-02", expected: 0.093 },
-      { from: "2026-03", to: "2026-06", expected: 0.38 },
-      { from: "2026-07", to: "2026-08", expected: 1.01 },
-      { from: "2026-09", to: "2026-11", expected: 2.53 },
+      { from: "2025-11", to: "2026-02", expected: 0.033 },
+      { from: "2026-03", to: "2026-06", expected: 0.121 },
+      { from: "2026-07", to: "2026-08", expected: 0.3 },
+      { from: "2026-09", to: "2026-11", expected: 0.838 },
     ],
   },
   /** 付き合った後の週のやり取り日数（以上）と、空いてよい連続日数（以下） */

@@ -14,9 +14,9 @@ const run = (query: string, order?: "new" | "old") => {
 };
 
 describe("インデックス", () => {
-  it("#68 の全メッセージ（サーバー770・DM436）を対象にする", () => {
-    // カイとの進捗やり取り（5件）を公開チャンネルから DM へ移した（#121）
-    expect(index.documents.filter((doc) => doc.mode === "channel")).toHaveLength(770);
+  it("#68 の全メッセージ（サーバー1,570・DM436）を対象にする", () => {
+    // #131 で mhc に 800通（8ch）を追加した
+    expect(index.documents.filter((doc) => doc.mode === "channel")).toHaveLength(1570);
     expect(index.documents.filter((doc) => doc.mode === "dm")).toHaveLength(436);
   });
 });
@@ -64,7 +64,8 @@ describe("フィルタの組み合わせ", () => {
   it("has: は添付・リンクの種類で絞る", () => {
     const images = run("has:image");
     expect(images.total).toBeGreaterThan(0);
-    expect(images.hits.every((hit) => hit.body !== "")).toBe(true);
+    // 画像だけの投稿（本文なし）もある（#131）
+    expect(images.hits.some((hit) => hit.body === "")).toBe(true);
 
     const links = run("has:link");
     expect(links.total).toBeGreaterThan(0);
