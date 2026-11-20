@@ -1,5 +1,12 @@
 import { describe, expect, it } from "vitest";
 import { cast } from "./cast";
+import {
+  applyTrigger,
+  availableScenes,
+  completeScene,
+  emptyProgress,
+  isChoiceAvailable,
+} from "./engine";
 import { flags, triggers } from "./flags";
 import { ENDING_ADDRESS_CONFIRMED, scenes } from "./script";
 import type { Progress } from "./types";
@@ -96,6 +103,58 @@ describe("台本の整合性（#81）", () => {
     expect(consult?.requires).toEqual(["denchan_found"]);
     expect(consult?.replyLines?.[0].speakerId).toBe("kai");
     expect(consult?.replyLines?.[0].text).toContain("でんちゃん");
+  });
+
+  it("どの選択肢を選んでも最後まで到達できる（デッドエンド0件）", () => {
+    type Pick = { sceneId: string; choiceId: string };
+    const runToEnd = (force?: Pick): Progress => {
+      let progress = emptyProgress();
+      for (const trigger of triggers) {
+        progress = applyTrigger(progress, trigger);
+      }
+      const tried = new Map<string, Set<string>>();
+      for (let guard = 0; guard < 40; guard += 1) {
+        const scene = availableScenes(progress)[0];
+        if (!scene) break;
+        if (scene.choices.length === 0) {
+          progress = completeScene(progress, scene);
+          continue;
+        }
+        const used = tried.get(scene.id) ?? new Set<string>();
+        // 寄り道で同じ場面に残るので、強制する選択肢は1回だけ使う
+        const forced =
+          force?.sceneId === scene.id && !used.has(force.choiceId)
+            ? scene.choices.find((choice) => choice.id === force.choiceId)
+            : undefined;
+        const choice =
+          (forced && isChoiceAvailable(progress, forced) ? forced : undefined) ??
+          scene.choices.find(
+            (candidate) => !used.has(candidate.id) && isChoiceAvailable(progress, candidate),
+          );
+        if (!choice) break;
+        used.add(choice.id);
+        tried.set(scene.id, used);
+        progress = completeScene(progress, scene, choice.id);
+      }
+      return progress;
+    };
+
+    // すべての場面・すべての選択肢を1つずつ選ぶ経路で、ch4 完了（結末）まで届く
+    for (const scene of scenes) {
+      for (const choice of scene.choices) {
+        const progress = runToEnd({ sceneId: scene.id, choiceId: choice.id });
+        expect(progress.completedScenes, `${scene.id}/${choice.id}`).toContain("ch4-kanon");
+        expect(progress.flags, `${scene.id}/${choice.id}`).toContain("facebook_search");
+        expect(progress.completedScenes).toHaveLength(scenes.length);
+      }
+    }
+  });
+
+  it("ch2 のどちらの選択肢でもかのんの写真を見たことになり、ch3 に進める", () => {
+    const ch2 = scenes.find((scene) => scene.id === "ch2-contest");
+    for (const choice of ch2?.choices ?? []) {
+      expect(choice.setsFlags, choice.id).toContain("bff_photos_seen");
+    }
   });
 
   it("台本とフラグ定義のIDが一致する（未定義のフラグを使わない）", () => {

@@ -70,6 +70,11 @@ export type SceneChoice = {
   ending?: string;
   /** 選んだ直後に続く台詞（話者が反応する1〜2行） */
   replyLines?: SceneLine[];
+  /**
+   * この選択肢で場面を完了するか（既定 true）。
+   * false は「寄り道」で、選んでも場面は終わらず、ほかの選択肢を選び直せる。
+   */
+  completesScene?: boolean;
 };
 
 /** 場面。要求フラグがそろい、まだ終わっていなければ始まる。 */

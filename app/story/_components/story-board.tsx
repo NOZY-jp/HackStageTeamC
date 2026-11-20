@@ -162,6 +162,26 @@ export function StoryBoard() {
                   </li>
                 ))}
               </ol>
+              {(() => {
+                // 寄り道の選択肢を選んだ直後は、その場面に残ったまま反応を出す
+                const picked = scene.choices.find(
+                  (choice) => choice.id === progress.choices[scene.id],
+                );
+                if (!picked?.replyLines?.length) {
+                  return null;
+                }
+                return (
+                  <ol className="mb-2 flex flex-col gap-1" aria-label="いまの反応">
+                    {picked.replyLines.map((line, index) => (
+                      // biome-ignore lint/suspicious/noArrayIndexKey: 台本は固定で並び替えない
+                      <li key={`now-${index}`} className="text-sm">
+                        <span className="font-semibold">{castName(line.speakerId)}</span>
+                        <span className="text-fg-muted">「{line.text}」</span>
+                      </li>
+                    ))}
+                  </ol>
+                );
+              })()}
               {scene.choices.length === 0 ? (
                 <button
                   type="button"

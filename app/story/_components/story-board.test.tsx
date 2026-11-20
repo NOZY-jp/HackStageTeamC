@@ -84,6 +84,27 @@ describe("シナリオ確認画面（#81）", () => {
     expect(screen.getByRole("button", { name: "カイに相談する" })).toBeEnabled();
   });
 
+  it("「カイに相談する」は寄り道で、場面に残ったまま検索を選べる（行き止まりにしない）", async () => {
+    const user = userEvent.setup();
+    render(<StoryBoard />);
+    await screen.findByRole("heading", { name: "シナリオ確認" });
+
+    await user.click(screen.getByRole("button", { name: "マイリストを開く" }));
+    await user.click(screen.getByRole("button", { name: "見に行く" }));
+    await user.click(screen.getByRole("button", { name: "コンテスト結果を見る" }));
+    await user.click(screen.getByRole("button", { name: "自分で調べる" }));
+    await user.click(screen.getByRole("button", { name: "旧ブログのコメント欄を読む" }));
+
+    // 寄り道: 場面は終わらず、カイの反応がその場で出る
+    await user.click(screen.getByRole("button", { name: "カイに相談する" }));
+    expect(screen.getByLabelText("いまの反応")).toHaveTextContent("でんちゃん");
+    expect(screen.getByRole("button", { name: "本名で TalkUp を検索する" })).toBeInTheDocument();
+
+    // そのまま検索を選べば ch4（照合）へ進める
+    await user.click(screen.getByRole("button", { name: "本名で TalkUp を検索する" }));
+    expect(screen.getByRole("button", { name: "この場面を終える" })).toBeInTheDocument();
+  });
+
   it("台帳の表示は1か所の型から引き、アカウント行の key が重複しない", async () => {
     const errorSpy = vi.spyOn(console, "error").mockImplementation(() => {});
     const { container } = render(<StoryBoard />);

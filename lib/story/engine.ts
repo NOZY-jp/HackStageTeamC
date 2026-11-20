@@ -62,6 +62,15 @@ export function completeScene(progress: Progress, scene: Scene, choiceId?: strin
     throw new Error(`場面 ${scene.id} は選択肢が必要です`);
   }
 
+  // 寄り道の選択肢（completesScene: false）は、フラグと選んだ内容だけ残して場面を続ける
+  if (choice && choice.completesScene === false) {
+    return {
+      flags: withFlags(progress.flags, choice.setsFlags),
+      completedScenes: progress.completedScenes,
+      choices: { ...progress.choices, [scene.id]: choice.id },
+    };
+  }
+
   return {
     flags: withFlags(progress.flags, [...scene.completesFlags, ...(choice?.setsFlags ?? [])]),
     completedScenes: [...progress.completedScenes, scene.id],

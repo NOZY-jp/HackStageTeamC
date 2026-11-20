@@ -92,6 +92,25 @@ describe("進行ロジック（#81）", () => {
     expect(after.flags).toContain("denchan_confirmed");
   });
 
+  it("寄り道の選択肢（completesScene: false）は場面を終わらせず、ほかの選択肢を選び直せる", () => {
+    let progress = applyTrigger(emptyProgress(), trigger("read-contest-result"));
+    progress = applyTrigger(progress, trigger("find-denchan"));
+    progress = completeScene(progress, scene("ch2-contest"), "see-photo");
+    const before = progress.completedScenes.length;
+
+    progress = completeScene(progress, scene("ch3-kai"), "ask-kai");
+    expect(progress.flags).toContain("denchan_confirmed");
+    expect(progress.completedScenes).toHaveLength(before);
+    // 同じ場面がまだ始められる＝検索の選択肢を選べる
+    expect(availableScenes(progress).map((s) => s.id)).toContain("ch3-kai");
+    expect(progress.choices["ch3-kai"]).toBe("ask-kai");
+
+    progress = completeScene(progress, scene("ch3-kai"), "search-name");
+    expect(progress.completedScenes).toContain("ch3-kai");
+    expect(progress.flags).toContain("facebook_search");
+    expect(availableScenes(progress).map((s) => s.id)).toContain("ch4-kanon");
+  });
+
   it("履歴は終わった場面だけを台本の順に、選んだ選択肢つきで組み立てる", () => {
     let progress = applyTrigger(emptyProgress(), trigger("open-mylist"));
     progress = completeScene(progress, scene("ch1-mylist"), "later");

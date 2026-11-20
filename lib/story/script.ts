@@ -46,7 +46,8 @@ export const scenes: Scene[] = [
     ],
     choices: [
       { id: "see-photo", label: "かのんの写真を見に行く", setsFlags: ["bff_photos_seen"] },
-      { id: "keep", label: "自分で調べる", setsFlags: [] },
+      // どちらの選択肢でも「写真を見た」ことになり、ch3 へ進める（行き止まりを作らない）
+      { id: "keep", label: "自分で調べる", setsFlags: ["bff_photos_seen"] },
     ],
     completesFlags: [],
   },
@@ -70,6 +71,8 @@ export const scenes: Scene[] = [
         label: "カイに相談する",
         setsFlags: ["denchan_confirmed"],
         requires: ["denchan_found"],
+        // 寄り道: 場面は終わらず、この後「本名で TalkUp を検索する」を選べる
+        completesScene: false,
         replyLines: [
           {
             speakerId: "kai",
