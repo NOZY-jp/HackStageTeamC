@@ -5,6 +5,7 @@
 import { describe, expect, it } from "vitest";
 import { buildMhcHistory } from "./data/messages/mhc-history";
 import { ACQUAINTANCE_NOTES } from "./data/people/acquaintance-notes";
+import { generateDmExpansion } from "./generators/dm-expansion";
 import { FRIEND_MEMBERS, looksPadded, UNIV_MEMBERS } from "./generators/servers";
 import { listChannels, listDMMessages, listDMThreads, listGuilds, listMessages } from "./index";
 import { QUALITY_LIMITS as Q } from "./test-thresholds";
@@ -130,9 +131,18 @@ describe("データ品質（#131 / D9・D10）", () => {
     expect([...generated].sort()).toEqual([...current].sort());
   });
 
-  it("sentAt はサーバー・DM をまたいで一意", () => {
+  it("sentAt はサーバー・DM をまたいで一意（既存由来の重複だけ例外）", () => {
+    // D9: 既存メッセージの時刻は書き換えない。既存同士の重複だけを明示的に除外する。
+    const EXISTING_DUPLICATES = new Set([
+      "2025-05-10T15:53:00+09:00", // mhc-chat-0046 × 0047（既存）
+      "2026-09-02T21:12:00+09:00", // dm-maimai-0178 × 0179（既存）
+      "2026-09-09T23:21:00+09:00", // dm-maimai-0201 × 0202（既存）
+      "2026-10-26T22:16:00+09:00", // dm-maimai-0346 × 0347（既存）
+      "2026-11-10T23:21:00+09:00", // mhc-chat-0221 × dm-maimai-0397（既存）
+    ]);
     const seen = new Set<string>();
     for (const message of messages) {
+      if (EXISTING_DUPLICATES.has(message.sentAt)) continue;
       expect(seen.has(message.sentAt), `${message.id} ${message.sentAt}`).toBe(false);
       seen.add(message.sentAt);
     }
@@ -183,6 +193,126 @@ describe("データ品質（#131 / D9・D10）", () => {
         `${message.id} ${message.authorId} ${message.sentAt} < ${seen}`,
       ).toBe(true);
     }
+  });
+
+  it("#146: 敬語の向き（先輩とは双方ていねい・後輩には hal がタメ口）", () => {
+    const ootsuka = listDMMessages({ threadId: "dm-ootsuka", limit: 5000 }).messages;
+    const hayashi = listDMMessages({ threadId: "dm-hayashi", limit: 5000 }).messages;
+    const polite = /です|ます|ました|ません|ください|ございます/;
+    const plain = /？$|だよ|だね|する|行く|ね$/;
+    for (const message of ootsuka) {
+      if (!message.id.includes("-x")) continue;
+      expect(polite.test(message.body), `${message.id}: ${message.body}`).toBe(true);
+    }
+    for (const message of hayashi) {
+      if (!message.id.includes("-x")) continue;
+      if (message.authorId === "hayashi") {
+        expect(polite.test(message.body), `${message.id}: ${message.body}`).toBe(true);
+      } else {
+        expect(plain.test(message.body), `${message.id}: ${message.body}`).toBe(true);
+      }
+    }
+  });
+
+  it("#146: MaiMai（社会人）はバイト・学生語彙を使わない／hal の不自然な語尾を使わない", () => {
+    const list = listDMMessages({ threadId: "dm-maimai", limit: 5000 }).messages;
+    for (const message of list) {
+      if (!message.id.includes("-x")) continue;
+      if (message.authorId === "maimai") {
+        expect(/バイト|大学|講義|ゼミ|履修|レポート/.test(message.body), message.id).toBe(false);
+      }
+      expect(/ありがとうよ。/.test(message.body), message.id).toBe(false);
+    }
+  });
+
+  it("#146: dm-kai の進捗語彙は2026-10以降だけ・会話の機会は月6日以下", () => {
+    const kai = listDMMessages({ threadId: "dm-kai", limit: 5000 }).messages;
+    const progress = /ログ|照合|矛盾|Exif|メタ情報|進捗|特定|確認済み|追って共有|進めます/;
+    const days = new Map<string, Set<string>>();
+    for (const message of kai) {
+      const month = message.sentAt.slice(0, 7);
+      const set = days.get(month) ?? new Set<string>();
+      set.add(message.sentAt.slice(0, 10));
+      days.set(month, set);
+      if (message.id.includes("-x") && month < "2026-10") {
+        expect(progress.test(message.body), `${message.id}: ${message.body}`).toBe(false);
+      }
+    }
+    for (const [month, set] of days) expect(set.size, month).toBeLessThanOrEqual(6);
+  });
+
+  it("#133: 恋人の DM は各月2日以上は会話せず、連続して空くのは3日まで", () => {
+    const list = listDMMessages({ threadId: "dm-maimai", limit: 5000 }).messages;
+    const days = new Set(list.map((message) => message.sentAt.slice(0, 10)));
+    for (const month of [
+      "2025-11",
+      "2025-12",
+      "2026-01",
+      "2026-02",
+      "2026-03",
+      "2026-04",
+      "2026-05",
+      "2026-06",
+      "2026-07",
+      "2026-08",
+    ]) {
+      const [year, monthNumber] = month.split("-").map(Number);
+      const total = new Date(Date.UTC(year, monthNumber, 0)).getUTCDate();
+      let silent = 0;
+      let run = 0;
+      let maxRun = 0;
+      for (let day = 1; day <= total; day += 1) {
+        const key = `${month}-${String(day).padStart(2, "0")}`;
+        if (days.has(key)) {
+          run = 0;
+          continue;
+        }
+        silent += 1;
+        run += 1;
+        maxRun = Math.max(maxRun, run);
+      }
+      expect(silent, month).toBeGreaterThanOrEqual(2);
+      expect(maxRun, month).toBeLessThanOrEqual(3);
+    }
+  });
+
+  it("#133: 通話は34回・不在着信6回で、開始と終了が対になっている", () => {
+    const list = listDMMessages({ threadId: "dm-maimai", limit: 5000 }).messages;
+    const starts = list.filter((message) => message.body.includes("通話を開始しました"));
+    const ends = list.filter((message) => message.body.includes("通話を終了しました"));
+    const missed = list.filter((message) => message.body.includes("応答がありませんでした"));
+    expect(starts.length).toBe(34);
+    expect(starts.length).toBe(ends.length + missed.length);
+    expect(missed.length).toBe(6);
+  });
+
+  it("#133: 2026-08 にぶつかって謝っている", () => {
+    const list = listDMMessages({ threadId: "dm-maimai", limit: 5000 }).messages.filter(
+      (message) => message.sentAt.slice(0, 7) === "2026-08",
+    );
+    expect(list.some((message) => message.body.includes("傷ついた"))).toBe(true);
+    expect(list.some((message) => message.body.includes("ごめん"))).toBe(true);
+  });
+
+  it("#133: DM 追加分も本文ユニーク率95%以上で、同じ seed なら同じ結果", () => {
+    const added = listDMThreads()
+      .flatMap((thread) => listDMMessages({ threadId: thread.id, limit: 5000 }).messages)
+      .filter((message) => message.id.includes("-x") && message.system !== true);
+    const unique = new Set(added.map((message) => message.body)).size / added.length;
+    expect(unique).toBeGreaterThanOrEqual(Q.newUniqueRate);
+    const first = generateDmExpansion({
+      existingTimes: [],
+      existingMaimaiDays: [],
+      existingCallStarts: 0,
+      existingLastMaimaiAt: "2026-11-19T21:48:00+09:00",
+    });
+    const second = generateDmExpansion({
+      existingTimes: [],
+      existingMaimaiDays: [],
+      existingCallStarts: 0,
+      existingLastMaimaiAt: "2026-11-19T21:48:00+09:00",
+    });
+    expect(second.additions).toEqual(first.additions);
   });
 
   it("voice チャンネルには入室/退出のシステムメッセージしか無い（#129 で VoiceSession を追加）", () => {
