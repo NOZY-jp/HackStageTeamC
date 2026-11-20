@@ -45,10 +45,13 @@ const inPeriod = (sentAt: string, from: string, to: string): boolean => {
 
 const dmMessages = (): Message[] =>
   listDMMessages({ threadId: DM_THREAD_ID, limit: 1000 }).messages;
+const kaiDMMessages = (): Message[] => listDMMessages({ threadId: "dm-kai", limit: 1000 }).messages;
 const serverMessages = (): Message[] =>
   listChannels(GUILD_ID)
     .filter((channel) => channel.kind === "text")
     .flatMap((channel) => listMessages({ channelId: channel.id, limit: 1000 }).messages);
+/** Discord 全体（サーバーの公開チャンネル＋DM すべて）。 */
+const discordMessages = (): Message[] => [...serverMessages(), ...dmMessages(), ...kaiDMMessages()];
 
 describe("ダミーデータの整合性", () => {
   it("サーバーは「モンハンコミュニティ」1つだけで、旧3サーバーは残っていない", () => {
@@ -92,14 +95,17 @@ describe("ダミーデータの整合性", () => {
     expect(new Set(handles).size).toBe(handles.length);
   });
 
-  it("DM スレッドは MaiMai との1件だけ", () => {
+  it("DM スレッドは MaiMai とカイの2件（調査の会話は公開チャンネルに置かない・#121）", () => {
     const threads = listDMThreads();
-    expect(threads).toHaveLength(1);
-    const thread = threads[0];
-    expect(thread.id).toBe(DM_THREAD_ID);
-    expect(thread.participantIds).toEqual([SELF_USER_ID, "maimai"]);
-    for (const id of thread.participantIds) {
-      expect(getUser(id)).toBeDefined();
+    expect(threads.map((thread) => thread.id).sort()).toEqual(["dm-kai", DM_THREAD_ID]);
+    const mai = threads.find((thread) => thread.id === DM_THREAD_ID);
+    expect(mai?.participantIds).toEqual([SELF_USER_ID, "maimai"]);
+    const kai = threads.find((thread) => thread.id === "dm-kai");
+    expect(kai?.participantIds).toEqual([SELF_USER_ID, "kai"]);
+    for (const thread of threads) {
+      for (const id of thread.participantIds) {
+        expect(getUser(id), id).toBeDefined();
+      }
     }
   });
 
@@ -372,21 +378,44 @@ describe("謎解きの手がかり（順序1・4・5・6・9・11）", () => {
   it("カイからの進捗連絡があり、カイは実在する（順序9）", () => {
     const kai = getUser("kai");
     expect(kai?.displayName).toBe(KAI_DISPLAY_NAME);
-    const fromKai = serverMessages().filter(
+    const fromKai = discordMessages().filter(
       (message) => message.authorId === "kai" && message.body.includes("進んだ"),
     );
     expect(fromKai.length).toBeGreaterThan(0);
+    // 進捗のやり取りは公開チャンネルではなく、カイとの DM にある
+    expect(fromKai.every((message) => message.channelId === "dm-kai")).toBe(true);
+    expect(
+      serverMessages().some(
+        (message) => message.authorId === "kai" && message.body.includes("進んだ"),
+      ),
+    ).toBe(false);
     // 「黒幕」などの答えは書かない
-    expect(serverMessages().some((message) => message.body.includes("黒幕"))).toBe(false);
+    expect(discordMessages().some((message) => message.body.includes("黒幕"))).toBe(false);
   });
 
   it("最後のメッセージは「住所を特定しました」で、住所そのものは書かない（順序11）", () => {
-    const all = [...serverMessages(), ...dmMessages()].sort((a, b) =>
-      a.sentAt.localeCompare(b.sentAt),
-    );
+    const all = discordMessages().sort((a, b) => a.sentAt.localeCompare(b.sentAt));
     const last = all[all.length - 1];
     expect(last.body).toBe("住所を特定しました");
     expect(all.some((message) => /丁目|番地|号室/.test(message.body))).toBe(false);
+  });
+
+  it("結末を宣言するのはリョウで、カイは「住所を特定しました」を発言しない（#121）", () => {
+    const all = discordMessages();
+    const ending = all.filter((message) => message.body.includes("住所を特定しました"));
+    expect(ending).toHaveLength(1);
+    // 黒幕（カイ）に結末を言わせない
+    expect(ending[0].authorId).not.toBe("kai");
+    expect(ending[0].authorId).toBe("hal");
+    // カイの発言は助言・進捗の確認までで、答え（住所）を宣言しない
+    const kaiLines = all
+      .filter((message) => message.authorId === "kai")
+      .map((message) => message.body);
+    expect(kaiLines.length).toBeGreaterThan(0);
+    for (const body of kaiLines) {
+      expect(body).not.toContain("住所を特定");
+      expect(body).not.toContain("黒幕");
+    }
   });
 });
 
@@ -450,8 +479,8 @@ describe("メンバー一覧と順序9のヒント", () => {
     expect(members.some((member) => member.status !== "offline")).toBe(true);
   });
 
-  it("順序9のヒント語（Facebook / 本名 / 検索）がサーバーの会話にある", () => {
-    const text = serverMessages()
+  it("順序9のヒント語（Facebook / 本名 / 検索）がカイとの DM にある", () => {
+    const text = kaiDMMessages()
       .map((message) => message.body)
       .join(" / ");
     expect(text).toMatch(/facebook/i);
