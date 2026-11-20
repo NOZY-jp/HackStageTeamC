@@ -370,6 +370,9 @@ const jst = (ms: number) => {
 };
 
 /** 数字・記号で一意に見せた文（水増し）を弾く */
+/** 「〜の件／〜の話」の継ぎはぎ（水増し）を弾く */
+export const looksSpliced = (body: string): boolean => /(の件|の話)[、。].*(の件|の話)/.test(body);
+
 export const looksPadded = (body: string): boolean => {
   // URL は数字を含んでもよい（本文を数字で水増ししたものだけを弾く）
   if (/https?:\/\//.test(body)) return false;
@@ -411,7 +414,7 @@ export function generateServers(
             ).getUTCDate();
       // 各月10日以上。全活動日に1通以上置く
       const active = new Set<number>();
-      const targetDays = Math.max(10, Math.min(13, Math.ceil(count / 6)));
+      const targetDays = 10;
       for (let day = 1; day <= days && active.size < targetDays; day += 1)
         if (rand() < 0.6) active.add(day);
       for (let day = 1; active.size < targetDays && day <= days; day += 1) active.add(day);
@@ -427,7 +430,7 @@ export function generateServers(
         // 1日の発言は同じチャンネルにまとめる（チャンネル内で会話が続くように）
         const dayChannel = pick(server.channels.map(([id]) => id));
         for (let i = 0; i < counts[index]; i += 1) {
-          at += int(1, 25) * 60000;
+          at += int(1, 15) * 60000;
           let key = jst(at);
           let guard = 0;
           while (usedTimes.has(key) && guard < 400) {
@@ -497,14 +500,15 @@ export function generateServers(
       let body = "";
       for (let attempt = 0; attempt < 3000; attempt += 1) {
         const candidate = pick(TEMPLATES[item.ch])(pick);
-        if (usedBody.has(candidate) || looksPadded(candidate)) continue;
+        if (usedBody.has(candidate) || looksPadded(candidate) || looksSpliced(candidate)) continue;
         body = candidate;
         break;
       }
       if (!body) {
         for (let attempt = 0; attempt < 3000; attempt += 1) {
           const candidate = `${pick(TEMPLATES[item.ch])(pick)}、${pick(P.time)}の${pick(P.tail)}`;
-          if (usedBody.has(candidate) || looksPadded(candidate)) continue;
+          if (usedBody.has(candidate) || looksPadded(candidate) || looksSpliced(candidate))
+            continue;
           body = candidate;
           break;
         }
