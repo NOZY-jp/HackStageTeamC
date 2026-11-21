@@ -75,3 +75,41 @@ describe("会話のリズム（#202）", () => {
     expect(bad).toEqual([]);
   });
 });
+
+describe("未読と時系列（#202）", () => {
+  it("未読は最後の自分の発言より後の相手の発言数で自動導出される", () => {
+    for (const thread of listDMThreads()) {
+      const messages = listDMMessages({ threadId: thread.id, limit: 9000 }).messages;
+      const lastMine = messages.map((message) => message.authorId).lastIndexOf("hal");
+      const expected = messages
+        .slice(lastMine + 1)
+        .filter((message) => message.authorId !== "hal").length;
+      expect(thread.unreadCount, thread.id).toBe(expected);
+    }
+  });
+
+  it("相手の最終発言が未読のスレッドが2本ある（オオツカ・ハヤシ）", () => {
+    for (const threadId of ["dm-ootsuka", "dm-hayashi"]) {
+      const thread = listDMThreads().find((candidate) => candidate.id === threadId);
+      expect(thread, threadId).toBeDefined();
+      expect(thread?.unreadCount, threadId).toBeGreaterThanOrEqual(1);
+      expect(thread?.unreadCount, threadId).toBeLessThanOrEqual(2);
+    }
+  });
+
+  it("どのスレッドも時刻は昇順で、すべてGAME_NOWより前", async () => {
+    const { GAME_NOW } = await import("@/lib/platform/game-time");
+    const now = Date.parse(GAME_NOW);
+    for (const thread of listDMThreads()) {
+      const messages = listDMMessages({ threadId: thread.id, limit: 9000 }).messages;
+      for (let i = 1; i < messages.length; i += 1) {
+        expect(Date.parse(messages[i].sentAt), messages[i].id).toBeGreaterThanOrEqual(
+          Date.parse(messages[i - 1].sentAt),
+        );
+      }
+      for (const message of messages) {
+        expect(Date.parse(message.sentAt), message.id).toBeLessThan(now);
+      }
+    }
+  });
+});

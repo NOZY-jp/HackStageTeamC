@@ -172,7 +172,7 @@ describe("ダミーデータの整合性", () => {
   });
 
   it("すべての発言者は実在し、テキストchは通常会話・ボイスchは通話行だけが入っている", () => {
-    const CALL_LINE = /通話を開始しました|通話を終了しました/;
+    const CALL_LINE = /が通話を(開始|終了)しました$/;
     for (const channel of listChannels(GUILD_ID)) {
       const messages = listMessages({
         channelId: channel.id,
@@ -181,11 +181,11 @@ describe("ダミーデータの整合性", () => {
       for (const message of messages) {
         expect(getUser(message.authorId)).toBeDefined();
         if (channel.kind === "text") {
-          // テキストチャンネルには通話の開始・終了を置かない（通常会話だけ）
-          expect(CALL_LINE.test(message.body), message.id).toBe(false);
+          // テキストチャンネルは通常会話だけ（システム行は一切置かない）
+          expect(message.system ?? false, message.id).toBe(false);
           expect(message.channelId).toBe(channel.id);
         } else {
-          // ボイスチャンネルは通話の開始・終了のシステム行だけ
+          // ボイスチャンネルは通話の開始・終了のシステム行だけ（通常会話は置かない）
           expect(message.system, message.id).toBe(true);
           expect(CALL_LINE.test(message.body), message.id).toBe(true);
         }
