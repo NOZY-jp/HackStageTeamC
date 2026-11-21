@@ -288,9 +288,9 @@ describe("データ品質（#131 / D9・D10）", () => {
     const starts = list.filter((message) => message.body.includes("通話を開始しました"));
     const ends = list.filter((message) => message.body.includes("通話を終了しました"));
     const missed = list.filter((message) => message.body.includes("応答がありませんでした"));
-    expect(starts.length).toBe(34);
+    expect(starts.length).toBe(44);
     expect(starts.length).toBe(ends.length + missed.length);
-    expect(missed.length).toBe(6);
+    expect(missed.length).toBe(9);
   });
 
   it("#133: 2026-08 にぶつかって謝っている", () => {
@@ -337,6 +337,25 @@ describe("データ品質（#131 / D9・D10）", () => {
     for (const message of messages) {
       expect(looksTwoTopic(message.body), `${message.id}: ${message.body}`).toBe(false);
     }
+  });
+
+  it("#133追記: dm-maimai に画像かリンク付きの投稿が20件以上ある", () => {
+    const list = listDMMessages({ threadId: "dm-maimai", limit: 5000 }).messages;
+    const media = list.filter(
+      (message) => (message.attachments?.length ?? 0) > 0 || /https?:/, //.test(message.body),
+    );
+    expect(media.length).toBeGreaterThanOrEqual(20);
+  });
+
+  it("#133追記: 通話の開始が深夜2〜5時に集中しない（25%以下）", () => {
+    const list = listDMMessages({ threadId: "dm-maimai", limit: 5000 }).messages;
+    const starts = list.filter((message) => message.body.includes("通話を開始しました"));
+    expect(starts.length).toBeGreaterThan(0);
+    const night = starts.filter((message) => {
+      const hour = Number(message.sentAt.slice(11, 13));
+      return hour >= 2 && hour < 5;
+    });
+    expect(night.length / starts.length).toBeLessThanOrEqual(0.25);
   });
 
   it("voice チャンネルには入室/退出のシステムメッセージしか無い（#129 で VoiceSession を追加）", () => {

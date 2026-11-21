@@ -42,6 +42,7 @@ const { additions, calls } = generateDmExpansion({
   existingMaimaiDays: [...maimaiDays],
   existingCallStarts,
   existingCallWindows: callWindows,
+  baseMessages: baseDmMessages,
   existingLastMaimaiAt,
 });
 

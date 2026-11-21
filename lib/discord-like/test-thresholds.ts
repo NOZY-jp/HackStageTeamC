@@ -8,7 +8,7 @@
 export const NATURALNESS_LIMITS = {
   /** 未返信で終わる DM スレッドの割合（以上） */
   /** 未返信で終わる DM の割合（下限。緩和ではなく「最低これだけ残す」の意味） */
-  unrepliedThreadRatio: 0.2,
+  unrepliedThreadRatio: 0.22, // #133 追記後の実測 0.22（下限を引き上げ）
   /** 既読スルー（質問のあとに返事が無いまま次の話題へ）の件数（以上） */
   readThrough: 20,
   /** 連投（5分以内の同じ人の続き）の回数（以上） */
@@ -43,7 +43,7 @@ export const VOLUME_LIMITS = {
   /** サーバーの数（旧3サーバー名は禁止のまま） */
   guildCount: 3, // mhc・univ・friend（#132）
   /** DM の総メッセージ数（範囲） */
-  dmMessages: { min: 1400, max: 2000 }, // #133 の 1,500 通を下限で守る
+  dmMessages: { min: 1600, max: 2200 }, // #133 追記後 1,650 通を下限で守る
   /** サーバーの総メッセージ数（3サーバー合算・範囲） */
   serverMessages: { min: 1570, max: 2900 }, // #131 で 1,570。目標 2,500〜2,900
   /**
