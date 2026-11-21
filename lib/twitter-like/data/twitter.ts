@@ -1,4 +1,4 @@
-import { HAL_HANDLE } from "@/lib/discord-like/data/names";
+import { HAL_HANDLE, HAL_NAME } from "@/lib/discord-like/data/names";
 import type { Post, Profile, Trend, TwitterUser } from "../types";
 
 /** True End 手がかり4: かのんの投稿で過去のストーカー被害を示唆するポストID。 */
@@ -11,7 +11,7 @@ export const KANON_STALKER_POST_ID = "post-105";
  * 日時は 2026-11 固定（JST）。劇中世界の投稿のみ（開発用語は入れない）。
  */
 export const twitterUsers: TwitterUser[] = [
-  { id: "tw-hal", displayName: "Hal", handle: HAL_HANDLE, avatarColor: "#3b6fd4" },
+  { id: "tw-hal", displayName: HAL_NAME, handle: HAL_HANDLE, avatarColor: "#3b6fd4" },
   { id: "tw-mai", displayName: "Mai", handle: "mai2mai2", avatarColor: "#c2417c" },
   { id: "tw-sou", displayName: "ソウ", handle: "kaiser018023071", avatarColor: "#b86a1f" },
   {
