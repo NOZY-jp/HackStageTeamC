@@ -7,6 +7,7 @@ import { replyTargetAuthor, usersById } from "@/components/twitter-like/lookup";
 import { PageHeader } from "@/components/twitter-like/page-header";
 import { PostCard } from "@/components/twitter-like/post-card";
 import { RightSidebar } from "@/components/twitter-like/right-sidebar";
+import { SearchProgressResults } from "@/components/twitter-like/search-progress-results";
 import { getPost, isProtected, searchPosts, searchUsers } from "@/lib/twitter-like";
 
 export const metadata: Metadata = { title: "検索" };
@@ -45,6 +46,72 @@ export default async function TwitterSearchPage({ searchParams }: Props) {
         ? allPosts.filter((post) => (post.media?.length ?? 0) > 0)
         : allPosts;
 
+  const options = { foundBff: true };
+  const usersAfterDiscovery =
+    query && (tab === "top" || tab === "user") ? searchUsers(query, options) : [];
+  const postsAfterDiscovery =
+    !query || tab === "user"
+      ? []
+      : searchPosts(query, options).filter(
+          (post) => tab !== "media" || (post.media?.length ?? 0) > 0,
+        );
+  const renderResults = (
+    matchedUsers: ReturnType<typeof searchUsers>,
+    matchedPosts: ReturnType<typeof searchPosts>,
+  ) =>
+    query === "" ? (
+      <div className="tw-empty">キーワードを入力して検索してください。</div>
+    ) : matchedUsers.length === 0 && matchedPosts.length === 0 ? (
+      <div className="tw-empty">
+        <p className="tw-empty-title">「{query}」に一致する結果はありません</p>
+        <p className="tw-empty-sub">別のキーワードで検索してみてください。</p>
+      </div>
+    ) : (
+      <>
+        {matchedUsers.length > 0 ? (
+          <section aria-label="ユーザー">
+            <h2 className="tw-card-title">ユーザー</h2>
+            <ul>
+              {matchedUsers.map((user) => (
+                <li key={user.id} className="tw-suggest-item">
+                  <Link href={`/twitter/profile/${user.handle}`} className="tw-suggest">
+                    <Avatar user={user} />
+                    <span className="tw-suggest-text">
+                      <span className="tw-name">
+                        {user.displayName}
+                        {isProtected(user) ? <LockIcon /> : null}
+                      </span>
+                      <span className="tw-handle">@{user.handle}</span>
+                    </span>
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          </section>
+        ) : null}
+        {tab === "user" ? null : matchedPosts.length > 0 ? (
+          <section aria-label="ポスト">
+            <h2 className="tw-card-title">ポスト</h2>
+            {matchedPosts.map((post) => {
+              const author = users.get(post.authorId);
+              return author ? (
+                <PostCard
+                  key={post.id}
+                  post={post}
+                  author={author}
+                  replyTo={replyTargetAuthor(post, getPost, users)}
+                />
+              ) : null;
+            })}
+          </section>
+        ) : (
+          <div className="tw-empty">
+            <p className="tw-empty-sub">「{query}」に一致するポストはありません</p>
+          </div>
+        )}
+      </>
+    );
+
   return (
     <>
       {matchedPosts.some((p) => p.id === "post-102") ? <StoryTrigger flag="s02-bff-reply" /> : null}
@@ -77,58 +144,10 @@ export default async function TwitterSearchPage({ searchParams }: Props) {
             ))}
           </nav>
         ) : null}
-        {query === "" ? (
-          <div className="tw-empty">キーワードを入力して検索してください。</div>
-        ) : matchedUsers.length === 0 && matchedPosts.length === 0 ? (
-          <div className="tw-empty">
-            <p className="tw-empty-title">「{query}」に一致する結果はありません</p>
-            <p className="tw-empty-sub">別のキーワードで検索してみてください。</p>
-          </div>
-        ) : (
-          <>
-            {matchedUsers.length > 0 ? (
-              <section aria-label="ユーザー">
-                <h2 className="tw-card-title">ユーザー</h2>
-                <ul>
-                  {matchedUsers.map((user) => (
-                    <li key={user.id} className="tw-suggest-item">
-                      <Link href={`/twitter/profile/${user.handle}`} className="tw-suggest">
-                        <Avatar user={user} />
-                        <span className="tw-suggest-text">
-                          <span className="tw-name">
-                            {user.displayName}
-                            {isProtected(user) ? <LockIcon /> : null}
-                          </span>
-                          <span className="tw-handle">@{user.handle}</span>
-                        </span>
-                      </Link>
-                    </li>
-                  ))}
-                </ul>
-              </section>
-            ) : null}
-            {tab === "user" ? null : matchedPosts.length > 0 ? (
-              <section aria-label="ポスト">
-                <h2 className="tw-card-title">ポスト</h2>
-                {matchedPosts.map((post) => {
-                  const author = users.get(post.authorId);
-                  return author ? (
-                    <PostCard
-                      key={post.id}
-                      post={post}
-                      author={author}
-                      replyTo={replyTargetAuthor(post, getPost, users)}
-                    />
-                  ) : null;
-                })}
-              </section>
-            ) : (
-              <div className="tw-empty">
-                <p className="tw-empty-sub">「{query}」に一致するポストはありません</p>
-              </div>
-            )}
-          </>
-        )}
+        <SearchProgressResults
+          beforeDiscovery={renderResults(matchedUsers, matchedPosts)}
+          afterDiscovery={renderResults(usersAfterDiscovery, postsAfterDiscovery)}
+        />
       </main>
       <RightSidebar hideSearch />
     </>

@@ -1,6 +1,6 @@
 import { HAL_HANDLE, HAL_NAME } from "@/lib/discord-like/data/names";
-import { generatedPosts, generatedProfiles, generatedUsers } from "./generated-posts";
 import type { Post, Profile, Trend, TwitterUser } from "../types";
+import { generatedPosts, generatedProfiles, generatedUsers } from "./generated-posts";
 
 /** True End 手がかり4: かのんの投稿で過去のストーカー被害を示唆するポストID。 */
 export const KANON_STALKER_POST_ID = "post-105";
@@ -1255,10 +1255,49 @@ export const twitterPosts: Post[] = [
   ...generatedPosts,
 ];
 const replyStore: Post[] = [];
-const REPLY_OPENERS = ["それは", "たしかに", "わかる", "自分も", "ちょっと", "なるほど", "いいですね", "うらやましい", "気になります", "あとで"];
-const REPLY_AUTHORS = ["tw-mai", "tw-hal", "tw-sou", "tw-aki", "tw-mio", "tw-ren", "tw-nagi", "tw-yuu"];
-const REPLY_PARTS = ["こっちでも同じでした", "今度くわしく聞きたいです", "自分もやってみます", "その話は助かります", "少し見直してみます", "また共有してください", "同じところで迷いました", "今度一緒にどうですか", "写真があったら見たいです", "時間が合えば行きます"];
-const replyParents = twitterPosts.filter((post) => !post.replyToId && !post.authorId.startsWith("tw-gen") && post.id !== "post-101" && post.id !== "post-105").slice(0, 42);
+const REPLY_OPENERS = [
+  "それは",
+  "たしかに",
+  "わかる",
+  "自分も",
+  "ちょっと",
+  "なるほど",
+  "いいですね",
+  "うらやましい",
+  "気になります",
+  "あとで",
+];
+const REPLY_AUTHORS = [
+  "tw-mai",
+  "tw-hal",
+  "tw-sou",
+  "tw-aki",
+  "tw-mio",
+  "tw-ren",
+  "tw-nagi",
+  "tw-yuu",
+];
+const REPLY_PARTS = [
+  "こっちでも同じでした",
+  "今度くわしく聞きたいです",
+  "自分もやってみます",
+  "その話は助かります",
+  "少し見直してみます",
+  "また共有してください",
+  "同じところで迷いました",
+  "今度一緒にどうですか",
+  "写真があったら見たいです",
+  "時間が合えば行きます",
+];
+const replyParents = twitterPosts
+  .filter(
+    (post) =>
+      !post.replyToId &&
+      !post.authorId.startsWith("tw-gen") &&
+      post.id !== "post-101" &&
+      post.id !== "post-105",
+  )
+  .slice(0, 42);
 replyParents.forEach((parent, pIndex) => {
   for (let n = 0; n < 4; n += 1) {
     const opener = REPLY_OPENERS[(pIndex + n) % REPLY_OPENERS.length];
@@ -1280,8 +1319,6 @@ twitterPosts.push(...replyStore);
 for (const post of twitterPosts) {
   post.replyCount = twitterPosts.filter((candidate) => candidate.replyToId === post.id).length;
 }
-
-
 
 /** ポストの表示数（インプレッション）のダミー値。Post.id → 件数。 */
 export const twitterViewCounts: Record<string, number> = {

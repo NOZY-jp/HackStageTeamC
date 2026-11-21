@@ -1,4 +1,4 @@
-import { render, screen, within } from "@testing-library/react";
+import { fireEvent, render, screen, within } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { StoryProvider, useStory } from "@/components/common/story/story-provider";
 import * as twitter from "@/lib/twitter-like";
@@ -8,6 +8,15 @@ import TwitterSearchPage from "./page";
 function StoryFlagProbe() {
   const { state } = useStory();
   return <output data-testid="story-flags">{state.flags.join(",")}</output>;
+}
+
+function DiscoverKanon() {
+  const { setFlag } = useStory();
+  return (
+    <button type="button" onClick={() => setFlag("foundBff")}>
+      発見
+    </button>
+  );
 }
 
 const params = (q: string, f?: string) => ({ searchParams: Promise.resolve({ q, f }) });
@@ -53,7 +62,7 @@ describe("TwitterSearchPage", () => {
   ])(
     "$f のタブで対象の検索結果を表示する",
     async ({ f, label, showsUsers, showsTextPost, showsMediaPost }) => {
-      const query = "かのん";
+      const query = "mai2mai2";
       vi.spyOn(twitter, "searchPosts").mockReturnValueOnce([textPost, mediaPost]);
       render(await TwitterSearchPage(params(query, f)));
 
@@ -97,13 +106,37 @@ describe("TwitterSearchPage", () => {
   });
 
   it("公開アカウントのユーザーには鍵アイコンを出さない", async () => {
-    render(await TwitterSearchPage(params("かのん")));
+    render(await TwitterSearchPage(params("mai2mai2")));
     const link = screen
-      .getAllByRole("link", { name: /かのん/ })
+      .getAllByRole("link", { name: /mai2mai2/ })
       .find((el) => el.classList.contains("tw-suggest"));
     expect(link).toBeDefined();
     // 公開アカウントなので鍵アイコン（tw-icon）は無い
     expect(link?.querySelectorAll("svg.tw-icon")).toHaveLength(0);
+  });
+
+  it("かのんのアカウントと post-105 は発見後に同じ画面で表示される", async () => {
+    window.localStorage.clear();
+    const view = await TwitterSearchPage(params("kanon__dayo"));
+    const body = twitter.getPost("post-105")?.body ?? "";
+    expect(body).not.toBe("");
+    render(
+      <StoryProvider>
+        <DiscoverKanon />
+        {view}
+      </StoryProvider>,
+    );
+    expect(screen.queryByRole("link", { name: /かのん/ })).not.toBeInTheDocument();
+    expect(screen.queryByText(body)).not.toBeInTheDocument();
+
+    fireEvent.click(screen.getByRole("button", { name: "発見" }));
+    expect(
+      within(screen.getByRole("region", { name: "ユーザー" })).getByRole("link", {
+        name: /かのん/,
+      }),
+    ).toBeInTheDocument();
+    expect(screen.getByText(body)).toBeInTheDocument();
+    window.localStorage.clear();
   });
 
   it("ユーザー・ポストとも0件なら従来の空メッセージのまま", async () => {

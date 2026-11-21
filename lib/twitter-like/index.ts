@@ -147,56 +147,62 @@ function matchesAllTerms(haystack: string, terms: string[]): boolean {
   return terms.every((term) => normalized.includes(term));
 }
 
-/**
- * 投稿を検索する（本文と投稿者の表示名・handleを対象・新しい順）。返信も対象に含める。
- * 鍵アカウントの投稿は除く。
- */
-export function searchPosts(query: string): Post[] {
+type SearchOptions = { foundBff?: boolean };
+
+const searchUsersById = new Map(twitterUsers.map((user) => [user.id, user]));
+const searchBiosById = new Map(twitterProfiles.map((profile) => [profile.userId, profile.bio]));
+const publicSearchPosts = twitterPosts.filter(isVisiblePost).sort(byPostedAtDesc);
+const searchPostDocuments = publicSearchPosts.map((post) => {
+  const author = searchUsersById.get(post.authorId);
+  return {
+    post,
+    text: [post.body, author?.displayName, author?.handle].join("\n").toLowerCase(),
+  };
+});
+
+function canSearchAccount(id: string, options: SearchOptions): boolean {
+  return id !== "tw-kanon" || options.foundBff === true;
+}
+
+/** 本文・投稿者名・handle の検索。鍵垢の投稿は検索対象外。 */
+export function searchPosts(query: string, options: SearchOptions = {}): Post[] {
   const terms = toTerms(query);
+  if (terms.length === 0) return [];
   return copyOf(
-    [...twitterPosts]
-      .filter(isVisiblePost)
-      .sort(byPostedAtDesc)
-      .filter((post) => {
-        const author = twitterUsers.find((user) => user.id === post.authorId);
-        const haystack = [post.body, author?.displayName ?? "", author?.handle ?? ""].join("\n");
-        return matchesAllTerms(haystack, terms);
-      }),
+    searchPostDocuments
+      .filter(
+        ({ post, text }) =>
+          canSearchAccount(post.authorId, options) && matchesAllTerms(text, terms),
+      )
+      .map(({ post }) => post),
   );
 }
 
-/**
- * 旧アカウントを過去ブログの記事タイトル等でも検索で見つけられるようにする補助キーワード。
- * 鍵垢のため投稿本文自体は検索に出さないが、旧記事タイトル等の特定語句でアカウント検索に載せる。
- * （「ブログ」単体のような一般語ではステップ2でネタバレしないよう除外する）
- */
-const EXTRA_USER_SEARCH_KEYWORDS: Record<string, readonly string[]> = {
-  "tw-old-denden": [
-    "写真コンテストで賞をもらいました！",
-    "【MHW】弓属性強化ガン積み構成まとめ",
-    "ブログはじめました！",
-    "hunter_denden0102",
-  ],
-};
-
-/**
- * ユーザーを検索する。対象は displayName・handle・bio（および補助キーワード）。
- */
-export function searchUsers(query: string): TwitterUser[] {
+/** 公開プロフィールと公開投稿本文で検索し、公開アカウントを先に並べる。 */
+export function searchUsers(query: string, options: SearchOptions = {}): TwitterUser[] {
   const terms = toTerms(query);
-  const normalizedQuery = query.trim().toLowerCase();
+  if (terms.length === 0) return [];
+
+  const matchingAuthors = new Set(
+    publicSearchPosts
+      .filter((post) => matchesAllTerms(post.body, terms))
+      .map((post) => post.authorId),
+  );
+  const matches = twitterUsers.filter((user) => {
+    if (!canSearchAccount(user.id, options)) return false;
+    const profile = [user.displayName, user.handle, searchBiosById.get(user.id)].join("\n");
+    return matchingAuthors.has(user.id) || matchesAllTerms(profile, terms);
+  });
+
+  const exactAccount = (user: TwitterUser) =>
+    terms.length === 1 &&
+    [user.displayName, user.handle].some((label) => label.toLowerCase() === terms[0]);
   return copyOf(
-    twitterUsers.filter((user) => {
-      const bio = twitterProfiles.find((profile) => profile.userId === user.id)?.bio ?? "";
-      if (matchesAllTerms([user.displayName, user.handle, bio].join("\n"), terms)) {
-        return true;
-      }
-      const extras = EXTRA_USER_SEARCH_KEYWORDS[user.id];
-      if (!extras || normalizedQuery === "ブログ") {
-        return false;
-      }
-      return extras.some((keyword) => matchesAllTerms(keyword, terms));
-    }),
+    matches.sort(
+      (a, b) =>
+        Number(exactAccount(b)) - Number(exactAccount(a)) ||
+        Number(isProtected(a)) - Number(isProtected(b)),
+    ),
   );
 }
 

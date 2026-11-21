@@ -223,18 +223,24 @@ describe("twitterTrends（いま話題）", () => {
 
 describe("searchUsers", () => {
   it("handle・displayName・bio を対象に検索する", () => {
-    expect(searchUsers("kohakunchos0117").map((user) => user.id)).toEqual(["tw-hal"]);
-    expect(searchUsers("ソウ").map((user) => user.id)).toEqual(["tw-sou"]);
-    const bioMatch = searchUsers("古い友達");
+    expect(searchUsers("kohakunchos0117").map((user) => user.id)).toEqual([
+      "tw-hal",
+      "tw-mai",
+      "tw-sou",
+    ]);
+    expect(searchUsers("ソウ")[0]?.id).toBe("tw-sou");
+    const bioMatch = searchUsers("古い友達", { foundBff: true });
     expect(bioMatch.map((user) => user.id)).toEqual(["tw-kanon"]);
   });
 
-  it("過去ブログの記事タイトル等で旧アカウントをユーザー検索できる（単体の一般語「ブログ」では出さない）", () => {
-    expect(searchUsers("弓属性強化ガン積み構成").map((user) => user.handle)).toContain(
+  it("旧垢の公開 bio にある記事名では見つかり、追加語句では見つからない", () => {
+    expect(searchUsers("写真コンテストで賞をもらいました！").map((user) => user.handle)).toContain(
       "maimai_mhw",
     );
-    expect(searchUsers("ブログはじめました！").map((user) => user.handle)).toContain("maimai_mhw");
-    expect(searchUsers("ブログ")).toEqual([]);
+    expect(searchUsers("ブログはじめました！").map((user) => user.handle)).not.toContain(
+      "maimai_mhw",
+    );
+    expect(searchUsers("ブログ").map((user) => user.handle)).not.toContain("maimai_mhw");
   });
 
   it("空のクエリでは何も返さない", () => {

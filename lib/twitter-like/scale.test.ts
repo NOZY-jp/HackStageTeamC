@@ -9,8 +9,18 @@ import { twitterPosts, twitterUsers } from "./data/twitter";
 const topLevel = twitterPosts.filter((post) => !post.replyToId);
 const replies = twitterPosts.filter((post) => post.replyToId);
 const CLUES = [
-  "モンハン", "ブログ", "弓", "写真コンテスト", "でんちゃん", "ストーカー",
-  "集会所", "装備", "カメラ", "喫茶店", "レポート", "就活",
+  "モンハン",
+  "ブログ",
+  "弓",
+  "写真コンテスト",
+  "でんでん",
+  "ストーカー",
+  "集会所",
+  "装備",
+  "カメラ",
+  "喫茶店",
+  "レポート",
+  "就活",
 ];
 
 describe("Twixer のデータ規模（#248）", () => {
@@ -21,7 +31,10 @@ describe("Twixer のデータ規模（#248）", () => {
 
   it("手がかり語ごとに投稿が20件以上ある", () => {
     for (const clue of CLUES) {
-      expect(topLevel.filter((post) => post.body.includes(clue)).length, clue).toBeGreaterThanOrEqual(20);
+      expect(
+        topLevel.filter((post) => post.body.includes(clue)).length,
+        clue,
+      ).toBeGreaterThanOrEqual(20);
     }
   });
 
