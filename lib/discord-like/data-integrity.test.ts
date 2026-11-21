@@ -452,21 +452,12 @@ describe("謎解きの手がかり（順序1・4・5・6・9・11）", () => {
     expect(discordMessages().some((message) => message.body.includes("黒幕"))).toBe(false);
   });
 
-  it("最後のメッセージは「住所を特定しました」で、住所そのものは書かない（順序11）", () => {
-    const all = discordMessages().sort((a, b) => a.sentAt.localeCompare(b.sentAt));
-    const last = all[all.length - 1];
-    expect(last.body).toBe("住所を特定しました");
-    expect(all.some((message) => /丁目|番地|号室/.test(message.body))).toBe(false);
-  });
-
-  it("結末を宣言するのはリョウで、カイは「住所を特定しました」を発言しない（#121）", () => {
+  it("静的なログは順序9・11のネタバレ（住所特定・本名検索）を先出ししない", () => {
     const all = discordMessages();
-    const ending = all.filter((message) => message.body.includes("住所を特定しました"));
-    expect(ending).toHaveLength(1);
-    // 黒幕（カイ）に結末を言わせない
-    expect(ending[0].authorId).not.toBe("kai");
-    expect(ending[0].authorId).toBe("hal");
-    // カイの発言は助言・進捗の確認までで、答え（住所）を宣言しない
+    expect(all.some((message) => message.body.includes("住所を特定しました"))).toBe(false);
+    expect(all.some((message) => message.body.includes("本名で検索"))).toBe(false);
+    expect(all.some((message) => /丁目|番地|号室/.test(message.body))).toBe(false);
+    // カイの発言は助言・進捗の確認までで、答え（住所・黒幕）を宣言しない
     const kaiLines = all
       .filter((message) => message.authorId === "kai")
       .map((message) => message.body);
@@ -538,13 +529,12 @@ describe("メンバー一覧と順序9のヒント", () => {
     expect(members.some((member) => member.status !== "offline")).toBe(true);
   });
 
-  it("順序9のヒント語（Facebook / 本名 / 検索）がカイとの DM にある", () => {
+  it("順序9のヒント語（本名で検索・Facebook・Talkup）が静的な dm-kai に先出しされていない", () => {
     const text = kaiDMMessages()
       .map((message) => message.body)
       .join(" / ");
-    expect(text).toMatch(/facebook/i);
-    expect(text).toContain("本名");
-    expect(text).toContain("検索");
+    expect(text).not.toMatch(/facebook|talkup/i);
+    expect(text).not.toContain("本名で検索");
   });
 
   it("不自然な漢字の連結（回来・去来・行来など）が無い", () => {

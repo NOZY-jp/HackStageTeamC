@@ -37,6 +37,7 @@ export type MatchedUser = {
   displayName: string;
   handle: string;
   status?: "online" | "idle" | "dnd" | "offline";
+  profileUrl?: string;
 };
 
 export type SearchResponse =
@@ -157,6 +158,7 @@ export function buildSearchIndex(): SearchIndex {
       displayName: user.displayName,
       handle: user.handle,
       status: user.status,
+      ...(user.profileUrl ? { profileUrl: user.profileUrl } : {}),
     })),
   };
 }
@@ -271,11 +273,23 @@ export function searchIndex(
   );
 
   const matchedUsers =
-    parsed.filters.from.length === 0
-      ? []
-      : index.users.filter((user) =>
+    parsed.filters.from.length > 0
+      ? index.users.filter((user) =>
           parsed.filters.from.some((value) => matchesName(user.displayName, user.handle, value)),
-        );
+        )
+      : parsed.terms.length > 0
+        ? (() => {
+            const needles = parsed.terms.map(normalizeName);
+            if (needles.some((needle) => needle.length === 0)) {
+              return [];
+            }
+            return index.users.filter((user) => {
+              const display = user.displayName.toLowerCase();
+              const handle = user.handle.toLowerCase();
+              return needles.every((needle) => display.includes(needle) || handle.includes(needle));
+            });
+          })()
+        : [];
 
   return {
     ok: true,

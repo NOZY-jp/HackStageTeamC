@@ -94,6 +94,8 @@ describe("データ品質（#131 / D9・D10）", () => {
       for (const channel of texts) {
         for (const message of listMessages({ channelId: channel.id, limit: 5000 }).messages) {
           const month = message.sentAt.slice(0, 7);
+          // denden の 2018 年の手がかり投稿は月次品質の対象外（2025-2026 のみ厳格に検査する）
+          if (month < "2025-01") continue;
           const set = days.get(month) ?? new Set<string>();
           set.add(message.sentAt.slice(0, 10));
           days.set(month, set);
