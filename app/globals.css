@@ -6573,6 +6573,40 @@ a.tw-dm-item:focus-visible {
 }
 
 /* カスタム演出：画面いっぱいの文字 */
+/* 絵を見せて、押すまで待つ（look）。画面全体が押せる面。右下に小さな印だけ */
+.sp-look {
+  position: absolute;
+  inset: 0;
+  display: block;
+  border: 0;
+  background: transparent;
+  cursor: pointer;
+  pointer-events: auto;
+}
+
+.sp-look-hint {
+  position: absolute;
+  right: 28px;
+  bottom: 24px;
+  color: rgb(255 255 255 / 0.85);
+  font-size: 14px;
+  text-shadow: 0 1px 6px rgb(0 0 0 / 0.7);
+  animation: sp-look-bob 1.6s ease-in-out infinite;
+}
+
+@keyframes sp-look-bob {
+  50% {
+    translate: 0 4px;
+    opacity: 0.5;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .sp-look-hint {
+    animation: none;
+  }
+}
+
 .sp-big-text {
   position: absolute;
   inset: 0;

@@ -86,7 +86,50 @@ function BigText({ props, onDone, instant }: CustomCueProps) {
   );
 }
 
+/**
+ * 絵を見せて、押すまで待つ。画面全体を押せる面にして、押す・Enter・Space で次へ。
+ * 文章の窓は look() が先に隠している。右下に小さく「押すと続く」印だけを出す
+ */
+function Look({ onDone, instant }: CustomCueProps) {
+  useEffect(() => {
+    if (instant) {
+      onDone();
+      return;
+    }
+    const onKey = (event: KeyboardEvent) => {
+      if (event.key === "Enter" || event.key === " ") {
+        event.preventDefault();
+        onDone();
+      }
+    };
+    // 前の文章を送った同じキー入力で、すぐ閉じないよう少し待ってから受け付ける
+    const timer = window.setTimeout(() => window.addEventListener("keydown", onKey), 300);
+    return () => {
+      window.clearTimeout(timer);
+      window.removeEventListener("keydown", onKey);
+    };
+  }, [instant, onDone]);
+
+  return (
+    <motion.button
+      type="button"
+      className="sp-look"
+      aria-label="続ける"
+      onClick={onDone}
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      exit={{ opacity: 0 }}
+      transition={{ delay: 0.6, duration: 0.6 }}
+    >
+      <span className="sp-look-hint" aria-hidden="true">
+        ▼
+      </span>
+    </motion.button>
+  );
+}
+
 export const CUSTOM_CUE_COMPONENTS: Record<CustomCueName, ComponentType<CustomCueProps>> = {
   "phone-screen": PhoneScreen,
   "big-text": BigText,
+  look: Look,
 };

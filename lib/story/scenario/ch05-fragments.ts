@@ -1,4 +1,4 @@
-import { hideWindow, narrate, think, title } from "../stage";
+import { background, hideWindow, look, narrate, think, title } from "../stage";
 import type { Beat } from "../types";
 import { kaiDm } from "./kai-dm";
 
@@ -51,7 +51,13 @@ export const chapter5: Beat[] = [
       narrate("あとは簡単、それをマップアプリで調べるだけだ。"),
       think("でんちゃんはこのあたりに住んでいるのか"),
       narrate("このあたりをマップアプリで散策してみる。"),
+      // 散策の途中：地元の少し有名な洋菓子店。絵を見せて、押したら文章へ
+      background("sweets-shop", { transition: "fade", duration: "slow" }),
+      ...look(),
       title("……"),
+      // マンホールの絵柄から絞り込んだ通り。マンホールが文章の窓に隠れないよう、先に絵だけ見せる
+      background("manhole-street", { transition: "fade", duration: "slow" }),
+      ...look(),
       narrate("よし、talkupの投稿と合致する風景と本名と合致する表札を見つけた。"),
       think("現地凸、するか"),
     ],
