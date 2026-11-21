@@ -304,7 +304,9 @@ function BrowserChromeInner() {
     return () => window.removeEventListener("storage", onStorage);
   }, [mounted]);
 
-  const hiddenRoute = HIDDEN_PREFIXES.some((prefix) => startsWithPrefix(pathname, prefix));
+  // タイトル画面（/）は全画面で見せるので、ツールバーを出さない
+  const hiddenRoute =
+    pathname === "/" || HIDDEN_PREFIXES.some((prefix) => startsWithPrefix(pathname, prefix));
   const hidden = hiddenRoute || (covering && upcoming?.layout === "fullscreen");
 
   // --browser-chrome-height を常に最新の実寸と同期する

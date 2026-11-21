@@ -251,7 +251,8 @@ export function StoryStage() {
     // 通話の様子は、その場面を流しているあいだだけ出す
     setVoice([]);
   }, [upcomingId]);
-  const hidden = HIDDEN_PREFIXES.some((prefix) => pathname.startsWith(prefix));
+  // タイトル画面（/）と確認画面では出さない
+  const hidden = pathname === "/" || HIDDEN_PREFIXES.some((prefix) => pathname.startsWith(prefix));
   const startRequested = searchParams.get("start") === "1";
   useEffect(() => {
     if (!ready || hidden || !startRequested) {
