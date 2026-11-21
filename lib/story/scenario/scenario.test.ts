@@ -242,6 +242,10 @@ describe("ゲームでの場面の進行", () => {
     state = setFlag(state, "s10-talkup-match");
     play("ch5-talkup");
     expect(state.flags).toContain("s11-address");
+    // カイの助言どおり「でんちゃん」と呼ぶと誤認結末へ（#120）
+    expect(state.flags).toContain("kaiToldDenchan");
+    play("ch6-call-name");
+    expect(state.flags).toContain("usedDenchan");
 
     play("ch6-bad-end");
     expect(nextBeat(state)).toBeUndefined();
