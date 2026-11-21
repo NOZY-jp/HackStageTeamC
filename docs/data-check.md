@@ -17,11 +17,11 @@ npm run data:check
 | `direct-profile-link`       | 段階10の検索対象プロフィールへ直接案内するパスを、通常投稿などの静的な本文に置かない                                                                                 | #76                                |
 | `story-only-phrase`         | 物語の進み具合で届く文言（「住所を特定しました」「本名で検索したら」や典型的な言い換え）を、静的な過去のデータに置かない。物語の場面（`lib/story/scenario`）から流す | #119                               |
 | `invalid-time`              | 実在する日付・時刻を ISO 8601 で書く。時刻つきはタイムゾーン必須（`+09:00` か `Z`）。登録日のような日付だけの値は `YYYY-MM-DD`                                       | ―                                  |
-| `after-game-now`            | 静的なデータの日時は、ゲームの「いま」（`lib/data-check/rules.ts` の `GAME_NOW`）以前                                                                                | #119                               |
+| `after-game-now`            | 静的なデータの日時は、ゲームの「いま」（`lib/platform/game-time.ts` の `GAME_NOW`）以前                                                                              | #119                               |
 | `duplicate-id`              | 同一データセット内、および同じ入れ子の配列内で ID を重複させない                                                                                                     | ―                                  |
 | 主要人物の名前              | Discord の表示名・ハンドルが名前の定数（`lib/discord-like/data/names.ts`）と同じ。Twixer に主要人物のハンドルがある。leaf に彼女の作者ページがある                   | #76（名前は1か所）                 |
 
-検査は、登録済みデータセットのレコードから、日時・色コード・素材の URL などを除いた文字列を集めて調べます。本文はパスや URL だけの場合も検査します（`lib/data-check/corpus.ts`）。新しいデータのファイルを作ったら、`collectCorpus()` に1行足してください。
+検査は、登録済みデータセットのレコードから、日時・色コード・素材の URL などを除いた文字列を集めて調べます。本文や自己紹介の欄はパスや URL だけの場合も検査します（`lib/data-check/corpus.ts` の `DISPLAY_TEXT_KEYS`）。新しいデータのファイルを作ったら、`collectCorpus()` に1行足してください。
 
 ## この検査が見ないもの
 
@@ -40,7 +40,7 @@ story-only-phrase discord/dmMessages/dm-kai-0005 … 物語で届くはずの「
 
 - まず直す。名前は名前の定数を使い、物語で届く文言は物語の場面に移す
 - すぐに直せず、直す Issue があるときだけ、`lib/data-check/known-issues.ts` に Issue 番号つきで足す。キーは、決まりの ID から違反内容まで含めて、失敗の表示をそのまま写す
-- 直ったものが `known-issues.ts` に残っていても失敗する。#159 でカイの助言と結末を台本へ移すときは、その取り込みと同時に対応する2件を消す
+- 直ったものが `known-issues.ts` に残っていても失敗する
 
 ## 決まりを足すとき
 

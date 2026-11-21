@@ -36,6 +36,26 @@ describe("検査対象データの収集", () => {
     ).toEqual(["talkup/posts/relative", "talkup/posts/absolute"]);
   });
 
+  it("自己紹介などの表示欄だけにある検索対象プロフィールへの直接パスを検出する", () => {
+    const users = itemsOf("talkup", "users", [
+      { id: "spoiler-in-bio", bio: "/talkup/profile/yui__photo" },
+      { id: "spoiler-in-workplace", workplace: "/talkup/profile/yui__photo" },
+      { id: "spoiler-in-url", profileUrl: "/talkup/profile/yui__photo" },
+      { id: "ordinary", bio: "本と喫茶店が好きです", profileUrl: "/pochiblo/mylist/k7q2m9d4" },
+    ]);
+
+    expect(users[3].texts).toContain("/pochiblo/mylist/k7q2m9d4");
+    expect(
+      checkAll(users)
+        .filter(({ rule }) => rule === "direct-profile-link")
+        .map(({ ref }) => ref),
+    ).toEqual([
+      "talkup/users/spoiler-in-bio",
+      "talkup/users/spoiler-in-workplace",
+      "talkup/users/spoiler-in-url",
+    ]);
+  });
+
   it("日付に似た名前の本文フィールドを日時として扱わない", () => {
     const [item] = itemsOf("twixer", "posts", [
       {

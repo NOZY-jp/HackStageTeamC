@@ -1,6 +1,5 @@
 import { describe, expect, it } from "vitest";
 import { type DataItem, itemsOf } from "./corpus";
-import { KNOWN_ISSUES } from "./known-issues";
 import {
   afterGameNow,
   duplicateIds,
@@ -78,6 +77,11 @@ describe("検査の決まり", () => {
     "本名を入れて検索してみて",
     "本名を入力して検索できます",
     "本名で調べられる",
+    "Facebookの検索欄に本名を入れてみて",
+    "検索窓に本名を入力してみて",
+    "検索フォームへ本名を入れて検索すると",
+    "本名を検索欄に入れてみる",
+    "本名を検索窓に打ち込んで",
   ])("静的データに先出しされた助言・結末 %s を検出する", (text) => {
     const messages = itemsOf("discord", "dmMessages", [{ id: "new-message", body: text }]);
     expect(storyOnlyPhrases(messages)).toHaveLength(1);
@@ -86,6 +90,7 @@ describe("検査の決まり", () => {
   it.each([
     "タグで検索すれば見つかる",
     "タグを入れて検索してみて",
+    "検索欄にタグを入れて検索してみて",
     "本名で検索、やってみる",
     "作品の正式名称を調べて",
   ])("対象の助言に当たらない %s は許す", (text) =>
@@ -145,12 +150,12 @@ describe("検査の決まり", () => {
     ]);
   });
 
-  it("既知の文言と同じレコードに増えた別の文言は新規違反になる", () => {
-    const records = [{ id: "dm-kai-0003", body: "本名で検索したら、住所を特定しました" }];
+  it("同じレコードに対象の文言が複数あれば、それぞれ別の違反になる", () => {
+    const records = [{ id: "new-message", body: "本名で検索したら、住所を特定しました" }];
     const keys = storyOnlyPhrases(itemsOf("discord", "dmMessages", records)).map(violationKey);
-    const known = new Set(KNOWN_ISSUES.map(({ key }) => key));
-    expect(keys.filter((key) => !known.has(key))).toEqual([
-      "story-only-phrase discord/dmMessages/dm-kai-0003 … 物語で届くはずの「住所を特定しました」が、静的なデータにある",
+    expect(keys).toEqual([
+      "story-only-phrase discord/dmMessages/new-message … 物語で届くはずの「住所を特定しました」が、静的なデータにある",
+      "story-only-phrase discord/dmMessages/new-message … 物語で届くはずの「本名で検索したら」が、静的なデータにある",
     ]);
   });
 });

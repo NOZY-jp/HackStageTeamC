@@ -46,11 +46,24 @@ const looksLikeNoise = (value: string) =>
   /^(?:https?:|\/)\S+$/.test(value) ||
   /^(?:#(?:[0-9a-f]{3,4}|[0-9a-f]{6}|[0-9a-f]{8})|[0-9a-f]{6})$/i.test(value);
 
+/** 画面にそのまま出る欄（本文・自己紹介まわり）。URL だけの値でも表示されるので、検査の対象に含める。 */
+const DISPLAY_TEXT_KEYS = new Set([
+  "body",
+  "text",
+  "bio",
+  "description",
+  "authorProfile",
+  "workplace",
+  "location",
+  "profileUrl",
+  "topic",
+]);
+
 function walk(value: unknown, key: string, path: string, item: DataItem) {
   if (typeof value === "string") {
     if (isTimeKey(key)) item.times.push({ key, value });
-    // URL だけでも、投稿やチャットの本文にはそのまま表示される。
-    else if (key === "body" || key === "text" || !looksLikeNoise(value)) item.texts.push(value);
+    // URL だけでも、投稿やチャットの本文・自己紹介の欄にはそのまま表示される。
+    else if (DISPLAY_TEXT_KEYS.has(key) || !looksLikeNoise(value)) item.texts.push(value);
     return;
   }
   if (Array.isArray(value)) {

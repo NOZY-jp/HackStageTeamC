@@ -1,5 +1,6 @@
 import { photoContestResult } from "@/lib/blog-like/data/contest";
 import { fbUsers, SPOILER_USER_ID } from "@/lib/facebook-like/data/users";
+import { GAME_NOW } from "@/lib/platform/game-time";
 import {
   FORBIDDEN_NICKNAMES,
   MAIMAI_KANA_READINGS,
@@ -54,21 +55,18 @@ const MAIMAI_NAME_READINGS = new RegExp(
 // #76「追記（2026-11-19・名前とハンドルの確定）」の人物表。
 const OTHER_REAL_NAME_PARTS = ["小路", "花音", "尾崎", "海斗", "杉浦"];
 
-/** #119 の助言・結末。助言の典型的な言い換えも、同じ違反として扱う。 */
+/** #119 の助言・結末。助言の典型的な言い換え（本名を入れる場所を名指す言い方を含む）も、同じ違反として扱う。 */
 const STORY_ONLY_PHRASES = [
   { label: "住所を特定しました", pattern: /住所を特定しました/ },
   {
     label: "本名で検索したら",
     pattern:
-      /本名\s*(?:で|を(?:\s*(?:入れ|入力し)て)?)\s*(?:検索(?:したら|すれば|すると|するなら|して|しよう|でき(?:る|ます|れば|たら))|調べ(?:たら|れば|ると|るなら|て|よう|られ(?:る|ます)))/,
+      /本名\s*(?:で|を(?:\s*(?:入れ|入力し)て)?)\s*(?:検索(?:したら|すれば|すると|するなら|して|しよう|でき(?:る|ます|れば|たら))|調べ(?:たら|れば|ると|るなら|て|よう|られ(?:る|ます)))|検索(?:欄|窓|フォーム|バー)\s*(?:に|へ)[^。、\n]{0,10}?本名\s*を?\s*(?:入れ|入力し|打ち込|打っ)|本名\s*を?\s*検索(?:欄|窓|フォーム|バー)\s*に?\s*(?:入れ|入力し|打ち込|打っ)/,
   },
 ];
 
-/**
- * ゲームの「いま」。静的な過去のデータは、すべてこれ以前に置く（#119）。
- * #159 の STORY_NOW と同じ値。#159 がマージされたら、そちらを import する
- */
-export const GAME_NOW = "2026-11-25T23:30:00+09:00";
+/** ゲームの「いま」。静的な過去のデータは、すべてこれ以前に置く（#119）。定義は lib/platform/game-time.ts */
+export { GAME_NOW };
 
 /** 日時の形。時刻つきはタイムゾーン必須（+09:00 か Z）。登録日のような日付だけの値は YYYY-MM-DD */
 const DATE_TIME = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}(:\d{2}(\.\d+)?)?(Z|[+-]\d{2}:\d{2})$/;
