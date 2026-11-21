@@ -2207,6 +2207,10 @@ a.tw-account:focus-visible {
   width: 100%;
 }
 
+.tw-search-tabs {
+  border-bottom: var(--pane-border) solid var(--tw-border);
+}
+
 .tw-tab {
   flex: 1;
   display: flex;
@@ -2637,31 +2641,27 @@ a.tw-time:hover {
 }
 
 .tw-profile-body {
-  position: relative;
   padding: 12px 16px 16px;
 }
 
-/* プロフィールの右上のボタン（フォロー・プロフィールを編集。押せない見た目だけ） */
-.tw-profile-action {
-  position: absolute;
-  top: 12px;
-  right: 16px;
-}
-
-.tw-profile-action .tw-follow-button {
-  min-height: 36px;
-  padding: 0 16px;
-  font-size: 15px;
-}
-
-/* 検索のタブ（話題・最新・アカウント・メディア） */
-.tw-search-tabs {
-  border-bottom: 1px solid var(--tw-border);
+.tw-profile-heading {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  gap: 8px;
+  margin-bottom: 12px;
 }
 
 .tw-profile-avatar {
   margin-top: -68px;
-  margin-bottom: 12px;
+}
+
+.tw-follow-button.tw-profile-action {
+  height: auto;
+  min-height: 36px;
+  max-width: 100%;
+  margin-inline-start: auto;
+  font-size: 15px;
 }
 
 .tw-profile-name {

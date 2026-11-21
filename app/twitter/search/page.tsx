@@ -25,7 +25,7 @@ type SearchTab = (typeof SEARCH_TABS)[number]["key"];
 
 function tabOf(value: string | string[] | undefined): SearchTab {
   const raw = Array.isArray(value) ? value[0] : value;
-  return SEARCH_TABS.some((tab) => tab.key === raw) ? (raw as SearchTab) : "top";
+  return SEARCH_TABS.find((tab) => tab.key === raw)?.key ?? "top";
 }
 
 /** /twitter/search?q=… の検索ページ。ユーザーとポストをまとめて出す。 */

@@ -52,11 +52,11 @@ export function ProfileShell({
           aria-hidden="true"
         />
         <div className="tw-profile-body">
-          <div className="tw-profile-avatar">
-            <Avatar user={user} size="xl" />
-          </div>
-          <div className="tw-profile-action">
-            <button type="button" className="tw-follow-button" disabled>
+          <div className="tw-profile-heading">
+            <div className="tw-profile-avatar">
+              <Avatar user={user} size="xl" />
+            </div>
+            <button type="button" className="tw-follow-button tw-profile-action" disabled>
               {user.handle === HAL_HANDLE ? "プロフィールを編集" : "フォロー"}
             </button>
           </div>

@@ -71,7 +71,7 @@ export function TwitterNav() {
           </Link>
         ))}
       </nav>
-      <button type="button" className="tw-post-button" disabled title="このデモでは投稿できません">
+      <button type="button" className="tw-post-button" aria-label="ポストする" disabled>
         <span className="tw-post-button-label">ポストする</span>
         <span className="tw-post-button-icon" aria-hidden="true">
           <ComposeIcon />
