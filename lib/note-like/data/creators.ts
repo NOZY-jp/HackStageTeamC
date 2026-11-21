@@ -3,8 +3,9 @@ import type { Creator } from "../types";
 /** 書き手。脚本（docs/）が固まるまでの仮データ。 */
 export const creators: Creator[] = [
   {
-    id: "mai_yoru",
-    displayName: "mai",
+    // 旧ブログ（ぽちブロ）からの引っ越し先。ID は lib/blog-like の LEAF_CREATOR_ID と揃える
+    id: "maimai",
+    displayName: "MaiMai",
     bio: "夜にゲームをして、朝に後悔する会社員。日記と、好きなものの話。",
     avatar: "/note-like/avatars/mai.svg",
     avatarColor: "#7c9cbf",

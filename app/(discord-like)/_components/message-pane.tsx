@@ -1,8 +1,22 @@
 "use client";
 
-import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
+import {
+  type ReactNode,
+  useCallback,
+  useEffect,
+  useLayoutEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 import { fetchMessagePage } from "@/app/(discord-like)/_actions/message-page";
-import type { MemberView, Message, MessageAuthor, MessageView } from "@/lib/discord-like/types";
+import type {
+  MemberView,
+  Message,
+  MessageAuthor,
+  MessageView,
+  VoiceSession,
+} from "@/lib/discord-like/types";
 import { useLocalMessages } from "./local-messages-context";
 import { MessageComposer } from "./message-composer";
 import { MessageList } from "./message-list";
@@ -53,6 +67,8 @@ export function MessagePane({
   topic,
   showHash,
   headerAvatar,
+  headerAction,
+  voiceSessions = [],
   members = [],
   focusMessageId,
 }: {
@@ -63,6 +79,10 @@ export function MessagePane({
   topic?: string;
   showHash?: boolean;
   headerAvatar?: { displayName: string; avatarColor: string };
+  /** ヘッダ右端の導線（DM の通話ボタンなど）。 */
+  headerAction?: ReactNode;
+  /** 通話履歴の算出に使う VoiceSession（#149） */
+  voiceSessions?: VoiceSession[];
   /** メンバー一覧（サーバー側で作って渡す）。 */
   members?: MemberView[];
   /** 検索結果からジャンプしてきたメッセージ（強調して表示する）。 */
@@ -268,6 +288,8 @@ export function MessagePane({
       topic={topic}
       showHash={showHash}
       headerAvatar={headerAvatar}
+      headerAction={headerAction}
+      voiceSessions={voiceSessions}
       members={members}
       focusMessageId={focusMessageId}
       onLoadOlder={loadOlder}

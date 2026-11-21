@@ -76,9 +76,8 @@ describe("ページ metadata（#77 第2・3段階）", () => {
     expect(meta.alternates?.canonical).toBe(canonicalUrl(creatorHref(CREATOR.id)));
   });
 
-  it("leaf の記事は タイトル・要約・canonical を返す（記事0件でも落ちない）", async () => {
-    // 現データの記事は0件。generateStaticParams の仮パスでも例外にしない
-    expect(listArticles()).toHaveLength(0);
+  it("leaf の記事は タイトル・要約・canonical を返す（存在しない記事でも落ちない）", async () => {
+    // 存在しない記事（generateStaticParams の仮パス相当）は metadata を返さない
     const empty = await noteMetadata({
       params: params({ creatorId: "_", noteId: "_" }),
       searchParams: emptySearch,
@@ -86,17 +85,16 @@ describe("ページ metadata（#77 第2・3段階）", () => {
     expect(empty).toEqual({});
 
     const article = listArticles()[0];
-    if (article) {
-      const meta = await noteMetadata({
-        params: params({ creatorId: article.creatorId, noteId: article.id }),
-        searchParams: emptySearch,
-      });
-      expect(meta.title).toBe(article.title);
-      expect(meta.description).toBe(article.excerpt);
-      expect(meta.alternates?.canonical).toBe(
-        canonicalUrl(`/note/${article.creatorId}/n/${article.id}`),
-      );
-    }
+    if (!article) throw new Error("記事がない");
+    const meta = await noteMetadata({
+      params: params({ creatorId: article.creatorId, noteId: article.id }),
+      searchParams: emptySearch,
+    });
+    expect(meta.title).toBe(article.title);
+    expect(meta.description).toBe(article.excerpt);
+    expect(meta.alternates?.canonical).toBe(
+      canonicalUrl(`/note/${article.creatorId}/n/${article.id}`),
+    );
   });
 });
 

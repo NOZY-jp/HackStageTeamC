@@ -19,8 +19,21 @@ export type ArticleBlock =
   | { kind: "paragraph"; text: string }
   | { kind: "heading"; text: string }
   | { kind: "quote"; text: string }
-  /** 本文中の画像。alt は内容の説明、caption は画像の下に出す一言 */
-  | { kind: "image"; src: string; alt: string; width: number; height: number; caption?: string }
+  /**
+   * 本文中の画像。alt は内容の説明、caption は画像の下に出す一言。
+   * href を渡すと、その画像の原寸を新しいタブで開ける（縮小表示で読めない文字がある場合）。
+   */
+  | {
+      kind: "image";
+      src: string;
+      alt: string;
+      width: number;
+      height: number;
+      caption?: string;
+      href?: string;
+      /** 原寸リンクのアクセシブル名 */
+      hrefLabel?: string;
+    }
   | { kind: "divider" };
 
 export type Article = {

@@ -45,14 +45,11 @@ export function FacebookLeftSidebar() {
 
       <div className="fb-sidebar-divider" />
 
-      <div className="px-2">
-        <h2 className="text-xs font-semibold text-[var(--fb-muted)] mb-2">
-          HackStage TeamC コミュニティ
-        </h2>
-        <p className="text-xs text-[var(--fb-muted)] leading-relaxed">
-          Discord 側と同じメンバーが参加している社内・チーム向け SNS モックです。
-        </p>
-      </div>
+      <p className="fb-sidebar-footer">
+        プライバシー · 利用規約 · 広告 · Cookie
+        <br />
+        talkup © 2026
+      </p>
     </aside>
   );
 }
