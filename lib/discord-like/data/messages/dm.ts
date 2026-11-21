@@ -8,7 +8,7 @@ export const messagesByDMThread: Record<string, Message[]> = {
       channelId: "dm-maimai",
       sentAt: "2026-04-18T23:05:00+09:00",
       authorId: "maimai",
-      body: "ねむい。あと一戦って言ってからもう三戦した",
+      body: "ねむい。あと一戦のつもりが三戦した",
     },
     {
       // ゲームの話の流れで、いまの画面を1枚だけ送る（ブログの話の前）
@@ -16,7 +16,7 @@ export const messagesByDMThread: Record<string, Message[]> = {
       channelId: "dm-maimai",
       sentAt: "2026-04-18T23:06:00+09:00",
       authorId: "maimai",
-      body: "見て、集会所で押すボタンも間違えて写真撮った",
+      body: "押すボタン間違えて写真撮ってた",
       attachments: [
         {
           id: "dm-maimai-att-2026",
@@ -31,42 +31,42 @@ export const messagesByDMThread: Record<string, Message[]> = {
       channelId: "dm-maimai",
       sentAt: "2026-04-18T23:10:00+09:00",
       authorId: "hal",
-      body: "右の入口でずっと壁向いてるのそれか。明日早いんじゃなかった？",
+      body: "それ、右の入口で壁向いてたやつ？ 明日早くない？",
     },
     {
       id: "dm-maimai-0065",
       channelId: "dm-maimai",
       sentAt: "2026-04-18T23:11:00+09:00",
       authorId: "maimai",
-      body: "明日は休み。こうなるの分かってたから水だけ先に持ってきた",
+      body: "明日休み。水だけ持ってきた",
     },
     {
       id: "dm-maimai-0059",
       channelId: "dm-maimai",
       sentAt: "2026-04-18T23:12:00+09:00",
       authorId: "hal",
-      body: "僕が中3でやってたら次の日の朝から怒られてる。まいまいもその頃から夜にやってた？",
+      body: "中3の頃からこんな時間までやってた？",
     },
     {
       id: "dm-maimai-0060",
       channelId: "dm-maimai",
       sentAt: "2026-04-18T23:15:00+09:00",
       authorId: "maimai",
-      body: "やってた。中3の頃なんて攻略ブログまで書いてたよ。モンハンで次に何されるか忘れるから、自分用に絵までつけてた",
+      body: "やってた。攻略ブログまで書いてた、自分用に絵つきで",
     },
     {
       id: "dm-maimai-0061",
       channelId: "dm-maimai",
       sentAt: "2026-04-18T23:17:00+09:00",
       authorId: "hal",
-      body: "絵つきなのいいな。今からでも読める？",
+      body: "絵つき、見たい。今から読める？",
     },
     {
       id: "dm-maimai-0064",
       channelId: "dm-maimai",
       sentAt: "2026-04-18T23:19:00+09:00",
       authorId: "maimai",
-      body: "前のブログはもう閉じちゃった。2020年の2月にnoteに移行したけど、自分の絵が雑すぎてどれ持ってったか覚えてない",
+      body: "前のは閉じた。2020年の2月にnoteへ移行して、どれ持っていったか覚えてない",
     },
     {
       id: "dm-maimai-0063",
