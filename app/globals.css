@@ -6728,9 +6728,8 @@ a.tw-dm-item:focus-visible {
 }
 
 .call-tiles[data-layout="grid"] .call-tile-label {
-  position: absolute;
-  left: 10px;
-  bottom: 8px;
+  position: static;
+  margin-top: 10px;
   gap: 6px;
   padding: 2px 8px;
   border-radius: 8px;
@@ -6816,9 +6815,76 @@ a.tw-dm-item:focus-visible {
   flex: 0 0 auto;
 }
 
-/* DMの共有中: 相手の大タイルは隠し、共有画面と自分の小窓だけにする（レイアウトの跳ねを防ぐ） */
+/* DMの共有中: 相手は右上の小窓に残し、自分は右下に幅を確保（名前を切らない） */
+.call-stage[data-sharing="true"] .call-tiles[data-layout="dm"] {
+  position: absolute;
+  inset: 0;
+  display: block;
+  pointer-events: none;
+}
+
 .call-stage[data-sharing="true"] .call-tiles[data-layout="dm"] .call-tile:first-child {
-  display: none;
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  width: min(160px, 28%);
+  height: 120px;
+  min-height: 0;
+  padding: 4px;
+}
+
+.call-stage[data-sharing="true"] .call-tiles[data-layout="dm"] .call-tile:first-child .call-tile-avatar {
+  width: 56px;
+  height: 56px;
+  font-size: 22px;
+}
+
+.call-stage[data-sharing="true"] .call-tiles[data-layout="dm"] .call-tile:nth-child(2) {
+  width: min(240px, 46%);
+}
+
+/* 共有中のプレースホルダー（ウィンドウ風） */
+.call-share-window {
+  display: grid;
+  gap: 6px;
+  width: min(560px, 72%);
+  margin: 0 auto;
+  padding: 10px;
+  border: 1px solid var(--color-divider);
+  border-radius: 10px;
+  background-color: var(--color-bg-panel);
+}
+
+.call-share-dots {
+  display: flex;
+  gap: 4px;
+}
+
+.call-share-dots i {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background-color: var(--color-divider);
+}
+
+.call-share-bar {
+  display: block;
+  height: 8px;
+  border-radius: 4px;
+  background-color: color-mix(in srgb, var(--color-divider) 60%, transparent);
+}
+
+.call-share-canvas {
+  display: block;
+  height: 120px;
+  border-radius: 6px;
+  background-color: color-mix(in srgb, var(--color-bg-input) 85%, transparent);
+  background-image: linear-gradient(
+    135deg,
+    transparent 0 46%,
+    color-mix(in srgb, var(--color-divider) 55%, transparent) 46% 54%,
+    transparent 54%
+  );
 }
 
 /* 参加者一覧（右パネル） */

@@ -146,8 +146,13 @@ describe("画面共有中のレイアウト", () => {
     expect(css).toMatch(
       /\.call-stage\[data-sharing="true"\] \.call-tiles\[data-layout="grid"\] \{[^}]*flex-direction: column/,
     );
+    // DMは相手を消さず、右上の小窓に残す
     expect(css).toMatch(
-      /\.call-stage\[data-sharing="true"\] \.call-tiles\[data-layout="dm"\] \.call-tile:first-child \{\s*display: none/,
+      /\.call-stage\[data-sharing="true"\] \.call-tiles\[data-layout="dm"\] \.call-tile:first-child \{[^}]*position: absolute/,
+    );
+    // 共有中の自分は幅を確保（名前を切らない）
+    expect(css).toMatch(
+      /\.call-stage\[data-sharing="true"\] \.call-tiles\[data-layout="dm"\] \.call-tile:nth-child\(2\) \{[^}]*width: min\(240px/,
     );
   });
 });

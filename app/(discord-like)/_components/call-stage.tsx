@@ -375,6 +375,16 @@ export function CallStage({
 
       {sharing ? (
         <div className="call-share" role="status">
+          {/* 共有中の内容らしく見せる（読み込み失敗に見えないように枠と帯を出す） */}
+          <div className="call-share-window" aria-hidden="true">
+            <span className="call-share-dots">
+              <i />
+              <i />
+              <i />
+            </span>
+            <span className="call-share-bar" />
+            <span className="call-share-canvas" />
+          </div>
           <p>画面を共有しています</p>
           <span className="call-share-hint">停止するには操作バーの「共有を停止」</span>
         </div>
