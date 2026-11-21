@@ -173,7 +173,7 @@ describe("searchPosts", () => {
   it("投稿者の表示名・handleも検索対象にする", () => {
     // displayName「Hal」とhandle「kohakunchos0117」が別文字列の fixture で、
     // 片方の経路が壊れても検出できるようにそれぞれ独立に検証する
-    expect(searchPosts("Hal").map((post) => post.id)).toContain("post-002");
+    expect(searchPosts("琥珀").map((post) => post.id)).toContain("post-002");
     expect(searchPosts("kohakunchos0117").map((post) => post.id)).toContain("post-002");
     // 本文に handle を含まない tw-hal 本人の投稿も返る
     expect(searchPosts("kohakunchos0117").map((post) => post.id)).toContain("post-014");

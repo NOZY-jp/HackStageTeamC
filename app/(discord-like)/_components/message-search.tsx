@@ -5,13 +5,14 @@ import {
   type KeyboardEvent as ReactKeyboardEvent,
   useCallback,
   useEffect,
+  useId,
   useMemo,
   useRef,
   useState,
 } from "react";
 import { searchMessages } from "@/app/(discord-like)/_actions/message-search";
 import { useOptionalStory } from "@/components/common/story/story-provider";
-import type { SearchHit, SearchResponse } from "@/lib/discord-like/search";
+import type { MatchedUser, SearchHit, SearchResponse } from "@/lib/discord-like/search";
 import {
   parseQuery,
   type SearchOrder,
@@ -33,6 +34,7 @@ type SearchState =
   | { kind: "results"; response: Extract<SearchResponse, { ok: true }> };
 
 const DEBOUNCE_MS = 180;
+const RESULT_SELECTOR = ".search-result, .search-user-profile-button";
 
 const escapeRegExp = (value: string): string => value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 
@@ -88,6 +90,52 @@ function Highlight({ text, terms }: { text: string; terms: string[] }) {
         part.hit ? <mark key={`hit-${part.at}`}>{part.text}</mark> : part.text,
       )}
     </>
+  );
+}
+
+function SearchUserProfile({
+  user,
+  onOpen,
+  onNavigate,
+}: {
+  user: MatchedUser;
+  onOpen: () => void;
+  onNavigate: () => void;
+}) {
+  const [open, setOpen] = useState(false);
+  const profileId = useId();
+  const label = `${user.displayName}（@${user.handle}）`;
+
+  if (!user.profileUrl) {
+    return <span>{label}</span>;
+  }
+
+  return (
+    <div>
+      <button
+        type="button"
+        className="search-user-profile-button"
+        aria-expanded={open}
+        aria-controls={open ? profileId : undefined}
+        onClick={() => {
+          if (!open) {
+            onOpen();
+          }
+          setOpen(!open);
+        }}
+      >
+        {user.displayName}
+      </button>
+      {open ? (
+        <div id={profileId} className="message-profile">
+          <p className="members-profile-handle">@{user.handle}</p>
+          {user.status === "offline" ? <p className="members-profile-note">オフライン</p> : null}
+          <Link className="members-profile-link" href={user.profileUrl} onClick={onNavigate}>
+            {user.profileUrl.replace(/^\//, "")}
+          </Link>
+        </div>
+      ) : null}
+    </div>
   );
 }
 
@@ -231,7 +279,7 @@ export function MessageSearch() {
       return;
     }
     const buttons = Array.from(
-      resultsRef.current?.querySelectorAll<HTMLButtonElement>(".search-result") ?? [],
+      resultsRef.current?.querySelectorAll<HTMLButtonElement>(RESULT_SELECTOR) ?? [],
     );
     if (buttons.length === 0) {
       return;
@@ -354,7 +402,7 @@ export function MessageSearch() {
                     if (event.key === "ArrowDown" && showResults) {
                       event.preventDefault();
                       resultsRef.current
-                        ?.querySelector<HTMLButtonElement>(".search-result")
+                        ?.querySelector<HTMLButtonElement>(RESULT_SELECTOR)
                         ?.focus();
                     }
                   }}
@@ -432,32 +480,21 @@ export function MessageSearch() {
                       : `全${response.total}件中 ${response.hits.length}件を表示`}
                   </p>
                   {response.matchedUsers.length > 0 ? (
-                    <p className="search-users">
-                      該当ユーザー:{" "}
-                      {response.matchedUsers.map((user, index) => (
-                        <span key={user.id}>
-                          {index > 0 ? "、" : null}
-                          {user.displayName}（@{user.handle}）
-                          {user.profileUrl ? (
-                            <>
-                              {" "}
-                              <Link
-                                href={user.profileUrl}
-                                className="text-(--color-accent-fg) underline"
-                                onClick={() => {
-                                  if (user.id === "denden") {
-                                    story?.setFlag("s05-old-discord-user");
-                                  }
-                                  close();
-                                }}
-                              >
-                                {user.profileUrl.replace(/^\//, "")}
-                              </Link>
-                            </>
-                          ) : null}
-                        </span>
+                    <div className="search-users">
+                      <p>該当ユーザー</p>
+                      {response.matchedUsers.map((user) => (
+                        <SearchUserProfile
+                          key={user.id}
+                          user={user}
+                          onOpen={() => {
+                            if (user.id === "denden") {
+                              story?.setFlag("s05-old-discord-user");
+                            }
+                          }}
+                          onNavigate={close}
+                        />
                       ))}
-                    </p>
+                    </div>
                   ) : null}
                   {response.hits.length > 0 ? (
                     <ul className="search-result-list">

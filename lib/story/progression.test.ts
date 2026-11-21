@@ -110,14 +110,9 @@ describe("進行チェック（各プラットフォームのデータに手が�
       ["mhc-lfg-0901", "mhc-lfg-0902", "mhc-lfg-0903", "mhc-lfg-0904"].includes(message.id),
     );
     expect(oldPosts).toHaveLength(4);
-    expect(
-      oldPosts.some(
-        (message) =>
-          message.authorId === "denden" &&
-          OLD_DISCORD_ID !== undefined &&
-          message.body.includes(OLD_DISCORD_ID),
-      ),
-    ).toBe(true);
+    expect(oldPosts.filter((message) => message.authorId === "denden")).toHaveLength(3);
+    // 旧IDは移行記事の画像から拾い、Discordのアカウントと照合する。
+    expect(oldPosts.map((message) => message.body).join("\n")).not.toContain(old?.handle);
   });
 
   it("段階6: そのプロフィールのリンクは、ブログのトップではなく記事一覧（マイリスト）で、実在する", () => {

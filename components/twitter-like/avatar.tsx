@@ -14,6 +14,8 @@ export function Avatar({
   if (user.avatarSrc) {
     return (
       <span className="tw-avatar" data-size={size} data-kind="image">
+        {/* 小さなSVGアイコンは最適化不要なので img のまま（#169） */}
+        {/* biome-ignore lint/performance/noImgElement: 200x200 の静的SVGで、next/image の最適化は不要 */}
         <img src={user.avatarSrc} alt={user.avatarAlt ?? `${user.displayName}のアイコン`} />
       </span>
     );
