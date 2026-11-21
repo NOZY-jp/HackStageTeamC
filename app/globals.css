@@ -6771,7 +6771,7 @@ a.tw-dm-item:focus-visible {
   transition: transform 0.8s cubic-bezier(0.2, 0.7, 0.2, 1);
 }
 
-/* 3つの SNS の画面を、少しずつ重ねて並べる（真ん中の Twixer をいちばん手前に） */
+/* 3つの SNS の画面を、少しずつ重ねて並べる（右端の Discord をいちばん手前に） */
 .tt-feed {
   position: absolute;
   top: -25vh;
@@ -6788,8 +6788,8 @@ a.tw-dm-item:focus-visible {
 }
 
 /*
- * 左から talkup・Twixer・Discord。真ん中のいちばん手前は、黒くてタイトルが読みやすい Twixer。
- * Discord は文字が少なく右側が空くので、右端に置いて空きを画面の外に逃がす
+ * 左から talkup・Twixer・Discord。いちばん手前は Discord（右端に置いて、文字の少ない右側の空きを画面の外に逃がす）。
+ * 奥の2枚は少し小さく暗くして、奥行きを出す
  */
 .tt-feed[data-platform="talkup"] {
   left: max(-6vw, -90px);
@@ -6799,18 +6799,18 @@ a.tw-dm-item:focus-visible {
 
 .tt-feed[data-platform="twixer"] {
   left: calc(50% - min(23vw, 310px));
-  z-index: 3;
-  transform: rotate(-5deg);
+  z-index: 2;
+  transform: rotate(-5deg) scale(0.94);
 }
 
 .tt-feed[data-platform="discord"] {
   right: max(-10vw, -150px);
-  z-index: 2;
-  transform: rotate(-7deg) scale(0.94);
+  z-index: 3;
+  transform: rotate(-7deg);
 }
 
 /* 奥の2枚は少し暗くして、奥行きを出す */
-.tt-feed[data-platform="discord"]::after,
+.tt-feed[data-platform="twixer"]::after,
 .tt-feed[data-platform="talkup"]::after {
   content: "";
   position: absolute;
