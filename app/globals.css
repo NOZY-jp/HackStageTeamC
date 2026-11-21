@@ -7957,3 +7957,18 @@ article div[class~="justify-between"][class~="text-xs"] > div {
     transition: none;
   }
 }
+
+/* 写真を見せる場面（#226）。画面を覆わず、縦横比を保って中央に収める */
+.sp-photo {
+  display: grid;
+  place-items: center;
+  overflow: hidden;
+}
+
+.sp-photo-image {
+  width: auto;
+  height: auto;
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: contain;
+}
