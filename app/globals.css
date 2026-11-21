@@ -6839,7 +6839,11 @@ a.tw-dm-item:focus-visible {
   opacity: 0.7;
 }
 
-.call-tiles[data-layout="dm"] .call-tile:first-child .call-tile-avatar {
+/* 共有中の右上の小窓だけ、アバターを小さくする（通常のDM通話には効かせない） */
+.call-stage[data-sharing="true"]
+  .call-tiles[data-layout="dm"]
+  .call-tile:first-child
+  .call-tile-avatar {
   width: 56px;
   height: 56px;
   font-size: 22px;

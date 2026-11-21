@@ -156,3 +156,22 @@ describe("画面共有中のレイアウト", () => {
     );
   });
 });
+
+describe("共有を止めた後の通常表示", () => {
+  it("小窓用の56pxアバターは共有中だけに効く（通常は160px以上）", async () => {
+    const css = await import("node:fs/promises").then((fs) =>
+      fs.readFile("app/globals.css", "utf8"),
+    );
+    // 素の（共有中でない）DMタイルに56pxを当てない
+    expect(css).not.toMatch(
+      /(^|\n)\.call-tiles\[data-layout="dm"\] \.call-tile:first-child \.call-tile-avatar \{[^}]*width: 56px/,
+    );
+    expect(css).toMatch(
+      /\.call-stage\[data-sharing="true"\] \.call-tiles\[data-layout="dm"\] \.call-tile:first-child \.call-tile-avatar \{[^}]*width: 56px/,
+    );
+    // 通常時は clamp(160px…) が残っている
+    expect(css).toMatch(
+      /\.call-tiles\[data-layout="dm"\] \.call-tile:first-child \.call-tile-avatar \{[^}]*clamp\(160px/,
+    );
+  });
+});
