@@ -1,12 +1,14 @@
 import type { Guild } from "../../types";
+import { FRIEND_MEMBER_IDS } from "../members";
 
-/** リア友サーバー（#132）。テキスト3・ボイス1。かのんは入れない（面識なしの設定）。 */
+/** リア友サーバー（#132）。テキスト3・ボイス1。かのんは入れない（面識なしの設定）。メンバー20人（#163）。 */
 export const friend: Guild = {
   id: "friend",
   urlId: "1187002356428841051",
   name: "いつメン",
   iconColor: "#c9973f",
   initials: "IT",
+  memberIds: FRIEND_MEMBER_IDS,
   categories: [
     { id: "friend-cat-text", guildId: "friend", name: "テキストチャンネル", position: 1 },
     { id: "friend-cat-voice", guildId: "friend", name: "ボイスチャンネル", position: 2 },

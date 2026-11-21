@@ -23,6 +23,9 @@ const AWAY_FROM_BOTTOM = 320;
 const LOAD_MARGIN = "200px";
 const SKELETON_ROWS = ["a", "b", "c"] as const;
 
+/** プロフィールのリンクは本文でなくリンク先そのものを見せる（#163 で文言のハードコードをやめた）。 */
+const profileLinkLabel = (url: string) => url.replace(/^\//, "");
+
 /** 表示は固定データの UTC 表記をそのまま使う（相対表記にしない）。 */
 const dateOf = (sentAt: string) => sentAt.slice(0, 10);
 const formatDate = (sentAt: string) => {
@@ -110,11 +113,22 @@ export function MessageList({
   const [awayFromBottom, setAwayFromBottom] = useState(false);
   const [showMembers, setShowMembers] = useState(false);
   const [openProfileId, setOpenProfileId] = useState<string | null>(null);
+  const [memberQuery, setMemberQuery] = useState("");
 
   // 名簿が無い画面（DM など）ではトグルもパネルも出さない
   const hasMembers = members.length > 0;
-  const onlineMembers = members.filter((member) => member.status !== "offline");
-  const offlineMembers = members.filter((member) => member.status === "offline");
+  // パネル内の絞り込み（displayName/handle の部分一致・大文字小文字を見ない）
+  const memberFilter = memberQuery.trim().toLowerCase();
+  const matchesMember = (member: MemberView) =>
+    memberFilter === "" ||
+    member.displayName.toLowerCase().includes(memberFilter) ||
+    member.handle.toLowerCase().includes(memberFilter);
+  const onlineMembers = members.filter(
+    (member) => member.status !== "offline" && matchesMember(member),
+  );
+  const offlineMembers = members.filter(
+    (member) => member.status === "offline" && matchesMember(member),
+  );
 
   // 初回表示・チャンネル切替時は最下部（最新）へ
   // 検索からジャンプしたときは、最新ではなく該当メッセージへ寄せる
@@ -125,6 +139,13 @@ export function MessageList({
       element.scrollTop = element.scrollHeight;
       setAwayFromBottom(false);
     }
+  }, [resetKey]);
+
+  // チャンネルが変わったらメンバーの絞り込みも戻す（別サーバーの名簿に持ち越さない）
+  // biome-ignore lint/correctness/useExhaustiveDependencies: resetKey はチャンネル切替の合図
+  useEffect(() => {
+    setMemberQuery("");
+    setOpenProfileId(null);
   }, [resetKey]);
 
   // ジャンプ先のメッセージを画面中央に出す。
@@ -388,59 +409,81 @@ export function MessageList({
               ×
             </button>
           </div>
+          <div className="members-filter">
+            <label htmlFor="members-filter-input" className="visually-hidden">
+              メンバーを検索
+            </label>
+            <input
+              id="members-filter-input"
+              type="search"
+              className="members-filter-input"
+              value={memberQuery}
+              placeholder="メンバーを検索"
+              autoComplete="off"
+              onChange={(event) => setMemberQuery(event.target.value)}
+            />
+          </div>
           <div className="members-panel-scroll">
             {[
               { label: `オンライン — ${onlineMembers.length}`, list: onlineMembers },
               { label: `オフライン — ${offlineMembers.length}`, list: offlineMembers },
-            ].map((group) => (
-              <section key={group.label} className="members-group" aria-label={group.label}>
-                <h3 className="members-group-title">{group.label}</h3>
-                <ul className="members-list">
-                  {group.list.map((member) => (
-                    <li key={member.id} className="members-item">
-                      <button
-                        type="button"
-                        className="members-row"
-                        aria-expanded={openProfileId === member.id}
-                        onClick={() =>
-                          setOpenProfileId((previous) =>
-                            previous === member.id ? null : member.id,
-                          )
-                        }
-                      >
-                        <span
-                          aria-hidden="true"
-                          className="members-avatar"
-                          style={{ backgroundColor: member.avatarColor }}
+            ]
+              .filter((group) => group.list.length > 0)
+              .map((group) => (
+                <section key={group.label} className="members-group" aria-label={group.label}>
+                  <h3 className="members-group-title">{group.label}</h3>
+                  <ul className="members-list">
+                    {group.list.map((member) => (
+                      <li key={member.id} className="members-item">
+                        <button
+                          type="button"
+                          className="members-row"
+                          aria-expanded={openProfileId === member.id}
+                          onClick={() =>
+                            setOpenProfileId((previous) =>
+                              previous === member.id ? null : member.id,
+                            )
+                          }
                         >
-                          {member.displayName.slice(0, 1)}
-                        </span>
-                        <span className="members-names">
-                          <span className="members-name">{member.displayName}</span>
-                          <span className="members-handle">{member.handle}</span>
-                        </span>
-                        <span className="members-status" data-status={member.status ?? "offline"} />
-                      </button>
-                      {openProfileId === member.id ? (
-                        <div className="members-profile">
-                          <p className="members-profile-handle">{member.handle}</p>
-                          {member.profileUrl ? (
-                            <a
-                              className="members-profile-link"
-                              href={member.profileUrl}
-                              target="_blank"
-                              rel="noreferrer noopener"
-                            >
-                              でんでんの狩猟日記 ぜんぶ
-                            </a>
-                          ) : null}
-                        </div>
-                      ) : null}
-                    </li>
-                  ))}
-                </ul>
-              </section>
-            ))}
+                          <span
+                            aria-hidden="true"
+                            className="members-avatar"
+                            style={{ backgroundColor: member.avatarColor }}
+                          >
+                            {member.displayName.slice(0, 1)}
+                          </span>
+                          <span className="members-names">
+                            <span className="members-name">{member.displayName}</span>
+                            <span className="members-handle">{member.handle}</span>
+                          </span>
+                          <span
+                            className="members-status"
+                            data-status={member.status ?? "offline"}
+                          />
+                        </button>
+                        {openProfileId === member.id ? (
+                          <div className="members-profile">
+                            <p className="members-profile-handle">{member.handle}</p>
+                            {member.profileUrl ? (
+                              <a
+                                className="members-profile-link"
+                                href={member.profileUrl}
+                                target="_blank"
+                                rel="noreferrer noopener"
+                              >
+                                {profileLinkLabel(member.profileUrl)}
+                              </a>
+                            ) : null}
+                          </div>
+                        ) : null}
+                      </li>
+                    ))}
+                  </ul>
+                </section>
+              ))}
+            {onlineMembers.length === 0 && offlineMembers.length === 0 ? (
+              <p className="members-panel-empty">メンバーが見つかりません</p>
+            ) : null}
           </div>
         </aside>
       ) : null}

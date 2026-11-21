@@ -47,6 +47,8 @@ export type Guild = {
   initials: string;
   categories: Category[];
   channels: Channel[];
+  /** このサーバーのメンバー（User.id の並び）。メンバー一覧はこの人たちだけを出す（#163）。 */
+  memberIds: string[];
 };
 
 export type MessageAttachment = {

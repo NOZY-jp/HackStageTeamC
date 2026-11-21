@@ -1,12 +1,14 @@
 import type { Guild } from "../../types";
+import { UNIV_MEMBER_IDS } from "../members";
 
-/** 大学の学科サーバー（#132）。テキスト6・ボイス2。 */
+/** 大学の学科サーバー（#132）。テキスト6・ボイス2。メンバー120人（#163）。 */
 export const univ: Guild = {
   id: "univ",
   urlId: "1187002356428840981",
   name: "◯◯大学 情報学科24",
   iconColor: "#3b6fd4",
   initials: "UN",
+  memberIds: UNIV_MEMBER_IDS,
   categories: [
     { id: "univ-cat-text", guildId: "univ", name: "テキストチャンネル", position: 1 },
     { id: "univ-cat-voice", guildId: "univ", name: "ボイスチャンネル", position: 2 },
