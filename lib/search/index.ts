@@ -316,6 +316,15 @@ function includesNormalized(target: string, strippedTarget: string, term: string
   );
 }
 
+const KIND_PRIORITY_BONUS: Record<SearchResultKind, number> = {
+  contest: 300,
+  blog: 240,
+  "blog-entry": 220,
+  "note-creator": 100,
+  "note-article": 0,
+  service: 0,
+};
+
 function scoreServiceDocument(doc: SearchDocument, terms: string[]): number {
   const aliases = doc.serviceAliases ?? [];
   const normalizedAliases = aliases.map((alias) => ({
@@ -340,7 +349,7 @@ function scoreServiceDocument(doc: SearchDocument, terms: string[]): number {
     const exact = normalizedAliases.some(
       (alias) => alias.raw === term || alias.stripped === strippedTerm,
     );
-    score += exact ? 120 : 60;
+    score += exact ? 260 : 120;
   }
   return score;
 }
@@ -370,7 +379,7 @@ function scoreDocument(doc: SearchDocument, query: string, terms: string[]): num
     }
   }
 
-  let score = 0;
+  let score = KIND_PRIORITY_BONUS[doc.kind];
 
   if (
     strippedFullQuery &&

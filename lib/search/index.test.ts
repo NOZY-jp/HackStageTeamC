@@ -117,6 +117,21 @@ describe("lib/search (Seek 検索エンジン)", () => {
     expect(diaryQuery.some((r) => r.kind === "service")).toBe(false);
   });
 
+  it("「弓属性強化ガン積み構成」の検索で閉鎖した旧ブログが leaf 記事より先頭（1位）に出て、禁止語・限定公開を含まない", () => {
+    const results = searchWeb("弓属性強化ガン積み構成");
+    expect(results.length).toBeGreaterThanOrEqual(2);
+    expect(results[0]?.url).toBe("/pochiblo/denden0102/entry/e20200211");
+    expect(results[0]?.snippet).toContain("弓属性強化ガン積み構成");
+
+    for (const result of results) {
+      expect(result.url).not.toContain("/entry/e20190811");
+      const text = [result.title, result.snippet, result.url].join("\n");
+      for (const word of FORBIDDEN_WORDS) {
+        expect(text).not.toContain(word);
+      }
+    }
+  });
+
   it("全角スペース区切りの AND 検索と空クエリを正しく扱う", () => {
     expect(searchWeb("")).toEqual([]);
     expect(searchWeb("　  ")).toEqual([]);
