@@ -4,7 +4,7 @@ import { describe, expect, it } from "vitest";
 import { LEAF_CREATOR_ID } from "@/lib/blog-migration/articles";
 import { articles } from "./data/articles";
 import { creators } from "./data/creators";
-import { listArticles } from "./index";
+import { getArticle, listArticles } from "./index";
 
 /**
  * #211: leaf のトップが MaiMai だけにならないよう、他書き手の記事を足す。
@@ -54,11 +54,16 @@ describe("Leaf のダミー記事（#211）", () => {
       const actual = articles.find((article) => article.id === expected.id);
       expect(actual, expected.id).toEqual(expected);
     }
-    for (const id of ["maimai-2020-02-screenshot", "maimai-2019-08-bow-build"]) {
+    for (const id of ["maimai-2020-02-screenshot"]) {
       expect(
         SNAPSHOT.some((entry) => entry.id === id),
         id,
       ).toBe(true);
     }
+  });
+
+  it("弓装備の移行記事は leaf から削除され、一覧にも出ない（#220）", () => {
+    expect(getArticle(LEAF_CREATOR_ID, "maimai-2019-08-bow-build")).toBeUndefined();
+    expect(listArticles().some((article) => article.id === "maimai-2019-08-bow-build")).toBe(false);
   });
 });
