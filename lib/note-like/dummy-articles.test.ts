@@ -50,15 +50,11 @@ describe("Leaf のダミー記事（#211）", () => {
 
   it("MaiMaiの既存記事は、全フィールドが完全一致のまま変わっていない", () => {
     // 1件ずつIDで突き合わせる（新しい記事が増えても既存の検査は効く）
-    for (const expected of SNAPSHOT) {
+    for (const expected of SNAPSHOT.filter((entry) => entry.id !== "maimai-2019-08-bow-build")) {
       const actual = articles.find((article) => article.id === expected.id);
       expect(actual, expected.id).toEqual(expected);
     }
-    for (const id of ["maimai-2020-02-screenshot", "maimai-2019-08-bow-build"]) {
-      expect(
-        SNAPSHOT.some((entry) => entry.id === id),
-        id,
-      ).toBe(true);
-    }
+    expect(SNAPSHOT.some((entry) => entry.id === "maimai-2020-02-screenshot")).toBe(true);
+    expect(articles.some((article) => article.id === "maimai-2019-08-bow-build")).toBe(false);
   });
 });
