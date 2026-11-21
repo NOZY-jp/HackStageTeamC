@@ -53,5 +53,4 @@ export type Trend = {
   id: string;
   category: string;
   name: string;
-  postCount: number;
 };

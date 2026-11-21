@@ -14,4 +14,15 @@ describe("RightSidebar", () => {
       expect(link.getAttribute("href")).not.toBe(`/twitter/profile/${HAL_HANDLE}`);
     }
   });
+
+  it("おすすめユーザーはフォロー中のアカウントだけ（かのんは出さない）", () => {
+    render(<RightSidebar />);
+    const suggestions = screen.getByRole("region", { name: "おすすめユーザー" });
+    // リョウはかのんをまだ知らない（フォローしていない）のでおすすめに出ない
+    expect(within(suggestions).queryByText("かのん")).toBeNull();
+    expect(within(suggestions).queryByText("@kanon__dayo")).toBeNull();
+    // フォロー中の Mai とソウは出る
+    expect(within(suggestions).queryByText("@mai2mai2")).not.toBeNull();
+    expect(within(suggestions).queryByText("@kaiser018023071")).not.toBeNull();
+  });
 });

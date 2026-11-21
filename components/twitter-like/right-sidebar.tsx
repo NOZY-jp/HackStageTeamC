@@ -1,15 +1,21 @@
 import Link from "next/link";
-import { HAL_HANDLE } from "@/lib/discord-like/data/names";
-import { listTrends, listUsers } from "@/lib/twitter-like";
+import {
+  isProtected,
+  listFollowingIds,
+  listTrends,
+  listUsers,
+  TWITTER_ME_ID,
+} from "@/lib/twitter-like";
 import { Avatar } from "./avatar";
-import { formatCount } from "./format";
-import { SearchIcon, VerifiedBadge } from "./icons";
-import { isVerified } from "./lookup";
+import { SearchIcon } from "./icons";
 
 export function RightSidebar({ hideSearch = false }: { hideSearch?: boolean }) {
   const trends = listTrends();
+  // おすすめはリョウ（閲覧者）が知っている人＝フォロー中のアカウントから出す。
+  // かのんはまだ知らないので出さない。
+  const following = new Set(listFollowingIds(TWITTER_ME_ID));
   const suggestions = listUsers()
-    .filter((user) => user.handle !== HAL_HANDLE)
+    .filter((user) => following.has(user.id) && !isProtected(user))
     .slice(0, 3);
   return (
     <aside className="tw-right" aria-label="サイドバー">
@@ -38,7 +44,6 @@ export function RightSidebar({ hideSearch = false }: { hideSearch?: boolean }) {
               >
                 <span className="tw-trend-meta">{trend.category}</span>
                 <span className="tw-trend-name">{trend.name}</span>
-                <span className="tw-trend-meta">{formatCount(trend.postCount)} 件のポスト</span>
               </Link>
             </li>
           ))}
@@ -57,10 +62,7 @@ export function RightSidebar({ hideSearch = false }: { hideSearch?: boolean }) {
               <Link href={`/twitter/profile/${user.handle}`} className="tw-suggest">
                 <Avatar user={user} />
                 <span className="tw-suggest-text">
-                  <span className="tw-name">
-                    {user.displayName}
-                    {isVerified(user) ? <VerifiedBadge /> : null}
-                  </span>
+                  <span className="tw-name">{user.displayName}</span>
                   <span className="tw-handle">@{user.handle}</span>
                 </span>
               </Link>
