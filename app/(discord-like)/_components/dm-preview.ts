@@ -23,7 +23,10 @@ export function threadPreview(
 ): { preview: string; time: string } {
   const latest = latestConversation(live);
   if (latest && (!base.sentAt || latest.sentAt.localeCompare(base.sentAt) > 0)) {
-    return { preview: latest.body.replace(/\s+/g, " ").slice(0, 80), time: latest.sentAt.slice(11, 16) };
+    return {
+      preview: latest.body.replace(/\s+/g, " ").slice(0, 80),
+      time: latest.sentAt.slice(11, 16),
+    };
   }
   return { preview: base.preview, time: base.time };
 }

@@ -1,8 +1,8 @@
 "use client";
 
-import { useOptionalLocalMessages } from "./local-messages-context";
-import { type DmThreadItem, DmThreadList } from "./dm-thread-list";
 import { threadPreview } from "./dm-preview";
+import { type DmThreadItem, DmThreadList } from "./dm-thread-list";
+import { useOptionalLocalMessages } from "./local-messages-context";
 
 /**
  * DM一覧の表示。物語で新しく届いたメッセージがあれば、そのスレッドの
@@ -18,7 +18,10 @@ export function DmListLive({
   const local = useOptionalLocalMessages();
   const rows = items.map((item) => {
     if (!local) return item;
-    const preview = threadPreview(base[item.id] ?? { preview: item.preview, time: item.time }, local.messagesFor(item.id));
+    const preview = threadPreview(
+      base[item.id] ?? { preview: item.preview, time: item.time },
+      local.messagesFor(item.id),
+    );
     return { ...item, ...preview };
   });
   return <DmThreadList threads={rows} />;
