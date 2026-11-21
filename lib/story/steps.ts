@@ -68,7 +68,7 @@ export const steps: Step[] = [
       {
         platform: "twixer",
         label: "とも（@tomo-0718）のリプライ（post-102）",
-        href: "/twitter/post/post-101",
+        href: "/twitter/profile/mai2mai2",
       },
     ],
     status: { done: true },
