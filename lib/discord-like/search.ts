@@ -284,6 +284,10 @@ export function searchIndex(
               return [];
             }
             return index.users.filter((user) => {
+              // 旧アカウントは画像に写るハンドルを照合して見つける。
+              if (user.id === "denden") {
+                return needles.length === 1 && needles[0] === normalizeName(user.handle);
+              }
               const display = user.displayName.toLowerCase();
               const handle = user.handle.toLowerCase();
               return needles.every((needle) => display.includes(needle) || handle.includes(needle));
