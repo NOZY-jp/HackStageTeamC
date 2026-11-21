@@ -13,6 +13,7 @@ import {
   getUser,
   listDMMessages,
   listMessages,
+  listVoiceSessions,
   listVoiceStates,
   loadUntil,
 } from "@/lib/discord-like";
@@ -90,6 +91,7 @@ async function DmThread({
       mode="dm"
       initialView={toMessageView(page)}
       title={otherName}
+      voiceSessions={listVoiceSessions({ channelId: thread.id })}
       showHash={false}
       headerAvatar={{ displayName: otherName, avatarColor: other?.avatarColor ?? "transparent" }}
       headerAction={
@@ -157,6 +159,7 @@ async function GuildChannel({
           mode="channel"
           initialView={toMessageView(page)}
           title={channel.name}
+          voiceSessions={listVoiceSessions({ channelId: channel.id })}
           topic={channel.topic}
           showHash
           members={members}

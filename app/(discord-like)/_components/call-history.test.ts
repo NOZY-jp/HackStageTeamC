@@ -69,3 +69,63 @@ describe("通話履歴カードの誤変換防止（#134）", () => {
     expect(history[0].minutes).toBe(3);
   });
 });
+
+describe("VoiceSession を正にする（#149）", () => {
+  it("session の endedReason=missed なら終了行が無くても不在着信", () => {
+    const messages = [message("a", "通話を開始しました", "2026-11-19T21:00:00+09:00")];
+    const history = buildCallHistory(messages, [
+      {
+        id: "s1",
+        scope: "dm",
+        channelId: "dm-maimai",
+        participantIds: ["hal", "maimai"],
+        startedAt: "2026-11-19T21:00:00+09:00",
+        endedReason: "missed",
+      },
+    ]);
+    expect(history).toHaveLength(1);
+    expect(history[0]).toMatchObject({ startId: "a", missed: true });
+    expect(callHistoryLabel(history[0])).toBe("不在着信");
+  });
+
+  it("session の endedAt から分を出し、終了行をカードに畳む", () => {
+    const messages = [
+      message("a", "通話を開始しました", "2026-11-19T21:00:00+09:00"),
+      message("b", "通話を終了しました", "2026-11-19T21:12:00+09:00"),
+    ];
+    const history = buildCallHistory(messages, [
+      {
+        id: "s2",
+        scope: "dm",
+        channelId: "dm-maimai",
+        participantIds: ["hal", "maimai"],
+        startedAt: "2026-11-19T21:00:00+09:00",
+        endedAt: "2026-11-19T21:12:00+09:00",
+        endedReason: "hangup",
+      },
+    ]);
+    expect(history[0]).toMatchObject({ startId: "a", endId: "b", minutes: 12, missed: false });
+    expect([
+      ...callHistoryByMessage(messages, [
+        {
+          id: "s2",
+          scope: "dm",
+          channelId: "dm-maimai",
+          participantIds: ["hal", "maimai"],
+          startedAt: "2026-11-19T21:00:00+09:00",
+          endedAt: "2026-11-19T21:12:00+09:00",
+          endedReason: "hangup",
+        },
+      ]).hidden,
+    ]).toEqual(["b"]);
+  });
+
+  it("session が無い古いデータは従来どおり本文から作る", () => {
+    const messages = [
+      message("a", "通話を開始しました", "2026-11-19T21:00:00+09:00"),
+      message("b", "通話を終了しました", "2026-11-19T21:03:00+09:00"),
+    ];
+    expect(buildCallHistory(messages)).toHaveLength(1);
+    expect(buildCallHistory(messages)[0]).toMatchObject({ minutes: 3, missed: false });
+  });
+});

@@ -48,6 +48,11 @@ export function useLocalMessages(): LocalMessages {
   return controls;
 }
 
+/** Provider の外でも安全に呼べる版（表示だけの画面・テスト用）。 */
+export function useOptionalLocalMessages(): LocalMessages | null {
+  return useContext(LocalMessagesContext);
+}
+
 /**
  * 送信したメッセージをチャンネル／DMスレッド単位で保持する（クライアントのみ）。
  * 物語の中で流したメッセージ（lib/story のチャットの命令）も、ここで過去のデータの後ろに足す。

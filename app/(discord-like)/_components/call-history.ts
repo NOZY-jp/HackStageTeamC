@@ -1,4 +1,4 @@
-import type { Message } from "@/lib/discord-like/types";
+import type { Message, VoiceSession } from "@/lib/discord-like/types";
 
 /** 通話履歴の1件（開始と終了のシステムメッセージから作る）。 */
 export type CallHistory = {
@@ -25,7 +25,46 @@ const isEnd = (message: Message) =>
  * システムメッセージの並びから通話履歴を作る（純粋関数）。
  * データは変更しない。後で `VoiceSession`（#129）が入ったら、この関数の中だけを差し替える。
  */
-export function buildCallHistory(messages: Message[]): CallHistory[] {
+export function buildCallHistory(
+  messages: Message[],
+  sessions: VoiceSession[] = [],
+): CallHistory[] {
+  // #149: VoiceSession を正とする（system 行の本文マッチは古いデータ用のフォールバック）
+  if (sessions.length > 0) {
+    const startByTime = new Map<string, Message>();
+    const endByTime = new Map<string, Message>();
+    for (const message of messages) {
+      if (message.system !== true) continue;
+      if (message.body.includes("通話を開始しました")) startByTime.set(message.sentAt, message);
+      if (
+        message.body.includes("通話を終了しました") ||
+        message.body.includes("応答がありませんでした")
+      ) {
+        endByTime.set(message.sentAt, message);
+      }
+    }
+    return sessions
+      .filter((session) => startByTime.has(session.startedAt))
+      .map((session) => {
+        const start = startByTime.get(session.startedAt) as Message;
+        const end = session.endedAt ? endByTime.get(session.endedAt) : undefined;
+        const minutes =
+          session.endedAt === undefined
+            ? undefined
+            : Math.max(
+                1,
+                Math.round((Date.parse(session.endedAt) - Date.parse(session.startedAt)) / 60000),
+              );
+        return {
+          startedAt: session.startedAt,
+          startId: start.id,
+          ...(end ? { endId: end.id } : {}),
+          ...(minutes !== undefined ? { minutes } : {}),
+          missed: session.endedReason === "missed",
+        };
+      });
+  }
+
   const history: CallHistory[] = [];
   let open: Message | undefined;
   for (const message of messages) {
@@ -59,13 +98,16 @@ export function buildCallHistory(messages: Message[]): CallHistory[] {
 }
 
 /** メッセージID → 通話履歴（描画用）。終了メッセージはカードに畳むので non-card 側で消す。 */
-export function callHistoryByMessage(messages: Message[]): {
+export function callHistoryByMessage(
+  messages: Message[],
+  sessions: VoiceSession[] = [],
+): {
   byId: Map<string, CallHistory>;
   hidden: Set<string>;
 } {
   const byId = new Map<string, CallHistory>();
   const hidden = new Set<string>();
-  for (const call of buildCallHistory(messages)) {
+  for (const call of buildCallHistory(messages, sessions)) {
     byId.set(call.startId, call);
     if (call.endId) {
       hidden.add(call.endId);

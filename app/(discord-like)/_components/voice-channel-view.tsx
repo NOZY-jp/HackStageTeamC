@@ -9,6 +9,7 @@ import { guildChannelPath } from "@/lib/platform/app-prefix";
 import { VOICE_CHANNELS, type VoiceChannel, type VoiceRoom } from "@/lib/story";
 import { CallStage } from "./call-stage";
 import { EmptyState } from "./empty-state";
+import { useOptionalLocalMessages } from "./local-messages-context";
 import { STORY_USERS } from "./story-users";
 import { useVoice } from "./voice-context";
 
@@ -83,13 +84,27 @@ export function VoiceChannelView({
   participants: VoiceParticipant[];
   currentUser: { id: string; displayName: string; avatarColor: string };
 }) {
-  const { connection, leftChannelId, join, leave, toggleMute, toggleDeafen } = useVoice();
+  const { connection, lastCall, leftChannelId, join, leave, toggleMute, toggleDeafen } = useVoice();
+  const localMessages = useOptionalLocalMessages();
   const joined = connection?.channelId === channelId;
   const muted = joined ? connection.muted : false;
   // 物語の場面がこの通話で流れているあいだは、物語の人物も参加者に出す（話している人は光る）
   const room = useStoryVoice(storyChannelOf(channelId));
   const shown = [...participants, ...storyParticipants(room)];
   useStoryLeave(room, joined, leave);
+
+  // #149: 退出したら会話ログに「通話 N分」を残す（データは変更しない）
+  const joinedAtRef = useRef<string | null>(null);
+  useEffect(() => {
+    if (joined) {
+      joinedAtRef.current = connection?.joinedAt ?? new Date().toISOString();
+      return;
+    }
+    if (!joinedAtRef.current) return;
+    const minutes = Math.max(1, Math.round((Date.now() - Date.parse(joinedAtRef.current)) / 60000));
+    localMessages?.addMessage(channelId, `通話 ${minutes}分`, { system: true });
+    joinedAtRef.current = null;
+  }, [channelId, connection?.joinedAt, joined, localMessages]);
   const deafened = joined ? connection.deafened : false;
 
   // 表示中のページだけが自動参加する（ルートキャッシュで裏に残った画面が奪わないように）
@@ -141,6 +156,11 @@ export function VoiceChannelView({
       </header>
 
       <div className="pane-scroll voice-body">
+        {!joined && lastCall?.channelId === channelId ? (
+          <p className="voice-last-call" data-testid="voice-last-call">
+            前回の通話: {lastCall.minutes}分
+          </p>
+        ) : null}
         {tiles.length === 0 && !joined ? (
           <EmptyState
             kind="voice"
