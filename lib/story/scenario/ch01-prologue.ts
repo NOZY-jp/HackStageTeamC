@@ -70,6 +70,7 @@ export const chapter1: Beat[] = [
       {
         id: "leave-call",
         label: "明日は遅れるわけにはいかないし、今日はもう寝るか",
+        sets: ["leftCall"],
         reply: [voice("discord:mhc-vc-3", "ryo", "leave"), wait("slow")],
       },
     ],

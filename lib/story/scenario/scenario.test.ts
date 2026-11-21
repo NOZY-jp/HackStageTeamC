@@ -119,6 +119,10 @@ describe("ゲームでの場面の進行", () => {
 
     const afterCall = completeBeat(started, prologue, "leave-call");
     expect(afterCall.choices[prologue.id]).toEqual(["leave-call"]);
+    // 選択でフラグが立ち、そのフラグが次場面の条件になっている（#81 の受入条件）
+    expect(afterCall.flags).toContain("leftCall");
+    const withoutChoice = setFlag(started, "started");
+    expect(nextBeat(withoutChoice)?.id).toBe("ch1-prologue");
     expect(transcript(afterCall)[0]?.lines.at(-1)?.text).toBe(
       "明日は遅れるわけにはいかないし、今日はもう寝るか",
     );

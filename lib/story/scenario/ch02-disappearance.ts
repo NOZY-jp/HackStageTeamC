@@ -7,7 +7,7 @@ export const chapter2: Beat[] = [
     id: "ch2-disappearance",
     chapter: 2,
     layout: "fullscreen",
-    when: ["started"],
+    when: ["started", "leftCall"],
     after: ["ch1-prologue"],
     source: "Google Docs 箱書き 第二章",
     script: [
