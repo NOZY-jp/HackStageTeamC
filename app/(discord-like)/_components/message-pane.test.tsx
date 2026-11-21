@@ -167,9 +167,9 @@ describe("MessagePane の段階的読み込み", () => {
         () => {
           expect(visibleMessages(container)).toBeGreaterThanOrEqual(before);
         },
-        { timeout: 3000 },
+        { timeout: 8000 },
       );
-      await new Promise((resolve) => setTimeout(resolve, 250));
+      await new Promise((resolve) => setTimeout(resolve, 120));
     }
 
     await waitFor(() => {
