@@ -4,7 +4,7 @@ import { TwitterNav } from "@/components/twitter-like/nav";
 
 export const metadata: Metadata = {
   title: { default: "Twixer", template: "%s | Twixer" },
-  description: "HackStage 作中の SNS「Twixer」タイムライン（ダミーデータ）",
+  description: "Twixerで話題のポストやフォロー中のアカウントの近況をチェック。",
 };
 
 export default function TwitterLayout({ children }: { children: ReactNode }) {
