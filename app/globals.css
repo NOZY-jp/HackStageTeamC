@@ -7995,6 +7995,8 @@ article div[class~="justify-between"][class~="text-xs"] > div {
   align-items: center;
   gap: 12px;
   margin: 0;
+  color: inherit;
+  text-decoration: none;
 }
 
 /* 空の色のグラデーションに、白い地平線を1本 */
@@ -8034,9 +8036,14 @@ article div[class~="justify-between"][class~="text-xs"] > div {
   padding: 4px 0;
   border-bottom: 2px solid transparent;
   color: var(--sk-sub);
+  text-decoration: none;
 }
 
-.sk-nav-item[data-current] {
+.sk-nav-item:hover {
+  color: var(--sk-ink);
+}
+
+.sk-nav-item[aria-current="page"] {
   border-bottom-color: var(--sk-sky);
   color: var(--sk-ink);
   font-weight: 700;
@@ -8140,4 +8147,145 @@ article div[class~="justify-between"][class~="text-xs"] > div {
   color: var(--sk-sub);
   font-size: 12px;
   text-align: center;
+}
+
+/* トップ：受賞作を背景に、キャッチコピーと入口 */
+.sk-hero {
+  position: relative;
+  display: grid;
+  overflow: hidden;
+  margin-bottom: 32px;
+  border-radius: 8px;
+  background-color: #10223a;
+}
+
+.sk-hero-image {
+  grid-area: 1 / 1;
+  width: 100%;
+  height: 100%;
+  min-height: 360px;
+  object-fit: cover;
+  opacity: 0.55;
+}
+
+/* 写真は半透明（重なりの順が上がる）なので、文字は position で写真より手前に置く */
+.sk-hero-text {
+  position: relative;
+  grid-area: 1 / 1;
+  align-self: end;
+  background: linear-gradient(0deg, rgb(10 22 40 / 0.75), rgb(10 22 40 / 0));
+  padding: clamp(24px, 5vw, 48px);
+  color: #fff;
+  text-shadow: 0 1px 12px rgb(0 0 0 / 0.45);
+}
+
+.sk-hero-name {
+  margin: 0 0 8px;
+  font-size: 13px;
+  letter-spacing: 0.2em;
+  opacity: 0.85;
+}
+
+.sk-hero-copy {
+  margin: 0 0 12px;
+  font-size: clamp(26px, 4.4vw, 42px);
+  font-weight: 700;
+  letter-spacing: 0.08em;
+}
+
+.sk-hero-lead {
+  max-width: 34em;
+  margin: 0 0 20px;
+  font-size: 15px;
+  line-height: 1.8;
+}
+
+.sk-hero-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.sk-button {
+  display: inline-block;
+  padding: 10px 22px;
+  border: 1px solid rgb(255 255 255 / 0.7);
+  border-radius: 999px;
+  color: #fff;
+  font-size: 14px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-decoration: none;
+  text-shadow: none;
+}
+
+.sk-button[data-primary] {
+  border-color: var(--sk-sky);
+  background-color: var(--sk-sky);
+}
+
+.sk-button:hover {
+  filter: brightness(1.1);
+}
+
+.sk-section-title {
+  margin: 0 0 16px;
+  font-size: 18px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+}
+
+.sk-news {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.sk-news-item {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 20px;
+  padding: 14px 0;
+  border-top: 1px solid var(--sk-line);
+  font-size: 15px;
+}
+
+.sk-news-date {
+  flex: none;
+  width: 6em;
+  color: var(--sk-sub);
+}
+
+.sk-news-link {
+  color: var(--sk-sky);
+}
+
+/* 募集要項：見出しと中身の2列（狭い画面では縦に積む） */
+.sk-guidelines {
+  margin: 0;
+}
+
+.sk-guidelines-row {
+  display: grid;
+  grid-template-columns: 8em 1fr;
+  gap: 8px 20px;
+  padding: 14px 0;
+  border-top: 1px solid var(--sk-line);
+  font-size: 15px;
+  line-height: 1.8;
+}
+
+.sk-guidelines-row dt {
+  color: var(--sk-sub);
+  font-weight: 700;
+}
+
+.sk-guidelines-row dd {
+  margin: 0;
+}
+
+@media (max-width: 560px) {
+  .sk-guidelines-row {
+    grid-template-columns: 1fr;
+  }
 }

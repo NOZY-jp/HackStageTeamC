@@ -1,5 +1,5 @@
 import { render } from "@testing-library/react";
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 import EntryPage, {
   generateMetadata as entryMetadata,
 } from "@/app/(blog-like)/pochiblo/[blogId]/entry/[entryId]/page";
@@ -9,6 +9,7 @@ import BlogTopPage, {
 import sitemap from "@/app/sitemap";
 import { listAllEntries, listBlogs } from "@/lib/blog-like";
 import { toDisplayUrl } from "@/lib/browser/url-map";
+import { CONTEST_NAV } from "@/lib/contest-like/site";
 import {
   PHOTO_CONTEST_BLOG_ID,
   PHOTO_CONTEST_LEGACY_PATH,
@@ -17,7 +18,13 @@ import {
 } from "@/lib/seo/contest";
 import { canonicalUrl } from "@/lib/seo/site";
 import nextConfig from "@/next.config";
+import ContestSiteLayout from "../../layout";
 import ContestResultPage, { metadata } from "./page";
+
+vi.mock("next/navigation", async (importOriginal) => ({
+  ...(await importOriginal<typeof import("next/navigation")>()),
+  usePathname: () => "/soukyuu-photo/2020/result",
+}));
 
 const BLOG = listBlogs().find((blog) => blog.id === PHOTO_CONTEST_BLOG_ID);
 if (!BLOG) {
@@ -60,8 +67,18 @@ describe("写真コンテストの結果ページ（#77 手順8）", () => {
 
   it("主催者のサイトとして、でんでんのブログとは別の URL・見た目で出す（#222）", () => {
     expect(toDisplayUrl(PHOTO_CONTEST_RESULT_PATH)).toBe("soukyuu-photo.jp/2020/result");
-    const { container } = render(<ContestResultPage />);
+    const { container } = render(
+      <ContestSiteLayout>
+        <ContestResultPage />
+      </ContestSiteLayout>,
+    );
     expect(container.querySelector(".sk-site")).not.toBeNull();
+    // ナビから主催者サイトの各ページへ行ける
+    const links = [...container.querySelectorAll(".sk-nav a")].map((link) =>
+      link.getAttribute("href"),
+    );
+    expect(links).toEqual(CONTEST_NAV.map((item) => item.href));
+    expect(container.querySelector('.sk-nav a[aria-current="page"]')?.textContent).toBe("結果発表");
     expect(container.textContent).not.toContain("でんでんの狩猟日記");
   });
 
