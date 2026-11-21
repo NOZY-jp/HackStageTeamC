@@ -8055,3 +8055,14 @@ article div[class~="justify-between"][class~="text-xs"] > div {
   color: #6b5a46;
   font-size: 14px;
 }
+
+/* コンテスト結果の「受賞者を確認する」（#239） */
+.contest-award-confirm {
+  margin-left: 10px;
+  padding: 4px 10px;
+  border: 1px solid #b9a58b;
+  border-radius: 999px;
+  background-color: #fffaf2;
+  color: #5c4a36;
+  font-size: 13px;
+}
