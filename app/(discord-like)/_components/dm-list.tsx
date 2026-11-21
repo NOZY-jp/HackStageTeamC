@@ -1,7 +1,8 @@
 import { Suspense } from "react";
 import { SidebarPane } from "@/components/discord-like/sidebar-pane";
 import { getUser, listDMMessages, listDMThreads } from "@/lib/discord-like";
-import { type DmThreadItem, DmThreadList } from "./dm-thread-list";
+import { DmListLive } from "./dm-list-live";
+import type { DmThreadItem } from "./dm-thread-list";
 import { EmptyState } from "./empty-state";
 import { SELF_USER_ID } from "./self-user";
 
@@ -14,6 +15,7 @@ const SKELETON_ROWS = [88, 72, 64, 78, 58, 70, 62];
  * データ上どのスレッドにも自分が入っていない場合は先頭の参加者を相手として扱う。
  */
 export function DmList() {
+  const base: Record<string, { sentAt?: string; preview: string; time: string }> = {};
   const threads: DmThreadItem[] = listDMThreads().map((thread) => {
     const otherId =
       thread.participantIds.find((participantId) => participantId !== SELF_USER_ID) ??
@@ -22,6 +24,11 @@ export function DmList() {
     const oldestFirst = listDMMessages({ threadId: thread.id, limit: 1 }).messages;
     const last = oldestFirst[oldestFirst.length - 1];
 
+    base[thread.id] = {
+      sentAt: last?.sentAt,
+      preview: last ? last.body.replace(/\s+/g, " ").slice(0, 80) : "",
+      time: last ? last.sentAt.slice(11, 16) : "",
+    };
     return {
       id: thread.id,
       urlId: thread.urlId,
@@ -68,7 +75,7 @@ export function DmList() {
             </div>
           }
         >
-          <DmThreadList threads={threads} />
+          <DmListLive items={threads} base={base} />
         </Suspense>
       )}
     </SidebarPane>
