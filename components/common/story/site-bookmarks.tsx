@@ -32,29 +32,38 @@ function saveIds(key: string, ids: SiteId[]) {
   }
 }
 
-export function SiteBookmarks({ pathname, flags }: { pathname: string; flags: readonly FlagId[] }) {
+/** URL や検索で直接開いたサイトも、ブックマークに覚える。 */
+export function useVisitedSites(here: SiteId | undefined): SiteId[] {
   const [visited, setVisited] = useState<SiteId[]>([]);
+
+  // サーバーの描画とずれないよう、描いたあとで読む。
+  useEffect(() => {
+    setVisited(loadIds(VISITED_KEY));
+  }, []);
+
+  useEffect(() => {
+    if (here) {
+      setVisited((current) => (current.includes(here) ? current : [...current, here]));
+    }
+  }, [here]);
+
+  useEffect(() => {
+    if (visited.length > 0) saveIds(VISITED_KEY, visited);
+  }, [visited]);
+
+  return visited;
+}
+
+export function SiteBookmarks({ pathname, flags }: { pathname: string; flags: readonly FlagId[] }) {
+  const here = siteAt(pathname);
+  const visited = useVisitedSites(here);
   const [announced, setAnnounced] = useState<SiteId[] | undefined>();
   const [open, setOpen] = useState(false);
   const [notice, setNotice] = useState<SiteId | undefined>();
 
-  // 保存した値を読む（サーバーの描画とずれないよう、描いたあとで読む）
   useEffect(() => {
-    setVisited(loadIds(VISITED_KEY));
     setAnnounced(loadIds(ANNOUNCED_KEY));
   }, []);
-
-  // 開いたサイトは、その時点で開放したことにする（締め出しはしない）
-  const here = siteAt(pathname);
-  useEffect(() => {
-    if (!here) return;
-    setVisited((current) => {
-      if (current.includes(here)) return current;
-      const next = [...current, here];
-      saveIds(VISITED_KEY, next);
-      return next;
-    });
-  }, [here]);
 
   const unlocked = useMemo(() => unlockedSites(flags, visited), [flags, visited]);
 
