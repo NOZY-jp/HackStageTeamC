@@ -1,6 +1,9 @@
 import { fireEvent, render, screen, waitFor, within } from "@testing-library/react";
+import type { ComponentProps } from "react";
 import { describe, expect, it, vi } from "vitest";
 import { AppShell } from "@/components/discord-like/app-shell";
+import { ChannelTree } from "@/components/discord-like/channel-tree";
+import { SidebarUserPanel } from "@/components/discord-like/sidebar-user-panel";
 import { getChannel, getGuild } from "@/lib/discord-like";
 import { guildChannelPath } from "@/lib/platform/app-prefix";
 import { VoiceChannelView } from "./voice-channel-view";
@@ -14,6 +17,19 @@ const vc2Path = guildChannelPath(guildUrlId, vc2UrlId);
 
 const nav = vi.hoisted(() => ({ path: "" }));
 vi.mock("next/navigation", () => ({ usePathname: () => nav.path }));
+vi.mock("next/link", () => ({
+  default: ({ href, onNavigate, ...props }: ComponentProps<"a"> & { onNavigate?: () => void }) => (
+    <a
+      {...props}
+      href={href}
+      onClick={(event) => {
+        event.preventDefault();
+        onNavigate?.();
+        nav.path = href ?? "";
+      }}
+    />
+  ),
+}));
 
 const participants = [{ id: "mina", displayName: "双剣ミナ", avatarColor: "#5865f2" }];
 const currentUser = { id: "hal", displayName: "Hal", avatarColor: "#eb459e" };
@@ -57,6 +73,80 @@ describe("VoiceChannelView", () => {
     render(shell(view("mhc-vc-1", "雑談通話", vc1UrlId)));
 
     expect(pane("雑談通話").queryByRole("button", { name: "参加" })).not.toBeInTheDocument();
+  });
+
+  it("左下から切断し、画面の参加ボタン・同じVC・テキストチャンネル経由で再参加できる", async () => {
+    const harness = () => (
+      <VoiceProvider>
+        <AppShell rail={<span />} leftFooter={<SidebarUserPanel userId="hal" />}>
+          <ChannelTree
+            guildId="mhc"
+            guildUrlId={guildUrlId}
+            currentUser={currentUser}
+            sections={[
+              {
+                id: "voice-test",
+                name: null,
+                channels: [
+                  {
+                    id: "mhc-vc-1",
+                    urlId: vc1UrlId,
+                    name: "雑談通話",
+                    kind: "voice",
+                    unread: false,
+                    mentionCount: 0,
+                    participants: [],
+                  },
+                  {
+                    id: "text",
+                    urlId: "123",
+                    name: "雑談",
+                    kind: "text",
+                    unread: false,
+                    mentionCount: 0,
+                    participants: [],
+                  },
+                ],
+              },
+            ]}
+          />
+          <VoiceChannelView
+            guildId="mhc"
+            guildUrlId={guildUrlId}
+            channelId="mhc-vc-1"
+            channelUrlId={vc1UrlId}
+            channelName="雑談通話"
+            participants={[]}
+            currentUser={currentUser}
+          />
+        </AppShell>
+      </VoiceProvider>
+    );
+    nav.path = vc1Path;
+    const { rerender } = render(harness());
+    const sidebar = within(screen.getByRole("region", { name: /ユーザーネーム/ }));
+    const channel = pane("雑談通話");
+    const disconnect = () => fireEvent.click(sidebar.getByRole("button", { name: "切断" }));
+    const open = (name: string) => {
+      fireEvent.click(screen.getByRole("link", { name }));
+      rerender(harness());
+    };
+
+    disconnect();
+    expect(channel.getByText("参加者はいません")).toBeInTheDocument();
+    expect(channel.queryByRole("region", { name: "通話" })).not.toBeInTheDocument();
+    fireEvent.click(channel.getByRole("button", { name: "通話に参加" }));
+    expect(channel.getByText(/（自分）/)).toBeInTheDocument();
+
+    disconnect();
+    open("ボイスチャンネル 雑談通話");
+    expect(channel.getByText(/（自分）/)).toBeInTheDocument();
+
+    disconnect();
+    open("テキストチャンネル 雑談");
+    expect(sidebar.queryByRole("button", { name: "切断" })).not.toBeInTheDocument();
+    open("ボイスチャンネル 雑談通話");
+    expect(channel.getByText(/（自分）/)).toBeInTheDocument();
   });
 
   it("参加者一覧に自分が入る", async () => {

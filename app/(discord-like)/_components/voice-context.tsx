@@ -25,8 +25,6 @@ type VoiceControls = {
   connection: VoiceConnection | null;
   /** 直前に退出した通話の長さ（#149 の表示用。UI のみ） */
   lastCall: { channelId: string; minutes: number } | null;
-  /** ユーザーが明示的に「切断」したチャンネル（自動参加の抑止にだけ使う） */
-  leftChannelId: string | null;
   join: (target: { guildId: string; channelId: string; channelName: string }) => void;
   leave: () => void;
   toggleMute: () => void;
@@ -51,22 +49,18 @@ export function useVoice(): VoiceControls {
 export function VoiceProvider({ children }: { children: ReactNode }) {
   const [connection, setConnection] = useState<VoiceConnection | null>(null);
   const [lastCall, setLastCall] = useState<{ channelId: string; minutes: number } | null>(null);
-  const [leftChannelId, setLeftChannelId] = useState<string | null>(null);
   const connectionRef = useRef<VoiceConnection | null>(null);
   connectionRef.current = connection;
 
   const join = useCallback(
     (target: { guildId: string; channelId: string; channelName: string }) => {
-      // 参加できた時点で「切断」の印は役目を終える（同じチャンネルなら呼ばれない）
-      setLeftChannelId(null);
-      setConnection({
-        guildId: target.guildId,
-        channelId: target.channelId,
-        channelName: target.channelName,
+      const next = {
+        ...target,
         joinedAt: new Date().toISOString(),
         muted: false,
         deafened: false,
-      });
+      };
+      setConnection((current) => (current?.channelId === next.channelId ? current : next));
     },
     [],
   );
@@ -78,8 +72,6 @@ export function VoiceProvider({ children }: { children: ReactNode }) {
       const minutes = Math.max(1, Math.round((Date.now() - Date.parse(target.joinedAt)) / 60000));
       setLastCall({ channelId: target.channelId, minutes });
     }
-    // 明示的な切断はチャンネル単位で記録する（自動参加の抑止に使う）
-    setLeftChannelId(target?.channelId ?? null);
     setConnection(null);
   }, []);
 
@@ -92,8 +84,8 @@ export function VoiceProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const controls = useMemo<VoiceControls>(
-    () => ({ connection, lastCall, leftChannelId, join, leave, toggleMute, toggleDeafen }),
-    [connection, lastCall, leftChannelId, join, leave, toggleMute, toggleDeafen],
+    () => ({ connection, lastCall, join, leave, toggleMute, toggleDeafen }),
+    [connection, lastCall, join, leave, toggleMute, toggleDeafen],
   );
 
   return <VoiceContext.Provider value={controls}>{children}</VoiceContext.Provider>;
