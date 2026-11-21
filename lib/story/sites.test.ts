@@ -8,9 +8,15 @@ describe("サイトの開放（ブックマーク）", () => {
 
   it("謎解きの段階に着くと、順に開放される", () => {
     expect(unlockedSites(["s01-blog-talk"], [])).toEqual(["discord", "twixer"]);
-    expect(unlockedSites(["s01-blog-talk", "s03-blog-found"], [])).toEqual([
+    expect(unlockedSites(["s01-blog-talk", "s02-bff-reply"], [])).toEqual([
       "discord",
       "twixer",
+      "seek",
+    ]);
+    expect(unlockedSites(["s01-blog-talk", "s02-bff-reply", "s03-blog-found"], [])).toEqual([
+      "discord",
+      "twixer",
+      "seek",
       "oldBlog",
       "leaf",
     ]);
