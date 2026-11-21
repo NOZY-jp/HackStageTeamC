@@ -1,6 +1,18 @@
 import { describe, expect, it } from "vitest";
 import { SELF_USER_ID } from "@/app/(discord-like)/_components/self-user";
+import {
+  availableBeats,
+  choose,
+  completeBeat,
+  completedChats,
+  initialState,
+  setFlag,
+} from "@/lib/story";
 import { getMessageImage, OLD_GAMER_ID } from "./data/message-images";
+import {
+  channelMessages as staticChannelMessages,
+  dmMessages as staticDmMessages,
+} from "./data/messages";
 import {
   HAL_HANDLE,
   HAL_NAME,
@@ -10,6 +22,7 @@ import {
   OLD_DISPLAY_NAME,
   OLD_HANDLE,
 } from "./data/names";
+import { GAME_NOW } from "./data/now";
 import {
   getChannel,
   getGuild,
@@ -21,6 +34,7 @@ import {
   listMessages,
   listVoiceStates,
 } from "./index";
+import { buildSearchIndex } from "./search";
 import { VOLUME_LIMITS } from "./test-thresholds";
 import type { Message } from "./types";
 import { listMemberViews } from "./view";
@@ -439,5 +453,225 @@ describe("メンバー一覧", () => {
     expect(old?.profileUrl?.endsWith("/")).toBe(false);
     // オンラインとオフラインの両方が居る（見出し分けの前提）
     expect(members.some((member) => member.status !== "offline")).toBe(true);
+  });
+});
+
+describe("量と会話の構造（#154・#119）", () => {
+  it("通数が決めた範囲に収まり、DM とサーバーの両方がある", () => {
+    const dm = listDMThreads().flatMap(
+      (thread) => listDMMessages({ threadId: thread.id, limit: 5000 }).messages,
+    );
+    const server = listGuilds().flatMap((guild) =>
+      listChannels(guild.id).flatMap(
+        (channel) => listMessages({ channelId: channel.id, limit: 5000 }).messages,
+      ),
+    );
+    const maimai = listDMMessages({ threadId: "dm-maimai", limit: 5000 }).messages.length;
+    expect(maimai).toBeGreaterThanOrEqual(VOLUME_LIMITS.dmMaimai.min);
+    expect(maimai).toBeLessThanOrEqual(VOLUME_LIMITS.dmMaimai.max);
+    expect(dm.length).toBeGreaterThanOrEqual(VOLUME_LIMITS.dmTotal.min);
+    expect(dm.length).toBeLessThanOrEqual(VOLUME_LIMITS.dmTotal.max);
+    expect(server.length).toBeGreaterThanOrEqual(VOLUME_LIMITS.serverTotal.min);
+    expect(server.length).toBeLessThanOrEqual(VOLUME_LIMITS.serverTotal.max);
+    expect(listDMThreads()).toHaveLength(VOLUME_LIMITS.dmThreads);
+  });
+
+  it("月ごとに会話があり、1か月に偏っていない（傾向）", () => {
+    const all = [
+      ...listGuilds().flatMap((guild) =>
+        listChannels(guild.id).flatMap(
+          (channel) => listMessages({ channelId: channel.id, limit: 5000 }).messages,
+        ),
+      ),
+      ...listDMThreads().flatMap(
+        (thread) => listDMMessages({ threadId: thread.id, limit: 5000 }).messages,
+      ),
+    ];
+    const months = new Map<string, number>();
+    for (const message of all) {
+      const month = message.sentAt.slice(0, 7);
+      months.set(month, (months.get(month) ?? 0) + 1);
+    }
+    // 2025-11 から 2026-11 まで、抜けた月が無い
+    const expected: string[] = [];
+    for (let year = 2025, month = 11; year < 2027; ) {
+      expected.push(`${year}-${String(month).padStart(2, "0")}`);
+      if (year === 2026 && month === 11) break;
+      month += 1;
+      if (month === 13) {
+        month = 1;
+        year += 1;
+      }
+    }
+    for (const month of expected) {
+      expect(months.get(month) ?? 0, month).toBeGreaterThanOrEqual(50);
+    }
+    const busiest = Math.max(...expected.map((month) => months.get(month) ?? 0));
+    expect(busiest / all.length).toBeLessThanOrEqual(0.2);
+  });
+
+  it("どのチャンネルも一人の独白になっていない", () => {
+    for (const guild of listGuilds()) {
+      for (const channel of listChannels(guild.id).filter((item) => item.kind === "text")) {
+        const list = listMessages({ channelId: channel.id, limit: 5000 }).messages.filter(
+          (message) => message.system !== true,
+        );
+        if (list.length < 10) continue;
+        expect(new Set(list.map((message) => message.authorId)).size, channel.id).toBeGreaterThan(
+          1,
+        );
+      }
+    }
+    for (const thread of listDMThreads()) {
+      const list = listDMMessages({ threadId: thread.id, limit: 5000 }).messages.filter(
+        (message) => message.system !== true,
+      );
+      expect(new Set(list.map((message) => message.authorId)).size, thread.id).toBeGreaterThan(1);
+    }
+  });
+
+  it("静的ログ・検索に、カイの進捗助言と結末が無い", () => {
+    const plot = /本名で検索|でんちゃん|住所を特定しました|例の件、どこまで進んだ|使い回してる/;
+    const staticMessages = [
+      ...Object.values(staticDmMessages).flat(),
+      ...Object.values(staticChannelMessages).flat(),
+    ];
+    expect(staticMessages.filter((message) => plot.test(message.body))).toEqual([]);
+    expect(buildSearchIndex().documents.filter((doc) => plot.test(doc.body))).toEqual([]);
+  });
+
+  it("静的ログはすべてゲームの現在より前", () => {
+    const all = [
+      ...listGuilds().flatMap((guild) =>
+        listChannels(guild.id).flatMap(
+          (channel) => listMessages({ channelId: channel.id, limit: 5000 }).messages,
+        ),
+      ),
+      ...listDMThreads().flatMap(
+        (thread) => listDMMessages({ threadId: thread.id, limit: 5000 }).messages,
+      ),
+    ];
+    for (const message of all) {
+      expect(Date.parse(message.sentAt), message.id).toBeLessThan(Date.parse(GAME_NOW));
+    }
+  });
+});
+
+describe("カイの進捗は進行のときだけ読める（#119）", () => {
+  it("進捗が未達なら、カイの助言のビートは始まらない", () => {
+    expect(availableBeats(initialState).some((beat) => beat.place === "discord:dm-kai")).toBe(
+      false,
+    );
+    expect(completedChats(initialState)).toEqual([]);
+  });
+
+  it("達成するとカイの助言がビートで届き、結末は選んだときだけ残る", () => {
+    const atName = setFlag(initialState, "s08-real-name");
+    const contact = availableBeats(atName).find((beat) => beat.place === "discord:dm-kai");
+    if (!contact) throw new Error("カイの連絡が始まらない");
+    const afterContact = completeBeat(atName, contact);
+    expect(completedChats(afterContact)).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({ from: "kai", text: expect.stringContaining("本名で検索") }),
+      ]),
+    );
+    // 結末は選択するまで出ない
+    expect(completedChats(afterContact).some((chat) => chat.text === "住所を特定しました")).toBe(
+      false,
+    );
+    const atMatch = setFlag(afterContact, "s10-talkup-match");
+    const report = availableBeats(atMatch).find((beat) => beat.place === "discord:dm-kai");
+    if (!report?.choices) throw new Error("結末の選択肢がない");
+    const ended = choose(atMatch, report, "send");
+    expect(completedChats(ended)).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({ from: "ryo", text: "住所を特定しました" }),
+      ]),
+    );
+  });
+});
+
+describe("会話の多様性と文章（main から戻した検査）", () => {
+  it("一言だけの日・通話に移る日・長文の日が混ざっている", () => {
+    const all = [
+      ...listGuilds().flatMap((guild) =>
+        listChannels(guild.id).flatMap(
+          (channel) => listMessages({ channelId: channel.id, limit: 5000 }).messages,
+        ),
+      ),
+      ...listDMThreads().flatMap(
+        (thread) => listDMMessages({ threadId: thread.id, limit: 5000 }).messages,
+      ),
+    ];
+    const byDay = new Map<string, { count: number; long: boolean; call: boolean }>();
+    for (const message of all) {
+      const day = message.sentAt.slice(0, 10);
+      const entry = byDay.get(day) ?? { count: 0, long: false, call: false };
+      entry.count += 1;
+      entry.long ||= message.body.length >= 40;
+      entry.call ||= message.body.includes("通話を開始しました");
+      byDay.set(day, entry);
+    }
+    const days = [...byDay.values()];
+    expect(days.filter((day) => day.count === 1).length).toBeGreaterThan(0);
+    expect(days.filter((day) => day.call).length).toBeGreaterThan(0);
+    expect(days.filter((day) => day.long).length).toBeGreaterThan(0);
+  });
+
+  it("通話は夜〜深夜に始まり、早朝4〜6時台には始まらない", () => {
+    const all = [
+      ...Object.values(staticChannelMessages).flat(),
+      ...Object.values(staticDmMessages).flat(),
+    ].filter((message) => message.body.includes("通話を開始しました"));
+    expect(all.length).toBeGreaterThan(5);
+    const hours = all.map((message) => Number(message.sentAt.slice(11, 13)));
+    expect(
+      hours.filter((hour) => hour >= 19 || hour <= 2).length / hours.length,
+    ).toBeGreaterThanOrEqual(0.5);
+    expect(hours.some((hour) => hour >= 4 && hour < 7)).toBe(false);
+  });
+
+  it("後半ほど DM が濃くなる（月平均で後半が前半の1.5倍以上）", () => {
+    const dm = listDMThreads().flatMap(
+      (thread) => listDMMessages({ threadId: thread.id, limit: 5000 }).messages,
+    );
+    const months = new Map<string, number>();
+    for (const message of dm) {
+      const month = message.sentAt.slice(0, 7);
+      months.set(month, (months.get(month) ?? 0) + 1);
+    }
+    const sorted = [...months.entries()].sort(([a], [b]) => a.localeCompare(b));
+    const half = Math.floor(sorted.length / 2);
+    const average = (rows: [string, number][]) =>
+      rows.reduce((sum, [, count]) => sum + count, 0) / rows.length;
+    const first = average(sorted.slice(0, half));
+    const second = average(sorted.slice(half));
+    expect(second / first).toBeGreaterThanOrEqual(1.5);
+  });
+
+  it("不自然な漢字の連結（回来・去来・行来）が無い", () => {
+    const all = [
+      ...Object.values(staticChannelMessages).flat(),
+      ...Object.values(staticDmMessages).flat(),
+    ];
+    const bad = all.filter((message) =>
+      /(?:^|[^0-9一二三四五六七八九十])回来|去来|行来/.test(message.body),
+    );
+    expect(bad.map((message) => message.id)).toEqual([]);
+  });
+
+  it("同じ本文が3通続かない（募集文のコピー防止）", () => {
+    for (const [channelId, list] of Object.entries(staticChannelMessages)) {
+      for (let i = 2; i < list.length; i += 1) {
+        const same = list[i].body === list[i - 1].body && list[i].body === list[i - 2].body;
+        expect(same, `${channelId} ${list[i].id}`).toBe(false);
+      }
+    }
+  });
+
+  it("募集文に助詞の重複（をを・がが・にに）が無い", () => {
+    const lfg = listMessages({ channelId: "mhc-lfg", limit: 5000 }).messages;
+    const bad = lfg.filter((message) => /をを|がが|にに|からから/.test(message.body));
+    expect(bad.map((message) => message.id)).toEqual([]);
   });
 });

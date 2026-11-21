@@ -406,7 +406,7 @@ const scripts: Record<string, string> = {
 23:17 hal まだ余韻があります
 23:19 maimai 余韻って
 23:21 hal 終わったあとの、この
-23:22 maimai わかる
+23:22 maimai わかる。終わった瞬間って変な感じになる
 23:22:40 maimai でも寝て
 2026-01-16
 21:31 maimai 明日何の日か知ってる？
@@ -523,7 +523,7 @@ const scripts: Record<string, string> = {
 18:31 maimai 写真送るね
 18:36 maimai チョコ作った
 18:36:40 maimai 形がいびつ
-18:41 hal すごい
+18:41 hal すごい、写真より手作りっぽい
 18:43 hal 手作りですか
 18:45 maimai そう
 18:45:40 maimai 型がなくてスプーンで落とした
@@ -582,13 +582,13 @@ const scripts: Record<string, string> = {
 14:55 maimai 大事なのにわかんないのはまずい
 14:58 hal はい
 15:02 maimai タイトルを結論にしたら
-15:10 hal なるほど
+15:10 hal なるほど、結論を先に
 15:14 maimai なるほどじゃなくて直して
 2026-03-03
 21:44 hal 直しました
 21:46 maimai 見る
 21:53 maimai 全然違う
-21:54 maimai わかる
+21:54 maimai わかる、今の見やすい
 21:56 hal よかった
 21:58 maimai これなら聞いてて苦じゃない
 22:01 hal うれしいです
@@ -687,7 +687,7 @@ const scripts: Record<string, string> = {
 22:14 hal よかったじゃないですか
 22:16 maimai よかったけど、なんか拍子抜け
 22:19 hal 拍子抜けはいいことです
-22:22 maimai そうだね
+22:22 maimai そうだね、拍子抜けでよかった
 2026-04-06
 13:31 hal 研究室、決まりました
 13:34 maimai え
@@ -832,9 +832,8 @@ const scripts: Record<string, string> = {
 23:17 hal 怖いです
 23:19 maimai 次は自分かもって
 23:22 hal そういうことです
-23:25 maimai わかる
+23:25 maimai わかる、あれ三日くらい引きずる
 23:26 maimai わたしも会議で一回やられた
-23:29 maimai あれ、三日くらい引きずる
 23:33 hal 引きずりますよね
 23:35 maimai ね
 2026-06-02
@@ -1180,7 +1179,7 @@ const scripts: Record<string, string> = {
 22:54 maimai じゃあ今日はそれで
 2026-08-24
 23:11 maimai 今日ね、仕事で褒められた
-23:14 hal すごい
+23:14 hal それはうれしいですね
 23:16 maimai たぶん気を使ってるだけ
 23:19 hal そういうの、素直に受け取ったほうが
 23:22 maimai 素直に受け取れないから困ってる
@@ -1411,7 +1410,7 @@ const scripts: Record<string, string> = {
 13:07 maimai 会うときの
 13:09 hal まだ一ヶ月先です
 13:11 maimai 一ヶ月あるから見てる
-13:14 hal なるほど
+13:14 hal なるほど、一ヶ月あると選ぶのも楽しいですね
 13:16 maimai ハルは何着るの
 13:18 hal 普通の
 13:20 maimai 普通って

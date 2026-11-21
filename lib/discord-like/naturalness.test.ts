@@ -1,6 +1,9 @@
+import { readFileSync } from "node:fs";
+import { resolve } from "node:path";
 import { describe, expect, it } from "vitest";
 import { channelMessages, dmMessages } from "./data/messages";
 import { listDMMessages } from "./index";
+import { NATURALNESS_LIMITS as N } from "./test-thresholds";
 import type { Message } from "./types";
 
 const messages = [...Object.values(channelMessages).flat(), ...Object.values(dmMessages).flat()];
@@ -102,6 +105,156 @@ describe("会話の時刻・人物設定", () => {
           expect(message.body, message.id).not.toContain(term);
         }
       }
+    }
+  });
+});
+
+/** チャンネル／DMスレッドごとの、時系列の並び（バーストを切る単位） */
+const byChannel = byContainer(messages);
+
+/** バースト: 隣り合う発言の間隔が burstWindowMinutes 以内で続くひとかたまり */
+const burstsOf = (list: Message[]): Message[][] => {
+  const bursts: Message[][] = [];
+  for (const message of list) {
+    const current = bursts.at(-1);
+    const previous = current?.at(-1);
+    const gap = previous
+      ? (Date.parse(message.sentAt) - Date.parse(previous.sentAt)) / 60000
+      : Number.POSITIVE_INFINITY;
+    if (current && gap <= N.burstWindowMinutes) {
+      current.push(message);
+    } else {
+      bursts.push([message]);
+    }
+  }
+  return bursts;
+};
+
+const isQuestion = (body: string) => /[?？]\s*[」』）)]*$/.test(body.trim());
+
+describe("会話の自然さ（#154 の6指標）", () => {
+  it("① 同じバーストの中で誰も答えない質問は15%以下", () => {
+    const questions = messages.filter(
+      (message) => message.system !== true && isQuestion(message.body),
+    );
+    expect(questions.length).toBeGreaterThan(50);
+    let unanswered = 0;
+    const samples: string[] = [];
+    for (const question of questions) {
+      const list = byChannel.get(question.channelId) ?? [];
+      const index = list.findIndex((message) => message.id === question.id);
+      const burst = burstsOf(list).find((group) => group.some((m) => m.id === question.id)) ?? [];
+      const position = burst.findIndex((message) => message.id === question.id);
+      const answer = burst
+        .slice(position + 1)
+        .find((message) => message.authorId !== question.authorId && !isQuestion(message.body));
+      // バーストの外でも、1時間以内に別の人が何か返していれば会話は成立している
+      const outside = list
+        .slice(index + 1)
+        .find((message) => message.authorId !== question.authorId);
+      const withinHour =
+        outside && Date.parse(outside.sentAt) - Date.parse(question.sentAt) <= 60 * 60_000;
+      if (!answer && !withinHour) {
+        unanswered += 1;
+        samples.push(`${question.id} ${question.body}`);
+      }
+    }
+    const ratio = unanswered / questions.length;
+    expect(ratio, samples.slice(0, 5).join(" / ")).toBeLessThanOrEqual(N.unansweredQuestionRatio);
+  });
+
+  it("② 評価語だけの単独発言は、チャンネルごとに1回まで", () => {
+    const standalone =
+      /^(たしかに|確かに|わかる|なるほど|いいと思う|そうだね|それな|すごい|やばい|草|www)[。！!…\s]*$/;
+    const counts = new Map<string, string[]>();
+    for (const message of messages) {
+      if (standalone.test(message.body.trim())) {
+        counts.set(message.channelId, [...(counts.get(message.channelId) ?? []), message.id]);
+      }
+    }
+    for (const [channelId, ids] of counts) {
+      expect(ids.length, `${channelId}: ${ids.join(", ")}`).toBeLessThanOrEqual(
+        N.standaloneReactionPerChannel,
+      );
+    }
+  });
+
+  it("③ 3通以上のバーストが6割以上で、隣接する発言の間隔の中央値は10分未満", () => {
+    const allBursts = [...byChannel.values()].flatMap(burstsOf);
+    const inLongBursts = allBursts
+      .filter((burst) => burst.length >= N.burstMinMessages)
+      .reduce((sum, burst) => sum + burst.length, 0);
+    expect(inLongBursts / messages.length).toBeGreaterThanOrEqual(N.burstMessageRatio);
+
+    const gaps = [...byChannel.values()]
+      .flatMap((list) =>
+        list.slice(1).map((m, i) => (Date.parse(m.sentAt) - Date.parse(list[i].sentAt)) / 60000),
+      )
+      .filter((minutes) => minutes <= N.burstWindowMinutes)
+      .sort((a, b) => a - b);
+    expect(gaps.length).toBeGreaterThan(100);
+    expect(gaps[Math.floor(gaps.length / 2)]).toBeLessThan(N.medianGapMinutes);
+  });
+
+  it("④ 時刻と内容が合っている（おはよう・おやすみ・出勤）", () => {
+    const hourOf = (sentAt: string) => Number(sentAt.slice(11, 13));
+    const problems: string[] = [];
+    for (const message of messages) {
+      const hour = hourOf(message.sentAt);
+      if (message.body.includes("おはよう") && (hour < N.morning.from || hour > N.morning.to)) {
+        problems.push(`おはよう ${message.id} ${hour}時`);
+      }
+      if (message.body.includes("おやすみ") && !(hour >= N.night.from || hour <= N.night.to - 24)) {
+        problems.push(`おやすみ ${message.id} ${hour}時`);
+      }
+      if (/仕事行って|会社行って|学校行って|授業行って/.test(message.body)) {
+        const date = new Date(message.sentAt);
+        const weekday = date.getUTCDay();
+        const jstWeekday = new Date(date.getTime() + 9 * 3600_000).getUTCDay();
+        if (jstWeekday === 0 || jstWeekday === 6) {
+          problems.push(`休日に通勤 ${message.id}`);
+        }
+        if (hour < N.commute.from || hour > N.commute.to) {
+          problems.push(`通勤の時刻 ${message.id} ${hour}時`);
+        }
+        void weekday;
+      }
+    }
+    expect(problems).toEqual([]);
+  });
+
+  it("⑤ 呼称は docs/discord/03-people.md の表に従う", () => {
+    const doc = readFileSync(resolve(process.cwd(), N.peopleDoc), "utf8");
+    const row = doc.split("\n").find((line) => /^\|\s*`maimai`/.test(line));
+    if (!row) throw new Error("03-people.md に maimai の行がありません");
+    const names = [...row.matchAll(/「([^」]+)」/g)].map((match) => match[1]);
+    // 表の「hal→相手 / 相手→hal」の順に並ぶ
+    expect(names.slice(0, 2)).toEqual(["まいまい", "ハル"]);
+    const [fromHal, fromMaimai] = names;
+
+    const maimaiDm = byChannel.get("dm-maimai") ?? [];
+    expect(maimaiDm.some((m) => m.authorId === "hal" && m.body.includes(fromHal))).toBe(true);
+    expect(maimaiDm.some((m) => m.authorId === "maimai" && m.body.includes(fromMaimai))).toBe(true);
+    // 本名は、本名を知らない相手との会話には出さない
+    for (const message of messages) {
+      const knowsRealName =
+        !["dm-maimai", "dm-kai", "dm-gunlance"].includes(message.channelId) &&
+        !message.channelId.startsWith("mhc-");
+      if (!knowsRealName) {
+        expect(message.body, message.id).not.toContain("リョウ");
+      }
+    }
+  });
+
+  it("⑥ モンスター・装備の表記ゆれが無い", () => {
+    const canonical = ["タマミツネ", "バーラハーラ", "双剣", "弓", "ヘッドセット"];
+    const variants = ["たまみつね", "ばーらはーら", "そうけん", "ゆみ", "へっどせっと"];
+    const text = messages.map((message) => message.body).join("\n");
+    for (const name of canonical) {
+      expect(text, name).toContain(name);
+    }
+    for (const variant of variants) {
+      expect(text, variant).not.toContain(variant);
     }
   });
 });
