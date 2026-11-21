@@ -132,13 +132,13 @@ describe("旧ブログの写真の実体（#113）", () => {
     return entry.body.filter((block) => block.kind === "image");
   };
 
-  it("受賞写真は svg のままで、実体がある（中身が用途と違うため切り替えない）", () => {
+  it("受賞写真は実体のある写真（webp）", () => {
     const images = checkout("e20181117");
     const image = images.find(
       (block) => block.kind === "image" && block.src.includes("contest-photo"),
     );
     if (image?.kind !== "image") throw new Error("contest-photo missing");
-    expect(image.src).toBe("/blog-like/photos/contest-photo.svg");
+    expect(image.src).toBe("/blog-like/photos/contest-photo.webp");
     expect(image.width).toBe(1200);
     expect(image.height).toBe(800);
     expect(existsSync(`public${image.src}`)).toBe(true);
