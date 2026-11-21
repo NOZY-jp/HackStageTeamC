@@ -3,12 +3,12 @@ import { readConversationScripts } from "./read-conversation-scripts";
 
 export const friendScript = readConversationScripts({
   "friend-chat": `2025-11-30
-21:41 taku 琥珀、最近ゲーム来ないじゃん
+21:41 taku リョウ、最近ゲーム来ないじゃん
 21:44 hal 来てます
 21:46 taku 嘘つけ
 21:47 hal 夜遅くに
 21:49 taku それでいい
-21:52 jun 琥珀は夜型だから
+21:52 jun リョウは夜型だから
 22:04 hal みんなは
 22:06 jun 俺も夜
 22:07:53 miyu 私は普通
@@ -25,7 +25,7 @@ export const friendScript = readConversationScripts({
 22:02 nao 写真見つけた
 22:05 nao 中学の
 22:07 taku やめろ
-22:09 nao 琥珀が真ん中でピースしてる
+22:09 nao リョウが真ん中でピースしてる
 22:12 hal 見せて
 22:14 nao 送る
 22:17 taku それ俺のカメラ
@@ -37,7 +37,7 @@ export const friendScript = readConversationScripts({
 15:38 jun 取れなかったら
 15:40 yuuto そのとき考える
 2026-01-18
-20:41 miyu 琥珀、誕生日おめでとう
+20:41 miyu リョウ、誕生日おめでとう
 20:44 hal ありがとう
 20:46 taku おめ
 20:48 jun おめ
@@ -87,7 +87,7 @@ export const friendScript = readConversationScripts({
 21:11 riku ない
 21:13 jun じゃあ電車
 2026-08-16
-19:41:53 nao 琥珀、最近なんかあるの
+19:41:53 nao リョウ、最近なんかあるの
 19:44:53 hal 何が
 19:46 nao 雰囲気
 19:49 hal 何もないです
@@ -116,7 +116,7 @@ export const friendScript = readConversationScripts({
 22:48 taku 11月だぞ
 22:51 miyu そうだけど
 2026-01-12
-21:31 taku 琥珀、最近なんか買った？
+21:31 taku リョウ、最近なんか買った？
 21:34 hal 本
 21:36 taku 何の本
 21:38 hal 研究の
@@ -126,7 +126,7 @@ export const friendScript = readConversationScripts({
 13:02 jun 今日ひま
 13:05 miyu 私も
 13:07 jun じゃあゲーム
-13:09 miyu 琥珀は
+13:09 miyu リョウは
 13:12 hal 入ります
 2026-03-18
 19:41 riku バイト先の先輩が辞める
@@ -143,7 +143,7 @@ export const friendScript = readConversationScripts({
 2026-05-16
 20:31 yuuto バド、来週の土曜
 20:34 jun 行く
-20:36 yuuto 琥珀は
+20:36 yuuto リョウは
 20:38 hal 行きます
 20:41 yuuto じゃあ四人
 2026-06-14
@@ -376,7 +376,7 @@ export const friendScript = readConversationScripts({
 2026-08-05
 13:31 taku 中学の集合写真、出てきた
 13:34 jun 見せて
-13:36 taku 琥珀が真ん中
+13:36 taku リョウが真ん中
 13:38 hal 違います
 13:41 taku 真ん中だ
 2026-10-12

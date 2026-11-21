@@ -277,7 +277,14 @@ describe("会話の自然さ（#154 の6指標）", () => {
     const hits = messages.filter((message) => oldName.test(message.body));
     expect(hits.map((message) => message.id)).toEqual([]);
 
-    const realName = messages.filter((message) => message.body.includes("リョウ"));
-    expect(realName.length).toBeLessThanOrEqual(1);
+    // 「リョウ」は、リア友・大学（本名を知る間柄）のチャネルだけ。それ以外は0件必須
+    const allowedChannel = (channelId: string) =>
+      channelId.startsWith("friend-") ||
+      channelId.startsWith("univ-") ||
+      ["dm-taku", "dm-jun", "dm-miyu", "dm-yama", "dm-ootsuka", "dm-hayashi"].includes(channelId);
+    const realName = messages.filter(
+      (message) => message.body.includes("リョウ") && !allowedChannel(message.channelId),
+    );
+    expect(realName.map((message) => `${message.channelId} ${message.id}`)).toEqual([]);
   });
 });

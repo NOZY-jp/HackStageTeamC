@@ -28,6 +28,7 @@ const scripts: Record<string, string> = {
 2025-03-19
 21:07 hal 今日、爪が出るクエスト回せますか
 21:31 maimai 回せます
+21:31:30 maimai 琥珀さんは爪だけですか
 21:31:42 maimai ただ21時半から30分だけ
 21:33 hal じゃあその前に入ります
 21:40 maimai もう入ってます

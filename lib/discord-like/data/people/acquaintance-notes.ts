@@ -18,7 +18,7 @@ export type AcquaintanceNote = {
 export const ACQUAINTANCE_NOTES: Record<string, AcquaintanceNote> = {
   taku: {
     calledByMe: "タク",
-    callsMe: "琥珀",
+    callsMe: "リョウ",
     relation: "中学からのリア友（モンハン仲間）",
     quirk: "「まじで」",
     frequency: "高",
@@ -26,7 +26,7 @@ export const ACQUAINTANCE_NOTES: Record<string, AcquaintanceNote> = {
   },
   jun: {
     calledByMe: "ジュン",
-    callsMe: "琥珀",
+    callsMe: "リョウ",
     relation: "高校の同級生",
     quirk: "「それな」",
     frequency: "中",
@@ -34,7 +34,7 @@ export const ACQUAINTANCE_NOTES: Record<string, AcquaintanceNote> = {
   },
   miyu: {
     calledByMe: "ミユ",
-    callsMe: "琥珀",
+    callsMe: "リョウ",
     relation: "大学の友達（別学科）",
     quirk: "「〜じゃん」",
     frequency: "中",
@@ -42,7 +42,7 @@ export const ACQUAINTANCE_NOTES: Record<string, AcquaintanceNote> = {
   },
   riku: {
     calledByMe: "リク",
-    callsMe: "琥珀",
+    callsMe: "リョウ",
     relation: "バイト先の友達",
     quirk: "「とりあえず」",
     frequency: "低",
@@ -50,7 +50,7 @@ export const ACQUAINTANCE_NOTES: Record<string, AcquaintanceNote> = {
   },
   nao: {
     calledByMe: "ナオ",
-    callsMe: "琥珀",
+    callsMe: "リョウ",
     relation: "中学の同級生",
     quirk: "「うそ」",
     frequency: "低",
@@ -58,7 +58,7 @@ export const ACQUAINTANCE_NOTES: Record<string, AcquaintanceNote> = {
   },
   yuuto: {
     calledByMe: "ユウト",
-    callsMe: "琥珀",
+    callsMe: "リョウ",
     relation: "高校の部活仲間",
     quirk: "「なるほどね」",
     frequency: "低",
@@ -66,7 +66,7 @@ export const ACQUAINTANCE_NOTES: Record<string, AcquaintanceNote> = {
   },
   yama: {
     calledByMe: "ヤマ",
-    callsMe: "琥珀",
+    callsMe: "リョウ",
     relation: "学科の同級生",
     quirk: "「〜っしょ」",
     frequency: "高",
@@ -74,7 +74,7 @@ export const ACQUAINTANCE_NOTES: Record<string, AcquaintanceNote> = {
   },
   sato: {
     calledByMe: "サトウ",
-    callsMe: "琥珀",
+    callsMe: "リョウ",
     relation: "学科の同級生",
     quirk: "「一応」",
     frequency: "中",
@@ -82,7 +82,7 @@ export const ACQUAINTANCE_NOTES: Record<string, AcquaintanceNote> = {
   },
   okada: {
     calledByMe: "オカダ",
-    callsMe: "琥珀",
+    callsMe: "リョウ",
     relation: "学科の同級生",
     quirk: "「まあ」",
     frequency: "中",
@@ -90,7 +90,7 @@ export const ACQUAINTANCE_NOTES: Record<string, AcquaintanceNote> = {
   },
   suzuki: {
     calledByMe: "スズキ",
-    callsMe: "琥珀",
+    callsMe: "リョウ",
     relation: "学科の同級生",
     quirk: "「それどういうこと？」",
     frequency: "中",
@@ -98,7 +98,7 @@ export const ACQUAINTANCE_NOTES: Record<string, AcquaintanceNote> = {
   },
   takahashi: {
     calledByMe: "タカハシ",
-    callsMe: "琥珀",
+    callsMe: "リョウ",
     relation: "学科の同級生",
     quirk: "「〜かも」",
     frequency: "低",
@@ -106,7 +106,7 @@ export const ACQUAINTANCE_NOTES: Record<string, AcquaintanceNote> = {
   },
   tanaka: {
     calledByMe: "タナカ",
-    callsMe: "琥珀",
+    callsMe: "リョウ",
     relation: "学科の同級生",
     quirk: "「とりま」",
     frequency: "低",
@@ -114,7 +114,7 @@ export const ACQUAINTANCE_NOTES: Record<string, AcquaintanceNote> = {
   },
   ito: {
     calledByMe: "イトウ",
-    callsMe: "琥珀",
+    callsMe: "リョウ",
     relation: "学科の同級生",
     quirk: "「なるはやで」",
     frequency: "低",
@@ -122,7 +122,7 @@ export const ACQUAINTANCE_NOTES: Record<string, AcquaintanceNote> = {
   },
   watanabe: {
     calledByMe: "ワタナベ",
-    callsMe: "琥珀",
+    callsMe: "リョウ",
     relation: "学科の同級生",
     quirk: "「〜だよね」",
     frequency: "低",
@@ -130,7 +130,7 @@ export const ACQUAINTANCE_NOTES: Record<string, AcquaintanceNote> = {
   },
   yamamoto: {
     calledByMe: "ヤマモト",
-    callsMe: "琥珀",
+    callsMe: "リョウ",
     relation: "学科の同級生",
     quirk: "「了解です」",
     frequency: "低",
@@ -138,7 +138,7 @@ export const ACQUAINTANCE_NOTES: Record<string, AcquaintanceNote> = {
   },
   nakamura: {
     calledByMe: "ナカムラ",
-    callsMe: "琥珀",
+    callsMe: "リョウ",
     relation: "学科の同級生",
     quirk: "「え、まじで」",
     frequency: "低",
@@ -146,7 +146,7 @@ export const ACQUAINTANCE_NOTES: Record<string, AcquaintanceNote> = {
   },
   kobayashi: {
     calledByMe: "コバヤシ",
-    callsMe: "琥珀",
+    callsMe: "リョウ",
     relation: "学科の同級生",
     quirk: "「〜っぽい」",
     frequency: "低",
@@ -154,7 +154,7 @@ export const ACQUAINTANCE_NOTES: Record<string, AcquaintanceNote> = {
   },
   kato: {
     calledByMe: "カトウ",
-    callsMe: "琥珀",
+    callsMe: "リョウ",
     relation: "学科の同級生",
     quirk: "「いけるいける」",
     frequency: "低",
@@ -162,7 +162,7 @@ export const ACQUAINTANCE_NOTES: Record<string, AcquaintanceNote> = {
   },
   yoshida: {
     calledByMe: "ヨシダ",
-    callsMe: "琥珀",
+    callsMe: "リョウ",
     relation: "学科の同級生",
     quirk: "「〜のほうが」",
     frequency: "低",
@@ -170,7 +170,7 @@ export const ACQUAINTANCE_NOTES: Record<string, AcquaintanceNote> = {
   },
   yamada: {
     calledByMe: "ヤマダ",
-    callsMe: "琥珀",
+    callsMe: "リョウ",
     relation: "学科の同級生",
     quirk: "「ざっくり」",
     frequency: "低",
@@ -178,7 +178,7 @@ export const ACQUAINTANCE_NOTES: Record<string, AcquaintanceNote> = {
   },
   sasaki: {
     calledByMe: "ササキ",
-    callsMe: "琥珀",
+    callsMe: "リョウ",
     relation: "学科の同級生",
     quirk: "「〜でいい？」",
     frequency: "低",
@@ -186,7 +186,7 @@ export const ACQUAINTANCE_NOTES: Record<string, AcquaintanceNote> = {
   },
   matsui: {
     calledByMe: "マツイ",
-    callsMe: "琥珀",
+    callsMe: "リョウ",
     relation: "学科の同級生",
     quirk: "「おつかれ」",
     frequency: "低",
@@ -194,7 +194,7 @@ export const ACQUAINTANCE_NOTES: Record<string, AcquaintanceNote> = {
   },
   inoue: {
     calledByMe: "イノウエ",
-    callsMe: "琥珀",
+    callsMe: "リョウ",
     relation: "学科の同級生",
     quirk: "「〜しとく」",
     frequency: "低",
@@ -202,7 +202,7 @@ export const ACQUAINTANCE_NOTES: Record<string, AcquaintanceNote> = {
   },
   kimura: {
     calledByMe: "キムラ",
-    callsMe: "琥珀",
+    callsMe: "リョウ",
     relation: "学科の同級生",
     quirk: "「まじか」",
     frequency: "低",
@@ -210,7 +210,7 @@ export const ACQUAINTANCE_NOTES: Record<string, AcquaintanceNote> = {
   },
   ootsuka: {
     calledByMe: "オオツカ先輩",
-    callsMe: "琥珀",
+    callsMe: "リョウ",
     relation: "学科の先輩",
     quirk: "「〜しなさい」",
     frequency: "中",
@@ -218,7 +218,7 @@ export const ACQUAINTANCE_NOTES: Record<string, AcquaintanceNote> = {
   },
   kubo: {
     calledByMe: "クボさん",
-    callsMe: "琥珀",
+    callsMe: "リョウ",
     relation: "学科の先輩",
     quirk: "「あとでいいよ」",
     frequency: "低",
@@ -226,7 +226,7 @@ export const ACQUAINTANCE_NOTES: Record<string, AcquaintanceNote> = {
   },
   nishimura: {
     calledByMe: "ニシムラさん",
-    callsMe: "琥珀",
+    callsMe: "リョウ",
     relation: "学科の先輩",
     quirk: "「念のため」",
     frequency: "低",
@@ -234,7 +234,7 @@ export const ACQUAINTANCE_NOTES: Record<string, AcquaintanceNote> = {
   },
   maeda: {
     calledByMe: "マエダさん",
-    callsMe: "琥珀",
+    callsMe: "リョウ",
     relation: "学科の先輩",
     quirk: "「〜の件だけど」",
     frequency: "低",
@@ -242,7 +242,7 @@ export const ACQUAINTANCE_NOTES: Record<string, AcquaintanceNote> = {
   },
   fujita: {
     calledByMe: "フジタさん",
-    callsMe: "琥珀",
+    callsMe: "リョウ",
     relation: "学科の先輩",
     quirk: "「大丈夫そう？」",
     frequency: "低",
@@ -250,7 +250,7 @@ export const ACQUAINTANCE_NOTES: Record<string, AcquaintanceNote> = {
   },
   ogawa: {
     calledByMe: "オガワさん",
-    callsMe: "琥珀",
+    callsMe: "リョウ",
     relation: "学科の先輩",
     quirk: "「助かる」",
     frequency: "低",
@@ -258,7 +258,7 @@ export const ACQUAINTANCE_NOTES: Record<string, AcquaintanceNote> = {
   },
   hayashi: {
     calledByMe: "ハヤシ",
-    callsMe: "琥珀",
+    callsMe: "リョウ",
     relation: "学科の後輩",
     quirk: "「教えてください」",
     frequency: "中",
@@ -266,7 +266,7 @@ export const ACQUAINTANCE_NOTES: Record<string, AcquaintanceNote> = {
   },
   shimizu: {
     calledByMe: "シミズ",
-    callsMe: "琥珀",
+    callsMe: "リョウ",
     relation: "学科の後輩",
     quirk: "「〜ですか？」",
     frequency: "低",
@@ -274,7 +274,7 @@ export const ACQUAINTANCE_NOTES: Record<string, AcquaintanceNote> = {
   },
   mori: {
     calledByMe: "モリ",
-    callsMe: "琥珀",
+    callsMe: "リョウ",
     relation: "学科の後輩",
     quirk: "「がんばります」",
     frequency: "低",
@@ -282,7 +282,7 @@ export const ACQUAINTANCE_NOTES: Record<string, AcquaintanceNote> = {
   },
   ikeda: {
     calledByMe: "イケダ",
-    callsMe: "琥珀",
+    callsMe: "リョウ",
     relation: "学科の後輩",
     quirk: "「なるほど」",
     frequency: "低",
@@ -290,7 +290,7 @@ export const ACQUAINTANCE_NOTES: Record<string, AcquaintanceNote> = {
   },
   hashimoto: {
     calledByMe: "ハシモト",
-    callsMe: "琥珀",
+    callsMe: "リョウ",
     relation: "学科の後輩",
     quirk: "「先輩は」",
     frequency: "低",
@@ -298,7 +298,7 @@ export const ACQUAINTANCE_NOTES: Record<string, AcquaintanceNote> = {
   },
   ishikawa: {
     calledByMe: "イシカワ",
-    callsMe: "琥珀",
+    callsMe: "リョウ",
     relation: "学科の後輩",
     quirk: "「〜してみます」",
     frequency: "低",
@@ -306,7 +306,7 @@ export const ACQUAINTANCE_NOTES: Record<string, AcquaintanceNote> = {
   },
   hasegawa: {
     calledByMe: "ハセガワ",
-    callsMe: "琥珀",
+    callsMe: "リョウ",
     relation: "学科の後輩",
     quirk: "「ありがとうございます」",
     frequency: "低",
@@ -314,7 +314,7 @@ export const ACQUAINTANCE_NOTES: Record<string, AcquaintanceNote> = {
   },
   ueda: {
     calledByMe: "ウエダ",
-    callsMe: "琥珀",
+    callsMe: "リョウ",
     relation: "学科の後輩",
     quirk: "「ちょっと聞きたいんですけど」",
     frequency: "低",
@@ -322,7 +322,7 @@ export const ACQUAINTANCE_NOTES: Record<string, AcquaintanceNote> = {
   },
   kondo: {
     calledByMe: "コンドウ",
-    callsMe: "琥珀",
+    callsMe: "リョウ",
     relation: "学科の後輩",
     quirk: "「お願いします」",
     frequency: "低",
