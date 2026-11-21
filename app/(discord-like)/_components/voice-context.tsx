@@ -14,6 +14,8 @@ export type VoiceConnection = {
   guildId: string;
   channelId: string;
   channelName: string;
+  /** 接続した時刻（通話時間の表示に使う。UI のみ） */
+  joinedAt: string;
   /** 見た目だけの状態（デバイスには触らない） */
   muted: boolean;
   deafened: boolean;
@@ -21,6 +23,8 @@ export type VoiceConnection = {
 
 type VoiceControls = {
   connection: VoiceConnection | null;
+  /** 直前に退出した通話の長さ（#149 の表示用。UI のみ） */
+  lastCall: { channelId: string; minutes: number } | null;
   /** ユーザーが明示的に「切断」したチャンネル（自動参加の抑止にだけ使う） */
   leftChannelId: string | null;
   join: (target: { guildId: string; channelId: string; channelName: string }) => void;
@@ -46,6 +50,7 @@ export function useVoice(): VoiceControls {
  */
 export function VoiceProvider({ children }: { children: ReactNode }) {
   const [connection, setConnection] = useState<VoiceConnection | null>(null);
+  const [lastCall, setLastCall] = useState<{ channelId: string; minutes: number } | null>(null);
   const [leftChannelId, setLeftChannelId] = useState<string | null>(null);
   const connectionRef = useRef<VoiceConnection | null>(null);
   connectionRef.current = connection;
@@ -58,6 +63,7 @@ export function VoiceProvider({ children }: { children: ReactNode }) {
         guildId: target.guildId,
         channelId: target.channelId,
         channelName: target.channelName,
+        joinedAt: new Date().toISOString(),
         muted: false,
         deafened: false,
       });
@@ -66,8 +72,14 @@ export function VoiceProvider({ children }: { children: ReactNode }) {
   );
 
   const leave = useCallback(() => {
+    const target = connectionRef.current;
+    if (target) {
+      // #149: 退出時に通話時間を残す（UI のみ。データは変えない）
+      const minutes = Math.max(1, Math.round((Date.now() - Date.parse(target.joinedAt)) / 60000));
+      setLastCall({ channelId: target.channelId, minutes });
+    }
     // 明示的な切断はチャンネル単位で記録する（自動参加の抑止に使う）
-    setLeftChannelId(connectionRef.current?.channelId ?? null);
+    setLeftChannelId(target?.channelId ?? null);
     setConnection(null);
   }, []);
 
@@ -80,8 +92,8 @@ export function VoiceProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const controls = useMemo<VoiceControls>(
-    () => ({ connection, leftChannelId, join, leave, toggleMute, toggleDeafen }),
-    [connection, leftChannelId, join, leave, toggleMute, toggleDeafen],
+    () => ({ connection, lastCall, leftChannelId, join, leave, toggleMute, toggleDeafen }),
+    [connection, lastCall, leftChannelId, join, leave, toggleMute, toggleDeafen],
   );
 
   return <VoiceContext.Provider value={controls}>{children}</VoiceContext.Provider>;
