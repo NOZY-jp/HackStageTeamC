@@ -285,3 +285,22 @@ describe("通話画面のUI（ホバーで操作を出す）", () => {
     expect(container.querySelector(".call-stage")?.getAttribute("data-connected")).toBe("false");
   });
 });
+
+describe("VC タイルの見た目（実Discord準拠・#137）", () => {
+  it("名前とマイクは左下、人数で 1/2/4/6 列になる", async () => {
+    const css = await import("node:fs/promises").then((fs) =>
+      fs.readFile("app/globals.css", "utf8"),
+    );
+    // 左下の名前＋マイク
+    expect(css).toMatch(
+      /\.call-tiles\[data-layout="grid"\] \.call-tile-label \{[^}]*position: absolute;[^}]*left: 10px;[^}]*bottom: 8px;/,
+    );
+    // 人数に応じた列（1 / 2 / 4 / 6）
+    expect(css).toMatch(/\[data-count="1"\] \{[^}]*grid-template-columns: minmax\(0, 1fr\)/);
+    expect(css).toMatch(/\.call-tiles\[data-layout="grid"\] \{[^}]*repeat\(2,/);
+    expect(css).toMatch(/\[data-count="5"\],[^{]*\[data-count="6"\] \{[^}]*repeat\(3,/);
+    // 発話の緑枠とパルス、動きを減らす設定で停止
+    expect(css).toMatch(/@keyframes call-pulse/);
+    expect(css).toMatch(/prefers-reduced-motion: reduce\)[^@]*call-tile\[data-speaking="true"\]/);
+  });
+});

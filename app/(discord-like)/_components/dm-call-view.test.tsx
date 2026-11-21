@@ -34,7 +34,13 @@ function Log() {
 const view = () => (
   <AppShell rail={<span />}>
     <LocalMessagesProvider>
-      <DmCallView threadId="dm-maimai" threadUrlId={threadUrlId} self={self} other={other} />
+      <DmCallView
+        threadId="dm-maimai"
+        threadUrlId={threadUrlId}
+        self={self}
+        other={other}
+        connectDelayMs={0}
+      />
       <Log />
     </LocalMessagesProvider>
   </AppShell>
@@ -67,8 +73,11 @@ describe("DM の通話画面（#137）", () => {
     const { container } = render(view());
     await screen.findByRole("main", { name: "MaiMai との通話" });
     const stage = container.querySelector(".call-stage");
+    if (!stage) throw new Error("stage missing");
+    // 接続（呼び出し中のあと）で操作バーが出るまで待つ
+    await waitFor(() => expect(container.querySelector(".call-controls")).toBeTruthy());
     const controls = container.querySelector(".call-controls");
-    if (!stage || !controls) throw new Error("stage missing");
+    if (!controls) throw new Error("controls missing");
     expect(controls.getAttribute("data-visible")).toBe("false");
     fireEvent.pointerEnter(stage);
     expect(controls.getAttribute("data-visible")).toBe("true");
@@ -148,7 +157,13 @@ function Harness({ showCall }: { showCall: boolean }) {
           </StartCallLink>
         </Activity>
         <Activity mode={showCall ? "visible" : "hidden"}>
-          <DmCallView threadId="dm-maimai" threadUrlId={threadUrlId} self={self} other={other} />
+          <DmCallView
+            threadId="dm-maimai"
+            threadUrlId={threadUrlId}
+            self={self}
+            other={other}
+            connectDelayMs={0}
+          />
         </Activity>
         <Log />
       </LocalMessagesProvider>
@@ -198,5 +213,16 @@ describe("入場→退出→再入場（#140）", () => {
     });
     expect(screen.getByTestId("log").textContent?.match(/通話を開始しました/g)).toHaveLength(1);
     expect(container.querySelector(".call-stage")?.getAttribute("data-connected")).toBe("true");
+  });
+
+  it("直リンクでも「通話は終了しました」を出さず、タイトルはヘッダーの1か所だけ", async () => {
+    const { container } = render(view());
+    await screen.findByRole("main", { name: "MaiMai との通話" });
+    expect(screen.queryByText("通話は終了しました")).toBeNull();
+    // ヘッダーの h1 以外にタイトルを出さない（ステージ内の h2 が無い）
+    expect(container.querySelectorAll("h1")).toHaveLength(1);
+    expect(container.querySelector(".call-stage h2")).toBeNull();
+    // 相手の名前と経過時間はステージに出す
+    expect(container.querySelector(".call-stage-timer")).toBeTruthy();
   });
 });

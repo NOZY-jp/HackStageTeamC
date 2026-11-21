@@ -32,6 +32,8 @@ type LocalMessages = {
   addMessage: (channelKey: string, body: string, options?: { system?: boolean }) => void;
   /** いま通話中のスレッド（null なら通話していない）。ルートの再マウントに依存しない（#140）。 */
   activeCallThreadId: string | null;
+  /** 通話の開始時刻（ISO）。画面を離れて戻っても経過時間の起点になる */
+  activeCallJoinedAt: string | null;
   /** 通話を開始する（同じスレッドで二重に開始しない）。 */
   startCall: (threadId: string) => void;
   /** 通話を終了する（開始していなければ何もしない）。 */
@@ -63,6 +65,7 @@ export function LocalMessagesProvider({ children }: { children: ReactNode }) {
   // 通話状態は Provider（レイアウト）に置く。ページは Next のルートキャッシュで
   // 再マウントされないことがあり、ページ内 state では再入場を拾えないため。
   const [activeCallThreadId, setActiveCallThreadId] = useState<string | null>(null);
+  const [activeCallJoinedAt, setActiveCallJoinedAt] = useState<string | null>(null);
   // 物語の中で流したメッセージ（場面の進み具合で増える）。いまは MaiMai との DM だけ
   const storyDm = useStoryChats("discord:dm-maimai");
   const sequence = useRef(0);
@@ -92,6 +95,7 @@ export function LocalMessagesProvider({ children }: { children: ReactNode }) {
       if (activeCallRef.current === threadId) return;
       activeCallRef.current = threadId;
       setActiveCallThreadId(threadId);
+      setActiveCallJoinedAt(new Date().toISOString());
       addMessage(threadId, "通話を開始しました", { system: true });
     },
     [addMessage],
@@ -102,6 +106,7 @@ export function LocalMessagesProvider({ children }: { children: ReactNode }) {
       if (activeCallRef.current !== threadId) return;
       activeCallRef.current = null;
       setActiveCallThreadId(null);
+      setActiveCallJoinedAt(null);
       addMessage(threadId, "通話を終了しました", { system: true });
     },
     [addMessage],
@@ -115,10 +120,11 @@ export function LocalMessagesProvider({ children }: { children: ReactNode }) {
       ],
       addMessage,
       activeCallThreadId,
+      activeCallJoinedAt,
       startCall,
       endCall,
     }),
-    [activeCallThreadId, addMessage, byKey, endCall, startCall, storyDm],
+    [activeCallThreadId, activeCallJoinedAt, addMessage, byKey, endCall, startCall, storyDm],
   );
 
   return <LocalMessagesContext.Provider value={controls}>{children}</LocalMessagesContext.Provider>;
