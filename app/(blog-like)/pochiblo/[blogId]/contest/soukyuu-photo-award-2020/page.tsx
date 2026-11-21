@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { BlogFrame } from "@/components/blog-like/blog-frame";
+import { ContestWinnerName } from "@/components/common/story/contest-winner";
 import { StoryAction } from "@/components/common/story/story-action";
 import { StoryGoto } from "@/components/common/story/story-goto";
 import { getBlog } from "@/lib/blog-like";
@@ -45,7 +46,7 @@ export default async function ContestResultPage({ params }: Props) {
 
         <h2>優秀賞</h2>
         <p>
-          受賞者: 服部 由比
+          受賞者: <ContestWinnerName name="服部 由比" />
           <br />
           受賞作品: 「帰り道」
         </p>
