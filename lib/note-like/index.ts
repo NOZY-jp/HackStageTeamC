@@ -65,7 +65,7 @@ function toTerms(query: string): string[] {
 
 /**
  * 記事が検索語に一致するか。空白区切りの語をすべて含むときに一致とする。
- * 対象はタイトル・要約・本文・タグ・書き手の名前とID。大文字小文字と先頭の # は無視する。
+ * 対象はタイトル・要約・本文・タグ・書き手の名前/自己紹介/ID。大文字小文字と先頭の # は無視する。
  */
 export function matchesQuery(
   article: Article,
@@ -82,6 +82,7 @@ export function matchesQuery(
     ...article.tags,
     ...article.body.map((block) => ("text" in block ? block.text : "")),
     creator?.displayName ?? "",
+    creator?.bio ?? "",
     article.creatorId,
   ]
     .join("\n")

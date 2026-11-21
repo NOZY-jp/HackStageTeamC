@@ -30,6 +30,9 @@ describe("旧ブログから旧 Twitter へのリンク（#97）", () => {
       expect(block.lead).not.toContain("当時の");
       expect(block.lead).not.toContain("旧");
     }
+    const linkedEntryIds = linkBlocks.map(({ entry }) => entry.id);
+    expect(linkedEntryIds).toContain("e20181117");
+    expect(linkedEntryIds).toContain("e20190811");
   });
 
   it("リンクの表示テキストから活動名 hunter_denden / @hunter_denden0102 が読める", () => {
