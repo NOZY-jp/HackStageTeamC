@@ -4,8 +4,27 @@ export { EXTRA_FLAGS, FLAG_IDS, type FlagId } from "./flags";
 export { isAtPlace, isWithinPlace, PLACES, type Place, type PlaceId } from "./places";
 export * from "./playback";
 export { beats } from "./scenario";
+export {
+  OLD_BLOG_ID,
+  SITE_IDS,
+  SITES,
+  type Site,
+  type SiteId,
+  siteAt,
+  unlockedSites,
+} from "./sites";
 export * from "./stage";
 export { getStep, STEP_IDS, type Step, type StepId, steps } from "./steps";
+export {
+  clearState,
+  fromLegacy,
+  LEGACY_STORAGE_KEYS,
+  loadState,
+  parseState,
+  readChoices,
+  STORAGE_KEY,
+  saveState,
+} from "./storage";
 export type * from "./types";
 
 /** 章の名前（シナリオの章立て） */

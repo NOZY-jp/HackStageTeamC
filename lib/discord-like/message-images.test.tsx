@@ -5,7 +5,7 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 import { MessageAttachments } from "@/app/(discord-like)/_components/message-attachments";
 import { getMessageImage, MESSAGE_IMAGES, OLD_GAMER_ID } from "./data/message-images";
 import { MAIMAI_HANDLE } from "./data/names";
-import { listDMMessages } from "./index";
+import { listDMMessages, listMessages } from "./index";
 
 // 検査する語そのものをリポジトリに残さない（文字コードで組み立てる）
 const word = (...codePoints: number[]) => String.fromCodePoint(...codePoints);
@@ -53,8 +53,29 @@ describe("順序4の画像の向きとパス（#102）", () => {
     expect(clip.src).toBe("/discord-like/clips/clip-0312-2.webp");
     expect(clip.width).toBe(1200);
     expect(clip.height).toBe(675);
-    // 未着のクリップは登録せず、既定の pending（プレースホルダ表示）に任せる
-    expect(getMessageImage("clip-0204-8.png").status).toBe("pending");
+    // 定義の無い画像名は登録せず、既定の pending（プレースホルダ表示）に任せる
+    expect(getMessageImage("clip-9999-0.png").status).toBe("pending");
+  });
+
+  it("#clips の添付名はすべて MESSAGE_IMAGES に定義され、実体がある", () => {
+    const page = listMessages({ channelId: "mhc-clips", limit: 2000 });
+    const names = page.messages.flatMap((message) =>
+      (message.attachments ?? [])
+        .filter((attachment) => attachment.kind === "image")
+        .map((attachment) => attachment.name),
+    );
+    expect(names.length).toBeGreaterThanOrEqual(32);
+    for (const name of names) {
+      // 未定義だと「画像は準備中です」になる回帰を防ぐ
+      expect(MESSAGE_IMAGES[name], name).toBeDefined();
+      expect(getMessageImage(name).status, name).toBe("ready");
+      expect(existsSync(`public${getMessageImage(name).src}`), name).toBe(true);
+    }
+    // 実体は .webp、添付名は .png のまま（mhc.ts と一致）
+    for (const name of names) {
+      expect(name.endsWith(".png"), name).toBe(true);
+      expect(getMessageImage(name).src.endsWith(".webp"), name).toBe(true);
+    }
   });
 
   it("未定義の画像は向き不明（unknown）として扱う", () => {

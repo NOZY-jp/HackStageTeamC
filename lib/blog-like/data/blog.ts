@@ -258,8 +258,8 @@ export const entries: Entry[] = [
       },
       {
         kind: "image",
-        src: "/blog-like/photos/graduation.svg",
-        alt: "中学校の卒業式の看板の前で、制服姿の2人が並んで立っている。右の子が卒業証書を広げて持っている",
+        src: "/blog-like/photos/graduation.webp",
+        alt: "中学校の卒業式の看板の前で、制服姿の2人が並んで立っている。左の子が卒業証書の筒を持ち、右の子の肩に腕を回している",
         width: 1200,
         height: 800,
         caption: "右が私です笑",

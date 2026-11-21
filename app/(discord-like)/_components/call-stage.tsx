@@ -26,7 +26,7 @@ function formatElapsed(ms: number): string {
 }
 
 /** 接続しているあいだだけ進む経過時間。 */
-function useCallTimer(running: boolean): string {
+function useCallTimer(running: boolean, startedAtIso?: string): string {
   const [startedAt, setStartedAt] = useState<number | null>(null);
   const [now, setNow] = useState(0);
 
@@ -35,11 +35,12 @@ function useCallTimer(running: boolean): string {
       setStartedAt(null);
       return;
     }
-    setStartedAt(Date.now());
+    const base = startedAtIso ? Date.parse(startedAtIso) : Date.now();
+    setStartedAt(Number.isNaN(base) ? Date.now() : base);
     setNow(Date.now());
     const timer = setInterval(() => setNow(Date.now()), 1000);
     return () => clearInterval(timer);
-  }, [running]);
+  }, [running, startedAtIso]);
 
   if (startedAt === null) {
     return "0:00";
@@ -174,6 +175,7 @@ export function CallStage({
   onToggleMute,
   onToggleDeafen,
   onLeave,
+  startedAt,
   subtitle,
   layout = "grid",
 }: {
@@ -185,6 +187,8 @@ export function CallStage({
   onToggleMute: () => void;
   onToggleDeafen: () => void;
   onLeave: () => void;
+  /** 接続開始時刻（ISO）。渡すとタイマーの起点になる（#150） */
+  startedAt?: string;
   subtitle?: string;
   /** grid = サーバーVC（並べる）/ dm = DM通話（相手を大きく、自分は右下の小窓） */
   layout?: "grid" | "dm";
@@ -194,7 +198,7 @@ export function CallStage({
   const [focused, setFocused] = useState(false);
   const [shareNotice, setShareNotice] = useState(false);
   const controlsVisible = active || focused;
-  const elapsed = useCallTimer(joined);
+  const elapsed = useCallTimer(joined, startedAt);
   const tabIndex = controlsVisible ? 0 : -1;
 
   return (

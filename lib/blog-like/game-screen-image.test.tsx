@@ -1,8 +1,9 @@
+import { existsSync } from "node:fs";
 import fs from "node:fs/promises";
 import { render } from "@testing-library/react";
 import { describe, expect, it } from "vitest";
 import { EntryBody } from "@/components/blog-like/entry-body";
-import { getEntry } from "./index";
+import { getEntry, listAllEntries } from "./index";
 
 // 検査する語そのものをリポジトリに残さない（文字コードで組み立てる）
 const word = (...codePoints: number[]) => String.fromCodePoint(...codePoints);
@@ -121,5 +122,44 @@ describe("旧ブログのゲーム画面（順序4の証拠画像・#101）", ()
     expect(img?.getAttribute("alt")).toContain("ゲーム画面");
     expect(img?.getAttribute("width")).toBe("1200");
     expect(img?.getAttribute("height")).toBe("675");
+  });
+});
+
+describe("旧ブログの写真の実体（#113）", () => {
+  const checkout = (id: string) => {
+    const entry = listAllEntries("denden0102").find((candidate) => candidate.id === id);
+    if (!entry) throw new Error(`記事 ${id} が見つかりません`);
+    return entry.body.filter((block) => block.kind === "image");
+  };
+
+  it("受賞写真は svg のままで、実体がある（中身が用途と違うため切り替えない）", () => {
+    const images = checkout("e20181117");
+    const image = images.find(
+      (block) => block.kind === "image" && block.src.includes("contest-photo"),
+    );
+    if (image?.kind !== "image") throw new Error("contest-photo missing");
+    expect(image.src).toBe("/blog-like/photos/contest-photo.svg");
+    expect(image.width).toBe(1200);
+    expect(image.height).toBe(800);
+    expect(existsSync(`public${image.src}`)).toBe(true);
+  });
+
+  it("卒業式は WebP（1200×800）を参照し、alt を実物の構図に合わせる", () => {
+    const images = checkout("e20180316");
+    const image = images.find(
+      (block) => block.kind === "image" && block.src.includes("graduation"),
+    );
+    if (image?.kind !== "image") throw new Error("graduation missing");
+    expect(image.src).toBe("/blog-like/photos/graduation.webp");
+    expect(image.width).toBe(1200);
+    expect(image.height).toBe(800);
+    expect(existsSync(`public${image.src}`)).toBe(true);
+    const alt = image.alt;
+    expect(alt).toContain("左の子が卒業証書の筒を持ち");
+    expect(alt).toContain("右の子の肩に腕を回している");
+    expect(alt).not.toContain("右の子が卒業証書を広げて持っている");
+    // 本名・呼び名は書かない
+    expect(alt).not.toContain("かのん");
+    expect(image.caption).toBe("右が私です笑");
   });
 });

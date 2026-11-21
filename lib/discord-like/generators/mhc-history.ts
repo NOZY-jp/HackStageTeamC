@@ -334,7 +334,7 @@ export function generateMhcHistory(
         }
       }
       typoCount += 1;
-    } else if (roll < 0.28 && topicCount < 120) {
+    } else if (roll < 0.33 && topicCount < 135) {
       for (let attempt = 0; attempt < 2000; attempt += 1) {
         const candidate = `${pick(P.topic)}${pick(P.topicTail)}。${pick(["それはそう", "いいと思う", "どうだろう"])}`;
         if (!usedBody.has(candidate)) {

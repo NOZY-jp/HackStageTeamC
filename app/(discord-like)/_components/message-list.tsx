@@ -10,7 +10,7 @@ import {
   useState,
 } from "react";
 import { PaneToggles } from "@/components/discord-like/pane-toggles";
-import type { MemberView, Message, MessageAuthor } from "@/lib/discord-like/types";
+import type { MemberView, Message, MessageAuthor, VoiceSession } from "@/lib/discord-like/types";
 import { callHistoryByMessage, callHistoryLabel } from "./call-history";
 import { EmptyState } from "./empty-state";
 import { MessageRow } from "./message-row";
@@ -58,6 +58,7 @@ export function MessageList({
   emptyText = "まだメッセージがありません",
   headerAvatar,
   headerAction,
+  voiceSessions = [],
   composer,
   onLoadOlder,
   loadingOlder = false,
@@ -80,6 +81,8 @@ export function MessageList({
   headerAvatar?: { displayName: string; avatarColor: string };
   /** ヘッダ右端に置く導線（DM の通話ボタンなど）。 */
   headerAction?: ReactNode;
+  /** 通話履歴の算出に使う VoiceSession（#149）。無ければ system 行から従来どおり作る。 */
+  voiceSessions?: VoiceSession[];
   /** ログの下に差し込む入力欄（省略時は出さない）。 */
   composer?: ReactNode;
   /** 上端に近づいたとき、古いメッセージを追加で読み込む。 */
@@ -196,7 +199,7 @@ export function MessageList({
 
   const byId = new Map(messages.map((message) => [message.id, message]));
   // 通話の開始/終了のシステムメッセージは、1枚の通話履歴カードに畳む（データは変えない）
-  const { byId: callById, hidden: hiddenCalls } = callHistoryByMessage(messages);
+  const { byId: callById, hidden: hiddenCalls } = callHistoryByMessage(messages, voiceSessions);
   const rows: Row[] = [];
   let currentDate = "";
   let previous: Message | undefined;
