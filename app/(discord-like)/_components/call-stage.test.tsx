@@ -105,13 +105,13 @@ describe("レイアウトのリグレッション防止", () => {
       fs.readFile("app/globals.css", "utf8"),
     );
     expect(css).not.toMatch(
-      /\.call-tiles\[data-count="3"\] \.call-tile:first-child \{\s*grid-row: span 2/,
+      /\.call-tiles\[data-count="3"\]\s+\.call-tile:first-child\s*\{\s*grid-row:\s*span\s+2/,
     );
     expect(css).toMatch(
-      /\[data-layout="grid"\]\[data-count="3"\] \{[^}]*grid-template-columns: repeat\(3,/,
+      /\[data-layout="grid"\]\[data-count="3"\]\s*\{[^}]*grid-template-columns:\s*repeat\(3,/,
     );
     // 4人は2×2
-    expect(css).toMatch(/\.call-tiles\[data-count="4"\] \{[^}]*repeat\(2,/);
+    expect(css).toMatch(/\.call-tiles\[data-count="4"\]\s*\{[^}]*repeat\(2,/);
   });
 
   it("DMの相手アバターは160px以上", async () => {
@@ -119,7 +119,7 @@ describe("レイアウトのリグレッション防止", () => {
       fs.readFile("app/globals.css", "utf8"),
     );
     expect(css).toMatch(
-      /\.call-tiles\[data-layout="dm"\] \.call-tile:first-child \.call-tile-avatar \{[^}]*clamp\(160px/,
+      /\.call-tiles\[data-layout="dm"\]\s+\.call-tile:first-child\s+\.call-tile-avatar\s*\{[^}]*clamp\(160px/,
     );
   });
 
@@ -144,15 +144,15 @@ describe("画面共有中のレイアウト", () => {
       fs.readFile("app/globals.css", "utf8"),
     );
     expect(css).toMatch(
-      /\.call-stage\[data-sharing="true"\] \.call-tiles\[data-layout="grid"\] \{[^}]*flex-direction: column/,
+      /\.call-stage\[data-sharing="true"\]\s+\.call-tiles\[data-layout="grid"\]\s*\{[^}]*flex-direction:\s*column/,
     );
     // DMは相手を消さず、右上の小窓に残す
     expect(css).toMatch(
-      /\.call-stage\[data-sharing="true"\] \.call-tiles\[data-layout="dm"\] \.call-tile:first-child \{[^}]*position: absolute/,
+      /\.call-stage\[data-sharing="true"\]\s+\.call-tiles\[data-layout="dm"\]\s+\.call-tile:first-child\s*\{[^}]*position:\s*absolute/,
     );
     // 共有中の自分は幅を確保（名前を切らない）
     expect(css).toMatch(
-      /\.call-stage\[data-sharing="true"\] \.call-tiles\[data-layout="dm"\] \.call-tile:nth-child\(2\) \{[^}]*width: min\(240px/,
+      /\.call-stage\[data-sharing="true"\]\s+\.call-tiles\[data-layout="dm"\]\s+\.call-tile:nth-child\(2\)\s*\{[^}]*width:\s*min\(240px/,
     );
   });
 });
@@ -164,14 +164,14 @@ describe("共有を止めた後の通常表示", () => {
     );
     // 素の（共有中でない）DMタイルに56pxを当てない
     expect(css).not.toMatch(
-      /(^|\n)\.call-tiles\[data-layout="dm"\] \.call-tile:first-child \.call-tile-avatar \{[^}]*width: 56px/,
+      /(^|\n)\.call-tiles\[data-layout="dm"\]\s+\.call-tile:first-child\s+\.call-tile-avatar\s*\{[^}]*width:\s*56px/,
     );
     expect(css).toMatch(
       /\.call-stage\[data-sharing="true"\]\s+\.call-tiles\[data-layout="dm"\]\s+\.call-tile:first-child\s+\.call-tile-avatar \{[^}]*width: 56px/,
     );
     // 通常時は clamp(160px…) が残っている
     expect(css).toMatch(
-      /\.call-tiles\[data-layout="dm"\] \.call-tile:first-child \.call-tile-avatar \{[^}]*clamp\(160px/,
+      /\.call-tiles\[data-layout="dm"\]\s+\.call-tile:first-child\s+\.call-tile-avatar\s*\{[^}]*clamp\(160px/,
     );
   });
 });

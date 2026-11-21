@@ -293,11 +293,11 @@ describe("VC タイルの見た目（実Discord準拠・#137）", () => {
     );
     // アバター直下の名前＋マイク（視線移動を減らす）
     expect(css).toMatch(
-      /\.call-tiles\[data-layout="grid"\] \.call-tile-label \{[^}]*position: static;[^}]*margin-top: 10px;/,
+      /\.call-tiles\[data-layout="grid"\]\s+\.call-tile-label\s*\{[^}]*position:\s*static;[^}]*margin-top:\s*10px;/,
     );
     // 人数に応じた列（1 / 2 / 4 / 6）
-    expect(css).toMatch(/\[data-count="1"\] \{[^}]*grid-template-columns: minmax\(0, 1fr\)/);
-    expect(css).toMatch(/\.call-tiles\[data-layout="grid"\] \{[^}]*repeat\(2,/);
+    expect(css).toMatch(/\[data-count="1"\]\s*\{[^}]*grid-template-columns:\s*minmax\(0,\s*1fr\)/);
+    expect(css).toMatch(/\.call-tiles\[data-layout="grid"\]\s*\{[^}]*repeat\(2,/);
     expect(css).toMatch(/\[data-count="5"\],[^{]*\[data-count="6"\] \{[^}]*repeat\(3,/);
     // 発話の緑枠とパルス、動きを減らす設定で停止
     expect(css).toMatch(/@keyframes call-pulse/);
