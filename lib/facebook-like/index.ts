@@ -1,11 +1,8 @@
 import { fbPosts } from "./data/posts";
-import { FB_SELF_USER_ID, fbUsers } from "./data/users";
+import { FB_SELF_USER_ID, fbUsers, SPOILER_USER_ID } from "./data/users";
 import type { FbPost, FbUser } from "./types";
 
 const copyOf = <T>(value: T): T => structuredClone(value);
-
-/** 順序10で本名から捜す相手（u40）。検索前の「連絡先」には出さない。 */
-const SPOILER_USER_ID = "u40";
 
 const byCreatedAtDesc = (a: { createdAt: string }, b: { createdAt: string }): number =>
   b.createdAt.localeCompare(a.createdAt);
