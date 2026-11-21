@@ -582,7 +582,11 @@ describe("カイの進捗は進行のときだけ読める（#119）", () => {
     if (!report?.choices) throw new Error("結末の選択肢がない");
     const ended = choose(atMatch, report, "visit-house");
     expect(ended.flags).toContain("s11-address");
-    expect(availableBeats(ended).some((beat) => beat.id === "ch6-bad-end")).toBe(true);
+    // カイの助言経由で「でんちゃん」と呼んだときだけ誤認結末へ（#120）
+    const door = availableBeats(ended).find((beat) => beat.id === "ch6-call-name");
+    if (!door?.choices) throw new Error("玄関の呼び名の選択肢がない");
+    const used = choose(ended, door, "denden");
+    expect(availableBeats(used).some((beat) => beat.id === "ch6-bad-end")).toBe(true);
   });
 });
 

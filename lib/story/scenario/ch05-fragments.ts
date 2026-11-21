@@ -12,7 +12,7 @@ export const chapter5: Beat[] = [
     layout: "overlay",
     place: "discord:dm-kai",
     when: ["s08-real-name"],
-    sets: ["s09-kai-contact"],
+    sets: ["s09-kai-contact", "kaiToldDenchan"],
     source: "Google Docs 箱書き 第五章・Issue #76 順序9",
     script: [
       title("第五章　欠片"),
@@ -40,6 +40,9 @@ export const chapter5: Beat[] = [
       ),
       say("ryo", "て、天才か？"),
       chat("discord:dm-kai", "ryo", "て、天才か？", "2026-11-23T21:12:30+09:00"),
+      say("kai", "そういえば、でんちゃんって呼ぶと喜ぶぞ"),
+      say("ryo", "でんちゃん？"),
+      say("kai", "昔の呼び名らしい。俺も聞いただけだけどな"),
       think("本名でTalkupを検索してみよう。"),
     ],
   },
