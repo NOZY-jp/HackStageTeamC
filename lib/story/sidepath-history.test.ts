@@ -1,88 +1,95 @@
 import { describe, expect, it } from "vitest";
-import { choose, completedChats, setFlag, transcript } from "./engine";
-import { say } from "./stage";
-import { loadState, parseState, saveState } from "./storage";
+import { choose, linesOf, transcript } from "./engine";
+import { beats } from "./scenario";
+import { loadState, saveState } from "./storage";
 import type { Beat, StoryState } from "./types";
 
 /**
  * #111: 寄り道（completes:false）の選択と台詞も履歴に残す。
- * #182 の結末分岐は「カイの助言を聞いたか」を履歴から読み直すため、ここが欠けると分岐の伏線が消える。
+ * 実シナリオの場面・選択肢・台詞をそのまま使い、fixture の自前文言では代替しない。
+ * #182 の結末分岐は「カイの助言を聞いたか」を履歴から読み直すため、ここが欠けると伏線が消える。
  */
 
-const adviceBeat: Beat = {
-  id: "t-advice",
-  chapter: 3,
-  layout: "overlay",
-  when: [],
-  script: [],
-  choices: [
-    { id: "search", label: "検索する", sets: ["s10-talkup-match"] },
-    {
-      id: "ask",
-      label: "相談する",
-      completes: false,
-      sets: ["askedKai"],
-      reply: [say("kai", "でんちゃんって呼ぶと喜ぶぞ")],
-    },
-  ],
+const state = (partial: Partial<StoryState> = {}): StoryState => ({
+  flags: [],
+  completed: [],
+  choices: {},
+  ...partial,
+});
+
+const findBeat = (id: string): Beat => {
+  const beat = beats.find((candidate) => candidate.id === id);
+  if (!beat) throw new Error(`${id} がありません`);
+  return beat;
 };
 
-const initial: StoryState = { flags: [], completed: [], choices: {} };
-
-/** 保存 → 読み直し（リロードと同じ経路） */
-const reload = (state: StoryState): StoryState => {
+/** 実シナリオの場面を、保存 → 読み直し（リロードと同じ経路）に通す */
+const reload = (value: StoryState): StoryState => {
   const store = new Map<string, string>();
   const memory = {
     getItem: (key: string) => store.get(key) ?? null,
     setItem: (key: string, value: string) => void store.set(key, value),
     removeItem: (key: string) => void store.delete(key),
   };
-  saveState(memory, state);
+  saveState(memory, value);
   return loadState(memory);
 };
 
+const texts = (value: StoryState): string[] =>
+  transcript(value, beats).flatMap(({ lines }) => lines.map((line) => line.text));
+
 describe("寄り道の選択が履歴に残る（#111）", () => {
-  it("相談してから検索で場面を終えても、助言の台詞が履歴に残る", () => {
-    let state = choose(setFlag(initial, "s03-blog-found"), adviceBeat, "ask");
-    state = choose(state, adviceBeat, "search");
-    expect(state.choices["t-advice"]).toEqual(["ask", "search"]);
-    const lines = transcript(state, [adviceBeat]).flatMap(({ lines }) =>
-      lines.map((line) => line.text),
-    );
-    expect(lines).toContain("でんちゃんって呼ぶと喜ぶぞ");
+  const sample = findBeat("sample-all-cues");
+  const detour = sample.choices?.find((choice) => choice.id === "detour");
+  const detourReply = detour?.reply?.[0];
+  const detourText = detourReply?.type === "text" ? detourReply.text : "";
+
+  it("実サンプルの寄り道を選んでから別の選択肢で終えても、寄り道の台詞が履歴に残る", () => {
+    expect(detour?.completes).toBe(false);
+    expect(detourText).not.toBe("");
+    let next = choose(state(), sample, "detour");
+    next = choose(next, sample, "b");
+    expect(next.completed).toContain(sample.id);
+    expect(next.choices[sample.id]).toEqual(["detour", "b"]);
+    expect(texts(next)).toContain(detourText);
   });
 
   it("保存して読み直しても、寄り道の選択は選んだ順の配列のまま残る", () => {
-    let state = choose(setFlag(initial, "s03-blog-found"), adviceBeat, "ask");
-    state = choose(state, adviceBeat, "search");
-    const loaded = reload(state);
-    expect(loaded.choices["t-advice"]).toEqual(["ask", "search"]);
-    expect(
-      transcript(loaded, [adviceBeat]).flatMap(({ lines }) => lines.map((line) => line.text)),
-    ).toContain("でんちゃんって呼ぶと喜ぶぞ");
+    let next = choose(state(), sample, "detour");
+    next = choose(next, sample, "b");
+    const loaded = reload(next);
+    expect(loaded.choices[sample.id]).toEqual(["detour", "b"]);
+    expect(texts(loaded)).toContain(detourText);
   });
 
-  it("古いセーブ（場面ごとに1つの文字列）も、1件の選択として読み直す", () => {
-    const legacy = parseState({
-      flags: ["s03-blog-found"],
-      completed: ["t-advice"],
-      choices: { "t-advice": "ask" },
+  it("実 ch5-talkup の助言も、保存して読み直した履歴に残る（#182 の伏線）", () => {
+    const talkup = findBeat("ch5-talkup");
+    const advice = linesOf(talkup).find((line) => line.text.includes("でんちゃん"));
+    expect(advice).toBeDefined();
+    const ready = state({
+      flags: ["s08-real-name", "s09-kai-contact", "s10-talkup-match"],
+      completed: ["ch5-kai-contact"],
     });
-    expect(legacy.choices["t-advice"]).toEqual(["ask"]);
-    expect(
-      transcript(legacy, [adviceBeat]).flatMap(({ lines }) => lines.map((line) => line.text)),
-    ).toContain("でんちゃんって呼ぶと喜ぶぞ");
+    const done = choose(ready, talkup, "visit-house");
+    expect(done.flags).toContain("s11-address");
+    const loaded = reload(done);
+    expect(loaded.choices[talkup.id]).toEqual(["visit-house"]);
+    expect(texts(loaded)).toContain(advice?.text);
   });
 
-  it("寄り道のあとに場面を終えても、助言を聞いた記録は消えない（#182 の伏線）", () => {
-    let state = choose(setFlag(initial, "s03-blog-found"), adviceBeat, "ask");
-    state = choose(state, adviceBeat, "search");
-    const loaded = reload(state);
-    expect(loaded.completed).toEqual(["t-advice"]);
-    expect(loaded.choices["t-advice"]).toContain("ask");
-    expect(
-      transcript(loaded, [adviceBeat]).flatMap(({ lines }) => lines.map((line) => line.text)),
-    ).toContain("でんちゃんって呼ぶと喜ぶぞ");
-    expect(completedChats(loaded, [adviceBeat])).toBeDefined();
+  it("旧セーブ（場面ごとに1つの文字列）は、実 save の読込で1件の選択として読み替える", () => {
+    const store = new Map<string, string>([
+      [
+        "hackstage:story:v1",
+        JSON.stringify({
+          flags: [],
+          completed: [sample.id],
+          choices: { [sample.id]: "detour" },
+        }),
+      ],
+    ]);
+    const loaded = loadState({ getItem: (key: string) => store.get(key) ?? null });
+    expect(loaded.choices[sample.id]).toEqual(["detour"]);
+    expect(texts(loaded)).toContain(detourText);
   });
 });
