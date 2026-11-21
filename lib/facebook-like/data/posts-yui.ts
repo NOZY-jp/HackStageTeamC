@@ -1,7 +1,7 @@
 import type { FbPost } from "../types";
 
 /**
- * 服部 由比（u40）本人の高校時代の投稿 20 件（2018-04〜2020-12）。
+ * MaiMai（u40）本人の高校時代の投稿 20 件（2018-04〜2020-12）。
  * 2021年の受験を挟んで更新が止まる設定なので、投稿日は 2020-12-31 までに収める。
  * 本名を投稿に出さず、神奈川県より狭い地域名・校名・固有名詞の手がかりは足さない。
  * 既存の fbp-201〜203 とは同じ日時を使わない。
@@ -22,7 +22,7 @@ export const fbYuiPosts: FbPost[] = [
     id: "fbp-302",
     authorId: "u40",
     body: "連休前の雨。通学路のアスファルトが光を映して、なんだか映画のひとこまみたいでした。濡れた傘をカバンにしまう音も、悪くない。",
-    createdAt: "2018-05-05T06:50:00Z",
+    createdAt: "2018-04-27T06:50:00Z",
     audience: "public",
     reactions: { like: 11 },
     comments: [],
@@ -31,21 +31,12 @@ export const fbYuiPosts: FbPost[] = [
   {
     id: "fbp-303",
     authorId: "u40",
-    body: "体育祭で撮影当番でした。借りたカメラで朝からリレーのゴールを狙います。動くものを撮るのは初めてで、全部ブレずに写るか心配。",
+    body: "体育祭で撮影当番でした。借りたカメラで朝からリレーのゴールを狙って、動くものを撮るのは初めてだったので全部ブレずに写っているか心配。",
     createdAt: "2018-06-16T09:20:00Z",
     feeling: "緊張",
     audience: "public",
     reactions: { like: 9, wow: 1 },
-    comments: [
-      {
-        id: "fbc-301",
-        postId: "fbp-303",
-        authorId: "u12",
-        body: "ゴールの瞬間、楽しみにしています。",
-        createdAt: "2018-06-16T10:00:00Z",
-        likes: 1,
-      },
-    ],
+    comments: [],
     shares: 0,
   },
   {
@@ -55,27 +46,8 @@ export const fbYuiPosts: FbPost[] = [
     createdAt: "2018-07-21T10:05:00Z",
     feeling: "夏!",
     audience: "public",
-    attachment: {
-      kind: "photo",
-      title: "撮影会の日",
-      subtitle: "海辺 / 真夏",
-      accentColor: "#8fa3b0",
-      src: "/talkup/seaside-sunset.svg",
-      alt: "夕方の海沿いの風景",
-      width: 800,
-      height: 600,
-    },
     reactions: { like: 15, love: 3, wow: 1 },
-    comments: [
-      {
-        id: "fbc-302",
-        postId: "fbp-304",
-        authorId: "u10",
-        body: "夏の海の写真、いいですね。",
-        createdAt: "2018-07-21T11:20:00Z",
-        likes: 1,
-      },
-    ],
+    comments: [],
     shares: 1,
   },
   {
@@ -86,16 +58,7 @@ export const fbYuiPosts: FbPost[] = [
     feeling: "がんばる",
     audience: "public",
     reactions: { like: 12, love: 3 },
-    comments: [
-      {
-        id: "fbc-303",
-        postId: "fbp-305",
-        authorId: "u6",
-        body: "展示、見に行きたいです。",
-        createdAt: "2018-09-29T09:05:00Z",
-        likes: 2,
-      },
-    ],
+    comments: [],
     shares: 0,
   },
   {
@@ -105,16 +68,7 @@ export const fbYuiPosts: FbPost[] = [
     createdAt: "2018-10-28T09:30:00Z",
     audience: "public",
     reactions: { like: 9, love: 1 },
-    comments: [
-      {
-        id: "fbc-304",
-        postId: "fbp-306",
-        authorId: "u12",
-        body: "かき揚げうどん、わたしも好きです。",
-        createdAt: "2018-10-28T10:05:00Z",
-        likes: 1,
-      },
-    ],
+    comments: [],
     shares: 0,
   },
   {
@@ -156,16 +110,7 @@ export const fbYuiPosts: FbPost[] = [
     createdAt: "2019-06-15T07:25:00Z",
     audience: "public",
     reactions: { like: 11, love: 4 },
-    comments: [
-      {
-        id: "fbc-305",
-        postId: "fbp-310",
-        authorId: "u6",
-        body: "紫陽花は雨の日がいちばん映えますね。",
-        createdAt: "2019-06-15T08:00:00Z",
-        likes: 2,
-      },
-    ],
+    comments: [],
     shares: 0,
   },
   {
@@ -175,27 +120,8 @@ export const fbYuiPosts: FbPost[] = [
     createdAt: "2019-08-03T10:10:00Z",
     feeling: "夏!",
     audience: "public",
-    attachment: {
-      kind: "photo",
-      title: "夏休みの午後",
-      subtitle: "友達と / 夏",
-      accentColor: "#c9973f",
-      src: "/talkup/cafe-two.svg",
-      alt: "テーブルをはさんで笑い合う二人の高校生",
-      width: 800,
-      height: 600,
-    },
     reactions: { like: 14, love: 4 },
-    comments: [
-      {
-        id: "fbc-306",
-        postId: "fbp-311",
-        authorId: "u10",
-        body: "休みの日の一枚、いいですね。",
-        createdAt: "2019-08-03T11:00:00Z",
-        likes: 1,
-      },
-    ],
+    comments: [],
     shares: 1,
   },
   {
@@ -241,7 +167,7 @@ export const fbYuiPosts: FbPost[] = [
   {
     id: "fbp-315",
     authorId: "u40",
-    body: "春なのに学校がしばらくお休みになって、窓辺の光が撮り相手です。同じ窓でも、時間帯でずいぶん違う顔を見せてくれます。家の中は、思ったより被写体であふれています。",
+    body: "春なのに学校がしばらくお休みになって、窓辺の光を撮っています。同じ窓でも、時間帯でずいぶん違う顔を見せてくれます。家の中は、思ったより被写体であふれています。",
     createdAt: "2020-04-11T08:20:00Z",
     audience: "friends",
     reactions: { like: 8, love: 1 },
@@ -287,16 +213,7 @@ export const fbYuiPosts: FbPost[] = [
     feeling: "集中モード",
     audience: "friends",
     reactions: { like: 16, love: 5 },
-    comments: [
-      {
-        id: "fbc-308",
-        postId: "fbp-319",
-        authorId: "u12",
-        body: "勉強も写真も、応援しています。",
-        createdAt: "2020-12-06T11:10:00Z",
-        likes: 2,
-      },
-    ],
+    comments: [],
     shares: 0,
   },
   {
@@ -307,16 +224,7 @@ export const fbYuiPosts: FbPost[] = [
     feeling: "しあわせ",
     audience: "public",
     reactions: { like: 18, love: 6 },
-    comments: [
-      {
-        id: "fbc-309",
-        postId: "fbp-320",
-        authorId: "u10",
-        body: "よいお年を！",
-        createdAt: "2020-12-20T08:00:00Z",
-        likes: 1,
-      },
-    ],
+    comments: [],
     shares: 1,
   },
 ];

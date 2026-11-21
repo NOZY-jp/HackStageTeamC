@@ -22,7 +22,13 @@ describe("ProfileView（u40）", () => {
       </FacebookProvider>,
     );
 
-    expect(screen.getByRole("button", { name: "投稿 (23)" })).toBeInTheDocument();
-    expect(screen.getAllByLabelText("服部 由比の投稿").length).toBeGreaterThan(0);
+    expect(screen.getByText("投稿 (23)")).toBeInTheDocument();
+    const expectedLabel = `${user.displayName}の投稿`;
+    expect(screen.getAllByLabelText(expectedLabel)).toHaveLength(23);
+    const articles = screen.getAllByRole("article");
+    expect(articles).toHaveLength(23);
+    for (const article of articles) {
+      expect(article).toHaveAttribute("aria-label", expectedLabel);
+    }
   });
 });

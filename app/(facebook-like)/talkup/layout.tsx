@@ -8,7 +8,7 @@ export const metadata: Metadata = {
     default: "talkup",
     template: "%s | talkup",
   },
-  description: "HackStage TeamC の架空SNS「talkup」のフィードUI（モックデータ）",
+  description: "日々の近況や写真を共有するSNS「talkup」のフィード画面",
 };
 
 export default function FacebookLayout({ children }: { children: ReactNode }) {

@@ -1,25 +1,16 @@
 import { describe, expect, it } from "vitest";
+import { listPostsByAuthor } from "../index";
 import { fbYuiPosts } from "./posts-yui";
 
-const KNOWN_USER_IDS = new Set([
-  "u1",
-  "u2",
-  "u3",
-  "u4",
-  "u5",
-  "u6",
-  "u7",
-  "u8",
-  "u9",
-  "u10",
-  "u11",
-  "u12",
-  "u35",
-  "u36",
-  "u40",
-]);
-
 const ISO_8601_PATTERN = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d+)?(?:Z|[+-]\d{2}:\d{2})$/;
+
+function isValidUtcIsoDate(stamp: string): boolean {
+  const parsed = Date.parse(stamp);
+  if (Number.isNaN(parsed)) {
+    return false;
+  }
+  return `${new Date(parsed).toISOString().slice(0, 19)}Z` === stamp;
+}
 
 describe("fbYuiPosts", () => {
   it("has exactly 20 posts", () => {
@@ -38,11 +29,11 @@ describe("fbYuiPosts", () => {
     }
   });
 
-  it("has sortable ISO 8601 createdAt values in chronological order", () => {
+  it("has sortable ISO 8601 createdAt values with valid calendar dates in chronological order", () => {
     const stamps = fbYuiPosts.map((post) => post.createdAt);
     for (const stamp of stamps) {
       expect(stamp).toMatch(ISO_8601_PATTERN);
-      expect(Number.isNaN(Date.parse(stamp))).toBe(false);
+      expect(isValidUtcIsoDate(stamp), `invalid calendar date: ${stamp}`).toBe(true);
     }
     const sorted = [...stamps].sort();
     expect(stamps).toEqual(sorted);
@@ -56,25 +47,36 @@ describe("fbYuiPosts", () => {
     }
   });
 
-  it("has comments whose postId matches the parent post id", () => {
+  it("has no createdAt collision across all u40 posts including fbp-201..203", () => {
+    const u40Posts = listPostsByAuthor("u40");
+    expect(u40Posts).toHaveLength(23);
+    const stamps = u40Posts.map((post) => post.createdAt);
+    expect(new Set(stamps).size).toBe(u40Posts.length);
+  });
+
+  it("has valid comments with unique ids, valid calendar dates, and bounds within high school era", () => {
+    const commentIds: string[] = [];
     for (const post of fbYuiPosts) {
       expect(post.comments.length).toBeLessThanOrEqual(2);
       for (const comment of post.comments) {
         expect(comment.postId).toBe(post.id);
         expect(comment.createdAt).toMatch(ISO_8601_PATTERN);
+        expect(
+          isValidUtcIsoDate(comment.createdAt),
+          `invalid calendar date: ${comment.createdAt}`,
+        ).toBe(true);
+        expect(comment.createdAt >= post.createdAt).toBe(true);
+        expect(comment.createdAt <= "2020-12-31T23:59:59Z").toBe(true);
+        commentIds.push(comment.id);
       }
     }
+    expect(new Set(commentIds).size).toBe(commentIds.length);
   });
 
-  it("has comment authors within the known user set and never u1", () => {
+  it("only allows comments authored by u40 (complete isolation from TeamC)", () => {
     for (const post of fbYuiPosts) {
       for (const comment of post.comments) {
-        expect(
-          KNOWN_USER_IDS.has(comment.authorId),
-          `${comment.id} の authorId ${comment.authorId} が既知ユーザーに含まれません`,
-        ).toBe(true);
-        // 主人公（u1）はまだこのアカウントを知らない
-        expect(comment.authorId).not.toBe("u1");
+        expect(comment.authorId, `${comment.id} の authorId`).toBe("u40");
       }
     }
   });
