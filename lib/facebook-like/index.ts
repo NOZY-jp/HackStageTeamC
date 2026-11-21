@@ -45,6 +45,20 @@ export function listPosts(): FbPost[] {
   return copyOf([...fbPosts].sort(byCreatedAtDesc));
 }
 
+/**
+ * 通常のフィードに出す投稿だけを残す。
+ * 本名で捜す相手（u40）の投稿は検索結果とプロフィールからだけ見せ、
+ * 検索前のフィードで本名が先に見えないようにする。
+ */
+export function filterFeedPosts(posts: FbPost[]): FbPost[] {
+  return posts.filter((post) => post.authorId !== SPOILER_USER_ID);
+}
+
+/** 通常のフィード（新着順）。u40 の投稿は含めない。 */
+export function listFeedPosts(): FbPost[] {
+  return copyOf(filterFeedPosts(fbPosts).sort(byCreatedAtDesc));
+}
+
 export function getPostById(postId: string): FbPost | undefined {
   const post = fbPosts.find((candidate) => candidate.id === postId);
   return post ? copyOf(post) : undefined;

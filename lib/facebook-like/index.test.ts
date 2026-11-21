@@ -1,8 +1,10 @@
 import { describe, expect, it } from "vitest";
 import {
+  filterFeedPosts,
   getPostById,
   getSelfUser,
   getUserByHandle,
+  listFeedPosts,
   listFriends,
   listPosts,
   listPostsByAuthor,
@@ -24,6 +26,24 @@ describe("lib/facebook-like", () => {
 
     posts[0].body = "mutated";
     expect(listPosts()[0].body).not.toBe("mutated");
+  });
+
+  it("keeps u40 posts out of the normal feed but keeps them searchable and on the profile", () => {
+    const feed = listFeedPosts();
+    expect(feed).toHaveLength(35);
+    expect(feed.every((post) => post.authorId !== "u40")).toBe(true);
+    expect(feed[0].createdAt >= feed[1].createdAt).toBe(true);
+
+    // 検索とプロフィール用の全投稿には残す
+    expect(listPosts().some((post) => post.authorId === "u40")).toBe(true);
+    expect(listPostsByAuthor("u40")).toHaveLength(23);
+    expect(searchFacebook("服部 由比").posts.every((post) => post.authorId === "u40")).toBe(true);
+
+    // 呼び出し元の配列は変更しない
+    const source = listPosts();
+    const before = source.length;
+    filterFeedPosts(source);
+    expect(source).toHaveLength(before);
   });
 
   it("resolves user by handle and lists friends", () => {

@@ -18,12 +18,16 @@ const renderFeed = () =>
   );
 
 describe("TalkUp のフィードと検索（#95）", () => {
-  it("?q= が無いときは従来どおり全件フィードを出す", () => {
+  it("?q= が無いときは u40（本名で捜す相手）の投稿をフィードに出さない", () => {
     nav.query = new URLSearchParams();
     const { container } = renderFeed();
 
     expect(screen.queryByText(/の検索結果/)).not.toBeInTheDocument();
-    expect(container.querySelectorAll("article").length).toBeGreaterThan(5);
+    const articles = container.querySelectorAll("article");
+    expect(articles.length).toBeGreaterThan(5);
+    for (const article of Array.from(articles)) {
+      expect(article.getAttribute("aria-label")).not.toBe("服部 由比の投稿");
+    }
   });
 
   it("?q=服部 由比 で、結果ラベル・本名のユーザー・該当投稿だけを出す", () => {

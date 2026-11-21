@@ -8,7 +8,7 @@ import { FacebookLeftSidebar } from "@/components/facebook-like/left-sidebar";
 import { PostCard } from "@/components/facebook-like/post-card";
 import { PostComposer } from "@/components/facebook-like/post-composer";
 import { FacebookRightSidebar } from "@/components/facebook-like/right-sidebar";
-import { filterPostsByQuery, searchFacebook } from "@/lib/facebook-like";
+import { filterFeedPosts, filterPostsByQuery, searchFacebook } from "@/lib/facebook-like";
 
 export default function FacebookFeedPage() {
   const { posts, searchQuery, setSearchQuery } = useFacebook();
@@ -17,8 +17,12 @@ export default function FacebookFeedPage() {
   // URL の ?q= から始まる検索状態で、該当ユーザーと投稿だけを出す
   const matchedUsers = useMemo(() => (query ? searchFacebook(query).users : []), [query]);
 
+  // 通常のフィードでは u40（本名で捜す相手）の投稿を出さない。
+  // 検索中は本人の投稿も結果に含める（検索とプロフィールからだけ見せる）。
+  const feedPosts = useMemo(() => (query ? posts : filterFeedPosts(posts)), [posts, query]);
+
   // 空白（半角・全角）を無視して照合する（「服部 由比」と「服部由比」の両方で届く）
-  const filteredPosts = useMemo(() => filterPostsByQuery(posts, query), [posts, query]);
+  const filteredPosts = useMemo(() => filterPostsByQuery(feedPosts, query), [feedPosts, query]);
 
   return (
     <div className="fb-feed-grid">
