@@ -1,17 +1,18 @@
 import { render, waitFor } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { StoryProvider, useStory } from "@/components/common/story/story-provider";
-import { StoryTrigger } from "@/components/common/story/story-trigger";
 import { FacebookProvider } from "@/components/facebook-like/facebook-context";
-import { ProfileView } from "@/components/facebook-like/profile-view";
-import { getUserByHandle, listFollowers, listFollowing, listFriends } from "@/lib/facebook-like";
-import { KAI_TALKUP_HANDLE, KAI_TALKUP_USER_ID } from "@/lib/facebook-like/data/users";
+import { KAI_TALKUP_HANDLE } from "@/lib/facebook-like/data/users";
 import type { FlagId } from "@/lib/story";
+import { ProfileContent } from "./profile-content";
 
 vi.mock("next/navigation", () => ({
   useSearchParams: () => new URLSearchParams(),
   usePathname: () => "/talkup/profile/imperial_chi",
   useRouter: () => ({ push: vi.fn(), replace: vi.fn(), refresh: vi.fn() }),
+  notFound: vi.fn(() => {
+    throw new Error("NEXT_NOT_FOUND");
+  }),
 }));
 
 function FlagProbe({ onFlags }: { onFlags: (flags: FlagId[]) => void }) {
@@ -26,26 +27,29 @@ describe("TalkUp プロフィールページの StoryTrigger（imperial_chi）",
   });
 
   it("@imperial_chi を開くと te03-talkup-kai-follower が立つ", async () => {
-    const user = getUserByHandle(KAI_TALKUP_HANDLE);
-    expect(user?.id).toBe(KAI_TALKUP_USER_ID);
-    if (!user) return;
-
+    const ui = await ProfileContent({ params: Promise.resolve({ handle: KAI_TALKUP_HANDLE }) });
     const seen: FlagId[][] = [];
     render(
       <StoryProvider>
-        <FacebookProvider>
-          {user.id === KAI_TALKUP_USER_ID ? <StoryTrigger flag="te03-talkup-kai-follower" /> : null}
-          <ProfileView
-            user={user}
-            friends={listFriends(user.id)}
-            following={listFollowing(user.id)}
-            followers={listFollowers(user.id)}
-          />
-        </FacebookProvider>
+        <FacebookProvider>{ui}</FacebookProvider>
         <FlagProbe onFlags={(flags) => seen.push(flags)} />
       </StoryProvider>,
     );
 
     await waitFor(() => expect(seen.at(-1)).toContain("te03-talkup-kai-follower"));
+  });
+
+  it("他の通常アカウント（@member04）では te03-talkup-kai-follower が立たない", async () => {
+    const ui = await ProfileContent({ params: Promise.resolve({ handle: "member04" }) });
+    const seen: FlagId[][] = [];
+    render(
+      <StoryProvider>
+        <FacebookProvider>{ui}</FacebookProvider>
+        <FlagProbe onFlags={(flags) => seen.push(flags)} />
+      </StoryProvider>,
+    );
+
+    await waitFor(() => expect(seen.length).toBeGreaterThan(0));
+    expect(seen.at(-1)).not.toContain("te03-talkup-kai-follower");
   });
 });

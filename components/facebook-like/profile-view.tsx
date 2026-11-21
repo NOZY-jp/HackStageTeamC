@@ -77,6 +77,7 @@ export function ProfileView({ user, friends, following = [], followers = [] }: P
           <div className="fb-profile-tabs" role="tablist" aria-label="プロフィール">
             <button
               type="button"
+              id="fb-tab-posts"
               role="tab"
               aria-selected={activeTab === "posts"}
               onClick={() => setActiveTab("posts")}
@@ -86,6 +87,7 @@ export function ProfileView({ user, friends, following = [], followers = [] }: P
             </button>
             <button
               type="button"
+              id="fb-tab-about"
               role="tab"
               aria-selected={activeTab === "about"}
               onClick={() => setActiveTab("about")}
@@ -95,6 +97,7 @@ export function ProfileView({ user, friends, following = [], followers = [] }: P
             </button>
             <button
               type="button"
+              id="fb-tab-friends"
               role="tab"
               aria-selected={activeTab === "friends"}
               onClick={() => setActiveTab("friends")}
@@ -104,6 +107,7 @@ export function ProfileView({ user, friends, following = [], followers = [] }: P
             </button>
             <button
               type="button"
+              id="fb-tab-following"
               role="tab"
               aria-selected={activeTab === "following"}
               onClick={() => setActiveTab("following")}
@@ -113,6 +117,7 @@ export function ProfileView({ user, friends, following = [], followers = [] }: P
             </button>
             <button
               type="button"
+              id="fb-tab-followers"
               role="tab"
               aria-selected={activeTab === "followers"}
               onClick={() => setActiveTab("followers")}
@@ -122,6 +127,7 @@ export function ProfileView({ user, friends, following = [], followers = [] }: P
             </button>
             <button
               type="button"
+              id="fb-tab-photos"
               role="tab"
               aria-selected={activeTab === "photos"}
               onClick={() => setActiveTab("photos")}
@@ -134,7 +140,7 @@ export function ProfileView({ user, friends, following = [], followers = [] }: P
       </section>
 
       {activeTab === "posts" ? (
-        <div className="fb-profile-body" role="tabpanel">
+        <div className="fb-profile-body" role="tabpanel" aria-labelledby="fb-tab-posts">
           <aside className="space-y-4">
             <div className="fb-card p-4 space-y-3">
               <h2 className="font-bold text-base">自己紹介</h2>
@@ -220,7 +226,7 @@ export function ProfileView({ user, friends, following = [], followers = [] }: P
       ) : null}
 
       {activeTab === "photos" ? (
-        <section className="fb-card p-6" role="tabpanel">
+        <section className="fb-card p-6" role="tabpanel" aria-labelledby="fb-tab-photos">
           <h2 className="font-bold text-lg mb-4">写真（{photoPosts.length}枚）</h2>
           {photoPosts.length > 0 ? (
             <PhotoGrid posts={photoPosts} large />
@@ -231,7 +237,7 @@ export function ProfileView({ user, friends, following = [], followers = [] }: P
       ) : null}
 
       {activeTab === "about" ? (
-        <section className="fb-card p-6 space-y-3" role="tabpanel">
+        <section className="fb-card p-6 space-y-3" role="tabpanel" aria-labelledby="fb-tab-about">
           <h2 className="font-bold text-lg">基本データ</h2>
           <p className="text-sm leading-relaxed">{user.bio}</p>
           <dl className="grid sm:grid-cols-2 gap-3 pt-2 text-sm">
@@ -248,7 +254,7 @@ export function ProfileView({ user, friends, following = [], followers = [] }: P
       ) : null}
 
       {activeTab === "friends" ? (
-        <section className="fb-card p-6" role="tabpanel">
+        <section className="fb-card p-6" role="tabpanel" aria-labelledby="fb-tab-friends">
           <h2 className="font-bold text-lg mb-4">友達（{friends.length}人）</h2>
           <div className="grid sm:grid-cols-2 gap-3">
             {friends.map((friend) => (
@@ -275,7 +281,7 @@ export function ProfileView({ user, friends, following = [], followers = [] }: P
       ) : null}
 
       {activeTab === "following" ? (
-        <section className="fb-card p-6" role="tabpanel">
+        <section className="fb-card p-6" role="tabpanel" aria-labelledby="fb-tab-following">
           <h2 className="font-bold text-lg mb-4">フォロー中（{following.length}人）</h2>
           {following.length > 0 ? (
             <div className="grid sm:grid-cols-2 gap-3">
@@ -306,7 +312,7 @@ export function ProfileView({ user, friends, following = [], followers = [] }: P
       ) : null}
 
       {activeTab === "followers" ? (
-        <section className="fb-card p-6" role="tabpanel">
+        <section className="fb-card p-6" role="tabpanel" aria-labelledby="fb-tab-followers">
           <h2 className="font-bold text-lg mb-4">フォロワー（{followers.length}人）</h2>
           {followers.length > 0 ? (
             <div className="grid sm:grid-cols-2 gap-3">

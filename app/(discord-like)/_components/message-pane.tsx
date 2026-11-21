@@ -293,7 +293,7 @@ export function MessagePane({
   );
 
   const handleMessageSeen = useCallback(() => {
-    if (seen) story?.setFlag(seen.flag);
+    if (seen && story?.ready) story.setFlag(seen.flag);
   }, [seen, story]);
 
   return (
