@@ -11,6 +11,10 @@ npm ci
 npm run dev   # http://localhost:3000
 ```
 
+## Seek のウェブ検索
+
+Google の通常検索結果を Seek に表示するには、サーバーの環境変数 `SEARCHAPI_API_KEY` を設定します。ローカルでは `.env.local` に設定できます。外部に送る検索語は `lib/search/google.ts` に定義した公開の一般語に限ります。一覧にない語でも、結果画面の「Googleで検索」から検索できます。未設定時や API から結果を取得できない場合も、作中の公開ページを検索できます。
+
 ## スクリプト
 
 | コマンド         | 内容                             |
