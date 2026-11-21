@@ -13,6 +13,7 @@ import {
 import { useOptionalStory } from "@/components/common/story/story-provider";
 import { PaneToggles } from "@/components/discord-like/pane-toggles";
 import type { MemberView, Message, MessageAuthor, VoiceSession } from "@/lib/discord-like/types";
+import type { FlagId } from "@/lib/story";
 import { callHistoryByMessage, callHistoryLabel } from "./call-history";
 import { EmptyState } from "./empty-state";
 import { MessageRow } from "./message-row";
@@ -35,6 +36,13 @@ const formatDate = (sentAt: string) => {
   return `${Number(year)}年${Number(month)}月${Number(day)}日`;
 };
 const formatTime = (sentAt: string) => sentAt.slice(11, 16);
+
+export type StoryMemberEntry = {
+  member: MemberView;
+  showWhenFlag: FlagId;
+  onOpenFlag?: FlagId;
+  note?: string;
+};
 
 type Row =
   | { type: "date"; key: string; label: string }
@@ -73,6 +81,7 @@ export function MessageList({
   contentRef,
   onJumpToLatest,
   members = [],
+  storyMember,
   focusMessageId,
   seenMessageId,
   onMessageSeen,
@@ -108,6 +117,8 @@ export function MessageList({
   onJumpToLatest?: () => void;
   /** 右パネルに出すメンバー一覧。 */
   members?: MemberView[];
+  /** 物語の進行で後から名簿に加わるメンバー。 */
+  storyMember?: StoryMemberEntry;
   /** 検索結果からジャンプしてきたメッセージ（強調して表示する）。 */
   focusMessageId?: string;
   /**
@@ -131,6 +142,7 @@ export function MessageList({
   );
 
   // 旧垢のプロフィールを開いたか、旧垢の投稿へ検索ジャンプした時点で順序5のフラグを立てる
+  // 動的参加メンバーのプロフィールを開いたときも該当フラグを立てる
   useEffect(() => {
     if (!story?.ready) {
       return;
@@ -141,20 +153,36 @@ export function MessageList({
     ) {
       story.setFlag("s05-old-discord-user");
     }
-  }, [story, openProfileId, focusedIsDenden]);
+    if (
+      storyMember?.onOpenFlag &&
+      openProfileId === storyMember.member.id &&
+      story.state.flags.includes(storyMember.showWhenFlag) &&
+      !story.state.flags.includes(storyMember.onOpenFlag)
+    ) {
+      story.setFlag(storyMember.onOpenFlag);
+    }
+  }, [story, openProfileId, focusedIsDenden, storyMember]);
+
+  const showStoryMember = Boolean(
+    storyMember && story?.ready && story.state.flags.includes(storyMember.showWhenFlag),
+  );
+  const visibleMembers =
+    showStoryMember && storyMember && !members.some((member) => member.id === storyMember.member.id)
+      ? [...members, storyMember.member]
+      : members;
 
   // 名簿が無い画面（DM など）ではトグルもパネルも出さない
-  const hasMembers = members.length > 0;
+  const hasMembers = visibleMembers.length > 0;
   // パネル内の絞り込み（displayName/handle の部分一致・大文字小文字を見ない）
   const memberFilter = memberQuery.trim().toLowerCase();
   const matchesMember = (member: MemberView) =>
     memberFilter === "" ||
     member.displayName.toLowerCase().includes(memberFilter) ||
     member.handle.toLowerCase().includes(memberFilter);
-  const onlineMembers = members.filter(
+  const onlineMembers = visibleMembers.filter(
     (member) => member.status !== "offline" && matchesMember(member),
   );
-  const offlineMembers = members.filter(
+  const offlineMembers = visibleMembers.filter(
     (member) => member.status === "offline" && matchesMember(member),
   );
 
@@ -313,7 +341,7 @@ export function MessageList({
   return (
     <main
       id="app-main"
-      className={members.length > 0 ? "app-main app-main--channel" : "app-main"}
+      className={hasMembers ? "app-main app-main--channel" : "app-main"}
       aria-label={title}
     >
       <div className="app-main-body">
@@ -516,6 +544,11 @@ export function MessageList({
                         {openProfileId === member.id ? (
                           <div className="members-profile">
                             <p className="members-profile-handle">{member.handle}</p>
+                            {storyMember?.note &&
+                            showStoryMember &&
+                            member.id === storyMember.member.id ? (
+                              <p className="members-profile-note">{storyMember.note}</p>
+                            ) : null}
                             {member.profileUrl ? (
                               <Link className="members-profile-link" href={member.profileUrl}>
                                 {profileLinkLabel(member.profileUrl)}

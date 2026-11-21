@@ -14,15 +14,20 @@ import {
   filterFeedPosts,
   getPostById as getTalkupPostById,
   getUserByHandle as getTalkupUserByHandle,
+  listFollowers as listTalkupFollowers,
+  listFollowing as listTalkupFollowing,
   listPosts as listTalkupPosts,
   searchFacebook,
 } from "@/lib/facebook-like";
+import { KAI_TALKUP_HANDLE, KAI_TALKUP_USER_ID } from "@/lib/facebook-like/data/users";
 import { getArticle as getNoteArticle } from "@/lib/note-like";
 import { PHOTO_CONTEST_NAME, PHOTO_CONTEST_RESULT_PATH } from "@/lib/seo/contest";
 import { getPost as getTwitterPost } from "@/lib/twitter-like";
+import { KANON_STALKER_POST_ID } from "@/lib/twitter-like/data/twitter";
 import { characters, FORBIDDEN_WORDS } from "./characters";
 import {
   KAI_DM_URL_ID,
+  KAI_NICKNAME_ADVICE_MESSAGE_ID,
   MAIMAI_DM_URL_ID,
   MHC_GUILD_URL_ID,
   NIGHT_VC_URL_ID,
@@ -188,6 +193,58 @@ describe("進行チェック（各プラットフォームのデータに手が�
     const badEnd = beats.find((candidate) => candidate.id === "ch6-bad-end");
     expect(badEnd?.when).toContain("s11-address");
     expect(badEnd?.after).toContain("ch5-talkup");
+  });
+
+  it("True End 導線: 4つの手がかり実物とシナリオ最終3場面が整合している", () => {
+    // 1. Discord dm-kai に「でんちゃん」の助言メッセージが存在する
+    const advice = (dmMessages["dm-kai"] ?? []).find(
+      (message) => message.id === KAI_NICKNAME_ADVICE_MESSAGE_ID,
+    );
+    expect(advice?.authorId).toBe("kai");
+    expect(advice?.body).toContain("でんちゃん");
+
+    // 2. Discord mhc には初期状態で kai が居ない
+    expect(getGuild("mhc")?.memberIds).not.toContain("kai");
+
+    // 3. Talkup で u40 は5/5を相互フォローし、フォロワーのうち χ（imperial_chi）だけ未フォローバック
+    const u40 = getTalkupUserByHandle("yui__photo");
+    expect(u40?.id).toBe("u40");
+    const u40Following = listTalkupFollowing("u40");
+    const u40Followers = listTalkupFollowers("u40");
+    expect(u40Following).toHaveLength(5);
+    expect(u40Followers).toHaveLength(6);
+    const followingIds = new Set(u40Following.map((u) => u.id));
+    const unreciprocated = u40Followers.filter((u) => !followingIds.has(u.id));
+    expect(unreciprocated.map((u) => [u.id, u.handle])).toEqual([
+      [KAI_TALKUP_USER_ID, KAI_TALKUP_HANDLE],
+    ]);
+
+    // 4. Twixer @kanon__dayo にストーカー被害示唆の投稿が存在する
+    const stalkerPost = getTwitterPost(KANON_STALKER_POST_ID);
+    expect(stalkerPost?.authorId).toBe("tw-kanon");
+    expect(stalkerPost?.body).toContain("ストーカー");
+
+    // 5. True End の3場面に禁止語・todo・maimai の「でんちゃん」発言が無い
+    for (const id of ["ch6-confront-kai", "ch6-maimai-reply", "ch6-true-end"]) {
+      const beat = beats.find((candidate) => candidate.id === id);
+      expect(beat, id).toBeDefined();
+      if (!beat) continue;
+      const lines = [
+        ...textsOf(beat.script),
+        ...chatsOf(beat.id, beat.script).map((m) => ({ from: m.from, text: m.text })),
+      ];
+      for (const line of lines) {
+        for (const word of FORBIDDEN_WORDS) {
+          expect(line.text).not.toContain(word);
+        }
+        if ("todo" in line) {
+          expect(line.todo).toBeUndefined();
+        }
+        if (line.from === "maimai") {
+          expect(line.text).not.toContain("でんちゃん");
+        }
+      }
+    }
   });
 });
 

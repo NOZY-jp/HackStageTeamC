@@ -73,8 +73,7 @@ export const QUALITY_LIMITS = {
     "slime",
     "jijii",
     "master",
-    "kai",
     "denden",
   ],
-  kaiInMhc: 5,
+  kaiInMhc: 0,
 } as const;

@@ -10,7 +10,7 @@ import { BriefcaseIcon, ClockIcon, MapPinIcon } from "./icons";
 import { PostCard } from "./post-card";
 import { PostComposer } from "./post-composer";
 
-type ProfileTab = "posts" | "about" | "friends" | "photos";
+type ProfileTab = "posts" | "about" | "friends" | "following" | "followers" | "photos";
 
 /** 「2018年4月」のような、talkup を始めた月 */
 function joinedLabel(iso: string): string {
@@ -21,13 +21,16 @@ function joinedLabel(iso: string): string {
 type ProfileViewProps = {
   user: FbUser;
   friends: FbUser[];
+  following?: FbUser[];
+  followers?: FbUser[];
 };
 
-export function ProfileView({ user, friends }: ProfileViewProps) {
+export function ProfileView({ user, friends, following = [], followers = [] }: ProfileViewProps) {
   const { selfUser, posts } = useFacebook();
   const [activeTab, setActiveTab] = useState<ProfileTab>("posts");
 
   const isSelf = selfUser.id === user.id;
+  const followingIdsSet = useMemo(() => new Set(following.map((person) => person.id)), [following]);
   const userPosts = useMemo(
     () => posts.filter((post) => post.authorId === user.id),
     [posts, user.id],
@@ -65,7 +68,8 @@ export function ProfileView({ user, friends }: ProfileViewProps) {
                 {user.bot ? <span className="fb-bot-badge">BOT</span> : null}
               </div>
               <p className="text-sm text-[var(--fb-muted)]">
-                @{user.handle} · 友達 {friends.length}人
+                @{user.handle} · フォロー中 {following.length} · フォロワー {followers.length} ·
+                友達 {friends.length}人
               </p>
             </div>
           </div>
@@ -101,6 +105,24 @@ export function ProfileView({ user, friends }: ProfileViewProps) {
             <button
               type="button"
               role="tab"
+              aria-selected={activeTab === "following"}
+              onClick={() => setActiveTab("following")}
+              className={`fb-profile-tab ${activeTab === "following" ? "is-active" : ""}`}
+            >
+              フォロー中 ({following.length})
+            </button>
+            <button
+              type="button"
+              role="tab"
+              aria-selected={activeTab === "followers"}
+              onClick={() => setActiveTab("followers")}
+              className={`fb-profile-tab ${activeTab === "followers" ? "is-active" : ""}`}
+            >
+              フォロワー ({followers.length})
+            </button>
+            <button
+              type="button"
+              role="tab"
               aria-selected={activeTab === "photos"}
               onClick={() => setActiveTab("photos")}
               className={`fb-profile-tab ${activeTab === "photos" ? "is-active" : ""}`}
@@ -112,7 +134,7 @@ export function ProfileView({ user, friends }: ProfileViewProps) {
       </section>
 
       {activeTab === "posts" ? (
-        <div className="fb-profile-body">
+        <div className="fb-profile-body" role="tabpanel">
           <aside className="space-y-4">
             <div className="fb-card p-4 space-y-3">
               <h2 className="font-bold text-base">自己紹介</h2>
@@ -198,7 +220,7 @@ export function ProfileView({ user, friends }: ProfileViewProps) {
       ) : null}
 
       {activeTab === "photos" ? (
-        <section className="fb-card p-6">
+        <section className="fb-card p-6" role="tabpanel">
           <h2 className="font-bold text-lg mb-4">写真（{photoPosts.length}枚）</h2>
           {photoPosts.length > 0 ? (
             <PhotoGrid posts={photoPosts} large />
@@ -209,7 +231,7 @@ export function ProfileView({ user, friends }: ProfileViewProps) {
       ) : null}
 
       {activeTab === "about" ? (
-        <section className="fb-card p-6 space-y-3">
+        <section className="fb-card p-6 space-y-3" role="tabpanel">
           <h2 className="font-bold text-lg">基本データ</h2>
           <p className="text-sm leading-relaxed">{user.bio}</p>
           <dl className="grid sm:grid-cols-2 gap-3 pt-2 text-sm">
@@ -226,7 +248,7 @@ export function ProfileView({ user, friends }: ProfileViewProps) {
       ) : null}
 
       {activeTab === "friends" ? (
-        <section className="fb-card p-6">
+        <section className="fb-card p-6" role="tabpanel">
           <h2 className="font-bold text-lg mb-4">友達（{friends.length}人）</h2>
           <div className="grid sm:grid-cols-2 gap-3">
             {friends.map((friend) => (
@@ -249,6 +271,76 @@ export function ProfileView({ user, friends }: ProfileViewProps) {
               </Link>
             ))}
           </div>
+        </section>
+      ) : null}
+
+      {activeTab === "following" ? (
+        <section className="fb-card p-6" role="tabpanel">
+          <h2 className="font-bold text-lg mb-4">フォロー中（{following.length}人）</h2>
+          {following.length > 0 ? (
+            <div className="grid sm:grid-cols-2 gap-3">
+              {following.map((person) => (
+                <Link
+                  key={person.id}
+                  href={`/talkup/profile/${person.handle}`}
+                  className="flex items-center gap-3 p-3 rounded-lg border border-[var(--fb-border)] hover:bg-[var(--fb-hover)] transition-colors"
+                >
+                  <FbAvatar
+                    displayName={person.displayName}
+                    avatarColor={person.avatarColor}
+                    status={person.status}
+                    size="lg"
+                    showStatus
+                  />
+                  <div className="min-w-0">
+                    <div className="font-semibold text-sm truncate">{person.displayName}</div>
+                    <div className="text-xs text-[var(--fb-muted)] truncate">@{person.handle}</div>
+                  </div>
+                </Link>
+              ))}
+            </div>
+          ) : (
+            <p className="text-sm text-[var(--fb-muted)]">フォロー中のユーザーはいません。</p>
+          )}
+        </section>
+      ) : null}
+
+      {activeTab === "followers" ? (
+        <section className="fb-card p-6" role="tabpanel">
+          <h2 className="font-bold text-lg mb-4">フォロワー（{followers.length}人）</h2>
+          {followers.length > 0 ? (
+            <div className="grid sm:grid-cols-2 gap-3">
+              {followers.map((follower) => {
+                const isMutual = followingIdsSet.has(follower.id);
+                return (
+                  <Link
+                    key={follower.id}
+                    href={`/talkup/profile/${follower.handle}`}
+                    className="flex items-center justify-between gap-3 p-3 rounded-lg border border-[var(--fb-border)] hover:bg-[var(--fb-hover)] transition-colors"
+                  >
+                    <div className="flex items-center gap-3 min-w-0">
+                      <FbAvatar
+                        displayName={follower.displayName}
+                        avatarColor={follower.avatarColor}
+                        status={follower.status}
+                        size="lg"
+                        showStatus
+                      />
+                      <div className="min-w-0">
+                        <div className="font-semibold text-sm truncate">{follower.displayName}</div>
+                        <div className="text-xs text-[var(--fb-muted)] truncate">
+                          @{follower.handle}
+                        </div>
+                      </div>
+                    </div>
+                    {isMutual ? <span className="fb-mutual-badge">相互フォロー</span> : null}
+                  </Link>
+                );
+              })}
+            </div>
+          ) : (
+            <p className="text-sm text-[var(--fb-muted)]">フォロワーはいません。</p>
+          )}
         </section>
       ) : null}
     </div>

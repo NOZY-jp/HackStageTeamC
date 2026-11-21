@@ -16,6 +16,8 @@ export const KAI_DM_URL_ID = "1187002356428841502";
  * ID は lib/discord-like/data/messages/dm.ts と同じ値（progression.test.ts で突き合わせる）。
  */
 export const BLOG_TALK_MESSAGE_ID = "dm-maimai-0060";
+/** True End 手がかり1: カイとのDMで「でんちゃん」を勧める発言のID（lib/discord-like/data/messages/dm.ts と一致） */
+export const KAI_NICKNAME_ADVICE_MESSAGE_ID = "dm-kai-nickname-advice";
 /** モンハンコミュニティ（サーバー）と、そのボイスチャンネル「深夜の集会」 */
 export const MHC_GUILD_URL_ID = "1187002356428840961";
 export const NIGHT_VC_URL_ID = "1187002356428840973";

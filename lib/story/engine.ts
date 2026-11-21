@@ -32,6 +32,9 @@ export function availableBeats(state: StoryState, beats: Beat[] = allBeats): Bea
     if (beat.previewOnly || state.completed.includes(beat.id)) {
       return false;
     }
+    if (beat.unless?.some((flag) => state.flags.includes(flag))) {
+      return false;
+    }
     const missing = missingFor(state, beat);
     return missing.flags.length === 0 && missing.beats.length === 0;
   });
@@ -63,7 +66,9 @@ export function choicesLeft(
 ): Choice[] {
   return (beat.choices ?? []).filter(
     (choice) =>
-      !chosen.includes(choice.id) && (choice.requires ?? []).every((flag) => flags.includes(flag)),
+      !chosen.includes(choice.id) &&
+      (choice.requires ?? []).every((flag) => flags.includes(flag)) &&
+      !(choice.unless ?? []).some((flag) => flags.includes(flag)),
   );
 }
 

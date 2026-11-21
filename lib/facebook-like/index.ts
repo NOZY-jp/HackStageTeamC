@@ -1,5 +1,5 @@
 import { fbPosts } from "./data/posts";
-import { FB_SELF_USER_ID, fbUsers, SPOILER_USER_ID } from "./data/users";
+import { FB_SELF_USER_ID, fbUsers, KAI_TALKUP_USER_ID, SPOILER_USER_ID } from "./data/users";
 import type { FbPost, FbUser } from "./types";
 
 const copyOf = <T>(value: T): T => structuredClone(value);
@@ -36,6 +36,25 @@ export function listFriends(userId: string): FbUser[] {
   }
   const friendSet = new Set(user.friendIds);
   return copyOf(fbUsers.filter((candidate) => friendSet.has(candidate.id)));
+}
+
+export function listFollowing(userId: string): FbUser[] {
+  const user = fbUsers.find((candidate) => candidate.id === userId);
+  if (!user) {
+    return [];
+  }
+  const followingSet = new Set(user.followingIds ?? user.friendIds);
+  return copyOf(fbUsers.filter((candidate) => followingSet.has(candidate.id)));
+}
+
+export function listFollowers(userId: string): FbUser[] {
+  const target = fbUsers.find((candidate) => candidate.id === userId);
+  if (!target) {
+    return [];
+  }
+  return copyOf(
+    fbUsers.filter((candidate) => (candidate.followingIds ?? candidate.friendIds).includes(userId)),
+  );
 }
 
 export function listPosts(): FbPost[] {
@@ -115,9 +134,9 @@ export function filterPostsByQuery(posts: FbPost[], query: string): FbPost[] {
   });
 }
 
-/** 連絡先（右サイドバー）に出すユーザー。本名で捜す相手は検索前に見せない。 */
+/** 連絡先（右サイドバー）に出すユーザー。本名で捜す相手や隠しアカウントは検索前に見せない。 */
 export function listContactUsers(): FbUser[] {
-  return copyOf(fbUsers.filter((user) => user.id !== SPOILER_USER_ID));
+  return copyOf(fbUsers.filter((user) => user.id !== SPOILER_USER_ID && !user.hiddenFromDirectory));
 }
 
 export function searchFacebook(query: string): { users: FbUser[]; posts: FbPost[] } {
@@ -128,6 +147,12 @@ export function searchFacebook(query: string): { users: FbUser[]; posts: FbPost[
   const matchedUsers = fbUsers.filter((user) => {
     if (user.id === SPOILER_USER_ID) {
       return matchesSpoilerUserQuery(normalized);
+    }
+    if (user.id === KAI_TALKUP_USER_ID) {
+      return normalized === normalizeSearchText(user.handle);
+    }
+    if (user.hiddenFromDirectory) {
+      return false;
     }
     return (
       normalizeSearchText(user.displayName).includes(normalized) ||

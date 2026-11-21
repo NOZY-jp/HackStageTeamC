@@ -21,7 +21,7 @@ const allMessages = (): Message[] => {
 const messages = allMessages();
 
 describe("Discord の会話データの配置", () => {
-  it("mhc の発言者は許可リストの人物だけ、kai は mhc と dm-kai 以外で発言せず、mhc では5件まで（D10）", () => {
+  it("mhc の発言者は許可リストの人物だけ、kai は静的ログでは dm-kai 以外で発言せず、mhc では0件（D10）", () => {
     let kaiInMhc = 0;
     for (const guild of listGuilds()) {
       if (guild.id !== "mhc") continue;
@@ -35,10 +35,7 @@ describe("Discord の会話データの配置", () => {
     expect(kaiInMhc).toBeLessThanOrEqual(Q.kaiInMhc);
     for (const message of messages) {
       if (message.authorId === "kai") {
-        expect(
-          ["mhc", "dm-kai"].some((key) => message.channelId.startsWith(key)),
-          message.id,
-        ).toBe(true);
+        expect(message.channelId, message.id).toBe("dm-kai");
       }
     }
   });

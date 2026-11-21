@@ -64,7 +64,7 @@ export const mhcScript = readConversationScripts({
 21:07 maimai ありがとう。終わったらすぐ解散で
 21:09:53 mina わたしも。22時半には抜けます
 2026-08-08
-20:31 kai 夏イベント、まだ枠ありますか
+20:31 haruka 夏イベント、まだ枠ありますか
 20:34 mina あります。21時からです
 20:38 mina 1枠で大丈夫です。装備は自由
 2026-10-03
@@ -255,9 +255,9 @@ export const mhcScript = readConversationScripts({
 19:09 mina 確かに少ない
 19:11 jijii だから今日は四人で行くぞ
 2026-09-19
-22:14 kai この前のクエスト、楽しかったです
+22:14 slime この前のクエスト、楽しかったです
 22:17 mina どのへんが
-22:19 kai みんな黙ってやってたとこ
+22:19 slime みんな黙ってやってたとこ
 22:21 mina わかる
 22:24 gunlance 俺は喋ってた
 2026-10-24
@@ -545,7 +545,7 @@ export const mhcScript = readConversationScripts({
 19:37 hal 谷の出口
 19:39 mina そこ好きです
 2026-10-17
-22:02 kai これ、わたしのです
+22:02 haruka これ、わたしのです
 22:05 gunlance うまい
 22:09 mina 偶然で撮れる画じゃない
 2025-12-08

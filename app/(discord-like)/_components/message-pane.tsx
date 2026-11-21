@@ -21,7 +21,7 @@ import type {
 import type { FlagId } from "@/lib/story";
 import { useLocalMessages } from "./local-messages-context";
 import { MessageComposer } from "./message-composer";
-import { MessageList } from "./message-list";
+import { MessageList, type StoryMemberEntry } from "./message-list";
 import { isAtBottom } from "./paging-scroll";
 
 /** 同梱データなので実時間はほぼ0。スケルトンの状態遷移を見せるためだけの待ち。 */
@@ -72,6 +72,7 @@ export function MessagePane({
   headerAction,
   voiceSessions = [],
   members = [],
+  storyMember,
   focusMessageId,
   seen,
 }: {
@@ -88,6 +89,8 @@ export function MessagePane({
   voiceSessions?: VoiceSession[];
   /** メンバー一覧（サーバー側で作って渡す）。 */
   members?: MemberView[];
+  /** 物語の進行で後から名簿に加わるメンバー。 */
+  storyMember?: StoryMemberEntry;
   /** 検索結果からジャンプしてきたメッセージ（強調して表示する）。 */
   focusMessageId?: string;
   /**
@@ -304,6 +307,7 @@ export function MessagePane({
       headerAction={headerAction}
       voiceSessions={voiceSessions}
       members={members}
+      storyMember={storyMember}
       focusMessageId={focusMessageId}
       seenMessageId={seen?.messageId}
       onMessageSeen={seen ? handleMessageSeen : undefined}

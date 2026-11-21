@@ -3,6 +3,7 @@ import { notFound } from "next/navigation";
 import { StoryTrigger } from "@/components/common/story/story-trigger";
 import { replyTargetAuthor, usersById } from "@/components/twitter-like/lookup";
 import { PostCard } from "@/components/twitter-like/post-card";
+import { PostSeenTrigger } from "@/components/twitter-like/post-seen-trigger";
 import { ProfileEmpty, ProfileShell } from "@/components/twitter-like/profile-shell";
 import { RightSidebar } from "@/components/twitter-like/right-sidebar";
 import {
@@ -12,6 +13,7 @@ import {
   listPostsByAuthor,
   listUsers,
 } from "@/lib/twitter-like";
+import { KANON_STALKER_POST_ID } from "@/lib/twitter-like/data/twitter";
 
 type Props = { params: Promise<{ handle: string }> };
 
@@ -52,14 +54,23 @@ export default async function TwitterProfilePage({ params }: Props) {
                 description="ポストすると、ここに表示されます。"
               />
             ) : null}
-            {posts.map((post) => (
-              <PostCard
-                key={post.id}
-                post={post}
-                author={user}
-                replyTo={replyTargetAuthor(post, getPost, users)}
-              />
-            ))}
+            {posts.map((post) => {
+              const card = (
+                <PostCard
+                  key={post.id}
+                  post={post}
+                  author={user}
+                  replyTo={replyTargetAuthor(post, getPost, users)}
+                />
+              );
+              return post.id === KANON_STALKER_POST_ID ? (
+                <PostSeenTrigger key={post.id} flag="te04-kanon-stalker-post">
+                  {card}
+                </PostSeenTrigger>
+              ) : (
+                card
+              );
+            })}
           </section>
         </ProfileShell>
       </main>

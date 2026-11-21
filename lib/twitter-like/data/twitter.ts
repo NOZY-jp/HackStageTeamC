@@ -1,6 +1,9 @@
 import { HAL_HANDLE } from "@/lib/discord-like/data/names";
 import type { Post, Profile, Trend, TwitterUser } from "../types";
 
+/** True End 手がかり4: かのんの投稿で過去のストーカー被害を示唆するポストID。 */
+export const KANON_STALKER_POST_ID = "post-105";
+
 /**
  * Twitter-like SNS 用のダミーデータ。
  * User.id は Discord 側（u1〜u5）と衝突しないよう "tw-" で始める。
@@ -307,6 +310,52 @@ export const twitterPosts: Post[] = [
       },
     ],
   },
+  // かのんの過去ポスト群（post-105 は最も古く、プロフィールの一番下＝スクロール先に配置する）
+  {
+    id: KANON_STALKER_POST_ID,
+    authorId: "tw-kanon",
+    postedAt: "2024-10-18T22:15:00+09:00",
+    body: "友達がストーカーされてるっぽくてガチやばいー、最近物騒ー。昔のアカウントまで掘られてたとか怖すぎるし、みんなも気をつけよ……",
+    replyCount: 0,
+    repostCount: 2,
+    likeCount: 14,
+  },
+  {
+    id: "post-106",
+    authorId: "tw-kanon",
+    postedAt: "2025-04-06T11:50:00+09:00",
+    body: "近所の川沿い、桜ほぼ満開だった！風で散る前にフィルム使い切りたい",
+    replyCount: 0,
+    repostCount: 0,
+    likeCount: 16,
+  },
+  {
+    id: "post-107",
+    authorId: "tw-kanon",
+    postedAt: "2025-11-03T16:20:00+09:00",
+    body: "文化祭シーズンだー。高校のころの写真部展示なつかしい、みんな元気かな",
+    replyCount: 0,
+    repostCount: 0,
+    likeCount: 11,
+  },
+  {
+    id: "post-108",
+    authorId: "tw-kanon",
+    postedAt: "2026-05-12T13:15:00+09:00",
+    body: "気になってた喫茶店のプリンやっと食べられた！固めでおいしかったーまた行こ",
+    replyCount: 0,
+    repostCount: 1,
+    likeCount: 23,
+  },
+  {
+    id: "post-109",
+    authorId: "tw-kanon",
+    postedAt: "2026-09-21T17:40:00+09:00",
+    body: "夕焼けがきれいすぎて駅のホームでずっと撮ってた。秋っぽい空になってきたー",
+    replyCount: 0,
+    repostCount: 1,
+    likeCount: 27,
+  },
   // 旧アカウント（@maimai_mhw・鍵垢）の残存投稿。ブログを書いていた頃〜閉鎖まで。
   // 鍵垢なので公開面には出ない（プロフィールの件数表示だけに数が残る）
   {
@@ -362,6 +411,11 @@ export const twitterViewCounts: Record<string, number> = {
   "post-102": 240,
   "post-103": 96,
   "post-104": 55,
+  "post-105": 72,
+  "post-106": 64,
+  "post-107": 48,
+  "post-108": 81,
+  "post-109": 90,
   "post-201": 40,
   "post-202": 22,
   "post-203": 18,

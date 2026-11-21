@@ -2,7 +2,8 @@ import { notFound } from "next/navigation";
 import { Suspense } from "react";
 import { StoryTrigger } from "@/components/common/story/story-trigger";
 import { ProfileView } from "@/components/facebook-like/profile-view";
-import { getUserByHandle, listFriends } from "@/lib/facebook-like";
+import { getUserByHandle, listFollowers, listFollowing, listFriends } from "@/lib/facebook-like";
+import { KAI_TALKUP_USER_ID } from "@/lib/facebook-like/data/users";
 
 // Cache Components（PPR）では、ページのトップレベルで await params すると
 // 静的シェルがブロックされ「params が <Suspense> の外で読まれている」エラーになる。
@@ -36,10 +37,13 @@ async function ProfileContent({ params }: { params: Promise<{ handle: string }> 
   }
 
   const friends = listFriends(user.id);
+  const following = listFollowing(user.id);
+  const followers = listFollowers(user.id);
   return (
     <>
       {user.id === "u40" ? <StoryTrigger flag="s10-talkup-match" delayMs={2500} /> : null}
-      <ProfileView user={user} friends={friends} />
+      {user.id === KAI_TALKUP_USER_ID ? <StoryTrigger flag="te03-talkup-kai-follower" /> : null}
+      <ProfileView user={user} friends={friends} following={following} followers={followers} />
     </>
   );
 }

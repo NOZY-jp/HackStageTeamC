@@ -6,6 +6,7 @@ import { chapter3 as chapter3Lead } from "./ch03-kai-lead";
 import { chapter4 } from "./ch04-traces";
 import { chapter5 } from "./ch05-fragments";
 import { chapter6 } from "./ch06-reality";
+import { chapter6Branch, chapter6TrueEnd } from "./ch06-true-end";
 import { samples } from "./sample";
 
 /**
@@ -22,6 +23,8 @@ export const beats: Beat[] = [
   ...chapter3Lead,
   ...chapter4,
   ...chapter5,
+  ...chapter6Branch,
   ...chapter6,
+  ...chapter6TrueEnd,
   ...samples,
 ];
