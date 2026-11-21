@@ -6680,22 +6680,51 @@ a.tw-dm-item:focus-visible {
 /* 背景：3つの SNS を横に並べ、それぞれ縦に流し続ける */
 .tt-feeds {
   position: absolute;
-  inset: -18vh -4vw;
-  display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 32px;
-  padding: 0 32px;
-  /* 少し傾けて、流れに動きを出す */
-  rotate: -6deg;
+  inset: 0;
 }
 
+/* 3つの SNS の画面を、少しずつ重ねて並べる（真ん中の Twixer をいちばん手前に） */
 .tt-feed {
+  position: absolute;
+  top: -25vh;
+  bottom: -25vh;
   display: flex;
   flex-direction: column;
-  min-width: 0;
+  width: min(46vw, 620px);
   overflow: hidden;
-  border-radius: 14px;
+  border-radius: 16px;
+  box-shadow:
+    0 0 0 1px rgb(255 255 255 / 0.08),
+    0 24px 60px rgb(0 0 0 / 0.5);
   font-family: system-ui, sans-serif;
+}
+
+.tt-feed[data-platform="discord"] {
+  left: max(-6vw, -90px);
+  z-index: 1;
+  transform: rotate(-9deg) scale(0.94);
+}
+
+.tt-feed[data-platform="twixer"] {
+  left: calc(50% - min(23vw, 310px));
+  z-index: 3;
+  transform: rotate(-5deg);
+}
+
+.tt-feed[data-platform="talkup"] {
+  right: max(-6vw, -90px);
+  z-index: 2;
+  transform: rotate(-7deg) scale(0.94);
+}
+
+/* 奥の2枚は少し暗くして、奥行きを出す */
+.tt-feed[data-platform="discord"]::after,
+.tt-feed[data-platform="talkup"]::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background-color: rgb(0 0 0 / 0.22);
+  pointer-events: none;
 }
 
 .tt-feed-head {
@@ -6798,7 +6827,7 @@ a.tw-dm-item:focus-visible {
 
 @keyframes tt-scroll {
   to {
-    translate: 0 -50%;
+    transform: translateY(-50%);
   }
 }
 
@@ -6826,7 +6855,8 @@ a.tw-dm-item:focus-visible {
 }
 
 .tt-title {
-  font-family: var(--tt-font-title), "Hiragino Mincho ProN", "Yu Mincho", serif;
+  font-family:
+    "Hiragino Mincho ProN", "Yu Mincho", "YuMincho", "Noto Serif JP", "Noto Serif CJK JP", serif;
   font-size: clamp(44px, 7.5vw, 92px);
   font-weight: 500;
   letter-spacing: 0.14em;
@@ -6839,7 +6869,8 @@ a.tw-dm-item:focus-visible {
   padding-top: 18px;
   border-top: 1px solid rgb(244 241 234 / 0.35);
   color: rgb(244 241 234 / 0.82);
-  font-family: var(--tt-font-title), "Hiragino Mincho ProN", "Yu Mincho", serif;
+  font-family:
+    "Hiragino Mincho ProN", "Yu Mincho", "YuMincho", "Noto Serif JP", "Noto Serif CJK JP", serif;
   font-size: clamp(15px, 1.8vw, 20px);
   letter-spacing: 0.18em;
   text-indent: 0.18em;
@@ -6860,7 +6891,8 @@ a.tw-dm-item:focus-visible {
   border-radius: 2px;
   background-color: rgb(7 8 13 / 0.35);
   color: #f4f1ea;
-  font-family: var(--tt-font-title), "Hiragino Mincho ProN", "Yu Mincho", serif;
+  font-family:
+    "Hiragino Mincho ProN", "Yu Mincho", "YuMincho", "Noto Serif JP", "Noto Serif CJK JP", serif;
   font-size: 18px;
   letter-spacing: 0.4em;
   text-indent: 0.4em;
@@ -6963,9 +6995,8 @@ a.tw-dm-item:focus-visible {
 }
 
 @media (max-width: 720px) {
-  .tt-feeds {
-    gap: 12px;
-    padding: 0 8px;
+  .tt-feed {
+    width: 70vw;
   }
 }
 
