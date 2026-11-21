@@ -390,7 +390,22 @@ describe("データ品質（#131 / D9・D10）", () => {
     // 明示行は dm-maimai と dm-kai、残り7本は「新DM 7本」にまとめている
     const dmRows = rows.filter((line) => /^\|\s*`dm-[a-z]+`/.test(line));
     expect(dmRows.length).toBe(2);
-    expect(rows.some((line) => /^\|\s*新DM 7本/.test(line))).toBe(true);
+    const newDmRowLine = rows.find((line) => /^\|\s*新DM /.test(line));
+    expect(newDmRowLine).toBeDefined();
+    const newDmRow = cells(newDmRowLine as string);
+    const otherThreads = listDMThreads().filter(
+      (thread) => thread.id !== "dm-maimai" && thread.id !== "dm-kai",
+    );
+    // 「7」は実際のスレッド本数と一致する
+    expect(Number(/新DM (\d+)本/.exec(newDmRowLine as string)?.[1])).toBe(otherThreads.length);
+    // 目標セル（255）は対象7スレッドの実測合計と一致する
+    const otherTotal = otherThreads.reduce(
+      (total, thread) =>
+        total + listDMMessages({ threadId: thread.id, limit: 5000 }).messages.length,
+      0,
+    );
+    expect(toNumber(newDmRow[3])).toBe(otherTotal);
+    expect(newDmRow[3]).toBe("**255**");
 
     const rowFor = (pattern: RegExp) => {
       const row = rows.find((line) => pattern.test(line));
