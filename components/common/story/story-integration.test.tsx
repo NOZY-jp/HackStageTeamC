@@ -5,7 +5,6 @@ import ContestResultPage from "@/app/(blog-like)/pochiblo/[blogId]/contest/souky
 import EntryPage from "@/app/(blog-like)/pochiblo/[blogId]/entry/[entryId]/page";
 import TalkupPage from "@/app/(facebook-like)/talkup/page";
 import { canConfirmTalkup } from "@/app/(facebook-like)/talkup/reveal";
-import { StoryConsole } from "@/app/(story)/_components/story-console";
 import { FacebookProvider } from "@/components/facebook-like/facebook-context";
 import { PHOTO_CONTEST_BLOG_ID } from "@/lib/seo/contest";
 import { availableBeats, type FlagId, STORAGE_KEY } from "@/lib/story";
@@ -134,7 +133,7 @@ describe("段階7・8・10・結末（実ページ経由・本名は結果ペー
     };
     expect(
       availableBeats(skipped).some((beat) =>
-        beat.choices?.some((choice) => choice.label === "住所を特定しました"),
+        beat.choices?.some((choice) => choice.label === "現地へ向かう"),
       ),
     ).toBe(false);
   });

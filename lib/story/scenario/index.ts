@@ -2,6 +2,7 @@ import type { Beat } from "../types";
 import { chapter1 } from "./ch01-prologue";
 import { chapter2 } from "./ch02-disappearance";
 import { chapter3 } from "./ch03-advice";
+import { chapter3 as chapter3Lead } from "./ch03-kai-lead";
 import { chapter4 } from "./ch04-traces";
 import { chapter5 } from "./ch05-fragments";
 import { chapter6 } from "./ch06-reality";
@@ -18,6 +19,7 @@ export const beats: Beat[] = [
   ...chapter1,
   ...chapter2,
   ...chapter3,
+  ...chapter3Lead,
   ...chapter4,
   ...chapter5,
   ...chapter6,

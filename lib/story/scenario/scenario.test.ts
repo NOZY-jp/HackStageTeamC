@@ -199,6 +199,7 @@ describe("ゲームでの場面の進行", () => {
     play("ch3-ask-kai");
     expect(state.flags).toContain("askedKai");
     expect(state.flags).toContain("s01-blog-talk");
+    play("ch3-kai-twixer-lead");
     expect(nextBeat(state)).toBeUndefined();
 
     state = setFlag(state, "s03-blog-found");
@@ -219,6 +220,12 @@ describe("ゲームでの場面の進行", () => {
 
     state = setFlag(state, "s08-real-name");
     play("ch4-real-name");
+
+    const kaiContact = nextBeat(state);
+    expect(kaiContact?.id).toBe("ch5-kai-contact");
+    expect(kaiContact?.place).toBe("discord:dm-kai");
+    play("ch5-kai-contact");
+    expect(state.flags).toContain("s09-kai-contact");
     expect(nextBeat(state)).toBeUndefined();
 
     state = setFlag(state, "foundBff");
@@ -230,12 +237,6 @@ describe("ゲームでの場面の進行", () => {
         text: "今の進捗どう？",
       }),
     );
-
-    const kaiContact = nextBeat(state);
-    expect(kaiContact?.id).toBe("ch5-kai-contact");
-    expect(kaiContact?.place).toBe("discord:dm-kai");
-    play("ch5-kai-contact");
-    expect(state.flags).toContain("s09-kai-contact");
     expect(nextBeat(state)).toBeUndefined();
 
     state = setFlag(state, "s10-talkup-match");

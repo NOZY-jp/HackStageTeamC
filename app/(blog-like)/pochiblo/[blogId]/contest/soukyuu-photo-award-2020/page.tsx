@@ -2,7 +2,6 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { BlogFrame } from "@/components/blog-like/blog-frame";
 import { ContestResultReveal } from "@/components/common/story/contest-result-reveal";
-import { StoryTrigger } from "@/components/common/story/story-trigger";
 import { getBlog } from "@/lib/blog-like";
 import {
   PHOTO_CONTEST_BLOG_ID,
@@ -35,7 +34,6 @@ export default async function ContestResultPage({ params }: Props) {
 
   return (
     <BlogFrame blog={blog}>
-      <StoryTrigger flag="s08-real-name" />
       <article className="pb-entry">
         <p className="pb-entry-date">2018年12月01日（土） 10:20</p>
         <h1 className="pb-entry-title">{PHOTO_CONTEST_NAME} 結果</h1>

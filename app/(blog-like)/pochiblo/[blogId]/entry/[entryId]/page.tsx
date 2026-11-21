@@ -69,15 +69,12 @@ export default async function EntryPage({ params }: Props) {
       {blog.id === "denden0102" && entry.id === "e20200211" ? (
         <StoryTrigger flag="s03-blog-found" />
       ) : null}
-      {blog.id === "denden0102" && entry.id === "e20181117" ? (
-        <StoryTrigger flag="s07-contest-entry" />
-      ) : null}
       <article className="pb-entry">
         <EntryDate entry={entry} />
         <h1 className="pb-entry-title">{entry.title}</h1>
         <EntryBody blocks={entry.body} />
         <EntryFooter entry={entry} />
-        {/* 受賞した記事から結果ページへ進む（本番ではこの操作で順序7が立つ・#119） */}
+        {/* 受賞記事でコンテスト名を控えたときだけ順序7を立てる（#119） */}
         {entry.id === "e20181117" ? (
           <p className="pb-contest-link">
             <StoryAction flag="s07-contest-entry">コンテスト名を控える</StoryAction>

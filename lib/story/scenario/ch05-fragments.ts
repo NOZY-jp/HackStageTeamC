@@ -11,8 +11,7 @@ export const chapter5: Beat[] = [
     chapter: 5,
     layout: "overlay",
     place: "discord:dm-kai",
-    when: ["foundBff"],
-    after: ["ch4-bff"],
+    when: ["s08-real-name"],
     sets: ["s09-kai-contact"],
     source: "Google Docs 箱書き 第五章・Issue #76 順序9",
     script: [
@@ -48,7 +47,7 @@ export const chapter5: Beat[] = [
     id: "ch5-talkup",
     chapter: 5,
     layout: "overlay",
-    when: ["s09-kai-contact", "s10-talkup-match"],
+    when: ["s08-real-name", "s09-kai-contact", "s10-talkup-match"],
     after: ["ch5-kai-contact"],
     source: "Google Docs 箱書き 第五章",
     script: [

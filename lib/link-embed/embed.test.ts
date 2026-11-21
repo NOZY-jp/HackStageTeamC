@@ -119,7 +119,7 @@ describe("resolveLinkEmbeds", () => {
     expect(embed.href).toBe("/twitter/post/post-101");
     expect(embed.siteName).toBe("Twixer");
     expect(embed.title).toBe("Mai（@mai2mai2）");
-    expect(embed.description).toContain("双剣");
+    expect(embed.description).toContain("弓の属性装備");
   });
 
   it("アプリ内パスで貼っても同じカードになる", () => {

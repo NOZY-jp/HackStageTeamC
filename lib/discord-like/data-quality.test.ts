@@ -21,7 +21,7 @@ const allMessages = (): Message[] => {
 const messages = allMessages();
 
 describe("Discord の会話データの配置", () => {
-  it("mhc の発言者は9人まで、kai は mhc と dm-kai 以外で発言せず、mhc では5件まで（D10）", () => {
+  it("mhc の発言者は許可リストの人物だけ、kai は mhc と dm-kai 以外で発言せず、mhc では5件まで（D10）", () => {
     let kaiInMhc = 0;
     for (const guild of listGuilds()) {
       if (guild.id !== "mhc") continue;

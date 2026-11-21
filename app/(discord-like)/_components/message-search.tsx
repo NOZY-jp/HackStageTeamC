@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import {
   type KeyboardEvent as ReactKeyboardEvent,
   useCallback,
@@ -430,9 +431,29 @@ export function MessageSearch() {
                   {response.matchedUsers.length > 0 ? (
                     <p className="search-users">
                       該当ユーザー:{" "}
-                      {response.matchedUsers
-                        .map((user) => `${user.displayName}（@${user.handle}）`)
-                        .join("、")}
+                      {response.matchedUsers.map((user, index) => (
+                        <span key={user.id}>
+                          {index > 0 ? "、" : null}
+                          {user.displayName}（@{user.handle}）
+                          {user.profileUrl ? (
+                            <>
+                              {" "}
+                              <Link
+                                href={user.profileUrl}
+                                className="text-(--color-accent-fg) underline"
+                                onClick={() => {
+                                  if (user.id === "denden") {
+                                    story?.setFlag("s05-old-discord-user");
+                                  }
+                                  close();
+                                }}
+                              >
+                                {user.profileUrl.replace(/^\//, "")}
+                              </Link>
+                            </>
+                          ) : null}
+                        </span>
+                      ))}
                     </p>
                   ) : null}
                   {response.hits.length > 0 ? (
