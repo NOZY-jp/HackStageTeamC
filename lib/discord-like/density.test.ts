@@ -5,14 +5,14 @@ import { listDMMessages, listDMThreads, listVoiceSessions } from "./index";
 const dm = (threadId: string) => listDMMessages({ threadId, limit: 6000 }).messages;
 
 describe("台本の密度（#177）", () => {
-  it("dm-maimai の通話は18回・不在5回で、夜〜深夜にだけ始まる", () => {
+  it("dm-maimai の通話は22回・不在6回で、夜〜深夜にだけ始まる", () => {
     const sessions = listVoiceSessions({ scope: "dm", channelId: "dm-maimai" });
-    expect(sessions).toHaveLength(18);
-    expect(sessions.filter((session) => session.endedReason === "missed")).toHaveLength(5);
+    expect(sessions).toHaveLength(22);
+    expect(sessions.filter((session) => session.endedReason === "missed")).toHaveLength(6);
     const starts = dm("dm-maimai").filter(
       (message) => message.system === true && message.body.includes("通話を開始しました"),
     );
-    expect(starts).toHaveLength(18);
+    expect(starts).toHaveLength(22);
     for (const start of starts) {
       const hour = Number(start.sentAt.slice(11, 13));
       expect(hour >= 19 || hour <= 2, start.id).toBe(true);
