@@ -239,9 +239,11 @@ describe("会話の自然さ（#154 の6指標）", () => {
     const row = doc.split("\n").find((line) => /^\|\s*`maimai`/.test(line));
     if (!row) throw new Error("03-people.md に maimai の行がありません");
     const names = [...row.matchAll(/「([^」]+)」/g)].map((match) => match[1]);
-    // 表の「hal→相手 / 相手→hal」の順に並ぶ
-    expect(names.slice(0, 2)).toEqual(["まいまい", "ハル"]);
-    const [fromHal, fromMaimai] = names;
+    // 表の「hal→相手 / 相手→hal」の順に並ぶ（MaiMai は「琥珀さん」→「琥珀」）
+    expect(names[0]).toBe("まいまい");
+    expect(names).toContain("琥珀");
+    const fromHal = "まいまい";
+    const fromMaimai = "琥珀";
 
     const maimaiDm = byChannel.get("dm-maimai") ?? [];
     expect(maimaiDm.some((m) => m.authorId === "hal" && m.body.includes(fromHal))).toBe(true);
@@ -267,5 +269,15 @@ describe("会話の自然さ（#154 の6指標）", () => {
     for (const variant of variants) {
       expect(text, variant).not.toContain(variant);
     }
+  });
+
+  it("廃止した旧呼び名はデータに0件、本名は結末以外に出さない", () => {
+    // 「ハルカ」は別の人物なので除外する
+    const oldName = /ハル(?!カ)/;
+    const hits = messages.filter((message) => oldName.test(message.body));
+    expect(hits.map((message) => message.id)).toEqual([]);
+
+    const realName = messages.filter((message) => message.body.includes("リョウ"));
+    expect(realName.length).toBeLessThanOrEqual(1);
   });
 });
