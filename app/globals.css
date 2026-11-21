@@ -918,6 +918,15 @@
   font-weight: 700;
 }
 
+button.message-author:hover,
+button.message-author:focus-visible {
+  text-decoration: underline;
+}
+
+button.message-author {
+  cursor: pointer;
+}
+
 .message-time {
   color: var(--color-text-muted);
   font-size: 12px;
@@ -5165,6 +5174,17 @@ a.tw-dm-item:focus-visible {
 
 .members-profile {
   margin: 4px 8px 8px 50px;
+}
+
+.message-profile {
+  margin-block: 4px;
+  width: fit-content;
+  max-width: 100%;
+  overflow-wrap: anywhere;
+}
+
+.members-profile,
+.message-profile {
   padding: 8px;
   border-radius: 6px;
   background-color: var(--color-bg-app);
