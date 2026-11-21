@@ -245,7 +245,8 @@ export const twitterPosts: Post[] = [
     repostCount: 6,
     likeCount: 83,
   },
-  // 2019年の攻略投稿と、リア友とみられる人物の「ブログにも書いてたよな」リプライ
+  // 2019年の攻略投稿と、リア友とみられる人物の「ブログにも書いてたよな」リプライ。
+  // ブログ名（でんでんの狩猟日記）をそのまま挙げる — 順序3 でその名前が検索語になる
   {
     id: "post-101",
     authorId: "tw-mai",
@@ -259,7 +260,7 @@ export const twitterPosts: Post[] = [
     id: "post-102",
     authorId: "tw-tomo",
     postedAt: "2019-09-09T21:40:00+09:00",
-    body: "それ、前にブログにも書いてたよな。読んでたよ。",
+    body: "それ、前にブログ『でんでんの狩猟日記』にも書いてたよな。読んでたよ。",
     replyToId: "post-101",
     replyCount: 0,
     repostCount: 0,

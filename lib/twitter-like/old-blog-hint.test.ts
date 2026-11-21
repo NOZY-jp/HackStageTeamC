@@ -7,6 +7,7 @@ import {
   listPosts,
   listReplies,
   listUsers,
+  searchPosts,
   searchUsers,
 } from "./index";
 
@@ -37,7 +38,7 @@ const accounts = () =>
   }));
 
 describe("第三章 Twitter 側（#94）", () => {
-  it("順序2: 攻略の投稿に、リア友とみられる人物の「ブログにも書いてたよな」リプライが読める", () => {
+  it("順序2: 攻略の投稿に、リア友とみられる人物がブログ名を挙げて「にも書いてたよな」とリプライしている", () => {
     const strategyPost = listPosts().find((post) => post.id === "post-101");
     expect(strategyPost).toBeDefined();
     expect(strategyPost?.body).toContain("双剣");
@@ -49,8 +50,12 @@ describe("第三章 Twitter 側（#94）", () => {
     const replies = listReplies("post-101");
     const fromFriend = replies.filter((reply) => reply.authorId === friend?.id);
     expect(fromFriend).toHaveLength(1);
-    // 「別の場所にも」の含み（ブログ名そのものは出さない）
-    expect(fromFriend[0].body).toContain("ブログにも書いて");
+    // 「別の場所にも」の含み ＋ ブログ名そのもの（順序3 でそのまま検索語になる）
+    expect(fromFriend[0].body).toContain("ブログ");
+    expect(fromFriend[0].body).toContain("にも書いて");
+    expect(fromFriend[0].body).toContain(BLOG_NAME);
+    // Twixer 内の検索でもブログ名からこのリプライに辿れる
+    expect(searchPosts(BLOG_NAME).map((post) => post.id)).toEqual(["post-102"]);
     expect(strategyPost?.authorId).not.toBe(friend?.id);
     // 返信者はかのんではない（かのんは旧アカウントの bio の BFF 行から見つける）
     expect(replies.some((reply) => reply.authorId === kanon?.id)).toBe(false);
@@ -143,13 +148,14 @@ describe("第三章 Twitter 側（#94）", () => {
     expect(new Set(sources).size).toBe(sources.length);
   });
 
-  it("リプライの本文にブログ名・本名・家族内の呼び名を出さない", () => {
+  it("リプライはブログ名を出すが、本名・家族内の呼び名は出さない", () => {
     const replies = listPosts()
       .filter((post) => post.replyToId === "post-101")
       .map((post) => post.body);
     expect(replies.length).toBeGreaterThan(0);
+    // ブログ名は順序3の検索語なのでリプライに必須
+    expect(replies.join("\n")).toContain(BLOG_NAME);
     for (const body of replies) {
-      expect(body).not.toContain(BLOG_NAME);
       expect(body).not.toContain(FAMILY_NAME);
       expect(body).not.toContain(GIVEN_NAME);
       expect(body).not.toContain(DEN);
