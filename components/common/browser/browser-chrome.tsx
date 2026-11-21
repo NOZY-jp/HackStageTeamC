@@ -13,11 +13,11 @@ import {
   useRef,
   useState,
 } from "react";
+import { useVisitedSites } from "@/components/common/story/site-bookmarks";
 import { useOptionalStory } from "@/components/common/story/story-provider";
 import { resolveOmniboxInput, toDisplayUrl } from "@/lib/browser/url-map";
-import { APP_PREFIX, dmListPath } from "@/lib/platform/app-prefix";
 import { PHOTO_CONTEST_NAME, PHOTO_CONTEST_RESULT_PATH } from "@/lib/seo/contest";
-import { unreadChats } from "@/lib/story";
+import { SITES, siteAt, unlockedSites, unreadChats } from "@/lib/story";
 import "./browser.css";
 
 const HIDDEN_PREFIXES = ["/story", "/screens"] as const;
@@ -41,13 +41,6 @@ export type HistoryEntry = {
   displayUrl: string;
   title: string;
   visitedAt: number;
-};
-
-type BookmarkItem = {
-  id: string;
-  label: string;
-  href: string;
-  matchPrefix: string;
 };
 
 type DiscoveryTarget = {
@@ -465,16 +458,13 @@ function BrowserChromeInner() {
     return unreadChats(chats, seenChatIds, pathname).length > 0;
   }, [mounted, chats, seenChatIds, pathname]);
 
-  const bookmarks: BookmarkItem[] = useMemo(
-    () => [
-      { id: "seek", label: "Seek", href: "/search", matchPrefix: "/search" },
-      { id: "discord", label: "Discord", href: dmListPath(), matchPrefix: `/${APP_PREFIX}` },
-      { id: "twixer", label: "Twixer", href: "/twitter", matchPrefix: "/twitter" },
-      { id: "leaf", label: "leaf", href: "/note", matchPrefix: "/note" },
-      { id: "talkup", label: "Talkup", href: "/talkup", matchPrefix: "/talkup" },
-    ],
-    [],
-  );
+  const activeSite = siteAt(pathname);
+  const visited = useVisitedSites(activeSite);
+  // 保存済みの進行は、サーバーと同じ初期表示を描いたあとで反映する。
+  const bookmarks = unlockedSites(
+    mounted && ready ? (story?.state.flags ?? []) : [],
+    mounted ? visited : [],
+  ).filter((id) => id !== "oldBlog");
 
   const handleSubmit = useCallback(
     (event: FormEvent<HTMLFormElement>) => {
@@ -555,17 +545,17 @@ function BrowserChromeInner() {
 
         <nav className="bc-nav" aria-label="サイトブックマーク">
           <ul className="bc-nav-list">
-            {bookmarks.map((item) => {
-              const active = startsWithPrefix(pathname, item.matchPrefix);
+            {bookmarks.map((id) => {
+              const item = SITES[id];
               return (
-                <li key={item.id}>
+                <li key={id}>
                   <Link
                     href={item.href}
                     className="bc-bookmark"
-                    aria-current={active ? "page" : undefined}
+                    aria-current={id === activeSite ? "page" : undefined}
                   >
                     <span>{item.label}</span>
-                    {item.id === "discord" && hasUnreadDiscord ? (
+                    {id === "discord" && hasUnreadDiscord ? (
                       <>
                         <span className="bc-unread-dot" aria-hidden="true" />
                         <span className="bc-visually-hidden">（未読メッセージあり）</span>

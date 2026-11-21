@@ -7,7 +7,7 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 import { StoryProvider, useStory } from "@/components/common/story/story-provider";
 import { dmListPath } from "@/lib/platform/app-prefix";
 import { PHOTO_CONTEST_NAME, PHOTO_CONTEST_RESULT_PATH } from "@/lib/seo/contest";
-import { beats } from "@/lib/story";
+import { beats, type FlagId, SITES } from "@/lib/story";
 import { BrowserChrome } from "./browser-chrome";
 
 const nav = {
@@ -75,6 +75,15 @@ function StoryStateHelper({
   return null;
 }
 
+function AdvanceStory({ flag }: { flag: FlagId }) {
+  const { setFlag } = useStory();
+  return (
+    <button type="button" onClick={() => setFlag(flag)}>
+      {flag}
+    </button>
+  );
+}
+
 function renderChrome(
   options: { cover?: boolean; withUnreadChat?: boolean; fullscreenBeat?: boolean } = {},
 ) {
@@ -122,10 +131,50 @@ describe("BrowserChrome", () => {
       "aria-current",
       "page",
     );
-    expect(within(navEl).getByRole("link", { name: "Seek" })).not.toHaveAttribute("aria-current");
+    expect(within(navEl).queryByRole("link", { name: "Seek" })).not.toBeInTheDocument();
     expect(within(navEl).getByRole("link", { name: /Discord/ })).not.toHaveAttribute(
       "aria-current",
     );
+  });
+
+  it("実際の進行フラグに合わせて、右上のブックマークを順に開放する", async () => {
+    nav.pathname = SITES.discord.href;
+    const user = userEvent.setup();
+    const unlocks = [
+      { flag: "s01-blog-talk", label: "Twixer" },
+      { flag: "s02-bff-reply", label: "Seek" },
+      { flag: "s03-blog-found", label: "leaf" },
+      { flag: "s09-kai-contact", label: "talkup" },
+    ] as const;
+    render(
+      <StoryProvider>
+        <BrowserChrome />
+        {unlocks.map(({ flag }) => (
+          <AdvanceStory key={flag} flag={flag} />
+        ))}
+      </StoryProvider>,
+    );
+    const bookmarks = within(screen.getByRole("navigation", { name: "サイトブックマーク" }));
+    const labels = ["Discord"];
+    expect(bookmarks.getAllByRole("link").map((link) => link.textContent)).toEqual(labels);
+    for (const { flag, label } of unlocks) {
+      await user.click(screen.getByRole("button", { name: flag }));
+      labels.push(label);
+      expect(bookmarks.getAllByRole("link").map((link) => link.textContent)).toEqual(labels);
+    }
+  });
+
+  it("直接訪れたサイトを別のページや再表示でもブックマークに残す", () => {
+    nav.pathname = "/note/maimai";
+    const first = renderChrome();
+    const leaf = screen.getByRole("link", { name: "leaf" });
+    expect(leaf).toHaveAttribute("aria-current", "page");
+    first.unmount();
+
+    nav.pathname = SITES.discord.href;
+    renderChrome();
+    expect(screen.getByRole("link", { name: "leaf" })).not.toHaveAttribute("aria-current");
+    expect(screen.queryByRole("link", { name: "talkup" })).not.toBeInTheDocument();
   });
 
   it("戻る・進むボタンとオムニボックスの URL 遷移・Seek 検索が動作する", async () => {
