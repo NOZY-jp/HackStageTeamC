@@ -124,7 +124,7 @@ export default async function TwitterSearchPage({ searchParams }: Props) {
               </section>
             ) : (
               <div className="tw-empty">
-                <p className="tw-empty-sub">「{query}」の検索結果はありません</p>
+                <p className="tw-empty-sub">「{query}」に一致するポストはありません</p>
               </div>
             )}
           </>

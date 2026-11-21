@@ -29,11 +29,15 @@ function startsWithPrefix(pathname: string, prefix: string): boolean {
  * 必ずパーセントエンコードする。表示した URL をそのまま再送信しても検索語が変わらないようにするため。
  */
 const QUERY_SAFE_ASCII = /^[A-Za-z0-9\-._~!$'()*,;:@/]$/;
+/** JS の正規表現で行区切りとして扱われ、URL のホスト判定を途切れさせる文字。 */
+const UNSAFE_UNICODE = new Set(["\u0085", "\u2028", "\u2029"]);
 
 function encodeQueryPart(value: string): string {
   let encoded = "";
   for (const char of value) {
-    if ((char.codePointAt(0) ?? 0) >= 0x80 || QUERY_SAFE_ASCII.test(char)) {
+    const code = char.codePointAt(0) ?? 0;
+    const keepReadable = code >= 0x80 ? !UNSAFE_UNICODE.has(char) : QUERY_SAFE_ASCII.test(char);
+    if (keepReadable) {
       encoded += char;
     } else {
       encoded += encodeURIComponent(char);

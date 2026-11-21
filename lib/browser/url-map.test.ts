@@ -225,5 +225,21 @@ describe("lib/browser/url-map", () => {
       expect(resolveOmniboxInput(talkup)).toBe(`/talkup${internalSearch}`);
       expect(resubmitDisplayUrl(talkup)).toBe(talkup);
     });
+
+    it("Unicode の行区切り・段落区切りを含む検索語も往復する", () => {
+      for (const query of ["前\u2028後", "前\u2029後", "前\u0085後"]) {
+        const label = JSON.stringify(query);
+        const internalSearch = `?q=${encodeURIComponent(query)}`;
+        const display = toDisplayUrl("/search", internalSearch);
+
+        // 行区切りを生のまま出すと、resolveOmniboxInput のホスト判定が途切れて
+        // 表示 URL 全体が検索語として扱われる
+        expect(display, label).not.toContain("\u2028");
+        expect(display, label).not.toContain("\u2029");
+        expect(display, label).not.toContain("\u0085");
+        expect(resolveOmniboxInput(display), label).toBe(`/search?q=${encodeURIComponent(query)}`);
+        expect(resubmitDisplayUrl(display), label).toBe(display);
+      }
+    });
   });
 });

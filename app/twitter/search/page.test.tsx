@@ -81,11 +81,12 @@ describe("TwitterSearchPage", () => {
     expect(screen.queryByText("「まいまい」の検索結果はありません")).not.toBeInTheDocument();
   });
 
-  it("ポストが0件でもユーザーが見つかれば「検索結果はありません」を出す", async () => {
+  it("ポストが0件でもユーザーが見つかれば「一致するポストはありません」を出す", async () => {
     // hunter_denden は旧垢（鍵垢）の bio に一致するが公開ポストは0件のためユーザーだけがヒットする
     render(await TwitterSearchPage(params("hunter_denden")));
     expect(screen.getByText("ユーザー")).toBeInTheDocument();
-    expect(screen.getByText("「hunter_denden」の検索結果はありません")).toBeInTheDocument();
+    expect(screen.getByText("「hunter_denden」に一致するポストはありません")).toBeInTheDocument();
+    expect(screen.queryByText("「hunter_denden」の検索結果はありません")).not.toBeInTheDocument();
   });
 
   it("鍵アカウントのユーザーの名前の横に鍵アイコンを出す", async () => {
