@@ -54,8 +54,16 @@ export function TitleScreen({ feeds }: { feeds: TitleFeed[] }) {
     };
   }, [phase, skip]);
 
+  // マウスの位置に合わせて、背景の画面をわずかに動かす（視差）。動きを減らす設定では動かさない
+  const onPointerMove = (event: React.PointerEvent<HTMLDivElement>) => {
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+    const { innerWidth, innerHeight } = window;
+    event.currentTarget.style.setProperty("--tt-mx", String(event.clientX / innerWidth - 0.5));
+    event.currentTarget.style.setProperty("--tt-my", String(event.clientY / innerHeight - 0.5));
+  };
+
   return (
-    <div className="tt-screen">
+    <div className="tt-screen" onPointerMove={onPointerMove}>
       <FeedBackground feeds={feeds} />
       <div className="tt-veil" aria-hidden="true" />
       {phase === "title" ? <TitleContent /> : null}
@@ -127,9 +135,29 @@ function TitleContent() {
     go(nextBeat(setFlag({ flags: [], completed: [], choices: {} }, "started")));
   };
 
+  const typed = useTyping(GAME_TITLE);
+  const done = typed >= [...GAME_TITLE].length;
+
   return (
-    <main className="tt-content">
-      <h1 className="tt-title">{GAME_TITLE}</h1>
+    <main className="tt-content" data-typed={done || undefined}>
+      {/* 連絡が途絶えた相手の、最後のオンライン（物語の導入をさりげなく見せる） */}
+      <p className="tt-presence" aria-hidden="true">
+        <span className="tt-presence-dot" />
+        <span className="tt-presence-name">MaiMai</span>
+        <span className="tt-presence-sep">・</span>
+        <span>最終オンライン 3日前</span>
+      </p>
+
+      <h1 className="tt-title" aria-label={GAME_TITLE}>
+        {/* 打ち終わったときの幅を先に取っておき、打っているあいだ文字が左右に動かないようにする */}
+        <span className="tt-title-ghost" aria-hidden="true">
+          {GAME_TITLE}
+        </span>
+        <span className="tt-title-typed" aria-hidden="true">
+          {[...GAME_TITLE].slice(0, typed).join("")}
+          <span className="tt-caret" />
+        </span>
+      </h1>
       <p className="tt-subtitle">{GAME_SUBTITLE}</p>
       <div className="tt-actions">
         <button
@@ -138,7 +166,10 @@ function TitleContent() {
           onClick={started ? () => go(upcoming) : start}
           disabled={!ready}
         >
-          {started ? "つづきから" : "はじめる"}
+          <span>{started ? "つづきから" : "はじめる"}</span>
+          <span className="tt-start-arrow" aria-hidden="true">
+            →
+          </span>
         </button>
         {started ? (
           <button type="button" className="tt-restart" onClick={restart}>
@@ -146,12 +177,35 @@ function TitleContent() {
           </button>
         ) : null}
       </div>
-      <a className="tt-github" href={REPOSITORY_URL} target="_blank" rel="noopener noreferrer">
-        <GitHubMark />
-        <span>GitHub</span>
-      </a>
+      <footer className="tt-footer">
+        <span className="tt-credit">© 2026 {STUDIO_NAME}</span>
+        <a className="tt-github" href={REPOSITORY_URL} target="_blank" rel="noopener noreferrer">
+          <GitHubMark />
+          <span>GitHub</span>
+        </a>
+      </footer>
     </main>
   );
+}
+
+/** タイトルを、チャットに打ち込むように1文字ずつ出す（動きを減らす設定では一度に出す） */
+function useTyping(text: string): number {
+  const length = [...text].length;
+  const [count, setCount] = useState(0);
+  useEffect(() => {
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+      setCount(length);
+      return;
+    }
+    let current = 0;
+    const timer = window.setInterval(() => {
+      current += 1;
+      setCount(current);
+      if (current >= length) window.clearInterval(timer);
+    }, 170);
+    return () => window.clearInterval(timer);
+  }, [length]);
+  return count;
 }
 
 function GitHubMark() {
