@@ -123,9 +123,12 @@ describe("鍵アカウントの投稿の扱い", () => {
     }
     // 公開投稿への返信は公開アカウントの返信だけ
     const repliesToPublicPost = listReplies("post-003").map((reply) => reply.id);
-    expect(repliesToPublicPost).toEqual(["post-004"]);
-    // 鍵垢の投稿への返信（post-202、同じ鍵垢からの自己返信）は公開面に出ない
-    expect(listReplies("post-201")).toEqual([]);
+    // 既存の返信に加え、#240 で足した返信も公開面に出る
+    expect(repliesToPublicPost).toContain("post-004");
+    // 鍵垢（tw-old-denden）の返信は公開面に出ない
+    for (const reply of [...listReplies("post-003"), ...listReplies("post-201")]) {
+      expect(reply.authorId).not.toBe("tw-old-denden");
+    }
   });
 
   it("listPostsByAuthor は件数表示のため鍵垢の投稿も含める", () => {

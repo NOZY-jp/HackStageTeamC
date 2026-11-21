@@ -165,7 +165,7 @@ export const twitterFollows: Record<string, string[]> = {
   "tw-hal": ["tw-mai", "tw-sou"],
 };
 
-export const twitterPosts: Post[] = [
+const twitterBasePosts: Post[] = [
   {
     id: "post-002",
     authorId: "tw-hal",
@@ -897,6 +897,83 @@ export const twitterViewCounts: Record<string, number> = {
 // トレンドを押すと名前のまま検索される。着弾先はリョウのゲーム仲間（Hal・Mai・ソウ）の
 // 雑談だけに絞る — 手がかりの投稿（post-101/102）やかのん・旧アカウントに直行する名前は置かない。
 // ポスト件数は出さない — 実際の検索結果（各1〜2件）と食い違う数字を見せないため。
+const reply: Post[] = [];
+
+/**
+ * 返信（#240）。トップレベルの投稿に、話題語へ触れる短い返信を付ける。
+ * 本文は親の話題語を1つ含み、8文字以上。日時は親より後。返信総数と replyCount を一致させる。
+ */
+const REPLY_TEMPLATES = [
+  (word: string) => `${word}の話、もっと聞きたいです`,
+  (word: string) => `その${word}、気になってました`,
+  (word: string) => `${word}は自分も同じでした`,
+  (word: string) => `${word}のところ、もう一度読みたい`,
+  (word: string) => `${word}、今度くわしく教えてください`,
+  (word: string) => `${word}で笑ってしまった`,
+  (word: string) => `${word}、いいですね`,
+  (word: string) => `自分の${word}の話もしたい`,
+];
+
+const REPLY_AUTHORS = [
+  "tw-mai",
+  "tw-hal",
+  "tw-sou",
+  "tw-aki",
+  "tw-mio",
+  "tw-ren",
+  "tw-nagi",
+  "tw-yuu",
+];
+
+const UNSAFE_TOPIC = ["ブログ", "でんちゃん", "レイド", "迷子", "週末", "電話", "例のゲーム"];
+const protectedAuthor = new Set(["tw-kanon", "tw-old-denden"]);
+const topicWord = (body: string): string | undefined => {
+  const words = body.match(/[ァ-ヶー]{2,}|[一-龠]{2,}/g) ?? [];
+  return words.find(
+    (word) => word.length >= 2 && !UNSAFE_TOPIC.some((unsafe) => word.includes(unsafe)),
+  );
+};
+
+const basePosts = twitterBasePosts;
+const replyParents = basePosts
+  .filter(
+    (post) =>
+      !post.replyToId &&
+      post.id !== "post-101" &&
+      post.id !== "post-105" &&
+      !protectedAuthor.has(post.authorId) &&
+      topicWord(post.body) !== undefined,
+  )
+  .slice(0, 42);
+
+replyParents.forEach((parent, parentIndex) => {
+  const word = topicWord(parent.body) ?? "";
+  const start = Date.parse(parent.postedAt);
+  for (let n = 0; n < 4; n += 1) {
+    const at = new Date(start + (n + 1) * 7 * 60 * 1000 + parentIndex * 1000);
+    reply.push({
+      id: `reply-${parent.id}-${n + 1}`,
+      authorId: REPLY_AUTHORS[(parentIndex + n) % REPLY_AUTHORS.length],
+      postedAt: at.toISOString().replace(".000Z", "+00:00"),
+      body: (() => {
+        const body = REPLY_TEMPLATES[(parentIndex + n) % REPLY_TEMPLATES.length](word);
+        return [...body].length >= 10 ? body : `${body}です`;
+      })(),
+      replyToId: parent.id,
+      replyCount: 0,
+      repostCount: 0,
+      likeCount: (parentIndex + n) % 7,
+    });
+  }
+});
+
+const allPosts = [...basePosts, ...reply];
+for (const post of basePosts) {
+  post.replyCount = allPosts.filter((candidate) => candidate.replyToId === post.id).length;
+}
+
+export const twitterPosts: Post[] = [...twitterBasePosts, ...reply];
+
 export const twitterTrends: Trend[] = [
   { id: "trend-1", category: "ゲーム · トレンド", name: "例のゲーム" },
   { id: "trend-2", category: "ゲーム · トレンド", name: "レイド" },
