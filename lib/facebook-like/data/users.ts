@@ -1,3 +1,4 @@
+import { HAL_NAME } from "@/lib/discord-like/data/names";
 import type { FbUser } from "../types";
 
 /** #76 段階10で、検索から見つける相手。 */
@@ -14,7 +15,8 @@ export const KAI_TALKUP_HANDLE = "imperial_chi";
 export const fbUsers: FbUser[] = [
   {
     id: "u1",
-    displayName: "メンバー01",
+    // プレイヤー本人の表示名は Discord と同じ正本（HAL_NAME）を使う（#209）
+    displayName: HAL_NAME,
     handle: "member01",
     avatarColor: "#5865f2",
     coverColor: "#3b49df",
