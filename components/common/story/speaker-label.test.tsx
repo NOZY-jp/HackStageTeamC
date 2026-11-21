@@ -52,8 +52,10 @@ describe("対面・心の声の話者ラベル（#208）", () => {
     expect(screen.getByText("リョウ")).toBeInTheDocument();
   });
 
-  it("通話（Discord）は開示後も「琥珀」", () => {
-    renderCue(["s08-real-name"], "call");
+  it("通話（Discord）は開示前も開示後も「琥珀」", () => {
+    expect(speakerLabel("ryo", { frame: "call", realNameKnown: false })).toBe("琥珀");
+    expect(speakerLabel("ryo", { frame: "call", realNameKnown: true })).toBe("琥珀");
+    renderCue([], "call");
     expect(screen.getByText("琥珀")).toBeInTheDocument();
   });
 });

@@ -118,7 +118,10 @@ export function speakerLabel(
   options: { frame?: string; realNameKnown?: boolean } = {},
 ): string {
   const person = characters[id];
-  if (id !== "ryo" || options.frame === "call") {
+  if (options.frame === "call") {
+    return person.accounts.discordName ?? person.name;
+  }
+  if (id !== "ryo") {
     return person.name;
   }
   return options.realNameKnown ? person.name : HAL_NAME;
