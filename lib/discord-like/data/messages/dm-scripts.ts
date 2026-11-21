@@ -1470,9 +1470,9 @@ const scripts: Record<string, string> = {
 22:28 maimai 明日スライド見せて
 2026-10-03
 21:41 maimai 今日はなんか疲れた
-21:44 hal 何かありましたか
-21:46 maimai 何もない
-21:47 maimai 何もないのに疲れた
+21:45 hal 何かありましたか
+21:48 maimai 何もない
+21:49 maimai 何もないのに疲れた
 21:51 hal そういう日あります
 21:53 maimai ある？
 21:55 hal あります
@@ -1909,7 +1909,7 @@ const scripts: Record<string, string> = {
 22:02 hal おつかれさまでした
 2026-02-07
 21:12 maimai 今日、帰りに犬に吠えられた
-21:14 hal 大丈夫でしたか
+21:15 hal 大丈夫でしたか
 21:16 maimai リード持ってない人だった
 21:18 hal それは怖い
 21:20 maimai 犬から逃げて駅まで走った
@@ -2035,7 +2035,7 @@ const scripts: Record<string, string> = {
 22:50 hal こたつ出しました
 22:52 maimai いいな
 22:54 hal そちらは
-22:56 maimai まだ布団
+22:56 maimai 寒いのでまだ布団
 2026-11-16
 23:03 maimai おやすみ
 23:06 hal おやすみなさい
@@ -2058,8 +2058,8 @@ const scripts: Record<string, string> = {
 23:25 maimai 蚊に刺された
 23:28 hal 大丈夫ですか
 23:30 maimai 三箇所
-23:32 hal かゆいですね
-23:34 maimai かゆい
+23:32 hal 痒いですね
+23:34 maimai 痒い
 2026-08-02
 20:12 maimai 日焼けした
 20:15 hal 痛くないですか
@@ -2322,7 +2322,7 @@ const scripts: Record<string, string> = {
 10:14 hal 撮るの難しそうですね
 10:16 taku 絞る
 10:18 hal 見せてください
-10:20 taku 現像したら
+10:20 taku 光の写真、現像したら
 2026-08-30
 18:40 taku フィルム、値上がりした
 18:43 hal そうなんですか
@@ -2538,7 +2538,7 @@ const scripts: Record<string, string> = {
   "dm-hayashi": `2025-11-30
 19:02 hayashi 先輩、履修の相談いいですか
 19:05 hal どうぞ
-19:07 hayashi この二つ、同時に取れますか
+19:07 hayashi 履修を二つ同時に取れますか
 19:09 hal 取れます。ただ大変です
 19:11 hayashi じゃあ片方にします
 2026-03-05

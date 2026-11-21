@@ -538,12 +538,12 @@ export const univScript = readConversationScripts({
 12:08 hal 早いですね
 12:10 sato まだ夏気分
 12:12 tanaka 切り替えろ
-12:15 sato 無理
+12:15 sato 切り替えは無理
 2026-09-18
 19:40 sato ゼミの発表、誰から
 19:43 hal 順番表を見ます
 19:45 tanaka 俺は後半
-19:47 sato じゃあ準備できる
+19:47 sato ゼミの準備できる
 2026-10-08
 13:20 tanaka 学祭、来る?
 13:23 hal 行きます
@@ -555,19 +555,19 @@ export const univScript = readConversationScripts({
 18:13 hal おめでとうございます
 18:15 tanaka すごい
 18:17 sato 緊張する
-18:20 hal 練習しましょうか
+18:20 hal 面接の練習しましょうか
 2026-11-12
-22:02 tanaka レポート、終わらない
+22:03 tanaka レポート、終わらない
 22:05 hal 何枚ですか
 22:07 tanaka 六枚
 22:09 sato それはつらい
-22:11 hal 分けて書くといいです
+22:11 hal レポートは分けて書くといいです
 2026-11-22
 14:30 sato 卒論のテーマ、決めた
 14:33 hal 何にしました
 14:35 sato 写真と記憶
 14:37 tanaka いいね
-14:40 hal 面白そうです
+14:40 hal 卒論、面白そうです
 2026-10-27
 20:10 sato ゼミの資料、共有しました
 20:13 hal 確認します
@@ -938,7 +938,7 @@ export const univScript = readConversationScripts({
 16:20 hal 実験室の予約、取りました
 16:23 sato ありがとう
 16:25 tanaka 助かる
-16:27 hal 一時間だけです`,
+16:27 hal 実験室は一時間だけです`,
 });
 
 const calls = [

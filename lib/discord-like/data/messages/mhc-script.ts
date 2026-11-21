@@ -461,7 +461,7 @@ export const mhcScript = readConversationScripts({
 12:39 haruka 待つほどのことでも
 12:41 slime 待ちます
 2026-08-21
-22:02 mina 今日、四人で行ったのに誰も罠持ってなかった
+22:02 mina 四人で行ったのに罠を誰も持ってなかった
 22:05 gunlance 俺は大砲がある
 22:07 mina 罠じゃない
 22:09 slime 次は持ちます
@@ -686,7 +686,7 @@ export const mhcScript = readConversationScripts({
 22:10 slime 年末まで無理かも
 22:12 mina 仕方ない
 22:14 gunlance たまには来いよ
-22:16 hal 行きます
+22:18 hal 行きます
 2026-11-20
 20:20 mina 12月の予定、決めたい
 20:23 hal 週末なら
@@ -709,13 +709,13 @@ export const mhcScript = readConversationScripts({
 20:25 haruka 秋っぽく
 20:27 slime 真似します
 20:29 haruka どうぞ
-20:32 mina 私も
+20:33 mina 私も
 2026-10-24
 21:20 haruka 大会の景品、届きました
 21:22 mina 早いですね
 21:24 haruka 素材系にしました
 21:26 slime 嬉しい
-21:28 hal ありがとうございます`,
+21:28 hal 景品、ありがとうございます`,
   "mhc-questions": `2025-03-13
 19:31 hal 弓で尻尾を切るのは無理ですか
 19:35 mina 切れます。ただし時間かかります
