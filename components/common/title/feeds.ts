@@ -139,9 +139,10 @@ export function buildTitleFeeds(): TitleFeed[] {
       : [];
   });
 
+  // 並び順は左から（左: Twixer、真ん中: Discord、右: talkup）
   return [
-    { platform: "discord", label: "Discord", items: discord },
     { platform: "twixer", label: "Twixer", items: twixer },
+    { platform: "discord", label: "Discord", items: discord },
     { platform: "talkup", label: "talkup", items: talkup },
   ];
 }
