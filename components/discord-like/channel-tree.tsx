@@ -107,11 +107,23 @@ export function ChannelTree({
                         <ul className="voice-members" aria-label={`${channel.name} の参加者`}>
                           {shown.participants.map((participant) => (
                             <li key={participant.id} className="voice-member">
-                              <span
+                              {/* 中央のタイルが主役。左は名前とマイクだけのコンパクト表示 */}
+                              <svg
                                 aria-hidden="true"
-                                className="voice-avatar"
-                                style={{ backgroundColor: participant.avatarColor }}
-                              />
+                                viewBox="0 0 24 24"
+                                width="12"
+                                height="12"
+                                fill="none"
+                                stroke="currentColor"
+                                strokeWidth="2"
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                                className="voice-member-mic"
+                              >
+                                <rect x="9" y="3" width="6" height="10" rx="3" />
+                                <path d="M5 11a7 7 0 0 0 14 0" />
+                                <path d="M12 18v3" />
+                              </svg>
                               <span className="truncate">{participant.displayName}</span>
                             </li>
                           ))}

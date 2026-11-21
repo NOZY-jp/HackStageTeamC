@@ -226,15 +226,15 @@ describe("通話画面のUI（ホバーで操作を出す）", () => {
     expect(timer?.textContent).toMatch(/通話時間\s*\d+:\d{2}/);
   });
 
-  it("操作はホバー中だけ出て、外すと消える（レイアウトは動かさない）", async () => {
+  it("通話中は操作バーが常に表示される（レイアウトは動かさない・PM決定）", async () => {
     nav.path = vc1Path;
     const { container } = render(shell(view("mhc-vc-1", "雑談通話", vc1UrlId)));
     const stage = container.querySelector(".call-stage");
     const controls = container.querySelector(".call-controls");
     if (!stage || !controls) throw new Error("stage missing");
 
-    // 非ホバー: data-visible=false（CSS で opacity/visibility を消す）
-    expect(controls.getAttribute("data-visible")).toBe("false");
+    // 入った時点で表示（ホバーで出し入れしない）
+    expect(controls.getAttribute("data-visible")).toBe("true");
     // 出し入れでレイアウトが動かないよう、操作バーは absolute 配置（CSS 側で固定）
     const css = await import("node:fs/promises").then((fs) =>
       fs.readFile("app/globals.css", "utf8"),
@@ -249,26 +249,23 @@ describe("通話画面のUI（ホバーで操作を出す）", () => {
     expect(controls.getAttribute("data-visible")).toBe("true");
 
     fireEvent.pointerLeave(stage);
-    expect(controls.getAttribute("data-visible")).toBe("false");
+    expect(controls.getAttribute("data-visible")).toBe("true");
   });
 
-  it("出ていないあいだ、操作ボタンは Tab で到達しない（フォーカス不可）", async () => {
+  it("操作ボタンは最初から Tab で到達できる（常時表示）", async () => {
     nav.path = vc1Path;
     const { container } = render(shell(view("mhc-vc-1", "雑談通話", vc1UrlId)));
     const stage = container.querySelector(".call-stage");
     if (!stage) throw new Error("stage missing");
 
     const leave = await pane("雑談通話").findByRole("button", { name: "切断" });
-    expect(leave).toHaveProperty("tabIndex", -1);
+    expect(leave).toHaveProperty("tabIndex", 0);
     expect(pane("雑談通話").getByRole("button", { name: "ミュート" })).toHaveProperty(
       "tabIndex",
-      -1,
+      0,
     );
-
-    // キーボード: 「操作を表示」にフォーカスすると操作が出て、到達できるようになる
-    fireEvent.focus(container.querySelector(".call-reveal") as Element);
+    expect(container.querySelector(".call-reveal")).toBeNull();
     expect(container.querySelector(".call-controls")?.getAttribute("data-visible")).toBe("true");
-    expect(pane("雑談通話").getByRole("button", { name: "切断" })).toHaveProperty("tabIndex", 0);
   });
 
   it("切断ボタンは従来どおり動く（切断後は操作が出ない）", async () => {
@@ -283,5 +280,24 @@ describe("通話画面のUI（ホバーで操作を出す）", () => {
       expect(pane("雑談通話").queryByRole("button", { name: "切断" })).not.toBeInTheDocument();
     });
     expect(container.querySelector(".call-stage")?.getAttribute("data-connected")).toBe("false");
+  });
+});
+
+describe("VC タイルの見た目（実Discord準拠・#137）", () => {
+  it("名前とマイクは左下、人数で 1/2/4/6 列になる", async () => {
+    const css = await import("node:fs/promises").then((fs) =>
+      fs.readFile("app/globals.css", "utf8"),
+    );
+    // アバター直下の名前＋マイク（視線移動を減らす）
+    expect(css).toMatch(
+      /\.call-tiles\[data-layout="grid"\]\s+\.call-tile-label\s*\{[^}]*position:\s*static;[^}]*margin-top:\s*10px;/,
+    );
+    // 人数に応じた列（1 / 2 / 4 / 6）
+    expect(css).toMatch(/\[data-count="1"\]\s*\{[^}]*grid-template-columns:\s*minmax\(0,\s*1fr\)/);
+    expect(css).toMatch(/\.call-tiles\[data-layout="grid"\]\s*\{[^}]*repeat\(2,/);
+    expect(css).toMatch(/\[data-count="5"\],[^{]*\[data-count="6"\] \{[^}]*repeat\(3,/);
+    // 発話の緑枠とパルス、動きを減らす設定で停止
+    expect(css).toMatch(/@keyframes call-pulse/);
+    expect(css).toMatch(/prefers-reduced-motion: reduce\)[^@]*call-tile\[data-speaking="true"\]/);
   });
 });

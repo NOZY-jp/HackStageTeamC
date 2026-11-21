@@ -106,7 +106,6 @@ async function DmThread({
         // DM の通話画面への導線（通話を開始する）
         <StartCallLink
           href={`${dmThreadPath(thread.urlId)}/call`}
-          threadId={thread.id}
           className="message-header-icon message-header-button"
           ariaLabel="通話を開始"
         >
