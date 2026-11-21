@@ -1,13 +1,12 @@
 import type { Metadata } from "next";
-import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { LikeButton } from "@/app/(note-like)/_components/like-button";
+import { ArticleBody } from "@/components/note-like/article-body";
 import { ArticleCover } from "@/components/note-like/article-cover";
 import { ArticleListItem } from "@/components/note-like/article-list-item";
 import { CreatorAvatar } from "@/components/note-like/creator-avatar";
 import {
-  type ArticleBlock,
   articleHref,
   creatorHref,
   formatPublishedAt,
@@ -41,32 +40,6 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     description: article.excerpt,
     alternates: { canonical: canonicalUrl(articleHref(article)) },
   };
-}
-
-function Block({ block }: { block: ArticleBlock }) {
-  switch (block.kind) {
-    case "heading":
-      return <h2>{block.text}</h2>;
-    case "quote":
-      return <blockquote>{block.text}</blockquote>;
-    case "image":
-      return (
-        <figure>
-          <Image
-            src={block.src}
-            alt={block.alt}
-            width={block.width}
-            height={block.height}
-            unoptimized
-          />
-          {block.caption ? <figcaption>{block.caption}</figcaption> : null}
-        </figure>
-      );
-    case "divider":
-      return <hr />;
-    default:
-      return <p>{block.text}</p>;
-  }
 }
 
 export default async function ArticlePage({ params }: Props) {
@@ -110,10 +83,7 @@ export default async function ArticlePage({ params }: Props) {
 
         {/* 本文。長文向けに行間を広く取る */}
         <div className="note-body">
-          {article.body.map((block, index) => (
-            // biome-ignore lint/suspicious/noArrayIndexKey: 本文ブロックは固定データで並び替えない
-            <Block key={index} block={block} />
-          ))}
+          <ArticleBody blocks={article.body} />
         </div>
 
         <ul className="note-tags">
