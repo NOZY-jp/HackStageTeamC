@@ -1,15 +1,22 @@
 "use client";
 
+import Image from "next/image";
 import Link from "next/link";
 import { useMemo, useState } from "react";
-import type { FbUser } from "@/lib/facebook-like/types";
+import type { FbPost, FbUser } from "@/lib/facebook-like/types";
 import { FbAvatar } from "./avatar";
 import { useFacebook } from "./facebook-context";
-import { BriefcaseIcon, MapPinIcon } from "./icons";
+import { BriefcaseIcon, ClockIcon, MapPinIcon } from "./icons";
 import { PostCard } from "./post-card";
 import { PostComposer } from "./post-composer";
 
-type ProfileTab = "posts" | "about" | "friends";
+type ProfileTab = "posts" | "about" | "friends" | "photos";
+
+/** 「2018年4月」のような、talkup を始めた月 */
+function joinedLabel(iso: string): string {
+  const date = new Date(iso);
+  return `${date.getUTCFullYear()}年${date.getUTCMonth() + 1}月`;
+}
 
 type ProfileViewProps = {
   user: FbUser;
@@ -24,6 +31,11 @@ export function ProfileView({ user, friends }: ProfileViewProps) {
   const userPosts = useMemo(
     () => posts.filter((post) => post.authorId === user.id),
     [posts, user.id],
+  );
+  // 写真つきの投稿（写真の欄・写真のタブに並べる。画像が未用意のものは題名入りの仮の枠）
+  const photoPosts = useMemo(
+    () => userPosts.filter((post) => post.attachment?.kind === "photo"),
+    [userPosts],
   );
 
   return (
@@ -56,16 +68,13 @@ export function ProfileView({ user, friends }: ProfileViewProps) {
                 @{user.handle} · 友達 {friends.length}人
               </p>
             </div>
-            <div className="pb-1">
-              <Link href="/talkup" className="fb-secondary-btn">
-                フィードに戻る
-              </Link>
-            </div>
           </div>
 
-          <div className="mt-4 pt-2 border-t border-[var(--fb-border)] flex items-center gap-2">
+          <div className="fb-profile-tabs" role="tablist" aria-label="プロフィール">
             <button
               type="button"
+              role="tab"
+              aria-selected={activeTab === "posts"}
               onClick={() => setActiveTab("posts")}
               className={`fb-profile-tab ${activeTab === "posts" ? "is-active" : ""}`}
             >
@@ -73,6 +82,8 @@ export function ProfileView({ user, friends }: ProfileViewProps) {
             </button>
             <button
               type="button"
+              role="tab"
+              aria-selected={activeTab === "about"}
               onClick={() => setActiveTab("about")}
               className={`fb-profile-tab ${activeTab === "about" ? "is-active" : ""}`}
             >
@@ -80,10 +91,21 @@ export function ProfileView({ user, friends }: ProfileViewProps) {
             </button>
             <button
               type="button"
+              role="tab"
+              aria-selected={activeTab === "friends"}
               onClick={() => setActiveTab("friends")}
               className={`fb-profile-tab ${activeTab === "friends" ? "is-active" : ""}`}
             >
               友達 ({friends.length})
+            </button>
+            <button
+              type="button"
+              role="tab"
+              aria-selected={activeTab === "photos"}
+              onClick={() => setActiveTab("photos")}
+              className={`fb-profile-tab ${activeTab === "photos" ? "is-active" : ""}`}
+            >
+              写真 ({photoPosts.length})
             </button>
           </div>
         </div>
@@ -107,7 +129,27 @@ export function ProfileView({ user, friends }: ProfileViewProps) {
                   <span>{user.location}在住</span>
                 </div>
               ) : null}
+              <div className="flex items-center gap-2 text-sm text-[var(--fb-muted)]">
+                <ClockIcon className="w-4 h-4 shrink-0" />
+                <span>{joinedLabel(user.joinedAt)}から talkup を利用</span>
+              </div>
             </div>
+
+            {photoPosts.length > 0 ? (
+              <div className="fb-card p-4">
+                <div className="flex items-center justify-between mb-3">
+                  <h2 className="font-bold text-base">写真</h2>
+                  <button
+                    type="button"
+                    onClick={() => setActiveTab("photos")}
+                    className="fb-text-btn"
+                  >
+                    すべて見る
+                  </button>
+                </div>
+                <PhotoGrid posts={photoPosts.slice(0, 9)} />
+              </div>
+            ) : null}
 
             <div className="fb-card p-4" id="friends">
               <div className="flex items-center justify-between mb-3">
@@ -115,7 +157,7 @@ export function ProfileView({ user, friends }: ProfileViewProps) {
                 <button
                   type="button"
                   onClick={() => setActiveTab("friends")}
-                  className="text-xs font-semibold text-[var(--fb-accent)] hover:underline"
+                  className="fb-text-btn"
                 >
                   すべて見る
                 </button>
@@ -153,6 +195,17 @@ export function ProfileView({ user, friends }: ProfileViewProps) {
             )}
           </div>
         </div>
+      ) : null}
+
+      {activeTab === "photos" ? (
+        <section className="fb-card p-6">
+          <h2 className="font-bold text-lg mb-4">写真（{photoPosts.length}枚）</h2>
+          {photoPosts.length > 0 ? (
+            <PhotoGrid posts={photoPosts} large />
+          ) : (
+            <p className="text-sm text-[var(--fb-muted)]">まだ写真はありません。</p>
+          )}
+        </section>
       ) : null}
 
       {activeTab === "about" ? (
@@ -199,5 +252,35 @@ export function ProfileView({ user, friends }: ProfileViewProps) {
         </section>
       ) : null}
     </div>
+  );
+}
+
+/** 写真つきの投稿を正方形で並べる。押すとその投稿を開く */
+function PhotoGrid({ posts, large = false }: { posts: FbPost[]; large?: boolean }) {
+  return (
+    <ul className={`fb-photo-grid ${large ? "is-large" : ""}`}>
+      {posts.map((post) => {
+        const photo = post.attachment;
+        if (!photo) return null;
+        return (
+          <li key={post.id}>
+            <Link href={`/talkup/post/${post.id}`} className="fb-photo-tile" title={photo.title}>
+              {photo.src ? (
+                <Image
+                  src={photo.src}
+                  alt={photo.alt ?? photo.title}
+                  width={photo.width ?? 800}
+                  height={photo.height ?? 600}
+                  unoptimized
+                  className="fb-photo-tile-img"
+                />
+              ) : (
+                <span className="fb-photo-tile-label">{photo.title}</span>
+              )}
+            </Link>
+          </li>
+        );
+      })}
+    </ul>
   );
 }
