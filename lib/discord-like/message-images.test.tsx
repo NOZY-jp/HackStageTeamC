@@ -86,7 +86,7 @@ describe("順序4の画像の向きとパス（#102）", () => {
   });
 
   it("DM の画像メッセージは、現在のIDのスクショを指している", () => {
-    const messages = listDMMessages({ threadId: "dm-maimai", limit: 1000 }).messages;
+    const messages = listDMMessages({ threadId: "dm-maimai", limit: 5000 }).messages;
     const withImage = messages.filter((message) =>
       (message.attachments ?? []).some((attachment) => attachment.kind === "image"),
     );
