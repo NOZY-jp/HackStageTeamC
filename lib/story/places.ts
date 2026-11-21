@@ -16,6 +16,8 @@ export const KAI_DM_URL_ID = "1187002356428841502";
  * ID は lib/discord-like/data/messages/dm.ts と同じ値（progression.test.ts で突き合わせる）。
  */
 export const BLOG_TALK_MESSAGE_ID = "dm-maimai-0060";
+/** True End 手がかり1: カイとのDMで「でんちゃん」を勧める発言のID（lib/discord-like/data/messages/dm.ts と一致） */
+export const KAI_NICKNAME_ADVICE_MESSAGE_ID = "dm-kai-nickname-advice";
 /** モンハンコミュニティ（サーバー）と、そのボイスチャンネル「深夜の集会」 */
 export const MHC_GUILD_URL_ID = "1187002356428840961";
 export const NIGHT_VC_URL_ID = "1187002356428840973";
@@ -56,8 +58,25 @@ export const PLACES = {
 
 export type PlaceId = keyof typeof PLACES;
 
+/**
+ * URL の表記ゆれを1か所でそろえる（#190）。
+ * 動的セグメントは `@me` が `%40me` のまま渡ることがあり、末尾スラッシュや大文字小文字でも
+ * 同じ画面かどうかの判定が割れる。デコードしてから比較する。
+ */
+export function normalizePathname(pathname: string): string {
+  let decoded = pathname;
+  try {
+    decoded = decodeURIComponent(pathname);
+  } catch {
+    // 壊れた % はそのまま比べる（判定できないだけで、落とさない）
+  }
+  return decoded.replace(/\/+$/, "").toLowerCase();
+}
+
 function startsWithPath(pathname: string, prefix: string): boolean {
-  return pathname === prefix || pathname.startsWith(prefix.endsWith("/") ? prefix : `${prefix}/`);
+  const path = normalizePathname(pathname);
+  const base = normalizePathname(prefix);
+  return path === base || path.startsWith(`${base}/`);
 }
 
 /** いま開いている URL が、その画面か */

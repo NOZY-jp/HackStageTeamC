@@ -1,7 +1,16 @@
 import { act, fireEvent, render, screen } from "@testing-library/react";
 import { StrictMode } from "react";
 import { afterEach, describe, expect, it, vi } from "vitest";
-import { type Beat, flag, narrate, type PlaybackSettings, say, show, think } from "@/lib/story";
+import {
+  type Beat,
+  chat,
+  flag,
+  narrate,
+  type PlaybackSettings,
+  say,
+  show,
+  think,
+} from "@/lib/story";
 import { ScenePlayer } from "./scene-player";
 
 const settings: PlaybackSettings = { mode: "click", speed: "instant" };
@@ -60,6 +69,52 @@ function renderPlayer(
 describe("ScenePlayer", () => {
   afterEach(() => {
     vi.useRealTimers();
+  });
+
+  it("DM を一通ずつ表示し、待機中に次のメッセージを出さない", async () => {
+    vi.useFakeTimers({ toFake: ["setTimeout", "requestAnimationFrame", "setInterval"] });
+    const onChatsChange = vi.fn();
+    const onComplete = vi.fn();
+    const scene: Beat = {
+      id: "test-dm",
+      chapter: 1,
+      when: [],
+      script: [
+        chat("discord:dm-kai", "ryo", "一通目", "2026-11-25T23:30:01+09:00", { wait: 3000 }),
+        chat("discord:dm-kai", "kai", "二通目", "2026-11-25T23:30:02+09:00", { wait: 3000 }),
+      ],
+    };
+    render(
+      <ScenePlayer
+        beat={scene}
+        settings={settings}
+        onSettingsChange={vi.fn()}
+        onComplete={onComplete}
+        onFlag={vi.fn()}
+        onMinimize={vi.fn()}
+        onOpenLog={vi.fn()}
+        onChatsChange={onChatsChange}
+        rememberPosition={false}
+      />,
+    );
+    await act(async () => {
+      await Promise.resolve();
+    });
+    expect(
+      onChatsChange.mock.lastCall?.[0].map((message: { text: string }) => message.text),
+    ).toEqual(["一通目"]);
+    expect(onComplete).not.toHaveBeenCalled();
+    await act(async () => {
+      await vi.advanceTimersByTimeAsync(3000);
+    });
+    expect(
+      onChatsChange.mock.lastCall?.[0].map((message: { text: string }) => message.text),
+    ).toEqual(["一通目", "二通目"]);
+    expect(onComplete).not.toHaveBeenCalled();
+    await act(async () => {
+      await vi.advanceTimersByTimeAsync(3000);
+    });
+    expect(onComplete).toHaveBeenCalled();
   });
 
   it("文章で止まり、進めると途中の命令（フラグ）を実行して次の文章へ", async () => {

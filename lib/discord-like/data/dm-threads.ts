@@ -1,6 +1,12 @@
 import type { DMThread } from "../types";
 import { messagesByDMThread } from "./messages/dm-expanded";
 
+/** 自分の最後の発言より後に届いた、相手からの通数（手書き値を持たない） */
+const unreadFrom = (list: { authorId: string }[]): number => {
+  const lastMine = list.map((message) => message.authorId).lastIndexOf("hal");
+  return list.slice(lastMine + 1).filter((message) => message.authorId !== "hal").length;
+};
+
 /**
  * DM スレッド。lastMessageAt は最終メッセージと同じ固定値。
  * カイとの DM は、調査の進捗（結末を含む）を公開チャンネルに出さないための非公開の場（#121）。
@@ -13,13 +19,12 @@ export const dmThreads: DMThread[] = [
     ] as const
   ).map(([id, urlId, personId]) => {
     const list = messagesByDMThread[id] ?? [];
-    const lastMine = list.map((message) => message.authorId).lastIndexOf("hal");
     return {
       id,
       urlId,
       participantIds: ["hal", personId] as [string, string],
       lastMessageAt: list[list.length - 1]?.sentAt ?? "2026-11-19T23:52:00+09:00",
-      unreadCount: Math.max(0, list.length - 1 - lastMine),
+      unreadCount: unreadFrom(list),
     };
   }),
   // #133 で追加した7本（urlId は 1503〜1509 の帯）
@@ -40,10 +45,7 @@ export const dmThreads: DMThread[] = [
       urlId,
       participantIds: ["hal", personId] as [string, string],
       lastMessageAt: list[list.length - 1]?.sentAt ?? "2026-11-19T23:52:00+09:00",
-      unreadCount: Math.max(
-        0,
-        list.length - 1 - list.map((message) => message.authorId).lastIndexOf("hal"),
-      ),
+      unreadCount: unreadFrom(list),
     };
   }),
 ];

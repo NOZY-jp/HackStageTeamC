@@ -16,11 +16,12 @@ const backgroundIds = (from: number, count: number): string[] =>
   backgroundUsers.slice(from, from + count).map((user) => user.id);
 
 /**
- * mhc のメンバー（260人）= 発言する9人＋ずっとオフラインの旧垢 `denden`＋背景250。
+ * mhc の初期メンバー（259人）= 発言する8人＋ずっとオフラインの旧垢 `denden`＋背景250。
  * `kanon` はどのサーバーにも入れない（リョウと面識なし。friend にも入れない決まりと同じ扱い）。
+ * `kai` は初期状態では mhc に居らず、第四章で旧アカウント発見を報告した後に動的参加する。
  */
 export const MHC_MEMBER_IDS: string[] = [
-  ...named.filter((user) => user.id !== "kanon").map((user) => user.id),
+  ...named.filter((user) => user.id !== "kanon" && user.id !== "kai").map((user) => user.id),
   ...backgroundIds(0, BACKGROUND_SPLIT.mhc),
 ];
 

@@ -1,17 +1,20 @@
 import { describe, expect, it } from "vitest";
 import { characters, FORBIDDEN_WORDS, nicknames } from "../characters";
 import {
+  choose,
   completeBeat,
   completedChats,
   initialState,
   nextBeat,
+  remainingChoices,
   setFlag,
   transcript,
 } from "../engine";
 import { EXTRA_FLAGS, type FlagId } from "../flags";
 import { chatsOf, say, textsOf, validateBeat } from "../stage";
 import { STEP_IDS } from "../steps";
-import type { Beat, Line } from "../types";
+import { parseState } from "../storage";
+import type { Beat, Line, StoryState } from "../types";
 import { beats } from "./index";
 
 /** 場面に出てくる全部の行（チャットに流す文と、選択肢の文＝リョウの発言も数える） */
@@ -197,6 +200,13 @@ describe("ゲームでの場面の進行", () => {
     play("ch1-prologue");
     play("ch2-disappearance");
     play("ch3-ask-kai");
+    expect(completedChats(state)).toContainEqual(
+      expect.objectContaining({
+        channel: "discord:dm-kai",
+        from: "kai",
+        text: "え、連絡取れなくなったってほんと？",
+      }),
+    );
     expect(state.flags).toContain("askedKai");
     expect(state.flags).toContain("s01-blog-talk");
     play("ch3-kai-twixer-lead");
@@ -208,6 +218,13 @@ describe("ゲームでの場面の進行", () => {
 
     state = setFlag(state, "s04-old-id-screenshot");
     play("ch4-leaf");
+    expect(completedChats(state)).toContainEqual(
+      expect.objectContaining({
+        channel: "discord:dm-kai",
+        from: "ryo",
+        text: "ありがとう、その線で探してみる",
+      }),
+    );
     expect(nextBeat(state)).toBeUndefined();
 
     state = setFlag(state, "s05-old-discord-user");
@@ -226,24 +243,233 @@ describe("ゲームでの場面の進行", () => {
     expect(kaiContact?.place).toBe("discord:dm-kai");
     play("ch5-kai-contact");
     expect(state.flags).toContain("s09-kai-contact");
+    expect(completedChats(state)).toContainEqual(
+      expect.objectContaining({ channel: "discord:dm-kai", from: "kai", text: "今の進捗どう？" }),
+    );
     expect(nextBeat(state)).toBeUndefined();
 
     state = setFlag(state, "foundBff");
     play("ch4-bff");
-    expect(completedChats(state)).toContainEqual(
-      expect.objectContaining({
-        channel: "discord:dm-kai",
-        from: "kai",
-        text: "今の進捗どう？",
-      }),
-    );
     expect(nextBeat(state)).toBeUndefined();
 
     state = setFlag(state, "s10-talkup-match");
     play("ch5-talkup");
     expect(state.flags).toContain("s11-address");
+    // カイの助言どおり「でんちゃん」と呼ぶと誤認結末へ（#120）
+    expect(state.flags).toContain("kaiToldDenchan");
+    play("ch6-call-name");
+    expect(state.flags).toContain("usedDenchan");
 
     play("ch6-bad-end");
     expect(nextBeat(state)).toBeUndefined();
+  });
+
+  const playBeat = (state: StoryState, expectedId: string, choiceId?: string): StoryState => {
+    const beat = nextBeat(state);
+    expect(beat?.id).toBe(expectedId);
+    if (!beat) throw new Error(`${expectedId} が始まりません`);
+    return completeBeat(state, beat, choiceId);
+  };
+
+  /** ch5-talkup 完了直前（s10-talkup-match まで到達済み）の状態を作る。 */
+  const reachBeforeCh5Talkup = () => {
+    let state = setFlag(initialState, "started");
+    const play = (expected: string) => {
+      const beat = nextBeat(state);
+      expect(beat?.id).toBe(expected);
+      if (!beat) throw new Error(`${expected} が始まりません`);
+      state = completeBeat(state, beat, beat.choices?.[0]?.id);
+    };
+    play("ch1-prologue");
+    play("ch2-disappearance");
+    play("ch3-ask-kai");
+    play("ch3-kai-twixer-lead");
+    state = setFlag(state, "s03-blog-found");
+    play("ch3-blog-found");
+    state = setFlag(state, "s04-old-id-screenshot");
+    play("ch4-leaf");
+    state = setFlag(state, "s05-old-discord-user");
+    play("ch4-old-account");
+    state = setFlag(state, "s06-old-profile-link");
+    play("ch4-old-blog");
+    state = setFlag(state, "s08-real-name");
+    play("ch4-real-name");
+    play("ch5-kai-contact");
+    state = setFlag(state, "foundBff");
+    play("ch4-bff");
+    state = setFlag(state, "s10-talkup-match");
+    return state;
+  };
+
+  const TE_FLAGS = [
+    "te01-kai-nickname",
+    "te02-kai-joined-mhc",
+    "te03-talkup-kai-follower",
+    "te04-kanon-stalker-post",
+  ] as const;
+
+  it("カイとのDMを時刻順に表示すると、旧アカウントの報告に続いて進捗確認の会話が並ぶ", () => {
+    const dm = completedChats(reachBeforeCh5Talkup())
+      .filter((message) => message.channel === "discord:dm-kai")
+      .sort((a, b) => Date.parse(a.at) - Date.parse(b.at));
+
+    const reports = dm.filter((message) => message.id.startsWith("ch4-old-account:"));
+    const checkIns = dm.filter((message) => message.text === "今の進捗どう？");
+    expect(reports.map((message) => message.from)).toEqual(["ryo", "kai"]);
+    expect(checkIns).toHaveLength(1);
+    const report = dm.findLastIndex((message) => message.id.startsWith("ch4-old-account:"));
+    const checkIn = dm.findIndex((message) => message.id === checkIns[0]?.id);
+    const reply = dm.findIndex(
+      (message) => message.id.startsWith("ch5-kai-contact:") && message.from === "ryo",
+    );
+    expect(report).toBeGreaterThanOrEqual(0);
+    expect(checkIn).toBeGreaterThan(report);
+    expect(reply).toBeGreaterThan(checkIn);
+  });
+
+  it("場面を完了済みの旧セーブでも手がかりの起点を復元し、分岐を開ける", () => {
+    const base = playBeat(reachBeforeCh5Talkup(), "ch5-talkup", "visit-house");
+    const restored = parseState({
+      ...base,
+      flags: base.flags.filter((flag) => flag !== "toldKaiOldAccount" && flag !== "kaiToldDenchan"),
+      completed: [...base.completed, "ch6-bad-end"],
+    });
+
+    expect(restored.flags).toEqual(
+      expect.arrayContaining(["toldKaiOldAccount", "kaiToldDenchan", "reachedBadEnd"]),
+    );
+    expect(parseState(restored)).toEqual(restored);
+    expect(nextBeat(restored)).toBeUndefined();
+
+    const investigated = TE_FLAGS.reduce(setFlag, restored);
+    const branch = nextBeat(investigated);
+    expect(branch?.id).toBe("ch6-branch");
+    if (!branch) throw new Error("ch6-branch missing");
+    expect(remainingChoices(investigated, branch).map((choice) => choice.id)).toEqual([
+      "confront-kai",
+      "go-to-house-again",
+    ]);
+  });
+
+  it("4つのTEフラグのうち1つでも欠けていれば、Bad End後の再調査でも分岐・True Endは開かない", () => {
+    let base = reachBeforeCh5Talkup();
+    base = playBeat(base, "ch5-talkup", "visit-house");
+    base = playBeat(base, "ch6-call-name", "denden");
+    const badEnd = nextBeat(base);
+    expect(badEnd?.id).toBe("ch6-bad-end");
+    if (!badEnd) throw new Error("ch6-bad-end missing");
+    expect(remainingChoices(base, badEnd).map((c) => c.id)).toEqual(["reinvestigate"]);
+    base = completeBeat(base, badEnd, "reinvestigate");
+    expect(base.flags).toContain("reachedBadEnd");
+    expect(nextBeat(base)).toBeUndefined();
+
+    // 4通りの「3/4だけ集めた状態」すべてで ch6-branch も True End も始まらない
+    for (const missing of TE_FLAGS) {
+      let partial = base;
+      for (const flag of TE_FLAGS) {
+        if (flag !== missing) partial = setFlag(partial, flag);
+      }
+      expect(nextBeat(partial), `missing ${missing}`).toBeUndefined();
+    }
+  });
+
+  it("Bad End後に4つすべて集めると分岐が開き、再度の誤選択からやり直してTrue Endへ到達できる", () => {
+    let state = reachBeforeCh5Talkup();
+    state = playBeat(state, "ch5-talkup", "visit-house");
+    state = playBeat(state, "ch6-call-name", "denden");
+    state = playBeat(state, "ch6-bad-end", "reinvestigate");
+    expect(state.flags).toContain("reachedBadEnd");
+
+    for (const flag of TE_FLAGS) {
+      state = setFlag(state, flag);
+    }
+
+    const branch = nextBeat(state);
+    expect(branch?.id).toBe("ch6-branch");
+    if (!branch) throw new Error("ch6-branch missing");
+    // Bad End 後なので go-to-house-first ではなく go-to-house-again が出る
+    expect(remainingChoices(state, branch).map((c) => c.id)).toEqual([
+      "confront-kai",
+      "go-to-house-again",
+    ]);
+
+    state = choose(state, branch, "go-to-house-again");
+    expect(state.flags).toContain("choseBadEndAgain");
+
+    state = playBeat(state, "ch6-bad-end-repeat", "reconsider-after-repeat");
+    expect(state.flags).toContain("reconsiderBranch");
+
+    state = playBeat(state, "ch6-branch-retry", "confront-kai-retry");
+    expect(state.flags).toContain("choseTrueEnd");
+
+    state = playBeat(state, "ch6-confront-kai");
+    state = playBeat(state, "ch6-maimai-reply");
+    state = playBeat(state, "ch6-true-end");
+    expect(nextBeat(state)).toBeUndefined();
+  });
+
+  it("初回探索で4つのTEフラグを集めきっていれば、ch5-talkup直後に分岐が開き両方のルートへ進める", () => {
+    let base = reachBeforeCh5Talkup();
+    for (const flag of TE_FLAGS) {
+      base = setFlag(base, flag);
+    }
+    base = playBeat(base, "ch5-talkup", "visit-house");
+
+    // (A) 分岐で真相を確かめる -> ch6-bad-end を飛ばして直接 True End へ
+    const branchA = nextBeat(base);
+    expect(branchA?.id).toBe("ch6-branch");
+    if (!branchA) throw new Error("ch6-branch missing");
+    expect(remainingChoices(base, branchA).map((c) => c.id)).toEqual([
+      "confront-kai",
+      "go-to-house-first",
+    ]);
+
+    let pathA = choose(base, branchA, "confront-kai");
+    expect(pathA.flags).toContain("choseTrueEnd");
+    pathA = playBeat(pathA, "ch6-confront-kai");
+    pathA = playBeat(pathA, "ch6-maimai-reply");
+    pathA = playBeat(pathA, "ch6-true-end");
+    expect(pathA.completed).not.toContain("ch6-bad-end");
+    expect(nextBeat(pathA)).toBeUndefined();
+
+    // (B) 分岐で家へ向かう選択 -> ch6-bad-end (reconsider) -> ch6-branch-retry -> True End
+    let pathB = choose(base, branchA, "go-to-house-first");
+    expect(pathB.flags).toContain("choseBadEnd");
+    pathB = playBeat(pathB, "ch6-call-name", "denden");
+    const badEnd = nextBeat(pathB);
+    expect(badEnd?.id).toBe("ch6-bad-end");
+    if (!badEnd) throw new Error("ch6-bad-end missing");
+    expect(remainingChoices(pathB, badEnd).map((c) => c.id)).toEqual(["reconsider"]);
+    pathB = completeBeat(pathB, badEnd, "reconsider");
+    expect(pathB.flags).toContain("reconsiderBranch");
+
+    pathB = playBeat(pathB, "ch6-branch-retry", "confront-kai-retry");
+    pathB = playBeat(pathB, "ch6-confront-kai");
+    pathB = playBeat(pathB, "ch6-maimai-reply");
+    pathB = playBeat(pathB, "ch6-true-end");
+    expect(nextBeat(pathB)).toBeUndefined();
+  });
+
+  it("分岐で家を訪れ表示名で呼んだ場合も、判断をやり直せる", () => {
+    let state = TE_FLAGS.reduce(setFlag, reachBeforeCh5Talkup());
+    state = playBeat(state, "ch5-talkup", "visit-house");
+    state = playBeat(state, "ch6-branch", "go-to-house-first");
+    state = playBeat(state, "ch6-call-name", "name");
+    state = playBeat(state, "ch6-wait-end", "reconsider");
+    state = playBeat(state, "ch6-branch-retry", "confront-kai-retry");
+    expect(nextBeat(state)?.id).toBe("ch6-confront-kai");
+  });
+
+  it("表示名で呼んだ後に手がかりを集めた場合も、True End の分岐が開く", () => {
+    let state = playBeat(reachBeforeCh5Talkup(), "ch5-talkup", "visit-house");
+    state = playBeat(state, "ch6-call-name", "name");
+    state = playBeat(state, "ch6-wait-end");
+    state = TE_FLAGS.reduce(setFlag, state);
+
+    const branch = nextBeat(state);
+    expect(branch?.id).toBe("ch6-branch");
+    if (!branch) throw new Error("ch6-branch missing");
+    expect(remainingChoices(state, branch).map((choice) => choice.id)).toEqual(["confront-kai"]);
+    expect(nextBeat(choose(state, branch, "confront-kai"))?.id).toBe("ch6-confront-kai");
   });
 });

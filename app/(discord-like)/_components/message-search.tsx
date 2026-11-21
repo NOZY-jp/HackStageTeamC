@@ -17,7 +17,7 @@ import {
   type SearchOrder,
   type SearchParseError,
 } from "@/lib/discord-like/search-query";
-import { BLOG_TALK_MESSAGE_ID } from "@/lib/story/places";
+import { BLOG_TALK_MESSAGE_ID, KAI_NICKNAME_ADVICE_MESSAGE_ID } from "@/lib/story/places";
 
 /**
  * メッセージ検索（#69）。ブラウザ版 Discord と同じく、ヘッダの検索バーを押すと
@@ -213,6 +213,9 @@ export function MessageSearch() {
     (hit: SearchHit) => {
       if (hit.authorId === "denden") {
         story?.setFlag("s05-old-discord-user");
+      }
+      if (hit.id === KAI_NICKNAME_ADVICE_MESSAGE_ID) {
+        story?.setFlag("te01-kai-nickname");
       }
       const href = hrefFor(hit);
       setOpen(false);
