@@ -1,3 +1,5 @@
+import { readFileSync } from "node:fs";
+import { join } from "node:path";
 import { describe, expect, it } from "vitest";
 import { getPost } from "@/lib/twitter-like";
 import { linesOf } from "./engine";
@@ -9,6 +11,11 @@ import type { Beat } from "./types";
  * #213: カイの第三章の誘導を弱める。投稿の直リンクは送らず、アカウントだけ。
  * アカウント → post-101 → post-102 → s02 の導線は成立したまま。
  */
+
+/** post-101 / post-102 の完全な写し（全フィールド）。 */
+const SNAPSHOT: { id: string }[] = JSON.parse(
+  readFileSync(join(process.cwd(), "lib/twitter-like/post-101-102.snapshot.json"), "utf8"),
+);
 
 const lead = beats.find((beat) => beat.id === "ch3-kai-twixer-lead");
 const advice = beats.find((beat) => beat.id === "ch3-ask-kai");
@@ -36,10 +43,14 @@ describe("カイの第三章の誘導（#213）", () => {
     expect(quotes.length).toBeLessThanOrEqual(1);
   });
 
-  it("段階2の行き先はアカウント、post-101・post-102 は不変", () => {
+  it("段階2の行き先はアカウント", () => {
     const step = steps.find((candidate) => candidate.id === "s02-bff-reply");
     expect(step?.places[0]?.href).toBe("/twitter/profile/mai2mai2");
-    expect(getPost("post-101")?.id).toBe("post-101");
-    expect(getPost("post-102")?.replyToId).toBe("post-101");
+  });
+
+  it("post-101・post-102 は全フィールドが完全一致", () => {
+    for (const expected of SNAPSHOT) {
+      expect(getPost(expected.id), expected.id).toEqual(expected);
+    }
   });
 });
