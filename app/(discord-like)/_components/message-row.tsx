@@ -1,8 +1,45 @@
 "use client";
 
+import Link from "next/link";
+import type { ReactNode } from "react";
+import { useOptionalStory } from "@/components/common/story/story-provider";
 import type { Message, MessageAuthor } from "@/lib/discord-like/types";
 import { MessageAttachments } from "./message-attachments";
 import { MessageEmbeds } from "./message-embeds";
+
+const POCHIBLO_URL = /https?:\/\/pochiblo\.jp(?:\/[^\s]*)?/g;
+
+function renderMessageBody(body: string, onPochibloClick?: () => void) {
+  const nodes: ReactNode[] = [];
+  let lastIndex = 0;
+  for (const match of body.matchAll(POCHIBLO_URL)) {
+    const url = match[0];
+    const index = match.index ?? 0;
+    if (index > lastIndex) {
+      nodes.push(body.slice(lastIndex, index));
+    }
+    const subPath = url.replace(/^https?:\/\/pochiblo\.jp/, "");
+    const href = subPath && subPath !== "/" ? `/pochiblo${subPath}` : "/pochiblo";
+    nodes.push(
+      <Link
+        key={`${index}-${url}`}
+        href={href}
+        className="message-link text-(--color-accent-fg) underline"
+        onClick={onPochibloClick}
+      >
+        {url}
+      </Link>,
+    );
+    lastIndex = index + url.length;
+  }
+  if (lastIndex === 0) {
+    return body;
+  }
+  if (lastIndex < body.length) {
+    nodes.push(body.slice(lastIndex));
+  }
+  return nodes;
+}
 
 /**
  * 1件のメッセージ行。grouped（同一作者が5分以内に連続発言）のときは
@@ -25,12 +62,15 @@ export function MessageRow({
   /** 検索結果からジャンプしてきた1件（強調表示する） */
   focused?: boolean;
 }) {
+  const story = useOptionalStory();
   const author = authors[message.authorId];
   const displayName = author?.displayName ?? message.authorId;
   const hasReply = Boolean(message.replyToId);
   const replyName = replyTarget
     ? (authors[replyTarget.authorId]?.displayName ?? replyTarget.authorId)
     : null;
+  const onDendenLinkClick =
+    message.authorId === "denden" ? () => story?.setFlag("s05-old-discord-user") : undefined;
 
   return (
     <article
@@ -70,14 +110,9 @@ export function MessageRow({
           <p className="message-meta">
             {author?.profileUrl ? (
               // プロフィールのリンクがある書き手だけ、名前をリンクにする（新しい画面は作らない）
-              <a
-                className="message-author"
-                href={author.profileUrl}
-                target="_blank"
-                rel="noreferrer noopener"
-              >
+              <Link className="message-author" href={author.profileUrl} onClick={onDendenLinkClick}>
                 {displayName}
-              </a>
+              </Link>
             ) : (
               <span className="message-author">{displayName}</span>
             )}
@@ -94,7 +129,7 @@ export function MessageRow({
               📌
             </span>
           ) : null}
-          {message.body}
+          {renderMessageBody(message.body, onDendenLinkClick)}
           {grouped && message.editedAt ? <span className="message-edited"> (編集済み)</span> : null}
         </p>
 

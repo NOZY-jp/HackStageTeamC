@@ -576,18 +576,13 @@ describe("カイの進捗は進行のときだけ読める（#119）", () => {
       ]),
     );
     // 結末は選択するまで出ない
-    expect(completedChats(afterContact).some((chat) => chat.text === "住所を特定しました")).toBe(
-      false,
-    );
+    expect(afterContact.flags).not.toContain("s11-address");
     const atMatch = setFlag(afterContact, "s10-talkup-match");
-    const report = availableBeats(atMatch).find((beat) => beat.place === "discord:dm-kai");
+    const report = availableBeats(atMatch).find((beat) => beat.id === "ch5-talkup");
     if (!report?.choices) throw new Error("結末の選択肢がない");
-    const ended = choose(atMatch, report, "send");
-    expect(completedChats(ended)).toEqual(
-      expect.arrayContaining([
-        expect.objectContaining({ from: "ryo", text: "住所を特定しました" }),
-      ]),
-    );
+    const ended = choose(atMatch, report, "visit-house");
+    expect(ended.flags).toContain("s11-address");
+    expect(availableBeats(ended).some((beat) => beat.id === "ch6-bad-end")).toBe(true);
   });
 });
 

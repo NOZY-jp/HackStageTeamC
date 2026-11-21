@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { LikeButton } from "@/app/(note-like)/_components/like-button";
+import { StoryTrigger } from "@/components/common/story/story-trigger";
 import { ArticleBody } from "@/components/note-like/article-body";
 import { ArticleCover } from "@/components/note-like/article-cover";
 import { ArticleListItem } from "@/components/note-like/article-list-item";
@@ -56,6 +57,9 @@ export default async function ArticlePage({ params }: Props) {
 
   return (
     <div className="note-page" data-width="article">
+      {article.id === "maimai-2020-02-screenshot" ? (
+        <StoryTrigger flag="s04-old-id-screenshot" />
+      ) : null}
       {/* 広い画面では、本文の左にスキを浮かせる */}
       <div className="note-article-side">
         <div className="note-article-side-inner">

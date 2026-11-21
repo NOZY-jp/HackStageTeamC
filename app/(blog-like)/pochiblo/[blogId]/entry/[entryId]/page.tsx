@@ -6,6 +6,7 @@ import { EntryBody } from "@/components/blog-like/entry-body";
 import { EntryComments } from "@/components/blog-like/entry-comments";
 import { EntryDate, EntryFooter } from "@/components/blog-like/entry-meta";
 import { StoryAction } from "@/components/common/story/story-action";
+import { StoryTrigger } from "@/components/common/story/story-trigger";
 import {
   blogPath,
   entryPath,
@@ -65,12 +66,15 @@ export default async function EntryPage({ params }: Props) {
 
   return (
     <BlogFrame blog={blog}>
+      {blog.id === "denden0102" && entry.id === "e20200211" ? (
+        <StoryTrigger flag="s03-blog-found" />
+      ) : null}
       <article className="pb-entry">
         <EntryDate entry={entry} />
         <h1 className="pb-entry-title">{entry.title}</h1>
         <EntryBody blocks={entry.body} />
         <EntryFooter entry={entry} />
-        {/* 受賞した記事から結果ページへ進む（本番ではこの操作で順序7が立つ・#119） */}
+        {/* 受賞記事でコンテスト名を控えたときだけ順序7を立てる（#119） */}
         {entry.id === "e20181117" ? (
           <p className="pb-contest-link">
             <StoryAction flag="s07-contest-entry">コンテスト名を控える</StoryAction>

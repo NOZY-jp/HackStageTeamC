@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import {
   type ReactNode,
   type RefObject,
@@ -9,6 +10,7 @@ import {
   useRef,
   useState,
 } from "react";
+import { useOptionalStory } from "@/components/common/story/story-provider";
 import { PaneToggles } from "@/components/discord-like/pane-toggles";
 import type { MemberView, Message, MessageAuthor, VoiceSession } from "@/lib/discord-like/types";
 import { callHistoryByMessage, callHistoryLabel } from "./call-history";
@@ -122,6 +124,24 @@ export function MessageList({
   const [showMembers, setShowMembers] = useState(false);
   const [openProfileId, setOpenProfileId] = useState<string | null>(null);
   const [memberQuery, setMemberQuery] = useState("");
+  const story = useOptionalStory();
+  const focusedIsDenden = Boolean(
+    focusMessageId &&
+      messages.some((message) => message.id === focusMessageId && message.authorId === "denden"),
+  );
+
+  // 旧垢のプロフィールを開いたか、旧垢の投稿へ検索ジャンプした時点で順序5のフラグを立てる
+  useEffect(() => {
+    if (!story?.ready) {
+      return;
+    }
+    if (
+      (openProfileId === "denden" || focusedIsDenden) &&
+      !story.state.flags.includes("s05-old-discord-user")
+    ) {
+      story.setFlag("s05-old-discord-user");
+    }
+  }, [story, openProfileId, focusedIsDenden]);
 
   // 名簿が無い画面（DM など）ではトグルもパネルも出さない
   const hasMembers = members.length > 0;
@@ -497,14 +517,9 @@ export function MessageList({
                           <div className="members-profile">
                             <p className="members-profile-handle">{member.handle}</p>
                             {member.profileUrl ? (
-                              <a
-                                className="members-profile-link"
-                                href={member.profileUrl}
-                                target="_blank"
-                                rel="noreferrer noopener"
-                              >
+                              <Link className="members-profile-link" href={member.profileUrl}>
                                 {profileLinkLabel(member.profileUrl)}
-                              </a>
+                              </Link>
                             ) : null}
                           </div>
                         ) : null}
