@@ -9,6 +9,10 @@ export type TwitterUser = {
   handle: string;
   /** アバターの地色（HEX） */
   avatarColor: string;
+  /** アバターの画像（あれば地色とイニシャルの代わりに出す） */
+  avatarSrc?: string;
+  /** アバター画像の説明。名前・学校名・地名は書かない */
+  avatarAlt?: string;
   /** 鍵アカウント。true のときプロフィール情報は公開のまま投稿一覧だけを隠す */
   protected?: boolean;
 };
