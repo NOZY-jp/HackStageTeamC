@@ -1,8 +1,14 @@
-import { redirect } from "next/navigation";
-import { guildChannelPath } from "@/lib/platform/app-prefix";
-import { MHC_GUILD_URL_ID, NIGHT_VC_URL_ID } from "@/lib/story/places";
+import type { Metadata } from "next";
+import { buildTitleFeeds } from "@/components/common/title/feeds";
+import { TitleScreen } from "@/components/common/title/title-screen";
+import { GAME_SUBTITLE, GAME_TITLE } from "@/components/common/title/title-text";
 
-/** ゲームの入口。Discord の「深夜の集会」ボイスチャンネルへ送り、序章を開始する。 */
+export const metadata: Metadata = {
+  title: { absolute: GAME_TITLE },
+  description: GAME_SUBTITLE,
+};
+
+/** ゲームの入口（タイトル画面） */
 export default function RootPage() {
-  redirect(`${guildChannelPath(MHC_GUILD_URL_ID, NIGHT_VC_URL_ID)}?start=1`);
+  return <TitleScreen feeds={buildTitleFeeds()} />;
 }

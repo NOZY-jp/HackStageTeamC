@@ -1267,10 +1267,6 @@
   grid-template-columns: repeat(2, minmax(0, 1fr));
 }
 
-.call-tiles[data-count="3"] .call-tile:first-child {
-  grid-row: span 2;
-}
-
 .call-tile {
   display: flex;
   flex-direction: column;
@@ -1329,6 +1325,13 @@
   color: var(--color-text-on-danger);
   font-size: clamp(28px, 5vh, 48px);
   font-weight: 700;
+}
+
+/* DM の相手は大きく見せる（#176）。VC のタイルは狭いので既定の小さめを使う */
+.call-tiles[data-layout="dm"] .call-tile:first-child .call-tile-avatar {
+  width: clamp(160px, 26vh, 260px);
+  height: clamp(160px, 26vh, 260px);
+  font-size: clamp(56px, 10vh, 92px);
 }
 
 .call-tile-label {
@@ -2358,6 +2361,18 @@ button.tw-tab:focus-visible {
   font-size: 16px;
   font-weight: 700;
   user-select: none;
+}
+
+.tw-avatar[data-kind="image"] {
+  overflow: hidden;
+  background-color: #e9eef2;
+}
+
+.tw-avatar[data-kind="image"] img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
 }
 
 .tw-avatar[data-size="sm"] {
@@ -6746,5 +6761,1109 @@ a.tw-dm-item:focus-visible {
 @media (prefers-reduced-motion: reduce) {
   .sb-notice {
     animation: none;
+  }
+}
+
+/* ---- タイトル画面（/）。背景に3つの SNS を流し、ぼかして重ねる。components/common/title ---- */
+
+.tt-screen {
+  position: relative;
+  height: 100dvh;
+  overflow: hidden;
+  background-color: #07080d;
+  color: #f4f1ea;
+}
+
+/* 背景：3つの SNS を横に並べ、それぞれ縦に流し続ける */
+.tt-feeds {
+  position: absolute;
+  inset: 0;
+  /* 列どうしの重なり順（z-index）を背景の中で閉じる。外に出るとぼかしやタイトルより上に来てしまう */
+  isolation: isolate;
+  z-index: 0;
+  /* マウスに合わせてわずかに動く（視差） */
+  transform: translate(calc(var(--tt-mx, 0) * -28px), calc(var(--tt-my, 0) * -18px));
+  transition: transform 0.8s cubic-bezier(0.2, 0.7, 0.2, 1);
+  /* 3枚を宙に浮いたモニターのように、少し斜めに向ける */
+  perspective: 1800px;
+}
+
+/* 3つの SNS の画面を、少しずつ重ねて並べる（右端の Discord をいちばん手前に） */
+.tt-feed {
+  position: absolute;
+  top: -25vh;
+  bottom: -25vh;
+  display: flex;
+  flex-direction: column;
+  width: min(46vw, 620px);
+  overflow: hidden;
+  border-radius: 16px;
+  box-shadow:
+    0 0 0 1px rgb(255 255 255 / 0.08),
+    0 24px 60px rgb(0 0 0 / 0.5);
+  font-family: system-ui, sans-serif;
+}
+
+/*
+ * 左から talkup・Twixer・Discord。いちばん手前は Discord（右端に置いて、文字の少ない右側の空きを画面の外に逃がす）。
+ * 奥の2枚は少し小さく暗くして、奥行きを出す
+ */
+.tt-feed[data-platform="talkup"] {
+  left: max(-6vw, -90px);
+  z-index: 1;
+  transform: rotateY(22deg) rotateZ(-8deg) scale(0.92);
+}
+
+.tt-feed[data-platform="twixer"] {
+  left: calc(50% - min(23vw, 310px));
+  z-index: 2;
+  transform: rotateY(6deg) rotateZ(-5deg) scale(0.94);
+}
+
+.tt-feed[data-platform="discord"] {
+  right: max(-10vw, -150px);
+  z-index: 3;
+  transform: rotateY(-18deg) rotateZ(-6deg);
+}
+
+/* 奥の2枚は少し暗くして、奥行きを出す */
+.tt-feed[data-platform="twixer"]::after,
+.tt-feed[data-platform="talkup"]::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background-color: rgb(0 0 0 / 0.22);
+  pointer-events: none;
+}
+
+/* talkup は白い画面なので、ほかより少し暗くして目を引きすぎないようにする */
+.tt-feed[data-platform="talkup"]::after {
+  background-color: rgb(6 8 16 / 0.48);
+}
+
+.tt-feed-head {
+  flex: none;
+  padding: 18px 18px 10px;
+  font-size: 18px;
+  font-weight: 800;
+}
+
+.tt-feed-track {
+  display: flex;
+  flex-direction: column;
+  animation: tt-scroll 70s linear infinite;
+}
+
+.tt-feed[data-platform="twixer"] .tt-feed-track {
+  animation-duration: 58s;
+  animation-direction: reverse;
+}
+
+.tt-feed[data-platform="talkup"] .tt-feed-track {
+  animation-duration: 82s;
+}
+
+.tt-feed-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin: 0;
+  padding: 0 14px 12px;
+  list-style: none;
+}
+
+.tt-feed-item {
+  display: flex;
+  gap: 10px;
+  padding: 12px;
+  border-radius: 10px;
+}
+
+.tt-feed-avatar {
+  flex: none;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+.tt-feed-body {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.tt-feed-name {
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.tt-feed-text {
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+/* 各 SNS の色味（本物の配色に寄せる） */
+.tt-feed[data-platform="discord"] {
+  background-color: #313338;
+  color: #dbdee1;
+}
+
+.tt-feed[data-platform="discord"] .tt-feed-item {
+  background-color: #2b2d31;
+}
+
+.tt-feed[data-platform="twixer"] {
+  background-color: #000;
+  color: #e7e9ea;
+  border: 1px solid #2f3336;
+}
+
+.tt-feed[data-platform="twixer"] .tt-feed-item {
+  border-bottom: 1px solid #2f3336;
+  border-radius: 0;
+}
+
+.tt-feed[data-platform="talkup"] {
+  background-color: #f0f2f5;
+  color: #050505;
+}
+
+.tt-feed[data-platform="talkup"] .tt-feed-head {
+  color: #7c3aed;
+}
+
+.tt-feed[data-platform="talkup"] .tt-feed-item {
+  background-color: #fff;
+  box-shadow: 0 1px 2px rgb(0 0 0 / 0.1);
+}
+
+@keyframes tt-scroll {
+  to {
+    transform: translateY(-50%);
+  }
+}
+
+/* 色をそろえる：3枚の画面に紺を重ね、夜の海の色味に統一する */
+.tt-grade {
+  position: absolute;
+  z-index: 1;
+  inset: 0;
+  background: linear-gradient(170deg, #12305f, #0a1838 55%, #1d1240);
+  mix-blend-mode: color;
+  opacity: 0.6;
+  pointer-events: none;
+}
+
+/* 「電子の海」の泡：小さな光の粒が、ゆっくり昇って消える */
+.tt-bubbles {
+  position: absolute;
+  z-index: 1;
+  inset: 0;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.tt-bubble {
+  position: absolute;
+  bottom: -12px;
+  border-radius: 50%;
+  background-color: rgb(170 210 255 / 0.55);
+  box-shadow: 0 0 8px rgb(140 190 255 / 0.6);
+  opacity: 0;
+  animation: tt-rise linear infinite;
+}
+
+@keyframes tt-rise {
+  10% {
+    opacity: 0.8;
+  }
+  80% {
+    opacity: 0.5;
+  }
+  100% {
+    transform: translate(18px, -110vh);
+    opacity: 0;
+  }
+}
+
+/* ぼかしと暗幕。真ん中を暗くして文字を読ませ、周りは画面の光のように青く残す。上に薄い粒子 */
+.tt-veil {
+  position: absolute;
+  z-index: 1;
+  inset: 0;
+  backdrop-filter: blur(2px);
+  background:
+    radial-gradient(
+      ellipse 55% 42% at 50% 50%,
+      rgb(6 7 12 / 0.86),
+      rgb(6 7 12 / 0.55) 60%,
+      transparent 100%
+    ),
+    radial-gradient(ellipse 120% 90% at 50% 50%, transparent 40%, rgb(3 4 8 / 0.9) 100%),
+    linear-gradient(160deg, rgb(40 70 140 / 0.18), rgb(10 12 30 / 0.1) 50%, rgb(120 40 90 / 0.12));
+}
+
+.tt-veil::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  opacity: 0.07;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  pointer-events: none;
+}
+
+/* タイトル・サブタイトル・はじめる */
+.tt-content {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  padding: 24px;
+  text-align: center;
+  animation: tt-fade-in 1.6s ease-out;
+}
+
+/* タイトルの上の英字。小さく、広い字間で */
+.tt-kicker {
+  margin-bottom: 18px;
+  color: rgb(190 210 240 / 0.55);
+  font-family: system-ui, sans-serif;
+  font-size: clamp(10px, 1vw, 12px);
+  letter-spacing: 0.55em;
+  text-indent: 0.55em;
+  text-transform: uppercase;
+}
+
+@media (max-width: 560px) {
+  .tt-kicker {
+    font-size: 9px;
+    letter-spacing: 0.3em;
+    text-indent: 0.3em;
+  }
+}
+
+.tt-title {
+  display: inline-grid;
+  font-family:
+    "Hiragino Mincho ProN", "Yu Mincho", "YuMincho", "Noto Serif JP", "Noto Serif CJK JP", serif;
+  font-size: clamp(34px, 6.6vw, 84px);
+  font-weight: 500;
+  letter-spacing: 0.12em;
+  text-shadow: 0 2px 24px rgb(0 0 0 / 0.7);
+}
+
+/* 打ち終わった幅（見えない）と、打っている文字を同じ場所に重ねる */
+.tt-title-ghost,
+.tt-title-typed {
+  grid-area: 1 / 1;
+  text-align: left;
+  white-space: nowrap;
+}
+
+.tt-title-ghost {
+  visibility: hidden;
+}
+
+/* 文字入力の棒。打ち終わっても点滅を続ける */
+.tt-caret {
+  display: inline-block;
+  width: 0.05em;
+  height: 0.9em;
+  margin-left: 0.06em;
+  vertical-align: -0.08em;
+  background-color: rgb(244 241 234 / 0.85);
+  animation: tt-blink 1.05s steps(1, end) infinite;
+}
+
+.tt-subtitle {
+  margin-top: 30px;
+  color: rgb(244 241 234 / 0.78);
+  font-family:
+    "Hiragino Mincho ProN", "Yu Mincho", "YuMincho", "Noto Serif JP", "Noto Serif CJK JP", serif;
+  font-size: clamp(15px, 1.7vw, 19px);
+  letter-spacing: 0.2em;
+  text-indent: 0.2em;
+}
+
+.tt-actions {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+  margin-top: clamp(44px, 9vh, 80px);
+}
+
+/* サブタイトルとボタンは、タイトルを打ち終えてから現れる */
+.tt-subtitle,
+.tt-actions {
+  opacity: 0;
+  translate: 0 8px;
+  transition:
+    opacity 1s ease-out,
+    translate 1s ease-out;
+}
+
+.tt-content[data-typed] .tt-subtitle {
+  opacity: 1;
+  translate: 0 0;
+}
+
+.tt-content[data-typed] .tt-actions {
+  opacity: 1;
+  translate: 0 0;
+  transition-delay: 0.5s;
+}
+
+/* はじめる：枠のない文字と矢印。かざすと下線が伸び、矢印が少し進む */
+.tt-start {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: 18px;
+  padding: 10px 6px;
+  background: none;
+  border: 0;
+  color: #f4f1ea;
+  font-family:
+    "Hiragino Mincho ProN", "Yu Mincho", "YuMincho", "Noto Serif JP", "Noto Serif CJK JP", serif;
+  font-size: 19px;
+  letter-spacing: 0.42em;
+  cursor: pointer;
+}
+
+.tt-start::after {
+  content: "";
+  position: absolute;
+  left: 6px;
+  right: 6px;
+  bottom: 2px;
+  height: 1px;
+  background-color: rgb(244 241 234 / 0.35);
+  transform-origin: left;
+  transition:
+    background-color 0.3s,
+    transform 0.4s ease-out;
+}
+
+.tt-start-arrow {
+  font-family: system-ui, sans-serif;
+  letter-spacing: 0;
+  transition: translate 0.3s ease-out;
+}
+
+.tt-start:hover::after,
+.tt-start:focus-visible::after {
+  background-color: #f4f1ea;
+}
+
+.tt-start:hover .tt-start-arrow,
+.tt-start:focus-visible .tt-start-arrow {
+  translate: 6px 0;
+}
+
+.tt-start:focus-visible {
+  outline: none;
+}
+
+.tt-start:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+
+.tt-restart {
+  padding: 4px 10px;
+  background: none;
+  border: 0;
+  color: rgb(244 241 234 / 0.5);
+  font-size: 12px;
+  letter-spacing: 0.2em;
+  cursor: pointer;
+}
+
+.tt-restart:hover {
+  color: #f4f1ea;
+}
+
+/* 下の段：左に制作、右に GitHub */
+.tt-footer {
+  position: absolute;
+  left: 26px;
+  right: 22px;
+  bottom: 18px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-family: system-ui, sans-serif;
+  font-size: 12px;
+}
+
+.tt-credit {
+  color: rgb(244 241 234 / 0.4);
+  letter-spacing: 0.12em;
+}
+
+/* 右下の GitHub */
+.tt-github {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 10px;
+  border-radius: 6px;
+  color: rgb(244 241 234 / 0.7);
+  font-family: system-ui, sans-serif;
+  font-size: 13px;
+  text-decoration: none;
+}
+
+.tt-github:hover,
+.tt-github:focus-visible {
+  color: #f4f1ea;
+  background-color: rgb(255 255 255 / 0.08);
+}
+
+/* 制作のロゴ（フェードイン → フェードアウト）。押すかキーでとばせる */
+.tt-splash {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  border: 0;
+  background-color: #000;
+  cursor: pointer;
+}
+
+.tt-splash-name {
+  color: #f4f1ea;
+  font-family: system-ui, sans-serif;
+  font-size: clamp(28px, 4vw, 44px);
+  font-weight: 300;
+  letter-spacing: 0.5em;
+  text-indent: 0.5em;
+  opacity: 0;
+  animation: tt-splash 3.2s ease-in-out forwards;
+}
+
+@keyframes tt-splash {
+  30%,
+  65% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+  }
+}
+
+@keyframes tt-blink {
+  50% {
+    opacity: 0;
+  }
+}
+
+@keyframes tt-fade-in {
+  from {
+    opacity: 0;
+  }
+}
+
+@media (max-width: 720px) {
+  .tt-feed {
+    width: 70vw;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .tt-feed-track,
+  .tt-content,
+  .tt-caret,
+  .tt-bubble {
+    animation: none;
+  }
+
+  .tt-feeds {
+    transform: none;
+  }
+
+  .tt-splash-name {
+    animation-duration: 1.2s;
+  }
+}
+
+/* ===== 通話UIの刷新（DM通話・サーバーVC 共通） ===== */
+
+/* DM 通話: ヘッダー以外にタイトルを出さない（中央は相手のアバターと名前・経過時間） */
+.call-stage-info-dm {
+  align-items: center;
+  text-align: center;
+}
+
+.call-stage-info-dm .call-stage-meta {
+  justify-content: center;
+}
+
+/* 自分は右下の小さいアバターカード（16:9の映像枠にしない） */
+.call-tiles[data-layout="dm"] .call-tile:nth-child(2) {
+  aspect-ratio: auto;
+  flex-direction: row;
+  gap: 8px;
+  align-items: center;
+  justify-content: flex-start;
+  width: min(220px, 40%);
+  min-height: 56px;
+  padding: 8px 12px;
+  border-radius: 12px;
+}
+
+.call-tiles[data-layout="dm"] .call-tile:nth-child(2) .call-tile-avatar {
+  width: 32px;
+  height: 32px;
+  font-size: 14px;
+}
+
+.call-tiles[data-layout="dm"] .call-tile:nth-child(2) .call-tile-name {
+  font-size: 13px;
+}
+
+.call-tiles[data-layout="dm"] .call-tiles {
+  position: relative;
+}
+
+/* サーバーVC: タイル左下に名前＋マイク（実Discord準拠） */
+.call-tiles[data-layout="grid"] .call-tile {
+  position: relative;
+  align-items: center;
+  justify-content: center;
+}
+
+.call-tiles[data-layout="grid"] .call-tile-label {
+  position: static;
+  margin-top: 10px;
+  gap: 6px;
+  padding: 2px 8px;
+  border-radius: 8px;
+  background-color: color-mix(in srgb, var(--color-bg-panel) 75%, transparent);
+}
+
+/* 人数で 1 / 2 / 4 / 6 列 */
+.call-tiles[data-layout="grid"] {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+.call-tiles[data-layout="grid"][data-count="3"] {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+.call-tiles[data-layout="grid"][data-count="1"] {
+  grid-template-columns: minmax(0, 1fr);
+}
+.call-tiles[data-layout="grid"][data-count="5"],
+.call-tiles[data-layout="grid"][data-count="6"] {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+/* 発話: 緑の枠＋控えめなパルス（動きを減らす設定では止める） */
+.call-tile[data-speaking="true"] {
+  border-color: var(--color-status-online);
+  box-shadow: 0 0 0 2px color-mix(in srgb, var(--color-status-online) 45%, transparent);
+  animation: call-pulse 1.8s ease-in-out infinite;
+}
+
+@keyframes call-pulse {
+  0%,
+  100% {
+    box-shadow: 0 0 0 2px color-mix(in srgb, var(--color-status-online) 35%, transparent);
+  }
+  50% {
+    box-shadow: 0 0 0 2px color-mix(in srgb, var(--color-status-online) 60%, transparent);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .call-tile[data-speaking="true"] {
+    animation: none;
+  }
+}
+
+/* 画面共有中: ステージに表示を出し、参加者は右側の縦並びに寄せる */
+.call-share {
+  display: grid;
+  flex: 1;
+  grid-template-columns: minmax(0, 1fr);
+  align-content: center;
+  justify-items: center;
+  gap: 8px;
+  padding: 12px;
+  border: 2px dashed var(--color-divider);
+  border-radius: 12px;
+  color: var(--color-text-muted);
+  text-align: center;
+}
+
+.call-share p {
+  margin: 0;
+  color: var(--color-text);
+  font-size: clamp(16px, 2.2vh, 22px);
+  font-weight: 700;
+}
+
+.call-share-hint {
+  font-size: clamp(11px, 1.4vh, 13px);
+}
+
+/* 共有中に右へ寄せるのはサーバーVCのタイルだけ（DMは中央の相手を潰さない） */
+.call-stage[data-sharing="true"] .call-tiles[data-layout="grid"] {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  bottom: 12px;
+  display: flex;
+  flex-direction: column;
+  width: min(220px, 34%);
+  gap: 8px;
+}
+
+.call-stage[data-sharing="true"] .call-tile {
+  min-height: 84px;
+  flex: 0 0 auto;
+}
+
+/* DMの共有中: 相手は右上の小窓に残し、自分は右下に幅を確保（名前を切らない） */
+.call-stage[data-sharing="true"] .call-tiles[data-layout="dm"] {
+  position: absolute;
+  inset: 0;
+  display: block;
+  pointer-events: none;
+}
+
+.call-stage[data-sharing="true"] .call-tiles[data-layout="dm"] .call-tile:first-child {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  width: min(160px, 28%);
+  height: 120px;
+  min-height: 0;
+  padding: 4px;
+}
+
+.call-stage[data-sharing="true"] .call-tile[data-muted="true"] .call-tile-avatar {
+  opacity: 0.7;
+}
+
+/* 共有中の右上の小窓だけ、アバターを小さくする（通常のDM通話には効かせない） */
+.call-stage[data-sharing="true"]
+  .call-tiles[data-layout="dm"]
+  .call-tile:first-child
+  .call-tile-avatar {
+  width: 56px;
+  height: 56px;
+  font-size: 22px;
+}
+
+.call-stage[data-sharing="true"] .call-tiles[data-layout="dm"] .call-tile:nth-child(2) {
+  width: min(240px, 46%);
+}
+
+/* 共有中のプレースホルダー（ウィンドウ風） */
+.call-share-window {
+  display: grid;
+  grid-template-rows: auto auto minmax(0, 1fr);
+  gap: 8px;
+  width: min(1180px, 88%);
+  min-width: 0;
+  min-height: 50vh;
+  aspect-ratio: 16 / 9;
+  margin: 0 auto;
+  padding: 12px;
+  border: 1px solid var(--color-divider);
+  border-radius: 10px;
+  background-color: var(--color-bg-panel);
+}
+
+.call-share-dots {
+  display: flex;
+  gap: 4px;
+}
+
+.call-share-dots i {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background-color: var(--color-divider);
+}
+
+.call-share-bar {
+  display: block;
+  height: 8px;
+  border-radius: 4px;
+  background-color: color-mix(in srgb, var(--color-divider) 60%, transparent);
+}
+
+.call-share-canvas {
+  display: block;
+  height: auto;
+  min-height: 0;
+  border-radius: 6px;
+  background-color: color-mix(in srgb, var(--color-bg-input) 85%, transparent);
+  background-image: linear-gradient(
+    135deg,
+    transparent 0 46%,
+    color-mix(in srgb, var(--color-divider) 55%, transparent) 46% 54%,
+    transparent 54%
+  );
+}
+
+/* 参加者一覧（右パネル） */
+.call-participants {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  /* 下の操作バー（切断）に重ならない高さで止める */
+  bottom: 88px;
+  max-height: calc(100% - 100px);
+  z-index: 3;
+  width: min(280px, 42%);
+  overflow: auto;
+  padding: 12px;
+  border: 1px solid var(--color-divider);
+  border-radius: 12px;
+  background-color: var(--color-bg-panel);
+}
+
+.call-participants h3 {
+  margin: 0 0 8px;
+  font-size: 13px;
+}
+
+.call-participants ul {
+  display: grid;
+  gap: 6px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.call-participants > ul > li {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  font-size: 13px;
+}
+
+.call-participants-avatar {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  color: var(--color-text-on-danger);
+  font-size: 11px;
+  font-weight: 700;
+}
+
+.call-participants-mic[data-state="muted"] {
+  color: var(--color-danger);
+}
+
+/* 呼び出し中は経過時間を 0:00 のまま、操作バーは出さない */
+.call-stage[data-connecting="true"] .call-controls {
+  display: none;
+}
+
+/* 狭い画面では参加者一覧を横幅いっぱいにし、操作バーの上に収める */
+@media (max-width: 640px) {
+  .call-participants {
+    left: 12px;
+    width: auto;
+    bottom: 96px;
+  }
+}
+
+/* 招待リンクのコピーに失敗したときの手動コピー欄 */
+.call-invite-manual {
+  position: absolute;
+  left: 50%;
+  bottom: 84px;
+  width: min(420px, 76%);
+  transform: translateX(-50%);
+  padding: 6px 8px;
+  border: 1px solid var(--color-divider);
+  border-radius: 8px;
+  background-color: var(--color-bg-input);
+  color: var(--color-text);
+  font-size: 12px;
+}
+
+/* ---- 見た目の仕上げ（#145）。SNS として自然に見えるよう、余白・階層・操作の手応えだけを整える ---- */
+
+/* 共通: 押せるものの手応え（色は各プラットフォームの変数に従う） */
+.fb-shell button,
+.tw-shell button {
+  -webkit-tap-highlight-color: transparent;
+}
+
+.fb-shell button:active,
+.tw-shell button:active {
+  transform: translateY(0.5px);
+}
+
+/* --- talkup --- */
+
+.fb-shell {
+  --fb-shadow: 0 1px 2px rgba(16, 24, 40, 0.06), 0 4px 12px rgba(16, 24, 40, 0.04);
+  --fb-radius-card: 14px;
+  background-image: radial-gradient(1200px 400px at 50% -160px, #eef1f7 0%, var(--fb-bg) 70%);
+}
+
+.fb-header {
+  border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+  background-color: rgba(255, 255, 255, 0.92);
+  backdrop-filter: saturate(180%) blur(12px);
+  box-shadow: 0 1px 2px rgba(16, 24, 40, 0.06);
+}
+
+.fb-logo-link {
+  width: 40px;
+  height: 40px;
+  background: linear-gradient(135deg, #8b5cf6, #6d28d9);
+  color: #ffffff;
+  font-weight: 800;
+  font-size: 20px;
+}
+
+.fb-search-box {
+  border: 1px solid transparent;
+  transition:
+    border-color 120ms ease,
+    background-color 120ms ease,
+    box-shadow 120ms ease;
+}
+
+.fb-search-box:focus-within {
+  border-color: rgba(124, 58, 237, 0.45);
+  background-color: #ffffff;
+  box-shadow: 0 0 0 4px rgba(124, 58, 237, 0.12);
+}
+
+.fb-card {
+  border-radius: var(--fb-radius-card);
+  border: 1px solid rgba(0, 0, 0, 0.045);
+}
+
+/* 投稿カード: 本文の行間と、写真の角丸をそろえる */
+.fb-card article,
+article.fb-card {
+  border-radius: var(--fb-radius-card);
+}
+
+.fb-feed-center > .fb-card,
+.fb-feed-center > article {
+  overflow: hidden;
+}
+
+/* プロフィール: カバーの上にアイコンが載る位置でも切れないように */
+.fb-profile-cover,
+.fb-cover {
+  background-image: linear-gradient(120deg, #a78bfa 0%, #7c3aed 45%, #4c1d95 100%);
+}
+
+.fb-profile-avatar,
+.fb-avatar[data-size="xl"] {
+  box-shadow:
+    0 0 0 4px var(--fb-card),
+    0 6px 16px rgba(16, 24, 40, 0.16);
+}
+
+/* --- Twixer --- */
+
+.tw-shell {
+  --tw-card: #16181c;
+  --tw-radius-card: 16px;
+  background-image: radial-gradient(
+    900px 360px at 70% -120px,
+    rgba(29, 155, 240, 0.1),
+    transparent 70%
+  );
+}
+
+.tw-main {
+  border-left: 1px solid var(--tw-border);
+  border-right: 1px solid var(--tw-border);
+}
+
+.tw-post {
+  border-bottom: 1px solid var(--tw-border);
+  transition: background-color 120ms ease;
+}
+
+.tw-post:hover {
+  background-color: var(--tw-hover-soft);
+}
+
+.tw-post-body {
+  font-size: 15.5px;
+  line-height: 1.65;
+}
+
+.tw-post-avatar .tw-avatar {
+  box-shadow: 0 0 0 1px var(--tw-border);
+}
+
+.tw-profile .tw-banner {
+  background-image: linear-gradient(120deg, #1d9bf0 0%, #185a8f 55%, #0f2f4a 100%);
+}
+
+.tw-profile-avatar .tw-avatar[data-size="xl"] {
+  box-shadow:
+    0 0 0 4px var(--tw-bg),
+    0 8px 24px rgba(0, 0, 0, 0.45);
+}
+
+.tw-avatar[data-kind="image"] img {
+  border-radius: inherit;
+}
+
+/* プロフィールの数値は、押せないことが分かる見た目にする（リンクにしない） */
+.tw-profile-stats {
+  color: var(--tw-muted);
+}
+
+/* 文言は折り返さない（1〜2文字だけ次の行に落ちるのを防ぐ）。収まらないときは余白と字間で詰める */
+.fb-primary-btn,
+.fb-action-btn,
+.fb-chip,
+.fb-person-action,
+.tw-post-button,
+.tw-tab,
+.tw-profile-actions button,
+.tw-follow-button {
+  white-space: nowrap;
+}
+
+.fb-primary-btn,
+.tw-post-button,
+.tw-button {
+  flex: none;
+}
+
+.tw-button {
+  white-space: nowrap;
+}
+
+/* リアクションの内訳（絵文字の並びと件数、コメント/シェア）は、単位ごと折り返す */
+article div[class~="justify-between"][class~="text-xs"] {
+  flex-wrap: wrap;
+  gap: 2px 8px;
+}
+
+article div[class~="justify-between"][class~="text-xs"] > div {
+  flex: none;
+  white-space: nowrap;
+}
+
+.fb-action-btn > span,
+.fb-action-btn .tw-icon,
+.fb-chip > span {
+  white-space: nowrap;
+}
+
+/* モバイル: 余白を詰めて、横スクロールを出さない */
+@media (max-width: 639.98px) {
+  .fb-feed-grid {
+    padding: 8px;
+    gap: 10px;
+  }
+
+  .fb-header {
+    padding: 0 10px;
+    gap: 8px;
+  }
+
+  .fb-search-box {
+    max-width: none;
+    height: 38px;
+  }
+
+  .fb-card {
+    border-radius: 12px;
+  }
+
+  /* 操作列（いいね・コメント・シェア）は3等分のまま、各操作を1行に収める */
+  /* 投稿カードの操作列（grid-cols-3 の行）は隙間を詰めて1行を確保する */
+  article [class~="grid-cols-3"] {
+    gap: 2px;
+  }
+
+  .fb-action-btn {
+    gap: 4px;
+    padding: 7px 2px;
+    font-size: 13px;
+  }
+
+  .fb-action-btn .tw-icon,
+  .fb-action-btn svg {
+    width: 15px;
+    height: 15px;
+    flex: none;
+  }
+
+  .fb-primary-btn {
+    padding: 7px 12px;
+  }
+
+  .tw-button {
+    padding: 0 12px;
+    font-size: 14px;
+  }
+
+  .tw-shell {
+    --tw-main-width: 100%;
+  }
+
+  .tw-main {
+    border-left: 0;
+    border-right: 0;
+  }
+
+  .tw-post {
+    padding-left: 12px;
+    padding-right: 12px;
+  }
+
+  /* プロフィールの数値・タブは1行のまま */
+  .tw-profile-stats,
+  .tw-profile-stats span,
+  .tw-tab,
+  .tw-follow-button,
+  .tw-post-button {
+    white-space: nowrap;
+  }
+
+  .tw-follow-button {
+    padding-left: 14px;
+    padding-right: 14px;
+  }
+
+  .tw-profile .tw-profile-body {
+    padding-left: 12px;
+    padding-right: 12px;
+  }
+}
+
+/* 動きを減らす設定では、押したときの移動もしない */
+@media (prefers-reduced-motion: reduce) {
+  .fb-shell button:active,
+  .tw-shell button:active {
+    transform: none;
+  }
+
+  .fb-search-box,
+  .tw-post {
+    transition: none;
   }
 }
