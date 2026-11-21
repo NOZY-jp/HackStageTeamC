@@ -29,7 +29,7 @@ export function DmList() {
       avatarColor: user?.avatarColor ?? "transparent",
       status: user?.status ?? "offline",
       preview: last ? last.body.replace(/\s+/g, " ").slice(0, 80) : "",
-      time: last ? last.sentAt.slice(11, 16) : "",
+      sentAt: last?.sentAt ?? "",
       unread: thread.unreadCount ?? 0,
     };
   });

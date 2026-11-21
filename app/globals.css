@@ -5415,6 +5415,17 @@ a.tw-dm-item:focus-visible {
   font-size: 12px;
 }
 
+.search-user-profile-button {
+  cursor: pointer;
+  color: var(--color-text);
+  font-weight: 700;
+}
+
+.search-user-profile-button:hover,
+.search-user-profile-button:focus-visible {
+  text-decoration: underline;
+}
+
 .search-result-list {
   margin: 0;
   padding: 0;
