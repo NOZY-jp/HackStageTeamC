@@ -31,6 +31,18 @@ export const VOLUME_LIMITS = {
   laterDensityRatioMin: 1.5,
 } as const;
 
+/**
+ * 人間らしさの痕跡（件数のノルマは置かない）。
+ * 種類ごとに「存在すること」だけを必須にし、多すぎないことだけ上限で見る。
+ * 2026-11-21 の実測: 既読スルー17.8%、連投17.1%。
+ */
+export const NOISE_LIMITS = {
+  /** 既読スルー（30分以上返事が来ない発言）の割合の上限 */
+  readThroughRatioMax: 0.35,
+  /** 連投（同じ人が続けて発言する）割合の上限 */
+  consecutivePostsRatioMax: 0.35,
+} as const;
+
 /** 会話の自然さ（#154 の6指標）。 */
 export const NATURALNESS_LIMITS = {
   /** ① 誰も答えない質問の割合 */

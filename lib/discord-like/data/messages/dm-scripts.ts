@@ -558,6 +558,7 @@ const scripts: Record<string, string> = {
 21:43 hal もったいないので
 21:45 maimai ばか
 21:46 maimai また作る
+21:47 maimai 🙏
 2026-02-24
 23:14 maimai 深夜にごめん
 23:14:40 maimai 眠れない
@@ -1922,6 +1923,7 @@ const scripts: Record<string, string> = {
 13:44 hal 直りました
 13:46 taku お前すごいな
 13:48 hal 中身を入れ替えただけです
+13:49 taku 👍
 13:51 taku それがすごい
 2026-05-04
 21:31 taku 連休、暇

@@ -145,16 +145,12 @@ describe("会話の自然さ（#154 の6指標）", () => {
       const index = list.findIndex((message) => message.id === question.id);
       const burst = burstsOf(list).find((group) => group.some((m) => m.id === question.id)) ?? [];
       const position = burst.findIndex((message) => message.id === question.id);
+      // 回答は同じバーストの中だけで数える（別バーストの発言では救済しない）
       const answer = burst
         .slice(position + 1)
-        .find((message) => message.authorId !== question.authorId && !isQuestion(message.body));
-      // バーストの外でも、1時間以内に別の人が何か返していれば会話は成立している
-      const outside = list
-        .slice(index + 1)
         .find((message) => message.authorId !== question.authorId);
-      const withinHour =
-        outside && Date.parse(outside.sentAt) - Date.parse(question.sentAt) <= 60 * 60_000;
-      if (!answer && !withinHour) {
+      void index;
+      if (!answer) {
         unanswered += 1;
         samples.push(`${question.id} ${question.body}`);
       }
