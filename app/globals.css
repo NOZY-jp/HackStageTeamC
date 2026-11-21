@@ -4508,6 +4508,8 @@ a.tw-dm-item:focus-visible {
   gap: 4px;
   margin-top: 16px;
   border-top: 1px solid var(--fb-border);
+  overflow-x: auto;
+  scrollbar-width: none;
 }
 
 .fb-profile-tab {
@@ -4517,6 +4519,8 @@ a.tw-dm-item:focus-visible {
   font-weight: 600;
   color: var(--fb-muted);
   border-radius: 6px;
+  white-space: nowrap;
+  flex-shrink: 0;
 }
 
 .fb-profile-tab:hover {
@@ -4541,6 +4545,16 @@ a.tw-dm-item:focus-visible {
 
 .fb-profile-tab.is-active:hover {
   background-color: transparent;
+}
+
+.fb-mutual-badge {
+  flex-shrink: 0;
+  padding: 2px 8px;
+  border-radius: 9999px;
+  background-color: var(--fb-bg);
+  color: var(--fb-muted);
+  font-size: 12px;
+  font-weight: 500;
 }
 
 /* 写真の欄（正方形のタイル） */
@@ -5157,6 +5171,12 @@ a.tw-dm-item:focus-visible {
 .members-profile-handle {
   color: var(--color-text-muted);
   font-size: 12px;
+}
+
+.members-profile-note {
+  margin-top: 4px;
+  color: var(--color-text-muted);
+  font-size: 11px;
 }
 
 .members-profile-link {

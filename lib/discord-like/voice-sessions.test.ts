@@ -31,7 +31,11 @@ const sessions = listVoiceSessions();
 
 describe("VoiceSession（#129）", () => {
   it("開始メッセージ1件につきセッション1件（通話IDは一意）", () => {
-    const starts = messages.filter((message) => message.body.includes("通話を開始しました"));
+    const starts = messages.filter(
+      (message) =>
+        message.body.includes("通話を開始しました") ||
+        message.body.includes("ボイスチャンネルに参加しました"),
+    );
     expect(sessions.length).toBeGreaterThan(0);
     expect(sessions.length).toBe(starts.length);
     const ids = sessions.map((session) => session.id);

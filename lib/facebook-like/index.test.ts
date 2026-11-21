@@ -1,13 +1,17 @@
 import { existsSync } from "node:fs";
 import { join } from "node:path";
 import { describe, expect, it } from "vitest";
+import { KAI_TALKUP_HANDLE, KAI_TALKUP_USER_ID } from "./data/users";
 import {
   filterFeedPosts,
   filterPostsByQuery,
   getPostById,
   getSelfUser,
   getUserByHandle,
+  listContactUsers,
   listFeedPosts,
+  listFollowers,
+  listFollowing,
   listFriends,
   listPosts,
   listPostsByAuthor,
@@ -405,5 +409,52 @@ describe("lib/facebook-like", () => {
   it("lists 23 posts for author u40", () => {
     const posts = listPostsByAuthor("u40");
     expect(posts.length).toBe(23);
+  });
+
+  it("u40 follows back 5/5 photo-club mutuals and has 6 followers with only imperial_chi unreciprocated", () => {
+    const following = listFollowing("u40");
+    const followers = listFollowers("u40");
+    expect(following.map((u) => u.id).sort()).toEqual(["u50", "u51", "u52", "u53", "u54"]);
+    expect(followers.map((u) => u.id).sort()).toEqual(["u49", "u50", "u51", "u52", "u53", "u54"]);
+
+    const followingSet = new Set(following.map((u) => u.id));
+    const unreciprocated = followers.filter((follower) => !followingSet.has(follower.id));
+    expect(unreciprocated.map((u) => [u.id, u.handle])).toEqual([
+      [KAI_TALKUP_USER_ID, KAI_TALKUP_HANDLE],
+    ]);
+  });
+
+  it("keeps hiddenFromDirectory users (u49..u54) out of contacts and generic search, matching imperial_chi only by exact handle", () => {
+    const hiddenIds = new Set(["u49", "u50", "u51", "u52", "u53", "u54"]);
+    const contacts = listContactUsers();
+    for (const contact of contacts) {
+      expect(hiddenIds.has(contact.id)).toBe(false);
+    }
+
+    for (const genericQuery of ["大学院", "ゲーム", "カメラ", "写真部", "χ", "佐伯", "神奈川"]) {
+      const result = searchFacebook(genericQuery);
+      for (const user of result.users) {
+        expect(hiddenIds.has(user.id), genericQuery).toBe(false);
+      }
+    }
+
+    const exactKai = searchFacebook("imperial_chi");
+    expect(exactKai.users.map((u) => u.id)).toEqual([KAI_TALKUP_USER_ID]);
+  });
+
+  it("keeps forbidden words and 湘南 out of u49..u54", () => {
+    const teUsers = listUsers().filter((user) => /^u(49|5[0-4])$/.test(user.id));
+    expect(teUsers).toHaveLength(6);
+    for (const user of teUsers) {
+      const texts = [user.displayName, user.handle, user.bio, user.workplace, user.location].filter(
+        (value): value is string => Boolean(value),
+      );
+      for (const text of texts) {
+        for (const spoiler of FORBIDDEN_WORDS) {
+          expect(text.includes(spoiler), `${user.id}: ${spoiler}`).toBe(false);
+        }
+        expect(text, `${user.id}: address`).not.toMatch(ADDRESS_PATTERN);
+      }
+    }
   });
 });

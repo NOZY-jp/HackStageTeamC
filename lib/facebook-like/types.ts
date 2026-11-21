@@ -20,6 +20,10 @@ export type FbUser = {
   location?: string;
   joinedAt: string;
   friendIds: string[];
+  /** フォロー中のユーザーID一覧（未指定時は friendIds を使う） */
+  followingIds?: string[];
+  /** 一覧（連絡先）や通常のあいまい検索に出さない隠しアカウント */
+  hiddenFromDirectory?: boolean;
 };
 
 export type FbReactionType = "like" | "love" | "haha" | "wow" | "sad" | "angry";
