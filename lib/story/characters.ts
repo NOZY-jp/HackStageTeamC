@@ -106,3 +106,20 @@ export const FORBIDDEN_WORDS = [
 export function getCharacter(id: CharacterId): Character {
   return characters[id];
 }
+
+/**
+ * 話者ラベル（#208）。リョウは、本名を知る前（s07/s08 より前）だけ「リョウ（琥珀）」と出す。
+ * 対面の初出でプレイヤーが誰か分かるようにし、開示後は「リョウ」に戻す。
+ * 心の声・通話は対象外（心の声は「リョウ」、通話は Discord の「琥珀」）。
+ * 呼び名の切替はここ1か所だけ（台本に名前を直書きしない）。
+ */
+export function speakerLabel(
+  id: CharacterId,
+  options: { frame?: string; realNameKnown?: boolean } = {},
+): string {
+  const person = characters[id];
+  if (id === "ryo" && (options.frame ?? "talk") === "talk" && !options.realNameKnown) {
+    return `${person.name}（${HAL_NAME}）`;
+  }
+  return person.name;
+}
