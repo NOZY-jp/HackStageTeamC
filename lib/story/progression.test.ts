@@ -4,11 +4,19 @@
  * 段階の status を done にしたら、ここに確認を足す。
  */
 import { describe, expect, it } from "vitest";
-import { getEntry, getMylist, listMylistEntries, listPublicEntries } from "@/lib/blog-like";
+import {
+  getBlog,
+  getEntry,
+  getMylist,
+  listMylistEntries,
+  listPublicEntries,
+} from "@/lib/blog-like";
 import { getChannel, getDMThread, getGuild, listGuilds } from "@/lib/discord-like";
 import { channelMessages, dmMessages } from "@/lib/discord-like/data/messages";
 import { users } from "@/lib/discord-like/data/users";
 import { buildSearchIndex } from "@/lib/discord-like/search";
+import { resolveLinkEmbeds } from "@/lib/link-embed";
+import { getPost } from "@/lib/twitter-like";
 import { characters } from "./characters";
 import {
   availableBeats,
@@ -56,6 +64,22 @@ describe("進行チェック（各プラットフォームのデータに手が�
       (message) => message.authorId === "maimai" && message.body.includes("攻略ブログ"),
     );
     expect(talk.length).toBeGreaterThan(0);
+  });
+
+  it("段階2の導線（#172）: 段階1のあと、カイとのDMに公開Twixer投稿のURLが届く", () => {
+    const atTalk = setFlag(initialState, "s01-blog-talk");
+    const lead = availableBeats(atTalk).find((beat) => beat.place === "discord:dm-kai");
+    if (!lead) throw new Error("カイの手がかりが届かない");
+    const after = completeBeat(atTalk, lead);
+    const url = completedChats(after).find(
+      (chat) => chat.channel === "discord:dm-kai" && chat.text.includes("twixer.com"),
+    )?.text;
+    expect(url, "DM に貼られるURL").toContain("mai2mai2");
+    // 鍵付きの旧アカウント（maimai_mhw）ではなく、実在する公開投稿 post-101 へ解決できる
+    expect(url).not.toContain("maimai_mhw");
+    expect(resolveLinkEmbeds(url ?? "").map((embed) => embed.href)).toEqual([
+      "/twitter/post/post-101",
+    ]);
   });
 
   it("11月25日までの通常ログはゲーム開始より前にある", () => {
@@ -167,8 +191,14 @@ describe("進行チェック（各プラットフォームのデータに手が�
     expect(listMylistEntries(mylist).map((item) => item.id)).toContain("e20181117");
   });
 
+  it("段階2: Twixer で、リア友とみられる人物のリプライがブログ名を挙げている", () => {
+    const reply = getPost("post-102");
+    expect(reply?.replyToId).toBe("post-101");
+    const blogTitle = getBlog("denden0102")?.title ?? "";
+    expect(reply?.body).toContain(blogTitle);
+  });
+
   it.todo("段階7・8: コンテスト名が造語「蒼穹フォトアワード 2020」になっている（#77）");
-  it.todo("段階2: Twixer にリア友とみられる人物の「○○にも書いてたよな」リプライがある");
   it.todo("段階10: talkup に本人のプロフィールと写真がある");
 });
 
