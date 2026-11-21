@@ -140,4 +140,40 @@ describe("ゲームでの場面の進行", () => {
       },
     ]);
   });
+
+  it("第三章〜第六章は、謎解きの段階に着くたびに順に始まり、悪い結末で終わる", () => {
+    let state = setFlag(initialState, "started");
+    const play = (expected: string) => {
+      const beat = nextBeat(state);
+      expect(beat?.id).toBe(expected);
+      if (!beat) throw new Error(`${expected} が始まりません`);
+      state = completeBeat(state, beat, beat.choices?.[0]?.id);
+    };
+    play("ch1-prologue");
+    play("ch2-disappearance");
+    play("ch3-ask-kai");
+    // カイの助言で段階1に着く（Twixer が開放される）
+    expect(state.flags).toContain("s01-blog-talk");
+    // 段階に着くまでは次の場面は始まらない（プレイヤーが調べる番）
+    expect(nextBeat(state)).toBeUndefined();
+    state = setFlag(state, "s03-blog-found");
+    play("ch3-blog-found");
+    state = setFlag(state, "s04-old-id-screenshot");
+    play("ch4-leaf");
+    state = setFlag(state, "s05-old-discord-user");
+    play("ch4-old-account");
+    state = setFlag(state, "s06-old-profile-link");
+    play("ch4-old-blog");
+    state = setFlag(state, "s08-real-name");
+    play("ch4-real-name");
+    // カイからの連絡（段階9）と結末の送信（段階11）は #159 の場面が立てる
+    state = setFlag(state, "s09-kai-contact");
+    expect(nextBeat(state)).toBeUndefined();
+    state = setFlag(state, "s10-talkup-match");
+    play("ch5-talkup");
+    expect(nextBeat(state)).toBeUndefined();
+    state = setFlag(state, "s11-address");
+    play("ch6-bad-end");
+    expect(nextBeat(state)).toBeUndefined();
+  });
 });
