@@ -9,14 +9,15 @@ import {
   transcript,
 } from "../engine";
 import { EXTRA_FLAGS, type FlagId } from "../flags";
-import { say, textsOf, validateBeat } from "../stage";
+import { chatsOf, say, textsOf, validateBeat } from "../stage";
 import { STEP_IDS } from "../steps";
 import type { Beat, Line } from "../types";
 import { beats } from "./index";
 
-/** 場面に出てくる全部の行（選択肢の文はリョウの発言として数える） */
+/** 場面に出てくる全部の行（チャットに流す文と、選択肢の文＝リョウの発言も数える） */
 const allLines = (beat: Beat): Line[] => [
   ...textsOf(beat.script),
+  ...chatsOf(beat.id, beat.script).map((message) => say(message.from, message.text)),
   ...(beat.choices ?? []).flatMap((choice) => [
     say("ryo", choice.label),
     ...textsOf(choice.reply ?? []),
@@ -103,6 +104,41 @@ describe("台本の整合性", () => {
           }
         }
       }
+    }
+  });
+
+  /**
+   * #174 レビュー P2（呼称）の回帰防止。
+   * 「でんちゃん」は旧ブログのコメント欄に祖母が一度だけ残した昔の呼び方で（#79）、
+   * リョウが普段から使う呼び名ではない（#76）。第一〜三章では、まだその手がかりが無いので
+   * 「まいまい」と呼ぶ。第一章だけは「でんちゃん」の由来を語る場面なので例外
+   * （由来が #76 と違う点は ch01-prologue.ts のコメントどおり清書で確認する）。
+   */
+  it("第二・三章では、リョウは「まいまい」と呼ぶ（「でんちゃん」は旧ブログの手がかり後）", () => {
+    for (const beat of beats.filter(
+      (candidate) => candidate.chapter === 2 || candidate.chapter === 3,
+    )) {
+      for (const line of allLines(beat)) {
+        expect(line.text.includes("でんちゃん"), `${beat.id}: ${line.text}`).toBe(false);
+      }
+    }
+  });
+
+  /**
+   * 上のテストを章ではなく手がかりの位置で押さえ直したもの。
+   * 第一章の由来の場面より後でも、旧ブログの手がかり（ch4-old-blog）より前の場面では
+   * 「でんちゃん」を出さない。第四〜六章に足した場面が手がかりを飛び越えないようにする。
+   */
+  it("「でんちゃん」は、第一章の由来の場面か、旧ブログの手がかり（ch4-old-blog）より後の場面にだけ出る", () => {
+    const clueIndex = beats.findIndex((beat) => beat.id === "ch4-old-blog");
+    expect(clueIndex, "旧ブログの手がかりの場面 ch4-old-blog").toBeGreaterThanOrEqual(0);
+
+    for (const [index, beat] of beats.entries()) {
+      if (beat.previewOnly || beat.chapter === 1) continue;
+      if (!allLines(beat).some((line) => line.text.includes("でんちゃん"))) continue;
+      expect(index, `${beat.id}: 旧ブログの手がかりより前の「でんちゃん」`).toBeGreaterThan(
+        clueIndex,
+      );
     }
   });
 

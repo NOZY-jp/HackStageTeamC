@@ -23,6 +23,25 @@ function startsWithPrefix(pathname: string, prefix: string): boolean {
   return pathname === prefix || pathname.startsWith(`${prefix}/`);
 }
 
+/**
+ * アドレスバー表示用にクエリの1要素を組み立てる。
+ * 日本語などは読めるまま残し、URL の区切りとして解釈が変わる文字（`#`・`+`・`&`・`=` など）は
+ * 必ずパーセントエンコードする。表示した URL をそのまま再送信しても検索語が変わらないようにするため。
+ */
+const QUERY_SAFE_ASCII = /^[A-Za-z0-9\-._~!$'()*,;:@/]$/;
+
+function encodeQueryPart(value: string): string {
+  let encoded = "";
+  for (const char of value) {
+    if ((char.codePointAt(0) ?? 0) >= 0x80 || QUERY_SAFE_ASCII.test(char)) {
+      encoded += char;
+    } else {
+      encoded += encodeURIComponent(char);
+    }
+  }
+  return encoded;
+}
+
 function formatReadableQuery(search?: string): string {
   if (!search) {
     return "";
@@ -34,10 +53,7 @@ function formatReadableQuery(search?: string): string {
   const params = new URLSearchParams(raw);
   const parts: string[] = [];
   for (const [key, value] of params.entries()) {
-    const safeKey = key.includes("&") || key.includes("=") ? encodeURIComponent(key) : key;
-    const safeValue =
-      value.includes("&") || value.includes("=") ? encodeURIComponent(value) : value;
-    parts.push(`${safeKey}=${safeValue}`);
+    parts.push(`${encodeQueryPart(key)}=${encodeQueryPart(value)}`);
   }
   return parts.length > 0 ? `?${parts.join("&")}` : "";
 }

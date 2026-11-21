@@ -13,7 +13,7 @@ export const chapter2: Beat[] = [
     script: [
       background("black", { transition: "cut" }),
       title("第二章　失踪"),
-      think("ちょっと早めに到着したけど、でんちゃんはまだ着いてなさそう"),
+      think("ちょっと早めに到着したけど、まいまいはまだ着いてなさそう"),
       chat(
         "discord:dm-maimai",
         "ryo",

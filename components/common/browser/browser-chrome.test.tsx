@@ -152,6 +152,40 @@ describe("BrowserChrome", () => {
     );
   });
 
+  it("表示 URL を編集せず Enter しても検索語の # が失われない", async () => {
+    const user = userEvent.setup();
+    nav.pathname = "/search";
+    nav.search = "q=%23%E7%B4%A0%E6%9D%90";
+    renderChrome();
+
+    const omnibox = screen.getByLabelText("URL または検索キーワード");
+    expect(omnibox).toHaveValue("seek.jp/?q=%23素材");
+
+    // フォーカス（全選択）だけして値を編集しないまま Enter する
+    await user.click(omnibox);
+    expect(omnibox).toHaveValue("seek.jp/?q=%23素材");
+    await user.keyboard("{Enter}");
+
+    expect(nav.push).toHaveBeenCalledTimes(1);
+    expect(nav.push).toHaveBeenCalledWith("/search?q=%23%E7%B4%A0%E6%9D%90");
+  });
+
+  it("表示 URL を編集せず Enter しても検索語の A+B が A B にならない", async () => {
+    const user = userEvent.setup();
+    nav.pathname = "/search";
+    nav.search = "q=A%2BB";
+    renderChrome();
+
+    const omnibox = screen.getByLabelText("URL または検索キーワード");
+    expect(omnibox).toHaveValue("seek.jp/?q=A%2BB");
+
+    await user.click(omnibox);
+    await user.keyboard("{Enter}");
+
+    expect(nav.push).toHaveBeenCalledTimes(1);
+    expect(nav.push).toHaveBeenCalledWith("/search?q=A%2BB");
+  });
+
   it("/story や /screens では非表示になり --browser-chrome-height を 0px にする", () => {
     nav.pathname = "/story";
     const { rerender } = renderChrome();
