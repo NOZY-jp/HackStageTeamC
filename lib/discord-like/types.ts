@@ -88,6 +88,21 @@ export type DMThread = {
   unreadCount?: number;
 };
 
+/**
+ * 通話1回分のセッション（#129）。システムメッセージの開始/終了の対から導出する。
+ * - `endedReason: "hangup"` は終了メッセージを持つ（1分〜6時間）
+ * - `endedReason: "missed"` は不在着信で、終了メッセージを持たない
+ */
+export type VoiceSession = {
+  id: string;
+  scope: "dm" | "guild";
+  channelId: string;
+  participantIds: string[];
+  startedAt: string;
+  endedAt?: string;
+  endedReason: "hangup" | "missed";
+};
+
 export type VoiceState = {
   channelId: string;
   userId: string;

@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 import { FbAvatar } from "@/components/facebook-like/avatar";
 import { useFacebook } from "@/components/facebook-like/facebook-context";
 import { FacebookLeftSidebar } from "@/components/facebook-like/left-sidebar";
@@ -10,9 +10,18 @@ import { PostComposer } from "@/components/facebook-like/post-composer";
 import { FacebookRightSidebar } from "@/components/facebook-like/right-sidebar";
 import { filterFeedPosts, filterPostsByQuery, searchFacebook } from "@/lib/facebook-like";
 
+/** 検索結果の絞り込み（すべて・人・投稿） */
+type SearchFilter = "all" | "people" | "posts";
+const SEARCH_FILTERS: { id: SearchFilter; label: string }[] = [
+  { id: "all", label: "すべて" },
+  { id: "people", label: "人" },
+  { id: "posts", label: "投稿" },
+];
+
 export default function FacebookFeedPage() {
   const { posts, searchQuery, setSearchQuery } = useFacebook();
   const query = searchQuery.trim();
+  const [filter, setFilter] = useState<SearchFilter>("all");
 
   // URL の ?q= から始まる検索状態で、該当ユーザーと投稿だけを出す
   const matchedUsers = useMemo(() => (query ? searchFacebook(query).users : []), [query]);
@@ -29,60 +38,85 @@ export default function FacebookFeedPage() {
       <FacebookLeftSidebar />
 
       <div className="fb-feed-center">
-        <PostComposer />
-
         {query ? (
-          <div className="fb-card px-4 py-2.5 flex items-center justify-between text-sm">
-            <span>
-              「<strong>{searchQuery}</strong>」の検索結果: ユーザー{matchedUsers.length}件 / 投稿
-              {filteredPosts.length}件
-            </span>
-            <button
-              type="button"
-              onClick={() => setSearchQuery("")}
-              className="text-xs font-semibold text-[var(--fb-accent)] hover:underline"
-            >
-              クリア
-            </button>
-          </div>
-        ) : null}
-
-        {query && matchedUsers.length > 0 ? (
-          <section className="fb-card p-4" aria-label="該当するユーザー">
-            <h2 className="text-sm font-semibold mb-2">ユーザー</h2>
-            <ul className="space-y-2">
-              {matchedUsers.map((user) => (
-                <li key={user.id}>
-                  <Link
-                    href={`/talkup/profile/${user.handle}`}
-                    className="flex items-center gap-3 hover:underline"
+          <>
+            {/* 検索中は投稿欄を出さず、検索結果の見出しと絞り込みを出す */}
+            <div className="fb-card fb-search-head">
+              <div className="fb-search-head-row">
+                <h1 className="fb-search-title">「{searchQuery}」の検索結果</h1>
+                <button type="button" onClick={() => setSearchQuery("")} className="fb-text-btn">
+                  クリア
+                </button>
+              </div>
+              <p className="fb-search-count">
+                ユーザー{matchedUsers.length}件 / 投稿{filteredPosts.length}件
+              </p>
+              <fieldset className="fb-search-filters" aria-label="絞り込み">
+                {SEARCH_FILTERS.map((item) => (
+                  <button
+                    key={item.id}
+                    type="button"
+                    aria-pressed={filter === item.id}
+                    className="fb-chip"
+                    onClick={() => setFilter(item.id)}
                   >
-                    <FbAvatar
-                      displayName={user.displayName}
-                      avatarColor={user.avatarColor}
-                      status={user.status}
-                      size="sm"
-                    />
-                    <span>
-                      <span className="block text-sm font-semibold">{user.displayName}</span>
-                      <span className="block text-xs text-[var(--fb-muted)]">
-                        @{user.handle}
-                        {user.location ? ` · ${user.location}` : ""}
-                      </span>
-                    </span>
-                  </Link>
-                </li>
-              ))}
-            </ul>
-          </section>
-        ) : null}
+                    {item.label}
+                  </button>
+                ))}
+              </fieldset>
+            </div>
 
-        {filteredPosts.length > 0 ? (
-          filteredPosts.map((post) => <PostCard key={post.id} post={post} />)
+            {filter !== "posts" && matchedUsers.length > 0 ? (
+              <section className="fb-card fb-people" aria-label="該当するユーザー">
+                <h2 className="fb-section-title">人</h2>
+                <ul className="fb-people-list">
+                  {matchedUsers.map((user) => (
+                    <li key={user.id}>
+                      <Link href={`/talkup/profile/${user.handle}`} className="fb-person">
+                        <FbAvatar
+                          displayName={user.displayName}
+                          avatarColor={user.avatarColor}
+                          status={user.status}
+                          size="lg"
+                        />
+                        <span className="fb-person-text">
+                          <span className="fb-person-name">{user.displayName}</span>
+                          <span className="fb-person-meta">
+                            {[user.workplace, user.location ? `${user.location}在住` : undefined]
+                              .filter(Boolean)
+                              .join(" · ") || `@${user.handle}`}
+                          </span>
+                        </span>
+                        <span className="fb-person-action" aria-hidden="true">
+                          プロフィールを見る
+                        </span>
+                      </Link>
+                    </li>
+                  ))}
+                </ul>
+              </section>
+            ) : null}
+
+            {filter !== "people" ? (
+              filteredPosts.length > 0 ? (
+                <>
+                  <h2 className="fb-section-title fb-section-title-bare">投稿</h2>
+                  {filteredPosts.map((post) => (
+                    <PostCard key={post.id} post={post} />
+                  ))}
+                </>
+              ) : (
+                <div className="fb-card fb-empty">該当する投稿が見つかりませんでした。</div>
+              )
+            ) : null}
+          </>
         ) : (
-          <div className="fb-card p-8 text-center text-sm text-[var(--fb-muted)]">
-            該当する投稿が見つかりませんでした。
-          </div>
+          <>
+            <PostComposer />
+            {feedPosts.map((post) => (
+              <PostCard key={post.id} post={post} />
+            ))}
+          </>
         )}
       </div>
 

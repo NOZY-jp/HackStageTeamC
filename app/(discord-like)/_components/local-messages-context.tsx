@@ -28,7 +28,14 @@ function toMessage(channelKey: string, chat: ChatMessage): Message {
 
 type LocalMessages = {
   messagesFor: (channelKey: string) => Message[];
-  addMessage: (channelKey: string, body: string) => void;
+  /** 送信（表示のみ）。`system` はデータを変えずにシステム行として描くための印。 */
+  addMessage: (channelKey: string, body: string, options?: { system?: boolean }) => void;
+  /** いま通話中のスレッド（null なら通話していない）。ルートの再マウントに依存しない（#140）。 */
+  activeCallThreadId: string | null;
+  /** 通話を開始する（同じスレッドで二重に開始しない）。 */
+  startCall: (threadId: string) => void;
+  /** 通話を終了する（開始していなければ何もしない）。 */
+  endCall: (threadId: string) => void;
 };
 
 const LocalMessagesContext = createContext<LocalMessages | null>(null);
@@ -41,6 +48,11 @@ export function useLocalMessages(): LocalMessages {
   return controls;
 }
 
+/** Provider の外でも安全に呼べる版（表示だけの画面・テスト用）。 */
+export function useOptionalLocalMessages(): LocalMessages | null {
+  return useContext(LocalMessagesContext);
+}
+
 /**
  * 送信したメッセージをチャンネル／DMスレッド単位で保持する（クライアントのみ）。
  * 物語の中で流したメッセージ（lib/story のチャットの命令）も、ここで過去のデータの後ろに足す。
@@ -48,24 +60,52 @@ export function useLocalMessages(): LocalMessages {
  */
 export function LocalMessagesProvider({ children }: { children: ReactNode }) {
   const [byKey, setByKey] = useState<Record<string, Message[]>>({});
+  // 通話状態は Provider（レイアウト）に置く。ページは Next のルートキャッシュで
+  // 再マウントされないことがあり、ページ内 state では再入場を拾えないため。
+  const [activeCallThreadId, setActiveCallThreadId] = useState<string | null>(null);
   // 物語の中で流したメッセージ（場面の進み具合で増える）。いまは MaiMai との DM だけ
   const storyDm = useStoryChats("discord:dm-maimai");
   const sequence = useRef(0);
 
-  const addMessage = useCallback((channelKey: string, body: string) => {
-    sequence.current += 1;
-    const message: Message = {
-      id: `local-${channelKey}-${sequence.current}`,
-      channelId: channelKey,
-      authorId: SELF_USER_ID,
-      sentAt: new Date().toISOString(),
-      body,
-    };
-    setByKey((previous) => ({
-      ...previous,
-      [channelKey]: [...(previous[channelKey] ?? []), message],
-    }));
-  }, []);
+  const addMessage = useCallback(
+    (channelKey: string, body: string, options?: { system?: boolean }) => {
+      sequence.current += 1;
+      const message: Message = {
+        id: `local-${channelKey}-${sequence.current}`,
+        channelId: channelKey,
+        authorId: SELF_USER_ID,
+        sentAt: new Date().toISOString(),
+        body,
+        ...(options?.system ? { system: true } : {}),
+      };
+      setByKey((previous) => ({
+        ...previous,
+        [channelKey]: [...(previous[channelKey] ?? []), message],
+      }));
+    },
+    [],
+  );
+
+  const activeCallRef = useRef<string | null>(null);
+  const startCall = useCallback(
+    (threadId: string) => {
+      if (activeCallRef.current === threadId) return;
+      activeCallRef.current = threadId;
+      setActiveCallThreadId(threadId);
+      addMessage(threadId, "通話を開始しました", { system: true });
+    },
+    [addMessage],
+  );
+
+  const endCall = useCallback(
+    (threadId: string) => {
+      if (activeCallRef.current !== threadId) return;
+      activeCallRef.current = null;
+      setActiveCallThreadId(null);
+      addMessage(threadId, "通話を終了しました", { system: true });
+    },
+    [addMessage],
+  );
 
   const controls = useMemo<LocalMessages>(
     () => ({
@@ -74,8 +114,11 @@ export function LocalMessagesProvider({ children }: { children: ReactNode }) {
         ...(byKey[channelKey] ?? []),
       ],
       addMessage,
+      activeCallThreadId,
+      startCall,
+      endCall,
     }),
-    [byKey, addMessage, storyDm],
+    [activeCallThreadId, addMessage, byKey, endCall, startCall, storyDm],
   );
 
   return <LocalMessagesContext.Provider value={controls}>{children}</LocalMessagesContext.Provider>;

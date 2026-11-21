@@ -6,6 +6,7 @@ import { STEP_IDS, type StepId } from "./steps";
  */
 export const EXTRA_FLAGS = {
   started: "ゲームを始めた",
+  leftCall: "序章の通話を終えた",
   askedKai: "カイに相談した",
 } as const;
 

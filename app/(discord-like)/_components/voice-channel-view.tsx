@@ -7,7 +7,9 @@ import { PaneToggles } from "@/components/discord-like/pane-toggles";
 import { getUser } from "@/lib/discord-like";
 import { guildChannelPath } from "@/lib/platform/app-prefix";
 import { VOICE_CHANNELS, type VoiceChannel, type VoiceRoom } from "@/lib/story";
+import { CallStage } from "./call-stage";
 import { EmptyState } from "./empty-state";
+import { useOptionalLocalMessages } from "./local-messages-context";
 import { STORY_USERS } from "./story-users";
 import { useVoice } from "./voice-context";
 
@@ -71,6 +73,7 @@ export function VoiceChannelView({
   channelName,
   participants,
   currentUser,
+  lastSessionMinutes,
 }: {
   guildId: string;
   /** URL に出す guild の数値ID */
@@ -81,14 +84,30 @@ export function VoiceChannelView({
   channelName: string;
   participants: VoiceParticipant[];
   currentUser: { id: string; displayName: string; avatarColor: string };
+  /** サーバーVCの直近通話（分）。VoiceSession から渡す（#150） */
+  lastSessionMinutes?: number;
 }) {
-  const { connection, leftChannelId, join, leave, toggleMute, toggleDeafen } = useVoice();
+  const { connection, lastCall, leftChannelId, join, leave, toggleMute, toggleDeafen } = useVoice();
+  const localMessages = useOptionalLocalMessages();
   const joined = connection?.channelId === channelId;
   const muted = joined ? connection.muted : false;
   // 物語の場面がこの通話で流れているあいだは、物語の人物も参加者に出す（話している人は光る）
   const room = useStoryVoice(storyChannelOf(channelId));
   const shown = [...participants, ...storyParticipants(room)];
   useStoryLeave(room, joined, leave);
+
+  // #149: 退出したら会話ログに「通話 N分」を残す（データは変更しない）
+  const joinedAtRef = useRef<string | null>(null);
+  useEffect(() => {
+    if (joined) {
+      joinedAtRef.current = connection?.joinedAt ?? new Date().toISOString();
+      return;
+    }
+    if (!joinedAtRef.current) return;
+    const minutes = Math.max(1, Math.round((Date.now() - Date.parse(joinedAtRef.current)) / 60000));
+    localMessages?.addMessage(channelId, `通話 ${minutes}分`, { system: true });
+    joinedAtRef.current = null;
+  }, [channelId, connection?.joinedAt, joined, localMessages]);
   const deafened = joined ? connection.deafened : false;
 
   // 表示中のページだけが自動参加する（ルートキャッシュで裏に残った画面が奪わないように）
@@ -105,6 +124,17 @@ export function VoiceChannelView({
     }
     join({ guildId, channelId, channelName });
   }, [active, channelId, channelName, connection?.channelId, guildId, join, leftChannelId]);
+
+  // 自分（1人でも破綻しないよう、参加者タイルに必ず入れる）
+  const selfTile: VoiceParticipant = {
+    id: `self-${currentUser.id}`,
+    displayName: `${currentUser.displayName}（自分）`,
+    avatarColor: currentUser.avatarColor,
+    speaking: room?.speaking === "ryo",
+    muted,
+    deafened,
+  };
+  const tiles = joined ? [...shown, selfTile] : shown;
 
   return (
     <main id="app-main" className="app-main" aria-label={channelName}>
@@ -129,90 +159,38 @@ export function VoiceChannelView({
       </header>
 
       <div className="pane-scroll voice-body">
-        <section aria-label="参加者" className="voice-participants">
-          {shown.length === 0 && !joined ? (
-            <EmptyState
-              kind="voice"
-              title="参加者はいません"
-              description="まだ誰も接続していません。"
-            />
-          ) : null}
-          {shown.map((participant) => (
-            <VoiceTile
-              key={participant.id}
-              name={participant.displayName}
-              avatarColor={participant.avatarColor}
-              speaking={Boolean(participant.speaking)}
-              status={
-                participant.muted ? "ミュート" : participant.deafened ? "スピーカーオフ" : "接続中"
-              }
-            />
-          ))}
-          {joined ? (
-            <VoiceTile
-              key={`self-${currentUser.id}`}
-              name={`${currentUser.displayName}（自分）`}
-              avatarColor={currentUser.avatarColor}
-              speaking={room?.speaking === "ryo"}
-              status={muted ? "ミュート" : deafened ? "スピーカーオフ" : "接続中"}
-            />
-          ) : null}
-        </section>
-
-        <div className="voice-actions">
-          {joined ? (
-            <>
-              <button type="button" className="voice-button voice-button-danger" onClick={leave}>
-                切断
-              </button>
-              <button
-                type="button"
-                className="voice-button"
-                aria-label={muted ? "ミュートを解除" : "ミュート"}
-                aria-pressed={muted}
-                onClick={toggleMute}
-              >
-                {muted ? "ミュート中" : "マイク"}
-              </button>
-              <button
-                type="button"
-                className="voice-button"
-                aria-label={deafened ? "スピーカーのオフを解除" : "スピーカーをオフ"}
-                aria-pressed={deafened}
-                onClick={toggleDeafen}
-              >
-                {deafened ? "スピーカーオフ" : "スピーカー"}
-              </button>
-            </>
-          ) : null}
-        </div>
+        {!joined && (lastCall?.channelId === channelId || lastSessionMinutes !== undefined) ? (
+          <p className="voice-last-call" data-testid="voice-last-call">
+            前回の通話: {lastCall?.channelId === channelId ? lastCall.minutes : lastSessionMinutes}
+            分
+          </p>
+        ) : null}
+        {tiles.length === 0 && !joined ? (
+          <EmptyState
+            kind="voice"
+            title="参加者はいません"
+            description="まだ誰も接続していません。"
+          />
+        ) : null}
+        <CallStage
+          title={channelName}
+          subtitle={
+            !joined
+              ? undefined
+              : tiles.length > 1
+                ? `${tiles.length}人が参加中`
+                : "ひとりで接続しています"
+          }
+          joined={joined}
+          muted={muted}
+          deafened={deafened}
+          participants={tiles}
+          onToggleMute={toggleMute}
+          onToggleDeafen={toggleDeafen}
+          onLeave={leave}
+          startedAt={joined ? connection?.joinedAt : undefined}
+        />
       </div>
     </main>
-  );
-}
-
-function VoiceTile({
-  name,
-  avatarColor,
-  speaking,
-  status,
-}: {
-  name: string;
-  avatarColor: string;
-  speaking: boolean;
-  status: string;
-}) {
-  return (
-    <div className="voice-tile" data-speaking={speaking ? "true" : undefined}>
-      <span
-        aria-hidden="true"
-        className="voice-tile-avatar"
-        style={{ backgroundColor: avatarColor }}
-      >
-        {name.slice(0, 1)}
-      </span>
-      <span className="voice-tile-name">{name}</span>
-      <span className="voice-tile-status">{status}</span>
-    </div>
   );
 }

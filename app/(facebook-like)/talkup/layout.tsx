@@ -8,7 +8,7 @@ export const metadata: Metadata = {
     default: "talkup",
     template: "%s | talkup",
   },
-  description: "日々の近況や写真を共有するSNS「talkup」のフィード画面",
+  description: "talkup で、友達や知り合いとつながろう。",
 };
 
 export default function FacebookLayout({ children }: { children: ReactNode }) {

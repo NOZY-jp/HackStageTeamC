@@ -4,12 +4,13 @@
 
 ## 正本はどこか
 
-| 何を                                               | 正本                                                   | コードの置き場所                                |
-| -------------------------------------------------- | ------------------------------------------------------ | ----------------------------------------------- |
-| 謎解きの順序（段階1〜11）・名前・呼称              | GitHub Issue #76「spec: 謎解きの順序と手がかりの配分」 | `lib/story/steps.ts`、`lib/story/characters.ts` |
-| 場面の文章（章ごとの会話・地の文）                 | Google Docs「HackStageTeamC」の箱書き                  | `lib/story/scenario/chNN-*.ts`                  |
-| 演出の枠組み（このページ）                         | Issue #83                                              | `lib/story/stage/`、`components/common/story/`  |
-| 各プラットフォームの過去のデータ（手がかりの実物） | 各プラットフォームの Issue                             | `lib/<platform>/data/`                          |
+| 何を                                                                 | 正本                                                   | コードの置き場所                                |
+| -------------------------------------------------------------------- | ------------------------------------------------------ | ----------------------------------------------- |
+| 謎解きの順序（段階1〜11）・名前・呼称                                | GitHub Issue #76「spec: 謎解きの順序と手がかりの配分」 | `lib/story/steps.ts`、`lib/story/characters.ts` |
+| 場面の文章（章ごとの会話・地の文）                                   | Google Docs「HackStageTeamC」の箱書き                  | `lib/story/scenario/chNN-*.ts`                  |
+| 演出の枠組み（このページ）                                           | Issue #83                                              | `lib/story/stage/`、`components/common/story/`  |
+| 各プラットフォームの過去のデータ（手がかりの実物）                   | 各プラットフォームの Issue                             | `lib/<platform>/data/`                          |
+| Discord の会話データの設計方針（自然さ・時間軸・人物・サーバー・DM） | `docs/discord/`（Issue #127）                          | `lib/discord-like/data/`                        |
 
 食い違ったら **#76 を優先**します。コードは正本の写しなので、正本が変わったらコードを合わせます。
 
@@ -157,6 +158,15 @@ choices: [
 - **たたむ**: 文章の窓だけを隠して、背景・立ち絵などの絵を見せる（操作させるためのものではない）。画面のどこかを押すか、Enter・Space・Esc で戻る
 - **流せる場所を足す**: `stage/cues.ts` の `CHAT_CHANNELS` に足し、受け取る側の画面で `useStoryChats("<場所>")`（`components/common/story/story-provider.tsx`）を読んで、過去のデータの後ろに並べる。いまは Discord の MaiMai との DM だけ（`app/(discord-like)/_components/local-messages-context.tsx`）。通話は `VOICE_CHANNELS` と `useStoryVoice(...)`（`voice-channel-view.tsx`）
 - 時刻は、そのプラットフォームの過去のデータとつじつまが合うように書く（`+09:00` 付き）
+
+### サイトの開放（ブックマーク）
+
+物語や謎解きの段階が進むと、行けるサイトが増えます。開放したサイトは、画面の左端の「ブックマーク」に並びます。新しく開放したときは、上に「ブックマークに追加しました」と短く知らせます。
+
+- 開放の条件は `lib/story/sites.ts` の `SITES`（`unlockWith` のフラグが全部そろったら）。はじめは Discord だけ
+- **締め出しはしない**。URL や検索でたどり着けたら、そのサイトはその時点で開放する
+- 場面を流しているあいだは、ブックマークを出さない
+- サイトを足すときは `SITES` に1行足す（並び順が開放される順）
 
 ### 組み合わせの注意
 
