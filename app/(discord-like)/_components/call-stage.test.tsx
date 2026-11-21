@@ -98,3 +98,42 @@ describe("通話ステージ（DM通話とVCの共通部品）", () => {
     expect(screen.getByRole("status").textContent).toContain("招待リンクをコピーしました");
   });
 });
+
+describe("レイアウトのリグレッション防止", () => {
+  it("VC3人は同サイズ3列（span 2 を使わない）", async () => {
+    const css = await import("node:fs/promises").then((fs) =>
+      fs.readFile("app/globals.css", "utf8"),
+    );
+    expect(css).not.toMatch(
+      /\.call-tiles\[data-count="3"\] \.call-tile:first-child \{\s*grid-row: span 2/,
+    );
+    expect(css).toMatch(
+      /\[data-layout="grid"\]\[data-count="3"\] \{[^}]*grid-template-columns: repeat\(3,/,
+    );
+    // 4人は2×2
+    expect(css).toMatch(/\.call-tiles\[data-count="4"\] \{[^}]*repeat\(2,/);
+  });
+
+  it("DMの相手アバターは160px以上", async () => {
+    const css = await import("node:fs/promises").then((fs) =>
+      fs.readFile("app/globals.css", "utf8"),
+    );
+    expect(css).toMatch(
+      /\.call-tiles\[data-layout="dm"\] \.call-tile:first-child \.call-tile-avatar \{[^}]*clamp\(160px/,
+    );
+  });
+
+  it("3人を渡すと3枚のタイルを data-count=3 で描く", () => {
+    const three = [
+      { id: "a", displayName: "A", avatarColor: "#111111" },
+      { id: "b", displayName: "B", avatarColor: "#222222" },
+      { id: "c", displayName: "C", avatarColor: "#333333" },
+    ];
+    const { container } = render(
+      <CallStage {...base} layout="grid" participants={three} selfId={undefined} />,
+    );
+    const list = container.querySelector(".call-tiles");
+    expect(list?.getAttribute("data-count")).toBe("3");
+    expect(list?.querySelectorAll(".call-tile")).toHaveLength(3);
+  });
+});
