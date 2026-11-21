@@ -11,16 +11,37 @@ export type Asset = {
   src?: string;
   /** 仮の板の色（画像が無いとき） */
   color: string;
+  /** 画像を使わない、ただの色の背景（暗転など）。仮の板の名前を出さない */
+  solid?: boolean;
 };
 
 export const BACKGROUNDS = {
   "room-night": { label: "リョウの部屋（夜）", color: "#1d2440" },
   "room-day": { label: "リョウの部屋（昼）", color: "#8fa6c0" },
   "pc-screen": { label: "PCの画面", color: "#10131c" },
-  station: { label: "駅前", color: "#c9b79c" },
+  station: {
+    label: "駅前（待ち合わせ・着いたとき）",
+    src: "/story/backgrounds/station-arrival.webp",
+    color: "#c9b79c",
+  },
+  "station-dusk": {
+    label: "駅前（待ち合わせ・夕方）",
+    src: "/story/backgrounds/station-dusk.webp",
+    color: "#d08a6a",
+  },
+  "sweets-shop": {
+    label: "地元の洋菓子店",
+    src: "/story/backgrounds/sweets-shop.webp",
+    color: "#a9825f",
+  },
+  "manhole-street": {
+    label: "マンホールのある住宅街",
+    src: "/story/backgrounds/manhole-street.webp",
+    color: "#7d6a78",
+  },
   cafe: { label: "喫茶店", color: "#a9825f" },
   street: { label: "住宅街", color: "#7d8a74" },
-  black: { label: "暗転", color: "#000000" },
+  black: { label: "暗転", color: "#000000", solid: true },
 } as const satisfies Record<string, Asset>;
 export type BackgroundId = keyof typeof BACKGROUNDS;
 

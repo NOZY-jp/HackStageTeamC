@@ -273,6 +273,14 @@ export const voice = (channel: VoiceChannel, who: CharacterId, action: VoiceActi
 });
 /** 文章の窓を隠す（次の文章で自動的に出る） */
 export const hideWindow = (): WindowCue => ({ type: "window", visible: false });
+/**
+ * 絵を見せて、押すまで待つ。文章の窓を隠し、押す（Enter・Space・クリック）と次へ進む。
+ * 手がかりの写真や風景など、窓に隠れると困る絵をしっかり見せたいときに、背景や小物を出した直後に置く
+ */
+export const look = (): [WindowCue, CustomCue] => [
+  hideWindow(),
+  custom("look", undefined, { wait: true }),
+];
 /** 文章の窓を出す */
 export const showWindow = (): WindowCue => ({ type: "window", visible: true });
 

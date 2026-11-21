@@ -13,6 +13,7 @@ export const chapter2: Beat[] = [
     script: [
       background("black", { transition: "cut" }),
       title("第二章　失踪"),
+      background("station", { transition: "fade", duration: "slow" }),
       think("ちょっと早めに到着したけど、まいまいはまだ着いてなさそう"),
       chat(
         "discord:dm-maimai",
@@ -24,10 +25,12 @@ export const chapter2: Beat[] = [
       think("まさか寝落ちしたまま寝坊……？"),
       think("でもゲームのイベントがあるたび時間ぴったし参加してたあいつが遅れるとは考えにくいよな"),
       title("……"),
+      background("station-dusk", { transition: "fade", duration: "slower" }),
       think("うーん遅くないか……？"),
       think("約束した時間から2時間は経ってるし、何も連絡が来ない"),
       think("せっかくある程度デートプラン考えてたんだけど、もう日を改めた方がいいか"),
       narrate("珍しいこともあるものだなと思いながら、僕はリスケの連絡を送った。"),
+      background("black", { transition: "fade", duration: "slow" }),
       title("……"),
       think("流石におかしい"),
       narrate("最後にメッセージを送ってから3日経つけど返信が来る気配がない"),
