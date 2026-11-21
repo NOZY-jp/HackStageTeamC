@@ -10,20 +10,24 @@ import { useStoryOptional } from "./story-provider";
 export function StoryGoto({
   href,
   flag,
+  requires = [],
   children,
   className,
 }: {
   href: string;
   flag?: FlagId;
+  /** これが全部立っていないと出さない（順序を飛ばせない） */
+  requires?: readonly FlagId[];
   children: React.ReactNode;
   className?: string;
 }) {
   const story = useStoryOptional();
+  if (!requires.every((required) => story?.state.flags.includes(required))) return null;
   return (
     <button
       type="button"
       className={className}
-      data-story-goto={flag ?? href}
+      data-story-goto={flag ?? "move"}
       onClick={() => {
         if (flag) story?.setFlag(flag);
         // 結果ページはサイト内のリンクとして HTML に残さない（手がかりの順序を守る）

@@ -74,9 +74,7 @@ export default async function EntryPage({ params }: Props) {
         {/* 受賞した記事から結果ページへ進む（本番ではこの操作で順序7が立つ・#119） */}
         {entry.id === "e20181117" ? (
           <p className="pb-contest-link">
-            <StoryGoto href={PHOTO_CONTEST_RESULT_PATH} flag="s07-contest-entry">
-              結果ページを見る
-            </StoryGoto>
+            <StoryGoto href={PHOTO_CONTEST_RESULT_PATH}>結果ページを見る</StoryGoto>
           </p>
         ) : null}
         <EntryComments comments={entry.comments} />

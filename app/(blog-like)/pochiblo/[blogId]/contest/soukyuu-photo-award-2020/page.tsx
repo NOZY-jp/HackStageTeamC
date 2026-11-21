@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { BlogFrame } from "@/components/blog-like/blog-frame";
 import { StoryAction } from "@/components/common/story/story-action";
+import { StoryGoto } from "@/components/common/story/story-goto";
 import { getBlog } from "@/lib/blog-like";
 import {
   PHOTO_CONTEST_BLOG_ID,
@@ -55,15 +56,18 @@ export default async function ContestResultPage({ params }: Props) {
 
         <p>受賞者のみなさま、おめでとうございます。作品は当時のブログでも紹介しています。</p>
 
-        {/* 受賞者の本名を確認した、というプレイヤーの操作を記録する（順序6〜7を踏んでいないと出ない・#119） */}
+        {/* 受賞者を見たことを記録し、その名前で検索へ進む（#119 の段階7→8） */}
         <div className="pb-mylist-actions">
-          <StoryAction
-            flag="s08-real-name"
+          <StoryAction flag="s07-contest-entry" className="pb-mylist-action">
+            受賞者を確認する
+          </StoryAction>
+          <StoryGoto
+            href={`/talkup?q=${encodeURIComponent("服部 由比")}`}
             requires={["s07-contest-entry"]}
             className="pb-mylist-action"
           >
-            この受賞者で間違いない
-          </StoryAction>
+            この名前で検索する
+          </StoryGoto>
         </div>
       </article>
     </BlogFrame>

@@ -90,10 +90,18 @@ describe("手がかりの導線（#119）", () => {
   });
 
   it("talkup はカイの連絡後かつ本人（u40）が結果に出たときだけ確かめられる", () => {
-    expect(canConfirmTalkup([], ["u40"])).toBe(false); // 順序9の前
-    expect(canConfirmTalkup(["s09-kai-contact"], [])).toBe(false); // 検索0件
-    expect(canConfirmTalkup(["s09-kai-contact"], ["u1"])).toBe(false); // 別人
-    expect(canConfirmTalkup(["s09-kai-contact"], ["u40"])).toBe(true);
+    expect(canConfirmTalkup([], ["u40"])).toBe(false); // 順序7〜9の前
+    expect(canConfirmTalkup(["s09-kai-contact"], ["u40"])).toBe(false); // 段階8の前
+    expect(canConfirmTalkup(["s07-contest-entry", "s08-real-name"], ["u40"])).toBe(false); // 段階9の前
+    expect(canConfirmTalkup(["s07-contest-entry", "s08-real-name", "s09-kai-contact"], [])).toBe(
+      false,
+    ); // 検索0件
+    expect(
+      canConfirmTalkup(["s07-contest-entry", "s08-real-name", "s09-kai-contact"], ["u1"]),
+    ).toBe(false); // 別人
+    expect(
+      canConfirmTalkup(["s07-contest-entry", "s08-real-name", "s09-kai-contact"], ["u40"]),
+    ).toBe(true);
   });
 
   it("段階8を飛ばすと結末は解禁されない", () => {

@@ -718,7 +718,7 @@ export const mhcScript = readConversationScripts({
 21:16 haruka 下手ですけど
 21:18 mina 慣れます
 2025-07-02
-22:31 maimai はじめまして、${MAIMAI_NAME}です！双剣使ってます〜
+22:31 maimai たまに来ます。${MAIMAI_NAME}です、双剣です
 22:34 mina 双剣仲間
 22:36 maimai よろしくお願いします
 22:38 mina こっちも
@@ -729,16 +729,16 @@ export const mhcScript = readConversationScripts({
 20:02 slime 新しく入った方、ここに一言どうぞ
 20:05 hal もう書きました
 20:07 slime 古い人でした
-2026-01-11
-21:31 master 新しい人が増えたので、自己紹介は任意です
+2026-01-20
+21:31 master 新しい人が増えたので、名前だけでも書いてくれると助かります
 21:34 gunlance 任意なら俺は書かない
 21:36 master もう書いてます
 21:38 gunlance 忘れてください
 2026-05-04
-20:02 haruka はじめまして。弓ハルカです。弓です
-20:05 mina 弓が増えた
-20:07 haruka 下手ですけど
-20:09 mina 慣れます
+20:02 haruka 久しぶりに入ったら人が増えてた
+20:05 mina 増えた
+20:07 haruka 名前だけでも覚えます
+20:09 mina 助かる
 20:12 slime よろしくお願いします
 2026-09-20
 19:41 slime 自己紹介のテンプレ、変えました？

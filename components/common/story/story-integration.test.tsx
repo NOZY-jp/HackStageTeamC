@@ -1,13 +1,14 @@
-import { render, screen } from "@testing-library/react";
+import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import ContestResultPage from "@/app/(blog-like)/pochiblo/[blogId]/contest/soukyuu-photo-award-2020/page";
 import EntryPage from "@/app/(blog-like)/pochiblo/[blogId]/entry/[entryId]/page";
 import TalkupPage from "@/app/(facebook-like)/talkup/page";
+import { canConfirmTalkup, shouldRecordMatch } from "@/app/(facebook-like)/talkup/reveal";
 import { StoryConsole } from "@/app/(story)/_components/story-console";
 import { FacebookProvider } from "@/components/facebook-like/facebook-context";
 import { PHOTO_CONTEST_BLOG_ID } from "@/lib/seo/contest";
-import { availableBeats, type FlagId } from "@/lib/story";
+import { availableBeats, type FlagId, STORAGE_KEY } from "@/lib/story";
 import { StoryProvider, useStory } from "./story-provider";
 
 const word = (...codePoints: number[]) => String.fromCodePoint(...codePoints);
@@ -27,19 +28,11 @@ function Probe({ onState }: { onState: (flags: FlagId[]) => void }) {
   return null;
 }
 
-/** 進行コンソールの「着いた」を、指定した段階まで順に押す（実UIの操作） */
-async function reachSteps(count: number) {
-  const user = userEvent.setup();
-  for (let i = 0; i < count; i += 1) {
-    const buttons = screen.getAllByRole("button", { name: "着いた" });
-    await user.click(buttons[0]);
-  }
-}
-
 const renderContest = async (onState: (flags: FlagId[]) => void) => {
-  const params = Promise.resolve({ blogId: PHOTO_CONTEST_BLOG_ID });
-  const searchParams = Promise.resolve({});
-  const page = await ContestResultPage({ params, searchParams });
+  const page = await ContestResultPage({
+    params: Promise.resolve({ blogId: PHOTO_CONTEST_BLOG_ID }),
+    searchParams: Promise.resolve({}),
+  });
   return render(
     <StoryProvider>
       <StoryConsole />
@@ -60,70 +53,74 @@ const renderTalkup = (onState: (flags: FlagId[]) => void) =>
     </StoryProvider>,
   );
 
-describe("段階8・10・結末の導線（実ページ経由・フラグ注入なし）", () => {
+const seed = (flags: string[]) =>
+  window.localStorage.setItem(
+    STORAGE_KEY,
+    JSON.stringify({ flags, completed: ["ch5-kai-contact"], choices: {} }),
+  );
+
+describe("段階7・8・10・結末（実ページ経由）", () => {
   beforeEach(() => {
     window.localStorage.clear();
     nav.query = new URLSearchParams();
   });
 
-  it("コンテスト結果ページは、順序7の後だけ本名の確認ボタンを出す", async () => {
+  it("コンテスト結果ページで受賞者を確認すると段階7が立ち、検索への導線が出る", async () => {
     const seen: FlagId[][] = [];
     await renderContest((flags) => seen.push(flags));
 
-    // 順序7より前は出ない
-    expect(screen.queryByRole("button", { name: "この受賞者で間違いない" })).toBeNull();
+    expect(screen.queryByRole("button", { name: "この名前で検索する" })).toBeNull();
+    await userEvent.setup().click(screen.getByRole("button", { name: "受賞者を確認する" }));
 
-    await reachSteps(7);
-    const button = await screen.findByRole("button", { name: "この受賞者で間違いない" });
-    await userEvent.setup().click(button);
-
-    expect(seen.at(-1)).toContain("s08-real-name");
+    await waitFor(() => expect(seen.at(-1)).toContain("s07-contest-entry"));
+    expect(await screen.findByRole("button", { name: "この名前で検索する" })).toBeTruthy();
   });
 
-  it("talkup は、カイの連絡の後かつ本人（u40）が結果にある時だけ確認できる", async () => {
+  it("talkup で本名検索して本人が出ると段階8が立ち、カイの連絡後に確認できる", async () => {
+    seed(["started", "s07-contest-entry"]);
     nav.query = new URLSearchParams({ q: BFF_QUERY });
     const seen: FlagId[][] = [];
     await renderTalkup((flags) => seen.push(flags));
 
-    // 順序9の前は出ない
+    await waitFor(() => expect(seen.at(-1)).toContain("s08-real-name"));
     expect(screen.queryByRole("button", { name: "この人物で間違いない" })).toBeNull();
 
-    // 進行コンソールで段階9まで進める（実UI）
+    // 段階9（カイの連絡）まで進める
     const user = userEvent.setup();
-    const reached = screen.getAllByRole("button", { name: "着いた" });
-    for (let i = 0; i < 9; i += 1) {
+    for (let i = 0; i < 7; i += 1) {
       await user.click(screen.getAllByRole("button", { name: "着いた" })[0]);
     }
-    void reached;
-
     const button = await screen.findByRole("button", { name: "この人物で間違いない" });
     await user.click(button);
-    expect(seen.at(-1)).toContain("s10-talkup-match");
+    await waitFor(() => expect(seen.at(-1)).toContain("s10-talkup-match"));
+  });
+
+  it("受賞者を確認していなければ、検索で本人が出ても段階8は立たない", async () => {
+    seed(["started"]);
+    nav.query = new URLSearchParams({ q: BFF_QUERY });
+    const seen: FlagId[][] = [];
+    await renderTalkup((flags) => seen.push(flags));
+    await waitFor(() => expect(seen.length).toBeGreaterThan(0));
+    expect(seen.at(-1)).not.toContain("s08-real-name");
+    expect(shouldRecordMatch([], ["u40"])).toBe(false);
   });
 
   it("talkup は、検索結果が本人（u40）でなければ確認ボタンを出さない", async () => {
+    seed(["started", "s07-contest-entry", "s08-real-name", "s09-kai-contact"]);
     nav.query = new URLSearchParams({ q: "member01" });
     await renderTalkup(() => {});
-    const user = userEvent.setup();
-    for (let i = 0; i < 9; i += 1) {
-      await user.click(screen.getAllByRole("button", { name: "着いた" })[0]);
-    }
     expect(screen.queryByRole("button", { name: "この人物で間違いない" })).toBeNull();
+    expect(
+      canConfirmTalkup(["s07-contest-entry", "s08-real-name", "s09-kai-contact"], ["u1"]),
+    ).toBe(false);
   });
 
-  it("段階8を飛ばすと結末は解禁されない（進行コンソール経由）", async () => {
-    const seen: FlagId[][] = [];
-    await renderTalkup((flags) => seen.push(flags));
-    const user = userEvent.setup();
-    // 9・10だけ進める（8は押さない）
-    const clickStep = async (index: number) => {
-      await user.click(screen.getAllByRole("button", { name: "着いた" })[index]);
+  it("段階8を飛ばすと結末は解禁されない", () => {
+    const skipped = {
+      flags: ["s07-contest-entry", "s09-kai-contact", "s10-talkup-match"] as FlagId[],
+      completed: ["ch5-kai-contact"],
+      choices: {},
     };
-    await clickStep(8); // s09
-    await clickStep(8); // s10（s09 が消えたぶん繰り上がる）
-    expect(seen.at(-1)).not.toContain("s08-real-name");
-
-    const skipped = { flags: seen.at(-1) ?? [], completed: ["ch5-kai-contact"], choices: {} };
     expect(
       availableBeats(skipped).some((beat) =>
         beat.choices?.some((choice) => choice.label === "住所を特定しました"),
@@ -131,23 +128,14 @@ describe("段階8・10・結末の導線（実ページ経由・フラグ注入�
     ).toBe(false);
   });
 
-  it("talkup は、検索が0件なら確認ボタンを出さない", async () => {
-    nav.query = new URLSearchParams({ q: "zzzznotfound" });
-    await renderTalkup(() => {});
-    const user = userEvent.setup();
-    for (let i = 0; i < 9; i += 1) {
-      await user.click(screen.getAllByRole("button", { name: "着いた" })[0]);
-    }
-    expect(screen.queryByRole("button", { name: "この人物で間違いない" })).toBeNull();
-  });
-
-  it("開発用コンソール無し（本番相当）でも、受賞記事の操作から順序7→8へ進める", async () => {
+  it("開発用コンソール無し（本番相当）でも、受賞記事→結果→確認→検索の順で進める", async () => {
     const seen: FlagId[][] = [];
-    const entryParams = Promise.resolve({ blogId: PHOTO_CONTEST_BLOG_ID, entryId: "e20181117" });
-    const entry = await EntryPage({ params: entryParams, searchParams: Promise.resolve({}) });
-    const resultParams = Promise.resolve({ blogId: PHOTO_CONTEST_BLOG_ID });
+    const entry = await EntryPage({
+      params: Promise.resolve({ blogId: PHOTO_CONTEST_BLOG_ID, entryId: "e20181117" }),
+      searchParams: Promise.resolve({}),
+    });
     const result = await ContestResultPage({
-      params: resultParams,
+      params: Promise.resolve({ blogId: PHOTO_CONTEST_BLOG_ID }),
       searchParams: Promise.resolve({}),
     });
     render(
@@ -158,15 +146,30 @@ describe("段階8・10・結末の導線（実ページ経由・フラグ注入�
       </StoryProvider>,
     );
 
-    // 進行コンソールは描画していない（本番と同じ）
+    // コンソールは描画していない（本番と同じ）
     expect(screen.queryByRole("button", { name: "着いた" })).toBeNull();
-    expect(screen.queryByRole("button", { name: "この受賞者で間違いない" })).toBeNull();
-
+    // 受賞記事から結果ページへは移動だけ（段階7はまだ立たない）
     await userEvent.setup().click(screen.getByRole("button", { name: "結果ページを見る" }));
-    expect(seen.at(-1)).toContain("s07-contest-entry");
+    await waitFor(() => expect(seen.length).toBeGreaterThan(0));
+    expect(seen.at(-1)).not.toContain("s07-contest-entry");
 
-    const reveal = await screen.findByRole("button", { name: "この受賞者で間違いない" });
-    await userEvent.setup().click(reveal);
-    expect(seen.at(-1)).toContain("s08-real-name");
+    await userEvent.setup().click(screen.getByRole("button", { name: "受賞者を確認する" }));
+    await waitFor(() => expect(seen.at(-1)).toContain("s07-contest-entry"));
+    expect(await screen.findByRole("button", { name: "この名前で検索する" })).toBeTruthy();
+
+    // その名前で検索すると段階8が立ち、カイの連絡（段階9）が届く状態になる
+    nav.query = new URLSearchParams({ q: BFF_QUERY });
+    const talkupSeen: FlagId[][] = [];
+    render(
+      <StoryProvider>
+        <FacebookProvider>
+          <TalkupPage />
+        </FacebookProvider>
+        <Probe onState={(flags) => talkupSeen.push(flags)} />
+      </StoryProvider>,
+    );
+    await waitFor(() => expect(talkupSeen.at(-1)).toContain("s08-real-name"));
+    const afterSearch = { flags: talkupSeen.at(-1) ?? [], completed: [], choices: {} };
+    expect(availableBeats(afterSearch).some((beat) => beat.place === "discord:dm-kai")).toBe(true);
   });
 });
