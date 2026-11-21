@@ -2,7 +2,9 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import type { Message } from "@/lib/discord-like/types";
 import { dmThreadPath, isActiveHref } from "@/lib/platform/app-prefix";
+import { useOptionalLocalMessages } from "./local-messages-context";
 
 export type DmThreadItem = {
   id: string;
@@ -11,7 +13,7 @@ export type DmThreadItem = {
   avatarColor: string;
   status: string;
   preview: string;
-  time: string;
+  sentAt: string;
   unread: number;
 };
 
@@ -24,19 +26,33 @@ const STATUS_LABELS: Record<string, string> = {
 
 /**
  * DM 一覧の項目。layout 側に置くため、選択中のスレッドは pathname から決める（#70）。
- * 一覧がチャンネル移動で作り直されないので、ハイライトだけが切り替わる。
+ * 過去ログのプレビューに、DM 本文と同じ Provider から届くメッセージを反映する。
  */
 export function DmThreadList({ threads }: { threads: DmThreadItem[] }) {
   const pathname = usePathname();
+  const localMessages = useOptionalLocalMessages();
 
   return (
     <ul>
       {threads.map((thread) => {
+        let latestMessage: Message | undefined;
+        let latestTimestamp = thread.sentAt ? Date.parse(thread.sentAt) : -Infinity;
+        for (const message of localMessages?.messagesFor(thread.id) ?? []) {
+          const timestamp = Date.parse(message.sentAt);
+          if (!message.system && timestamp >= latestTimestamp) {
+            latestMessage = message;
+            latestTimestamp = timestamp;
+          }
+        }
+        const preview = latestMessage
+          ? latestMessage.body.replace(/\s+/g, " ").slice(0, 80)
+          : thread.preview;
+        const time = (latestMessage?.sentAt ?? thread.sentAt).slice(11, 16);
         const statusLabel = STATUS_LABELS[thread.status] ?? STATUS_LABELS.offline;
         const label = [
           thread.name,
           thread.unread > 0 ? `未読${thread.unread}件` : "",
-          `最新 ${thread.time}`,
+          `最新 ${time}`,
           statusLabel,
         ]
           .filter(Boolean)
@@ -69,7 +85,7 @@ export function DmThreadList({ threads }: { threads: DmThreadItem[] }) {
 
               <span className="dm-text">
                 <span className="dm-name">{thread.name}</span>
-                <span className="dm-preview">{thread.preview}</span>
+                <span className="dm-preview">{preview}</span>
               </span>
 
               <span className="dm-meta">
@@ -78,7 +94,7 @@ export function DmThreadList({ threads }: { threads: DmThreadItem[] }) {
                     {thread.unread > 99 ? "99+" : thread.unread}
                   </span>
                 ) : null}
-                <span className="dm-time">{thread.time}</span>
+                <span className="dm-time">{time}</span>
               </span>
             </Link>
           </li>
