@@ -7,7 +7,13 @@ import { useStory } from "@/components/common/story/story-provider";
 import { dmListPath } from "@/lib/platform/app-prefix";
 import { nextBeat, PLACES, setFlag } from "@/lib/story";
 import type { TitleFeed } from "./feeds";
-import { GAME_SUBTITLE, GAME_TITLE, REPOSITORY_URL, STUDIO_NAME } from "./title-text";
+import {
+  GAME_SUBTITLE,
+  GAME_TITLE,
+  GAME_TITLE_EN,
+  REPOSITORY_URL,
+  STUDIO_NAME,
+} from "./title-text";
 
 /**
  * ゲームの入口。制作のロゴ（Quadrant）をフェードで出してから、タイトル画面にする。
@@ -65,7 +71,10 @@ export function TitleScreen({ feeds }: { feeds: TitleFeed[] }) {
   return (
     <div className="tt-screen" onPointerMove={onPointerMove}>
       <FeedBackground feeds={feeds} />
+      {/* 3枚の画面の色を、夜の海の紺にそろえる */}
+      <div className="tt-grade" aria-hidden="true" />
       <div className="tt-veil" aria-hidden="true" />
+      <Bubbles />
       {phase === "title" ? <TitleContent /> : null}
       {phase === "splash" ? (
         <button type="button" className="tt-splash" onClick={skip} aria-label="ロゴをとばす">
@@ -148,6 +157,7 @@ function TitleContent() {
         <span>最終オンライン 3日前</span>
       </p>
 
+      <p className="tt-kicker">{GAME_TITLE_EN}</p>
       <h1 className="tt-title" aria-label={GAME_TITLE}>
         {/* 打ち終わったときの幅を先に取っておき、打っているあいだ文字が左右に動かないようにする */}
         <span className="tt-title-ghost" aria-hidden="true">
@@ -185,6 +195,41 @@ function TitleContent() {
         </a>
       </footer>
     </main>
+  );
+}
+
+/**
+ * 「電子の海」の泡。小さな光の粒が、ゆっくり昇って消える。
+ * 位置・大きさ・速さは決まった並び（描くたびに変わらない＝サーバーとブラウザで食い違わない）
+ */
+const BUBBLES = Array.from({ length: 26 }, (_, index) => {
+  const pick = (seed: number) => ((index * 9301 + seed * 49297) % 233280) / 233280;
+  return {
+    left: `${Math.round(pick(1) * 100)}%`,
+    size: 2 + Math.round(pick(2) * 4),
+    duration: 14 + Math.round(pick(3) * 16),
+    delay: -Math.round(pick(4) * 30),
+  };
+});
+
+function Bubbles() {
+  return (
+    <div className="tt-bubbles" aria-hidden="true">
+      {BUBBLES.map((bubble, index) => (
+        <span
+          // biome-ignore lint/suspicious/noArrayIndexKey: 固定の並びで、並び替えない
+          key={index}
+          className="tt-bubble"
+          style={{
+            left: bubble.left,
+            width: bubble.size,
+            height: bubble.size,
+            animationDuration: `${bubble.duration}s`,
+            animationDelay: `${bubble.delay}s`,
+          }}
+        />
+      ))}
+    </div>
   );
 }
 

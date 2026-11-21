@@ -2,6 +2,8 @@
 
 /** ゲームのタイトル */
 export const GAME_TITLE = "電子の海から紡ぐ跡";
+/** タイトルの上に小さく添える英字 */
+export const GAME_TITLE_EN = "Traces woven from the electronic sea";
 export const GAME_SUBTITLE = "まだ“好き”に出会えていない誰かへ";
 /** タイトルの前に出す制作のロゴ */
 export const STUDIO_NAME = "Quadrant";

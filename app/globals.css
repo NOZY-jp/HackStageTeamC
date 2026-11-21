@@ -6769,6 +6769,8 @@ a.tw-dm-item:focus-visible {
   /* マウスに合わせてわずかに動く（視差） */
   transform: translate(calc(var(--tt-mx, 0) * -28px), calc(var(--tt-my, 0) * -18px));
   transition: transform 0.8s cubic-bezier(0.2, 0.7, 0.2, 1);
+  /* 3枚を宙に浮いたモニターのように、少し斜めに向ける */
+  perspective: 1800px;
 }
 
 /* 3つの SNS の画面を、少しずつ重ねて並べる（右端の Discord をいちばん手前に） */
@@ -6794,19 +6796,19 @@ a.tw-dm-item:focus-visible {
 .tt-feed[data-platform="talkup"] {
   left: max(-6vw, -90px);
   z-index: 1;
-  transform: rotate(-9deg) scale(0.94);
+  transform: rotateY(22deg) rotateZ(-8deg) scale(0.92);
 }
 
 .tt-feed[data-platform="twixer"] {
   left: calc(50% - min(23vw, 310px));
   z-index: 2;
-  transform: rotate(-5deg) scale(0.94);
+  transform: rotateY(6deg) rotateZ(-5deg) scale(0.94);
 }
 
 .tt-feed[data-platform="discord"] {
   right: max(-10vw, -150px);
   z-index: 3;
-  transform: rotate(-7deg);
+  transform: rotateY(-18deg) rotateZ(-6deg);
 }
 
 /* 奥の2枚は少し暗くして、奥行きを出す */
@@ -6819,9 +6821,9 @@ a.tw-dm-item:focus-visible {
   pointer-events: none;
 }
 
-/* talkup は白い画面なので、ほかより暗くして目を引きすぎないようにする */
+/* talkup は白い画面なので、ほかより少し暗くして目を引きすぎないようにする */
 .tt-feed[data-platform="talkup"]::after {
-  background-color: rgb(6 8 16 / 0.5);
+  background-color: rgb(6 8 16 / 0.48);
 }
 
 .tt-feed-head {
@@ -6928,6 +6930,49 @@ a.tw-dm-item:focus-visible {
   }
 }
 
+/* 色をそろえる：3枚の画面に紺を重ね、夜の海の色味に統一する */
+.tt-grade {
+  position: absolute;
+  z-index: 1;
+  inset: 0;
+  background: linear-gradient(170deg, #12305f, #0a1838 55%, #1d1240);
+  mix-blend-mode: color;
+  opacity: 0.6;
+  pointer-events: none;
+}
+
+/* 「電子の海」の泡：小さな光の粒が、ゆっくり昇って消える */
+.tt-bubbles {
+  position: absolute;
+  z-index: 1;
+  inset: 0;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.tt-bubble {
+  position: absolute;
+  bottom: -12px;
+  border-radius: 50%;
+  background-color: rgb(170 210 255 / 0.55);
+  box-shadow: 0 0 8px rgb(140 190 255 / 0.6);
+  opacity: 0;
+  animation: tt-rise linear infinite;
+}
+
+@keyframes tt-rise {
+  10% {
+    opacity: 0.8;
+  }
+  80% {
+    opacity: 0.5;
+  }
+  100% {
+    transform: translate(18px, -110vh);
+    opacity: 0;
+  }
+}
+
 /* ぼかしと暗幕。真ん中を暗くして文字を読ませ、周りは画面の光のように青く残す。上に薄い粒子 */
 .tt-veil {
   position: absolute;
@@ -6966,6 +7011,25 @@ a.tw-dm-item:focus-visible {
   padding: 24px;
   text-align: center;
   animation: tt-fade-in 1.6s ease-out;
+}
+
+/* タイトルの上の英字。小さく、広い字間で */
+.tt-kicker {
+  margin-bottom: 18px;
+  color: rgb(190 210 240 / 0.55);
+  font-family: system-ui, sans-serif;
+  font-size: clamp(10px, 1vw, 12px);
+  letter-spacing: 0.55em;
+  text-indent: 0.55em;
+  text-transform: uppercase;
+}
+
+@media (max-width: 560px) {
+  .tt-kicker {
+    font-size: 9px;
+    letter-spacing: 0.3em;
+    text-indent: 0.3em;
+  }
 }
 
 .tt-title {
@@ -7245,7 +7309,8 @@ a.tw-dm-item:focus-visible {
   .tt-feed-track,
   .tt-content,
   .tt-caret,
-  .tt-presence-dot {
+  .tt-presence-dot,
+  .tt-bubble {
     animation: none;
   }
 
