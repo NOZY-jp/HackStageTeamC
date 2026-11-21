@@ -190,7 +190,9 @@ describe("MessageSearch", () => {
 
     const profile = await screen.findByRole("button", { name: "hunter_denden" });
     expect(profile).toHaveAttribute("aria-expanded", "false");
-    expect(screen.queryByRole("link", { name: "pochiblo/mylist/k7q2m9d4" })).toBeNull();
+    expect(screen.queryByRole("link", { name: "旧ブログの記事一覧" })).toBeNull();
+    // 名前の時点ではリンクにせず、まず Discord 内のプロフィールを開く（#214）
+    expect(profile.tagName).toBe("BUTTON");
     expect(screen.getByTestId("story-flags").textContent).not.toContain("s05-old-discord-user");
 
     fireEvent.keyDown(screen.getByLabelText("メッセージを検索"), { key: "ArrowDown" });
@@ -201,7 +203,7 @@ describe("MessageSearch", () => {
     expect(screen.getByText("オフライン")).toBeInTheDocument();
     expect(screen.getByTestId("story-flags").textContent).toContain("s05-old-discord-user");
 
-    const link = await screen.findByRole("link", { name: "pochiblo/mylist/k7q2m9d4" });
+    const link = await screen.findByRole("link", { name: "旧ブログの記事一覧" });
     expect(link).toHaveAttribute("href", "/pochiblo/mylist/k7q2m9d4");
     expect(link).not.toHaveAttribute("target");
 
