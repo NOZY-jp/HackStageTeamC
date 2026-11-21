@@ -2360,6 +2360,18 @@ button.tw-tab:focus-visible {
   user-select: none;
 }
 
+.tw-avatar[data-kind="image"] {
+  overflow: hidden;
+  background-color: #e9eef2;
+}
+
+.tw-avatar[data-kind="image"] img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
 .tw-avatar[data-size="sm"] {
   width: 32px;
   height: 32px;
