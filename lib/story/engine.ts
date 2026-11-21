@@ -168,3 +168,16 @@ export function unreadChats(
       !isAtPlace(pathname, CHAT_CHANNELS[chat.channel].place),
   );
 }
+
+/** いま開いた画面のぶんだけを既読にする（通知の既読処理とテストで同じ判定を使う） */
+export function openedChatIds(
+  chats: ChatMessage[],
+  seen: readonly string[],
+  pathname: string,
+): string[] {
+  return chats
+    .filter(
+      (chat) => !seen.includes(chat.id) && isAtPlace(pathname, CHAT_CHANNELS[chat.channel].place),
+    )
+    .map((chat) => chat.id);
+}

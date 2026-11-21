@@ -680,6 +680,8 @@ describe("会話の多様性と文章（main から戻した検査）", () => {
   it("同じ本文が3通続かない（募集文のコピー防止）", () => {
     for (const [channelId, list] of Object.entries(staticChannelMessages)) {
       for (let i = 2; i < list.length; i += 1) {
+        // 写真だけの投稿（本文が空）は同じ本文の連続に数えない
+        if (list[i].body.trim() === "" && (list[i].attachments?.length ?? 0) > 0) continue;
         const same = list[i].body === list[i - 1].body && list[i].body === list[i - 2].body;
         expect(same, `${channelId} ${list[i].id}`).toBe(false);
       }

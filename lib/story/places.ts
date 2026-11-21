@@ -58,8 +58,25 @@ export const PLACES = {
 
 export type PlaceId = keyof typeof PLACES;
 
+/**
+ * URL の表記ゆれを1か所でそろえる（#190）。
+ * 動的セグメントは `@me` が `%40me` のまま渡ることがあり、末尾スラッシュや大文字小文字でも
+ * 同じ画面かどうかの判定が割れる。デコードしてから比較する。
+ */
+export function normalizePathname(pathname: string): string {
+  let decoded = pathname;
+  try {
+    decoded = decodeURIComponent(pathname);
+  } catch {
+    // 壊れた % はそのまま比べる（判定できないだけで、落とさない）
+  }
+  return decoded.replace(/\/+$/, "").toLowerCase();
+}
+
 function startsWithPath(pathname: string, prefix: string): boolean {
-  return pathname === prefix || pathname.startsWith(prefix.endsWith("/") ? prefix : `${prefix}/`);
+  const path = normalizePathname(pathname);
+  const base = normalizePathname(prefix);
+  return path === base || path.startsWith(`${base}/`);
 }
 
 /** いま開いている URL が、その画面か */
