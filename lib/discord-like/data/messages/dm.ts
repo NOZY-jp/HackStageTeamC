@@ -3045,4 +3045,43 @@ export const messagesByDMThread: Record<string, Message[]> = {
       body: "おやすみ",
     },
   ],
+  // カイとの DM（調査の進捗と結末は公開チャンネルに出さない・#121）
+  "dm-kai": [
+    {
+      id: "dm-kai-0001",
+      channelId: "dm-kai",
+      authorId: "kai",
+      sentAt: "2026-11-18T20:12:00+09:00",
+      body: "例の件、どこまで進んだ？",
+    },
+    {
+      id: "dm-kai-0002",
+      channelId: "dm-kai",
+      authorId: "hal",
+      sentAt: "2026-11-18T20:20:00+09:00",
+      body: "あと少し。また報告する",
+    },
+    {
+      id: "dm-kai-0003",
+      channelId: "dm-kai",
+      authorId: "kai",
+      sentAt: "2026-11-18T20:24:00+09:00",
+      body: "FaceBookだと本名で検索したら結構出てくるぞ？",
+    },
+    {
+      id: "dm-kai-0004",
+      channelId: "dm-kai",
+      authorId: "hal",
+      sentAt: "2026-11-18T20:27:00+09:00",
+      body: "本名で検索、やってみる",
+    },
+    {
+      // 結末の報告はカイではなくリョウ（カイは黒幕なので結末を宣言しない・#121）
+      id: "dm-kai-0005",
+      channelId: "dm-kai",
+      authorId: "hal",
+      sentAt: "2026-11-19T23:52:00+09:00",
+      body: "住所を特定しました",
+    },
+  ],
 };
