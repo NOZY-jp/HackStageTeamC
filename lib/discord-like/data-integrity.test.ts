@@ -444,7 +444,7 @@ describe("名前の差し替え（#76 の確定値）", () => {
 
 describe("メンバー一覧", () => {
   it("一覧にオフラインの旧垢が居て、プロフィールは記事一覧URL", () => {
-    const members = listMemberViews();
+    const members = listMemberViews(GUILD_ID);
     const old = members.find((member) => member.handle === OLD_HANDLE);
     expect(old).toBeDefined();
     expect(old?.status).toBe("offline");

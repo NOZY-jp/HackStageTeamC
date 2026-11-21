@@ -76,7 +76,10 @@ export function RightSidebar({ hideSearch = false }: { hideSearch?: boolean }) {
           さらに表示
         </span>
       </section>
-      <p className="tw-footer">Twixer デモ画面 · データはすべて架空です</p>
+      <p className="tw-footer">
+        利用規約 · プライバシーポリシー · Cookie のポリシー · アクセシビリティ · 広告情報 · © 2026
+        Twixer
+      </p>
     </aside>
   );
 }

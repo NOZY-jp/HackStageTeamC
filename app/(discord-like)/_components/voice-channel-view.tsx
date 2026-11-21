@@ -1,7 +1,7 @@
 "use client";
 
 import { usePathname } from "next/navigation";
-import { useEffect, useRef } from "react";
+import { useCallback, useEffect, useRef } from "react";
 import { useStoryVoice } from "@/components/common/story/story-provider";
 import { PaneToggles } from "@/components/discord-like/pane-toggles";
 import { getUser } from "@/lib/discord-like";
@@ -87,7 +87,7 @@ export function VoiceChannelView({
   /** サーバーVCの直近通話（分）。VoiceSession から渡す（#150） */
   lastSessionMinutes?: number;
 }) {
-  const { connection, lastCall, leftChannelId, join, leave, toggleMute, toggleDeafen } = useVoice();
+  const { connection, lastCall, join, leave, toggleMute, toggleDeafen } = useVoice();
   const localMessages = useOptionalLocalMessages();
   const joined = connection?.channelId === channelId;
   const muted = joined ? connection.muted : false;
@@ -114,16 +114,14 @@ export function VoiceChannelView({
   const pathname = usePathname();
   const active = pathname === guildChannelPath(guildUrlId, channelUrlId);
 
-  // このチャンネルに入ったら自動参加する。
-  // 「一度処理したか」ではなく実際の接続状態で判定するので、
-  // 往復で戻ってきたとき（route cache で裏に残っていた場合）も参加し直せる。
-  // ユーザーがこのチャンネルで「切断」したときだけ抑止する（印は context 側で管理）。
-  useEffect(() => {
-    if (!active || connection?.channelId === channelId || leftChannelId === channelId) {
-      return;
-    }
+  const joinChannel = useCallback(() => {
     join({ guildId, channelId, channelName });
-  }, [active, channelId, channelName, connection?.channelId, guildId, join, leftChannelId]);
+  }, [channelId, channelName, guildId, join]);
+
+  // 画面への入場をきっかけに自動参加する。切断で接続状態だけが変わっても再参加しない。
+  useEffect(() => {
+    if (active) joinChannel();
+  }, [active, joinChannel]);
 
   // 自分（1人でも破綻しないよう、参加者タイルに必ず入れる）
   const selfTile: VoiceParticipant = {
@@ -135,6 +133,8 @@ export function VoiceChannelView({
     deafened,
   };
   const tiles = joined ? [...shown, selfTile] : shown;
+  const previousCallMinutes =
+    lastCall?.channelId === channelId ? lastCall.minutes : lastSessionMinutes;
 
   return (
     <main id="app-main" className="app-main" aria-label={channelName}>
@@ -159,37 +159,44 @@ export function VoiceChannelView({
       </header>
 
       <div className="pane-scroll voice-body">
-        {!joined && (lastCall?.channelId === channelId || lastSessionMinutes !== undefined) ? (
-          <p className="voice-last-call" data-testid="voice-last-call">
-            前回の通話: {lastCall?.channelId === channelId ? lastCall.minutes : lastSessionMinutes}
-            分
-          </p>
+        {!joined ? (
+          <div className="voice-actions">
+            <button
+              type="button"
+              className="voice-button voice-button-primary"
+              onClick={joinChannel}
+            >
+              通話に参加
+            </button>
+            {previousCallMinutes !== undefined ? (
+              <p className="voice-last-call" data-testid="voice-last-call">
+                前回の通話: {previousCallMinutes}分
+              </p>
+            ) : null}
+          </div>
         ) : null}
-        {tiles.length === 0 && !joined ? (
-          <EmptyState
-            kind="voice"
-            title="参加者はいません"
-            description="まだ誰も接続していません。"
+        {tiles.length > 0 ? (
+          <CallStage
+            title={channelName}
+            subtitle={
+              !joined
+                ? undefined
+                : tiles.length > 1
+                  ? `${tiles.length}人が参加中`
+                  : "ひとりで接続しています"
+            }
+            joined={joined}
+            muted={muted}
+            deafened={deafened}
+            participants={tiles}
+            onToggleMute={toggleMute}
+            onToggleDeafen={toggleDeafen}
+            onLeave={leave}
+            startedAt={joined ? connection?.joinedAt : undefined}
           />
-        ) : null}
-        <CallStage
-          title={channelName}
-          subtitle={
-            !joined
-              ? undefined
-              : tiles.length > 1
-                ? `${tiles.length}人が参加中`
-                : "ひとりで接続しています"
-          }
-          joined={joined}
-          muted={muted}
-          deafened={deafened}
-          participants={tiles}
-          onToggleMute={toggleMute}
-          onToggleDeafen={toggleDeafen}
-          onLeave={leave}
-          startedAt={joined ? connection?.joinedAt : undefined}
-        />
+        ) : (
+          <EmptyState kind="voice" title="参加者はいません" />
+        )}
       </div>
     </main>
   );

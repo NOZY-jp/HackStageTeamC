@@ -139,7 +139,7 @@ async function GuildChannel({
     notFound();
   }
 
-  const members = listMemberViews();
+  const members = listMemberViews(guild.id);
   // 検索からジャンプしてきたときは、そのメッセージを含むところまで遡って表示する
   const focused = focusMessageId
     ? loadUntil({ channelId: channel.id, messageId: focusMessageId })

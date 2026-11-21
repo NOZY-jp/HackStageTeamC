@@ -25,7 +25,7 @@
 
 ### 共通の型
 
-- `Guild` 型は既存のまま（`categories` / `channels` / `iconColor` / `initials`）。**型の追加はしない**
+- `Guild` 型は既存のまま（`categories` / `channels` / `iconColor` / `initials`）。**型の追加はしない**（#163 でサーバーごとの `memberIds` を後から追加）
 - `urlId` は17〜19桁の数値風文字列で**グローバル一意**（`guilds.ts` の連番を踏襲: `1187002356428840961` 系の次の空き帯）
 - 並びは定義順（`Guild` に `position` は無い）。サーバーレールは 3つ表示
 
