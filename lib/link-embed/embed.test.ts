@@ -39,6 +39,18 @@ describe("normalizeAppPath（作中ドメイン→アプリ内パス）", () => 
   ])("%s → %s", (candidate, expected) => {
     expect(normalizeAppPath(candidate)).toBe(expected);
   });
+
+  it("外部サイトのURLはパスを見ない（同一オリジンだけ拾う）", () => {
+    // アプリ内ルートと同じパスでも、外部ホストなら undefined
+    expect(normalizeAppPath("https://example.com/twitter/post/post-101")).toBeUndefined();
+    // このアプリ自身のURLをそのまま貼った場合だけパスを見る
+    expect(normalizeAppPath("https://app.local/twitter/post/post-101", "app.local")).toBe(
+      "/twitter/post/post-101",
+    );
+    expect(
+      normalizeAppPath("https://app.local:3000/twitter/post/post-101", "app.local"),
+    ).toBeUndefined();
+  });
 });
 
 describe("resolveLinkEmbeds", () => {
@@ -78,12 +90,38 @@ describe("resolveLinkEmbeds", () => {
     const embeds = resolveLinkEmbeds("https://discord.com/channels/@me/1187002356428841502");
     expect(embeds[0]).toMatchObject({ siteName: "Discord" });
     expect(embeds[0]?.title).toContain("DM");
+
+    const channel = resolveLinkEmbeds(
+      "https://discord.com/channels/1187002356428840961/1187002356428840963",
+    );
+    expect(channel[0]).toMatchObject({ siteName: "モンハンコミュニティ", title: "#雑談" });
+  });
+
+  it("別サーバーのチャンネルIDを組み合わせたリンクはカードにしない（ページ側と同じ解決）", () => {
+    // 大学サーバーのURLに、モンハンコミュニティのチャンネルIDを載せた不整合なリンク
+    expect(
+      resolveLinkEmbeds("https://discord.com/channels/1187002356428840981/1187002356428840963"),
+    ).toEqual([]);
+    // 逆方向（存在するサーバー＋別サーバーのチャンネル）も同じ
+    expect(
+      resolveLinkEmbeds("/discord.com/channels/1187002356428840961/1187002356428840982"),
+    ).toEqual([]);
   });
 
   it("外部のURL・存在しないページはカードにしない（本文のまま）", () => {
     expect(resolveLinkEmbeds("https://example.com/mhc/gear-notes")).toEqual([]);
+    // アプリ内ルートと同じパスを持つ外部URLもカードにしない
+    expect(resolveLinkEmbeds("https://example.com/twitter/post/post-101")).toEqual([]);
     expect(resolveLinkEmbeds("/twitter/post/no-such-post")).toEqual([]);
     expect(resolveLinkEmbeds("twixer.com/mai2mai2/status/no-such")).toEqual([]);
+  });
+
+  it("同一オリジンのURLはカードになる（デプロイ先のURLをそのまま貼った場合）", () => {
+    const embeds = resolveLinkEmbeds(
+      "https://hack-stage-team-c.vercel.app/twitter/post/post-101",
+      "hack-stage-team-c.vercel.app",
+    );
+    expect(embeds[0]?.href).toBe("/twitter/post/post-101");
   });
 
   it("同じリンク先は1件だけ。複数あれば本文の順で出す", () => {

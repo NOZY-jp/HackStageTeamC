@@ -27,7 +27,12 @@ import {
   setFlag,
   transcript,
 } from "./engine";
-import { MAIMAI_DM_URL_ID, MHC_GUILD_URL_ID, NIGHT_VC_URL_ID } from "./places";
+import {
+  BLOG_TALK_MESSAGE_ID,
+  MAIMAI_DM_URL_ID,
+  MHC_GUILD_URL_ID,
+  NIGHT_VC_URL_ID,
+} from "./places";
 import { STORY_NOW } from "./scenario/kai-contact";
 import { OLD_BLOG_ID } from "./sites";
 import { VOICE_CHANNELS } from "./stage";
@@ -64,6 +69,12 @@ describe("進行チェック（各プラットフォームのデータに手が�
       (message) => message.authorId === "maimai" && message.body.includes("攻略ブログ"),
     );
     expect(talk.length).toBeGreaterThan(0);
+  });
+
+  it("段階1の合図に使うメッセージIDは、MaiMai の「攻略ブログ」の発言そのもの", () => {
+    const message = (dmMessages["dm-maimai"] ?? []).find(({ id }) => id === BLOG_TALK_MESSAGE_ID);
+    expect(message?.authorId).toBe("maimai");
+    expect(message?.body).toContain("攻略ブログ");
   });
 
   it("段階2の導線（#172）: 段階1のあと、カイとのDMに公開Twixer投稿のURLが届く", () => {

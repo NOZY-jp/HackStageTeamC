@@ -10,6 +10,12 @@ import { APP_PREFIX, dmListPath, dmThreadPath, guildChannelPath } from "@/lib/pl
  */
 export const MAIMAI_DM_URL_ID = "1187002356428841501";
 export const KAI_DM_URL_ID = "1187002356428841502";
+/**
+ * 段階1の手がかりになるメッセージ（MaiMai が「攻略ブログまで書いてた」と話す発言）。
+ * このメッセージが画面に見えた＝プレイヤーが確認した、として s01-blog-talk を立てる。
+ * ID は lib/discord-like/data/messages/dm.ts と同じ値（progression.test.ts で突き合わせる）。
+ */
+export const BLOG_TALK_MESSAGE_ID = "dm-maimai-0060";
 /** モンハンコミュニティ（サーバー）と、そのボイスチャンネル「深夜の集会」 */
 export const MHC_GUILD_URL_ID = "1187002356428840961";
 export const NIGHT_VC_URL_ID = "1187002356428840973";

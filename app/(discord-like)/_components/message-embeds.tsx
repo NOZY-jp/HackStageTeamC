@@ -20,7 +20,8 @@ export function MessageEmbeds({ body }: { body: string }) {
   useEffect(() => {
     if (!hasCandidate) return;
     let cancelled = false;
-    fetchLinkEmbeds(body)
+    // 同一オリジン（このアプリのURLをそのまま貼った場合）もカードにするため、いまのホストを渡す
+    fetchLinkEmbeds(body, window.location.host)
       .then((found) => {
         if (!cancelled) setEmbeds(found);
       })

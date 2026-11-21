@@ -6,12 +6,8 @@ import {
   getMylist,
   listMylistEntries,
 } from "@/lib/blog-like";
-import {
-  getChannelByUrlId,
-  getDMThreadByUrlId,
-  getGuildByUrlId,
-  getUser,
-} from "@/lib/discord-like";
+import { getChannel, getDMThread, getGuild, getUser } from "@/lib/discord-like";
+import { resolveChannelRoute } from "@/lib/discord-like/route-resolution";
 import {
   getPostById as getFbPostById,
   getUserByHandle as getFbUserByHandle,
@@ -52,10 +48,10 @@ const ACCENT = {
  * 本文に出たURL候補をアプリ内パスに正規化する。
  * - "/..." のアプリ内パス → そのまま
  * - 作中ドメイン（twixer.com / leaf.jp / pochiblo.jp / discord.com）→ 対応するアプリ内パス
- * - それ以外の http(s) URL → パス部分だけ見る（このアプリのデプロイURLをそのまま貼った場合を拾うため。
- *   パスがアプリ内ルートに当たらなければ後続の解決で弾かれる）
+ * - それ以外の http(s) URL → 同一オリジン（selfHost = このアプリのデプロイURLをそのまま貼った場合）だけ
+ *   パス部分を見る。外部サイトがたまたまアプリ内ルートと同じパスを持っていてもカードにしない。
  */
-export function normalizeAppPath(candidate: string): string | undefined {
+export function normalizeAppPath(candidate: string, selfHost?: string): string | undefined {
   const strip = (path: string) => path.replace(/\/+$/, "") || "/";
   if (candidate.startsWith("/")) return strip(candidate);
   // twixer.com / leaf.jp は blog-like/url.ts が作中URL→アプリ内パスの対応を持っている
@@ -74,7 +70,7 @@ export function normalizeAppPath(candidate: string): string | undefined {
     case APP_PREFIX:
       return `/${APP_PREFIX}${path === "/" ? "" : path}`;
     default:
-      return path;
+      return selfHost && url.host.toLowerCase() === selfHost.toLowerCase() ? path : undefined;
   }
 }
 
@@ -232,11 +228,14 @@ const DISCORD_SELF_ID = "hal";
 
 function resolveDiscord(path: string): LinkEmbed | undefined {
   const base = `\\/${APP_PREFIX}\\/channels`;
-  const dm = new RegExp(`^${base}\\/@me\\/([\\w-]+)$`).exec(path);
-  if (dm) {
-    const thread = getDMThreadByUrlId(dm[1]);
-    if (!thread) return undefined;
-    const partnerId = thread.participantIds.find((id) => id !== DISCORD_SELF_ID);
+  const match = new RegExp(`^${base}\\/([^/]+)\\/([^/]+)$`).exec(path);
+  if (!match) return undefined;
+  // ページ側と同じ解決に揃える（@me → DM、サーバー → そのサーバーに属するチャンネルだけ。
+  // 別サーバーのチャンネルIDや実在しない組み合わせはカードにしない）
+  const route = resolveChannelRoute(match[1], match[2]);
+  if (route.kind === "dm") {
+    const thread = getDMThread(route.threadId);
+    const partnerId = thread?.participantIds.find((id) => id !== DISCORD_SELF_ID);
     const partner = partnerId ? getUser(partnerId) : undefined;
     return {
       href: path,
@@ -245,10 +244,9 @@ function resolveDiscord(path: string): LinkEmbed | undefined {
       accentColor: ACCENT.discord,
     };
   }
-  const channel = new RegExp(`^${base}\\/(\\w+)\\/([\\w-]+)$`).exec(path);
-  if (channel) {
-    const guild = getGuildByUrlId(channel[1]);
-    const target = getChannelByUrlId(channel[2]);
+  if (route.kind === "channel") {
+    const guild = getGuild(route.guildId);
+    const target = getChannel(route.channelId);
     if (!guild || !target) return undefined;
     return {
       href: path,
@@ -276,12 +274,13 @@ const ROUTE_RESOLVERS: ((path: string) => LinkEmbed | undefined)[] = [
 /**
  * 本文中のURLのうちアプリ内ページに解決できたもののカード情報。
  * 本文に出た順に、同じリンク先は1件だけ。上限は Discord と同じく少数に絞る。
+ * selfHost は同一オリジン判定に使うこのアプリのホスト（クライアントの location.host）。
  */
-export function resolveLinkEmbeds(body: string, limit = 3): LinkEmbed[] {
+export function resolveLinkEmbeds(body: string, selfHost?: string, limit = 3): LinkEmbed[] {
   const embeds: LinkEmbed[] = [];
   const seen = new Set<string>();
   for (const candidate of extractLinkCandidates(body)) {
-    const path = normalizeAppPath(candidate);
+    const path = normalizeAppPath(candidate, selfHost);
     if (!path) continue;
     for (const resolve of ROUTE_RESOLVERS) {
       const embed = resolve(path);
