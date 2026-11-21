@@ -1,5 +1,5 @@
 import { characters } from "../characters";
-import { hideWindow, narrate, think, title } from "../stage";
+import { chat, hideWindow, narrate, think, title } from "../stage";
 import type { Beat } from "../types";
 import { kaiDm } from "./kai-dm";
 
@@ -27,19 +27,21 @@ export const chapter4: Beat[] = [
       kaiDm(
         "ryo",
         "ここまでしか調べられなくて、ここから更に深掘りできないものかと考えてる",
-        "2026-11-26T21:00:00+09:00",
+        "2026-11-25T23:35:00+09:00",
       ),
       kaiDm(
         "kai",
         "なるほど……前のアカウントなら、ゲーマーコミュニティーのサーバーでID検索してみるとかはどうだろうね",
-        "2026-11-26T21:01:00+09:00",
+        "2026-11-25T23:36:00+09:00",
       ),
       kaiDm(
         "ryo",
         "確かにコミュニティーで良くパーティー募集しているし、ひょっとしたら見つけれるかも",
-        "2026-11-26T21:02:00+09:00",
+        "2026-11-25T23:37:00+09:00",
       ),
-      kaiDm("ryo", "ありがとう、その線で探してみる", "2026-11-26T21:02:30+09:00"),
+      chat("discord:dm-kai", "ryo", "ありがとう、その線で探してみる", "2026-11-25T23:37:30+09:00", {
+        wait: 3000,
+      }),
     ],
   },
   {
