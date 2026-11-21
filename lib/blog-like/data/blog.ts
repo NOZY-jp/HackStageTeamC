@@ -413,7 +413,7 @@ export const entries: Entry[] = [
         id: "c-e20181117-5",
         authorName: "夜更かしハンター",
         postedAt: "2018-11-24T00:33:00+09:00",
-        body: "遅れましたが受賞おめでとう！ 川面のオレンジ、ずっと見てられる",
+        body: "遅れましたが受賞おめでとう！ ビルのあいだのオレンジ、ずっと見てられる",
       },
       {
         id: "c-e20181117-6",
@@ -437,7 +437,7 @@ export const entries: Entry[] = [
         id: "c-e20181117-9",
         authorName: "ガンナー見習い",
         postedAt: "2018-12-10T22:19:00+09:00",
-        body: "受賞おめでとうございます。橋の向こうの夕日、いい構図ですね",
+        body: "受賞おめでとうございます。鳩と同じ目線で撮ってるの、いい構図ですね",
       },
     ],
     visibility: "unlisted",
@@ -452,8 +452,8 @@ export const entries: Entry[] = [
       },
       {
         kind: "image",
-        src: "/blog-like/photos/contest-photo.svg",
-        alt: "夕方の川沿い。橋の向こうに沈む夕日と、川面に映るオレンジの光",
+        src: "/blog-like/photos/contest-photo.webp",
+        alt: "夕方のビル街。ビルのあいだに沈む夕日と、歩道の縁石にとまる一羽の鳩",
         width: 1200,
         height: 800,
         caption: "賞をもらった写真です。タイトルは「帰り道」",
