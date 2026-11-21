@@ -1,6 +1,6 @@
 import Link from "next/link";
 import type { ReactNode } from "react";
-import { isProtected } from "@/lib/twitter-like";
+import { isProtected, listFollowingIds, TWITTER_ME_ID } from "@/lib/twitter-like";
 import type { Profile, TwitterUser } from "@/lib/twitter-like/types";
 import { Avatar } from "./avatar";
 import { formatCount, formatJoinedAt } from "./format";
@@ -36,6 +36,8 @@ export function ProfileShell({
 }) {
   const base = `/twitter/profile/${user.handle}`;
   const locked = isProtected(user);
+  const following = listFollowingIds(TWITTER_ME_ID).includes(user.id);
+  const action = following ? "フォロー中" : "フォロー";
   return (
     <>
       <PageHeader
@@ -51,8 +53,13 @@ export function ProfileShell({
           aria-hidden="true"
         />
         <div className="tw-profile-body">
-          <div className="tw-profile-avatar">
-            <Avatar user={user} size="xl" />
+          <div className="tw-profile-heading">
+            <div className="tw-profile-avatar">
+              <Avatar user={user} size="xl" />
+            </div>
+            <button type="button" className="tw-follow-button tw-profile-action" disabled>
+              {user.id === TWITTER_ME_ID ? "プロフィールを編集" : action}
+            </button>
           </div>
           <h2 className="tw-profile-name">
             {user.displayName}

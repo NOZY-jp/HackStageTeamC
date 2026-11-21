@@ -2219,6 +2219,10 @@ a.tw-account:focus-visible {
   width: 100%;
 }
 
+.tw-search-tabs {
+  border-bottom: var(--pane-border) solid var(--tw-border);
+}
+
 .tw-tab {
   flex: 1;
   display: flex;
@@ -2652,9 +2656,24 @@ a.tw-time:hover {
   padding: 12px 16px 16px;
 }
 
+.tw-profile-heading {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
 .tw-profile-avatar {
   margin-top: -68px;
-  margin-bottom: 12px;
+}
+
+.tw-follow-button.tw-profile-action {
+  height: auto;
+  min-height: 36px;
+  max-width: 100%;
+  margin-inline-start: auto;
+  font-size: 15px;
 }
 
 .tw-profile-name {
