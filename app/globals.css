@@ -7968,7 +7968,8 @@ article div[class~="justify-between"][class~="text-xs"] > div {
 .sp-photo-image {
   width: auto;
   height: auto;
-  max-width: 100%;
-  max-height: 100%;
+  /* 画面の60〜80%程度に収め、周囲にゲーム画面を見せる（#226/#237） */
+  max-width: min(70%, 960px);
+  max-height: 70%;
   object-fit: contain;
 }
