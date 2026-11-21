@@ -12,6 +12,8 @@ export const twitterUsers: TwitterUser[] = [
   { id: "tw-mai", displayName: "Mai", handle: "mai2mai2", avatarColor: "#c2417c" },
   { id: "tw-sou", displayName: "ソウ", handle: "kaiser018023071", avatarColor: "#b86a1f" },
   { id: "tw-kanon", displayName: "かのん", handle: "kanon__dayo", avatarColor: "#c2563f" },
+  // まいのリア友とみられる人物（post-102 の返信者）。名前は #76 未確定。表示名・handle は仮決め
+  { id: "tw-tomo", displayName: "とも", handle: "tomo-0718", avatarColor: "#4e8a5c" },
   // 古いアカウント。改名して鍵垢になった（旧 @hunter_denden0102 → 現 @maimai_mhw）
   {
     id: "tw-old-denden",
@@ -62,14 +64,22 @@ export const twitterProfiles: Profile[] = [
     followingCount: 120,
     followersCount: 98,
   },
+  {
+    // プロフィール画面が profile を必須にするので最小だけ置く
+    userId: "tw-tomo",
+    bio: "たわごと。",
+    joinedAt: "2019-03-21",
+    followingCount: 42,
+    followersCount: 35,
+  },
 ];
 
 /**
  * フォロー関係（見る側の user id → フォローしている user id の一覧）。
  * ホームのタイムラインとおすすめユーザーの母集団に使う。
  * リョウ（tw-hal）がこの SNS で知っているのはゲーム仲間の Mai とソウだけ。
- * かのんはまだ知らないのでフォローしていない — 旧アカウントの bio の
- * 「BFF: @kanon__dayo」から見つけるのが筋書き。
+ * かのんも、まいのリア友とみられる人物もまだ知らないのでフォローしていない
+ * — かのんは旧アカウントの bio の「BFF: @kanon__dayo」から見つけるのが筋書き。
  */
 export const twitterFollows: Record<string, string[]> = {
   "tw-hal": ["tw-mai", "tw-sou"],
@@ -235,7 +245,7 @@ export const twitterPosts: Post[] = [
     repostCount: 6,
     likeCount: 83,
   },
-  // 2019年の攻略投稿と、リア友かのんの「ブログにも書いてたよな」リプライ
+  // 2019年の攻略投稿と、リア友とみられる人物の「ブログにも書いてたよな」リプライ
   {
     id: "post-101",
     authorId: "tw-mai",
@@ -247,7 +257,7 @@ export const twitterPosts: Post[] = [
   },
   {
     id: "post-102",
-    authorId: "tw-kanon",
+    authorId: "tw-tomo",
     postedAt: "2019-09-09T21:40:00+09:00",
     body: "それ、前にブログにも書いてたよな。読んでたよ。",
     replyToId: "post-101",

@@ -59,9 +59,9 @@ describe("ホームのタイムライン（listHomePosts）", () => {
     expect(times).toEqual([...times].sort().reverse());
   });
 
-  it("かのんの投稿と開設前の古い投稿はホームに出ないが他の面からは辿れる", () => {
+  it("フォローしていない人の投稿と開設前の古い投稿はホームに出ないが他の面からは辿れる", () => {
     const ids = listHomePosts(TWITTER_ME_ID).map((post) => post.id);
-    // かのんの投稿（フォローしていないので出ない）
+    // フォローしていない人の投稿（リア友の返信・かのんの投稿）は出ない
     expect(ids).not.toContain("post-102");
     expect(ids).not.toContain("post-103");
     expect(ids).not.toContain("post-104");
