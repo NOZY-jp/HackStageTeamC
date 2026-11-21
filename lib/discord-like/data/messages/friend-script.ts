@@ -14,7 +14,7 @@ export const friendScript = readConversationScripts({
 22:07:53 miyu 私は普通
 22:09:53 taku 普通じゃない
 2025-12-06
-19:31 jun 忘年会どうする
+19:31 jun 今年の忘年会どうする？そろそろ店取らんと埋まるぞ
 19:34 taku やる
 19:36 miyu いつ
 19:38 taku 20日
@@ -31,8 +31,8 @@ export const friendScript = readConversationScripts({
 22:17 taku それ俺のカメラ
 22:19 nao だから何
 2026-01-04
-15:31 yuuto 今年バドやらない？
-15:34 jun やる
+15:31 yuuto 明けおめ〜 今年も体育館借りてバドやらない？
+15:34 jun おっいいね！やるやる
 15:36 yuuto 体育館取れたら連絡する
 15:38 jun 取れなかったら
 15:40 yuuto そのとき考える
