@@ -357,10 +357,10 @@ export const twitterPosts: Post[] = [
     likeCount: 28,
     media: [
       {
-        src: "/twitter-like/photo-01.svg",
-        alt: "制服姿で並ぶ二人。左は黒髪のボブ、右は茶髪のロングが本人",
-        width: 800,
-        height: 600,
+        src: "/blog-like/photos/graduation.webp",
+        alt: "卒業式で肩を寄せて笑う二人。左は橙髪、右は黒髪のボブ",
+        width: 1200,
+        height: 800,
       },
       {
         src: "/twitter-like/photo-02.svg",

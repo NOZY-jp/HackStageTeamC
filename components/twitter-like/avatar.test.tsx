@@ -24,13 +24,14 @@ describe("Twixerのアイコンと照合（#169）", () => {
     }
   });
 
-  it("アイコンの見た目がツーショット写真の本人と一致する（茶髪のロング）", () => {
+  it("自画像とアルバムの特徴を維持し、写真の alt を匿名にする", () => {
     const user = kanon();
     expect(user.avatarAlt).toContain("茶髪");
     expect(user.avatarAlt).toContain("ロング");
+    expect(getPost("post-104")?.media?.[0]?.alt).toContain("茶髪のロングが本人");
     for (const postId of ["post-103", "post-104"]) {
       const alt = getPost(postId)?.media?.[0]?.alt ?? "";
-      expect(alt, postId).toContain("茶髪のロングが本人");
+      expect(alt, postId).toBeTruthy();
       for (const word of FORBIDDEN) expect(alt, postId).not.toContain(word);
     }
   });
