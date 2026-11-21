@@ -2,7 +2,7 @@ import { GAME_NOW } from "../../platform/game-time";
 import { chat, think } from "../stage";
 import type { Beat } from "../types";
 
-/** ゲーム開始時点（定義は discord-like のデータ側に1か所だけ）。 */
+/** ゲーム開始時点（定義は lib/platform/game-time.ts に1か所だけ）。 */
 export const STORY_NOW = GAME_NOW;
 
 const channel = "discord:dm-kai";
