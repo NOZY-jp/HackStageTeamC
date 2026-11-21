@@ -167,7 +167,7 @@ describe("共有を止めた後の通常表示", () => {
       /(^|\n)\.call-tiles\[data-layout="dm"\] \.call-tile:first-child \.call-tile-avatar \{[^}]*width: 56px/,
     );
     expect(css).toMatch(
-      /\.call-stage\[data-sharing="true"\] \.call-tiles\[data-layout="dm"\] \.call-tile:first-child \.call-tile-avatar \{[^}]*width: 56px/,
+      /\.call-stage\[data-sharing="true"\]\s+\.call-tiles\[data-layout="dm"\]\s+\.call-tile:first-child\s+\.call-tile-avatar \{[^}]*width: 56px/,
     );
     // 通常時は clamp(160px…) が残っている
     expect(css).toMatch(
