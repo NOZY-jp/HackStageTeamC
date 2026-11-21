@@ -13,6 +13,11 @@ export type Asset = {
   color: string;
   /** 画像を使わない、ただの色の背景（暗転など）。仮の板の名前を出さない */
   solid?: boolean;
+  /**
+   * 画像の収め方。既定は cover（画面いっぱい）。写真を見せる場面は contain にして、
+   * 画面を覆わず、縦横比を保ったまま中央に収める（#226）。
+   */
+  fit?: "cover" | "contain";
 };
 
 export const BACKGROUNDS = {
@@ -33,11 +38,13 @@ export const BACKGROUNDS = {
     label: "地元の洋菓子店",
     src: "/story/backgrounds/sweets-shop.webp",
     color: "#a9825f",
+    fit: "contain",
   },
   "manhole-street": {
     label: "マンホールのある住宅街",
     src: "/story/backgrounds/manhole-street.webp",
     color: "#7d6a78",
+    fit: "contain",
   },
   cafe: { label: "喫茶店", color: "#a9825f" },
   street: { label: "住宅街", color: "#7d8a74" },

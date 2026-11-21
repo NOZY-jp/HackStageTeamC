@@ -8066,3 +8066,19 @@ article div[class~="justify-between"][class~="text-xs"] > div {
   color: #5c4a36;
   font-size: 13px;
 }
+
+/* 写真を見せる場面（#226）。画面を覆わず、縦横比を保って中央に収める */
+.sp-photo {
+  display: grid;
+  place-items: center;
+  overflow: hidden;
+}
+
+.sp-photo-image {
+  width: auto;
+  height: auto;
+  /* 画面の60〜80%程度に収め、周囲にゲーム画面を見せる（#226/#237） */
+  max-width: min(70%, 960px);
+  max-height: 70%;
+  object-fit: contain;
+}
