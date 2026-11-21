@@ -71,8 +71,19 @@ export const QUALITY_LIMITS = {
   overallUniqueRate: 0.85,
   /** これ以上同じ本文が繰り返されたら、既存でも本文を差し替えてよい（D9） */
   rewriteIfRepeatedAtLeast: 5,
-  /** mhc で発言してよい人（D10: kai も可） */
-  mhcSpeakers: ["hal", "maimai", "gunlance", "mina", "haruka", "slime", "jijii", "master", "kai"],
+  /** mhc で発言してよい人（D10: kai も可。denden は MaiMai の 2018 年の旧アカウント） */
+  mhcSpeakers: [
+    "hal",
+    "maimai",
+    "gunlance",
+    "mina",
+    "haruka",
+    "slime",
+    "jijii",
+    "master",
+    "kai",
+    "denden",
+  ],
   /** mhc 内での kai の発言上限（D10） */
   kaiInMhc: 5,
   /** 各月で最低限発言がある日数（以上） */

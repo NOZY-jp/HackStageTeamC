@@ -49,11 +49,11 @@ describe("サーバーのメッセージ集計単位（#132）", () => {
         0,
       );
 
-  it("text の合計は 2,690（mhc 1,570・univ 700・friend 420）", () => {
-    expect(textCount("mhc")).toBe(1570);
+  it("text の合計は 2,694（mhc 1,574・univ 700・friend 420）", () => {
+    expect(textCount("mhc")).toBe(1574);
     expect(textCount("univ")).toBe(700);
     expect(textCount("friend")).toBe(420);
-    expect(textCount("mhc") + textCount("univ") + textCount("friend")).toBe(2690);
+    expect(textCount("mhc") + textCount("univ") + textCount("friend")).toBe(2694);
   });
 
   it("VC の入室/退出システムメッセージは voice チャンネルにだけある（univ 10・friend 4）", () => {

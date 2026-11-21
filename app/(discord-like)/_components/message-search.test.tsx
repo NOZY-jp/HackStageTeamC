@@ -1,8 +1,14 @@
 import { fireEvent, render, screen, waitFor } from "@testing-library/react";
-import { beforeEach, describe, expect, it, vi } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { searchMessages } from "@/app/(discord-like)/_actions/message-search";
+import { StoryProvider, useStory } from "@/components/common/story/story-provider";
 import type { SearchHit } from "@/lib/discord-like/search";
 import { MessageSearch } from "./message-search";
+
+function FlagProbe() {
+  const { state } = useStory();
+  return <span data-testid="story-flags">{state.flags.join(",")}</span>;
+}
 
 vi.mock("@/app/(discord-like)/_actions/message-search", () => ({
   searchMessages: vi.fn(),
@@ -30,8 +36,13 @@ const openWithButton = () => {
 
 describe("MessageSearch", () => {
   beforeEach(() => {
+    localStorage.clear();
     mockedSearch.mockReset();
     mockedSearch.mockResolvedValue({ ok: true, hits: [hit], total: 1, matchedUsers: [] });
+  });
+
+  afterEach(() => {
+    localStorage.clear();
   });
 
   it("検索バーから開き、入力へフォーカスし、Escで閉じて元のボタンへ戻る", async () => {
@@ -149,5 +160,88 @@ describe("MessageSearch", () => {
     fireEvent.keyDown(input, { key: "ArrowDown" });
     const result = screen.getByRole("button", { name: /MaiMai/ });
     expect(document.activeElement).toBe(result);
+  });
+
+  it("該当ユーザーに profileUrl があれば同一タブの内部リンクを出し、クリックで検索を閉じて旧垢フラグを立てる", async () => {
+    mockedSearch.mockResolvedValue({
+      ok: true,
+      hits: [],
+      total: 0,
+      matchedUsers: [
+        {
+          id: "denden",
+          displayName: "hunter_denden",
+          handle: "hunter_denden3243",
+          status: "offline",
+          profileUrl: "/pochiblo/mylist/k7q2m9d4",
+        },
+      ],
+    });
+    render(
+      <StoryProvider>
+        <FlagProbe />
+        <MessageSearch />
+      </StoryProvider>,
+    );
+    openWithButton();
+    fireEvent.change(screen.getByLabelText("メッセージを検索"), {
+      target: { value: "hunter_denden3243" },
+    });
+
+    const link = await screen.findByRole("link", { name: "pochiblo/mylist/k7q2m9d4" });
+    expect(link).toHaveAttribute("href", "/pochiblo/mylist/k7q2m9d4");
+    expect(link).not.toHaveAttribute("target");
+
+    fireEvent.click(link);
+    await waitFor(() => expect(screen.queryByRole("dialog")).not.toBeInTheDocument());
+    expect(screen.getByTestId("story-flags").textContent).toContain("s05-old-discord-user");
+  });
+
+  it("denden の検索結果へジャンプするときも旧垢フラグを立てる", async () => {
+    const dendenHit: SearchHit = {
+      id: "mhc-lfg-0903",
+      mode: "channel",
+      guildUrlId: "1093847561029384756",
+      channelUrlId: "1093847561029384760",
+      channelLabel: "マルチ募集",
+      authorId: "denden",
+      authorName: "hunter_denden",
+      authorHandle: "hunter_denden3243",
+      sentAt: "2018-04-20T21:24:00+09:00",
+      body: "ゲーマーIDは hunter_denden3243 です！",
+      pinned: false,
+    };
+    mockedSearch.mockResolvedValue({
+      ok: true,
+      hits: [dendenHit],
+      total: 1,
+      matchedUsers: [],
+    });
+
+    const assignMock = vi.fn();
+    const originalLocation = window.location;
+    Object.defineProperty(window, "location", {
+      configurable: true,
+      value: { ...originalLocation, assign: assignMock },
+    });
+    try {
+      render(
+        <StoryProvider>
+          <FlagProbe />
+          <MessageSearch />
+        </StoryProvider>,
+      );
+      openWithButton();
+      fireEvent.change(screen.getByLabelText("メッセージを検索"), {
+        target: { value: "hunter_denden3243" },
+      });
+
+      const result = await screen.findByRole("button", { name: /hunter_denden/ });
+      fireEvent.click(result);
+      expect(screen.getByTestId("story-flags").textContent).toContain("s05-old-discord-user");
+      expect(assignMock).toHaveBeenCalledWith(expect.stringContaining("m=mhc-lfg-0903"));
+    } finally {
+      Object.defineProperty(window, "location", { configurable: true, value: originalLocation });
+    }
   });
 });
