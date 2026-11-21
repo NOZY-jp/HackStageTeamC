@@ -73,6 +73,7 @@ export function VoiceChannelView({
   channelName,
   participants,
   currentUser,
+  lastSessionMinutes,
 }: {
   guildId: string;
   /** URL に出す guild の数値ID */
@@ -83,6 +84,8 @@ export function VoiceChannelView({
   channelName: string;
   participants: VoiceParticipant[];
   currentUser: { id: string; displayName: string; avatarColor: string };
+  /** サーバーVCの直近通話（分）。VoiceSession から渡す（#150） */
+  lastSessionMinutes?: number;
 }) {
   const { connection, lastCall, leftChannelId, join, leave, toggleMute, toggleDeafen } = useVoice();
   const localMessages = useOptionalLocalMessages();
@@ -156,9 +159,10 @@ export function VoiceChannelView({
       </header>
 
       <div className="pane-scroll voice-body">
-        {!joined && lastCall?.channelId === channelId ? (
+        {!joined && (lastCall?.channelId === channelId || lastSessionMinutes !== undefined) ? (
           <p className="voice-last-call" data-testid="voice-last-call">
-            前回の通話: {lastCall.minutes}分
+            前回の通話: {lastCall?.channelId === channelId ? lastCall.minutes : lastSessionMinutes}
+            分
           </p>
         ) : null}
         {tiles.length === 0 && !joined ? (
@@ -184,6 +188,7 @@ export function VoiceChannelView({
           onToggleMute={toggleMute}
           onToggleDeafen={toggleDeafen}
           onLeave={leave}
+          startedAt={joined ? connection?.joinedAt : undefined}
         />
       </div>
     </main>

@@ -1,6 +1,11 @@
 import { describe, expect, it } from "vitest";
 import type { Message } from "@/lib/discord-like/types";
-import { buildCallHistory, callHistoryByMessage, callHistoryLabel } from "./call-history";
+import {
+  buildCallHistory,
+  callHistoryByMessage,
+  callHistoryLabel,
+  lastCallMinutes,
+} from "./call-history";
 
 const message = (id: string, body: string, sentAt: string, system = true): Message => ({
   id,
@@ -25,13 +30,11 @@ describe("通話履歴カードの算出（#137）", () => {
     expect([...callHistoryByMessage(messages).hidden]).toEqual(["b"]);
   });
 
-  it("終了が来ない開始は不在着信", () => {
+  it("終了も応答なしも無い開始はデータ異常としてカード化しない（#150）", () => {
     const history = buildCallHistory([
       message("c", "通話を開始しました", "2026-11-19T22:00:00+09:00"),
     ]);
-    expect(history[0]).toMatchObject({ startId: "c", missed: true });
-    expect(history[0].endId).toBeUndefined();
-    expect(callHistoryLabel(history[0])).toBe("不在着信");
+    expect(history).toHaveLength(0);
   });
 
   it("応答がありませんでした は不在着信として数える", () => {
@@ -71,8 +74,11 @@ describe("通話履歴カードの誤変換防止（#134）", () => {
 });
 
 describe("VoiceSession を正にする（#149）", () => {
-  it("session の endedReason=missed なら終了行が無くても不在着信", () => {
-    const messages = [message("a", "通話を開始しました", "2026-11-19T21:00:00+09:00")];
+  it("session が missed でも、応答なしの行があって初めて不在着信カードになる（#150）", () => {
+    const messages = [
+      message("a", "通話を開始しました", "2026-11-19T21:00:00+09:00"),
+      message("m", "応答がありませんでした", "2026-11-19T21:00:30+09:00"),
+    ];
     const history = buildCallHistory(messages, [
       {
         id: "s1",
@@ -127,5 +133,79 @@ describe("VoiceSession を正にする（#149）", () => {
     ];
     expect(buildCallHistory(messages)).toHaveLength(1);
     expect(buildCallHistory(messages)[0]).toMatchObject({ minutes: 3, missed: false });
+  });
+});
+
+describe("カード化と畳み込み（#150）", () => {
+  const session = (startedAt: string, endedAt?: string, missed = false) => ({
+    id: "s",
+    scope: "dm" as const,
+    channelId: "dm-maimai",
+    participantIds: ["hal", "maimai"],
+    startedAt,
+    ...(endedAt ? { endedAt } : {}),
+    endedReason: missed ? ("missed" as const) : ("hangup" as const),
+  });
+
+  it("VoiceSession のあるスレッドでも開始/終了の行をカードへ畳み込む", () => {
+    const messages = [
+      message("a", "通話を開始しました", "2026-11-19T21:00:00+09:00"),
+      message("b", "通話を終了しました", "2026-11-19T21:05:00+09:00"),
+    ];
+    const { byId, hidden } = callHistoryByMessage(messages, [
+      session("2026-11-19T21:00:00+09:00", "2026-11-19T21:05:00+09:00"),
+    ]);
+    expect(byId.get("a")?.minutes).toBe(5);
+    expect([...hidden]).toEqual(["b"]);
+  });
+
+  it("不在着信カードは「応答がありませんでした」の行も畳み込む", () => {
+    const messages = [
+      message("a", "通話を開始しました", "2026-11-19T21:00:00+09:00"),
+      message("m", "応答がありませんでした", "2026-11-19T21:00:40+09:00"),
+    ];
+    const { byId, hidden } = callHistoryByMessage(messages, [
+      session("2026-11-19T21:00:00+09:00", undefined, true),
+    ]);
+    expect(callHistoryLabel(byId.get("a") as never)).toBe("不在着信");
+    expect([...hidden]).toEqual(["m"]);
+  });
+
+  it("session が無いスレッドでも同じ規則（応答なしのみ不在着信、開始だけはカード化しない）", () => {
+    const missedOnly = [
+      message("a", "通話を開始しました", "2026-11-19T21:00:00+09:00"),
+      message("m", "応答がありませんでした", "2026-11-19T21:00:40+09:00"),
+    ];
+    expect(buildCallHistory(missedOnly)[0]).toMatchObject({ startId: "a", missed: true });
+    expect(
+      buildCallHistory([message("b", "通話を開始しました", "2026-11-20T21:00:00+09:00")]),
+    ).toHaveLength(0);
+  });
+});
+
+describe("サーバーVCの直近通話（#150）", () => {
+  it("channelId の最後の終了済みセッションから分を出す", () => {
+    const sessions = [
+      {
+        id: "g1",
+        scope: "guild" as const,
+        channelId: "univ-vc-1",
+        participantIds: ["ootsuka"],
+        startedAt: "2026-07-10T21:00:00+09:00",
+        endedAt: "2026-07-10T21:30:00+09:00",
+        endedReason: "hangup" as const,
+      },
+      {
+        id: "g2",
+        scope: "guild" as const,
+        channelId: "univ-vc-1",
+        participantIds: ["ootsuka"],
+        startedAt: "2026-08-10T21:00:00+09:00",
+        endedAt: "2026-08-10T21:45:00+09:00",
+        endedReason: "hangup" as const,
+      },
+    ];
+    expect(lastCallMinutes(sessions, "univ-vc-1")).toBe(45);
+    expect(lastCallMinutes(sessions, "friend-vc")).toBeUndefined();
   });
 });
