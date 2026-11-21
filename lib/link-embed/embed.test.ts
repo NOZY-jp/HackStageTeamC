@@ -26,6 +26,12 @@ describe("extractLinkCandidates", () => {
     );
   });
 
+  it("ftp: など別スキームのURLも丸ごと1トークンで取る（パスだけを拾わない）", () => {
+    expect(extractLinkCandidates("罠 ftp://twixer.com/mai2mai2/status/post-101 だよ")).toEqual([
+      "ftp://twixer.com/mai2mai2/status/post-101",
+    ]);
+  });
+
   it("@ を含むアプリ内パスも切れずに拾う（/channels/@me/...）", () => {
     expect(
       extractLinkCandidates("ここ /discord.com/channels/@me/1187002356428841501 だよ"),
@@ -62,6 +68,17 @@ describe("normalizeAppPath（作中ドメイン→アプリ内パス）", () => 
     expect(
       normalizeAppPath("https://app.local:3000/twitter/post/post-101", "app.local"),
     ).toBeUndefined();
+  });
+
+  it("http(s) 以外のスキームは受理しない（作中ドメイン・同一オリジンでも）", () => {
+    expect(normalizeAppPath("ftp://twixer.com/mai2mai2/status/post-101")).toBeUndefined();
+    expect(normalizeAppPath("ftp://pochiblo.jp/denden0102")).toBeUndefined();
+    // 同一オリジンでも ftp は受理しない（裸のホスト名比較でもスキームを弾く）
+    expect(normalizeAppPath("ftp://app.local/twitter/post/post-101", "app.local")).toBeUndefined();
+    // 大文字の http(s) は従来どおり受理する
+    expect(normalizeAppPath("HTTPS://twixer.com/mai2mai2/status/post-101")).toBe(
+      "/twitter/post/post-101",
+    );
   });
 
   it("オリジンを渡すとスキーム込みで比べる（http と https は別オリジン）", () => {
@@ -188,6 +205,18 @@ describe("resolveLinkEmbeds", () => {
     );
     // status の形が壊れたURLは、プロフィールにもフォールバックしない
     expect(resolveLinkEmbeds("https://twixer.com/mai2mai2/status")).toEqual([]);
+  });
+
+  it("http(s) 以外のスキームのURLはカードにしない", () => {
+    // ftp: でもホストが作中ドメインなら以前はカードになっていた
+    expect(resolveLinkEmbeds("ftp://twixer.com/mai2mai2/status/post-101")).toEqual([]);
+    expect(resolveLinkEmbeds("file:///twitter/post/post-101")).toEqual([]);
+    expect(resolveLinkEmbeds("ftp://discord.com/channels/@me/1187002356428841501")).toEqual([]);
+    // 別スキームURLのあとに書いた有効なURLのカードは出る（候補ごとに切り分ける）
+    const embeds = resolveLinkEmbeds(
+      `罠 ftp://twixer.com/mai2mai2/status/post-101 と ${POST_101_URL}`,
+    );
+    expect(embeds.map((embed) => embed.href)).toEqual(["/twitter/post/post-101"]);
   });
 
   it("Twixer のURLは、ハンドルが投稿の作者と違うとカードにしない", () => {

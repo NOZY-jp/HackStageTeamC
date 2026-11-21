@@ -1,11 +1,11 @@
 import {
   BLOG_SERVICE_NAME,
-  externalHref,
   getBlog,
   getEntry,
   getMylist,
   listMylistEntries,
   parseTwixerStatusUrl,
+  toAppPath,
 } from "@/lib/blog-like";
 import { getChannel, getDMThread, getGuild, getUser } from "@/lib/discord-like";
 import { resolveChannelRoute } from "@/lib/discord-like/route-resolution";
@@ -47,49 +47,12 @@ const ACCENT = {
 
 /**
  * 本文に出たURL候補をアプリ内パスに正規化する。
- * - "/..." のアプリ内パス → そのまま
- * - 作中ドメイン（twixer.com / leaf.jp / pochiblo.jp / discord.com）→ 対応するアプリ内パス
- * - それ以外の URL → 同一オリジン（selfOrigin = このアプリのデプロイURLをそのまま貼った場合）だけ
- *   パス部分を見る。外部サイトがたまたまアプリ内ルートと同じパスを持っていてもカードにしない。
+ * 受理するURLの形（スキーム・オリジン・パス形状）の定義は lib/blog-like/url.ts に集約している。
+ * 解決できないもの（外部サイト・対象外スキーム・許されないパス形状）は undefined を返し、
+ * 本文のテキストのままにする。
  */
 export function normalizeAppPath(candidate: string, selfOrigin?: string): string | undefined {
-  const strip = (path: string) => path.replace(/\/+$/, "") || "/";
-  if (candidate.startsWith("/")) return strip(candidate);
-  // twixer.com / leaf.jp は blog-like/url.ts が作中URL→アプリ内パスの対応を持っている
-  const fiction = externalHref(candidate.split(/[?#]/)[0]);
-  if (fiction) return strip(fiction);
-  let url: URL;
-  try {
-    url = new URL(candidate);
-  } catch {
-    return undefined;
-  }
-  const path = strip(url.pathname);
-  switch (url.hostname.toLowerCase()) {
-    case "pochiblo.jp":
-      return path === "/" ? "/pochiblo" : `/pochiblo${path}`;
-    case APP_PREFIX:
-      return `/${APP_PREFIX}${path === "/" ? "" : path}`;
-    default:
-      return isSameOrigin(url, selfOrigin) ? path : undefined;
-  }
-}
-
-/**
- * 同一オリジン判定。selfOrigin はクライアントの location.origin（スキーム込み）。
- * スキームを含めて比べるので、ホストとポートが同じでも http と https は別オリジン。
- * スキームなしの値が来た場合はホスト名:ポートだけで比べる（後方互換）。
- */
-function isSameOrigin(url: URL, selfOrigin?: string): boolean {
-  if (!selfOrigin) return false;
-  if (!selfOrigin.includes("://")) {
-    return url.host.toLowerCase() === selfOrigin.toLowerCase();
-  }
-  try {
-    return url.origin === new URL(selfOrigin).origin;
-  } catch {
-    return false;
-  }
+  return toAppPath(candidate, selfOrigin);
 }
 
 const idOf = (path: string, pattern: RegExp): string | undefined => pattern.exec(path)?.[1];

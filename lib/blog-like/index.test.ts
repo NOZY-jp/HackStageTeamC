@@ -92,6 +92,11 @@ describe("externalHref", () => {
     expect(externalHref("twixer.com/someone/status")).toBeUndefined();
     expect(externalHref("twixer.com/someone/likes")).toBeUndefined();
   });
+
+  it("http(s) 以外のスキームのURLはリンクにしない", () => {
+    expect(externalHref("ftp://twixer.com/someone/status/123")).toBeUndefined();
+    expect(externalHref("ftp://leaf.jp/maimai")).toBeUndefined();
+  });
 });
 
 describe("パスと日付", () => {
