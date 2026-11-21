@@ -140,7 +140,6 @@ async function playToDoor() {
     </StoryProvider>,
   );
   const user = userEvent.setup();
-  await user.click(screen.getByRole("button", { name: "コンテスト名を控える" }));
   await waitFor(() =>
     expect(screen.getAllByTestId("flags").at(-1)?.textContent).toContain("s08-real-name"),
   );
