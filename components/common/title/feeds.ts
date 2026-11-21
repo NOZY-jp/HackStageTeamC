@@ -1,3 +1,5 @@
+import { readdirSync } from "node:fs";
+import path from "node:path";
 import { channelMessages } from "@/lib/discord-like/data/messages";
 import { users as discordUsers } from "@/lib/discord-like/data/users";
 import { fbPosts } from "@/lib/facebook-like/data/posts";
@@ -10,7 +12,7 @@ import { twitterPosts, twitterUsers } from "@/lib/twitter-like/data/twitter";
  * ぼかしても答えが透けないよう、本名・物語で届く文言・本人（talkup の u40）の投稿は入れない。
  */
 
-export type FeedItem = { id: string; name: string; color: string; text: string };
+export type FeedItem = { id: string; name: string; color: string; text: string; avatar: string };
 export type TitleFeed = {
   platform: "discord" | "twixer" | "talkup";
   label: string;
@@ -18,6 +20,37 @@ export type TitleFeed = {
 };
 
 const PER_COLUMN = 18;
+
+/**
+ * アイコンにする画像。写真・イラスト・アニメ調（public/title/avatars）と、ゲームの中の画像を混ぜる。
+ * 背景の飾りなので、いろいろな画像が並ぶよう、投稿ごとに散らして当てる
+ */
+const EXTRA_AVATARS = [
+  "/discord-like/clips/clip-0204-8.webp",
+  "/discord-like/clips/clip-0529-6.webp",
+  "/discord-like/clips/clip-0819-1.webp",
+  "/discord-like/clips/clip-1019-5.webp",
+  "/note-like/covers/coffee.svg",
+  "/note-like/covers/headset.svg",
+  "/note-like/covers/moon-castle.svg",
+  "/talkup/seaside-sunset.svg",
+  "/twitter-like/photo-02.svg",
+];
+
+function avatarPool(): string[] {
+  const dir = path.join(process.cwd(), "public", "title", "avatars");
+  const files = readdirSync(dir)
+    .filter((file) => /\.(svg|jpe?g|png|webp)$/.test(file))
+    .sort()
+    .map((file) => `/title/avatars/${file}`);
+  return [...files, ...EXTRA_AVATARS];
+}
+
+function hash(text: string): number {
+  let value = 0;
+  for (const char of text) value = (value * 31 + (char.codePointAt(0) ?? 0)) >>> 0;
+  return value;
+}
 const HIDDEN_WORDS = [
   "服部",
   "由比",
@@ -45,6 +78,8 @@ function spread<T>(items: T[], count: number): T[] {
 }
 
 export function buildTitleFeeds(): TitleFeed[] {
+  const pool = avatarPool();
+  const avatarOf = (name: string) => pool[hash(name) % pool.length];
   const discordById = new Map(discordUsers.map((user) => [user.id, user]));
   const discord = spread(
     Object.values(channelMessages)
@@ -60,6 +95,7 @@ export function buildTitleFeeds(): TitleFeed[] {
             name: user.displayName,
             color: user.avatarColor,
             text: short(message.body),
+            avatar: avatarOf(`${user.displayName}:${message.id}`),
           },
         ]
       : [];
@@ -72,7 +108,15 @@ export function buildTitleFeeds(): TitleFeed[] {
   ).flatMap((post) => {
     const user = twixerById.get(post.authorId);
     return user
-      ? [{ id: post.id, name: user.displayName, color: user.avatarColor, text: short(post.body) }]
+      ? [
+          {
+            id: post.id,
+            name: user.displayName,
+            color: user.avatarColor,
+            text: short(post.body),
+            avatar: avatarOf(`${user.displayName}:${post.id}`),
+          },
+        ]
       : [];
   });
 
@@ -83,7 +127,15 @@ export function buildTitleFeeds(): TitleFeed[] {
   ).flatMap((post) => {
     const user = talkupById.get(post.authorId);
     return user && safe(user.displayName)
-      ? [{ id: post.id, name: user.displayName, color: user.avatarColor, text: short(post.body) }]
+      ? [
+          {
+            id: post.id,
+            name: user.displayName,
+            color: user.avatarColor,
+            text: short(post.body),
+            avatar: avatarOf(`${user.displayName}:${post.id}`),
+          },
+        ]
       : [];
   });
 

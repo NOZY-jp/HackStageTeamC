@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useState } from "react";
 import { useStory } from "@/components/common/story/story-provider";
@@ -80,9 +81,15 @@ function FeedBackground({ feeds }: { feeds: TitleFeed[] }) {
               <ul key={copy} className="tt-feed-list">
                 {feed.items.map((item) => (
                   <li key={`${copy}-${item.id}`} className="tt-feed-item">
-                    <span className="tt-feed-avatar" style={{ backgroundColor: item.color }}>
-                      {item.name.slice(0, 1)}
-                    </span>
+                    <Image
+                      className="tt-feed-avatar"
+                      src={item.avatar}
+                      alt=""
+                      width={40}
+                      height={40}
+                      unoptimized
+                      style={{ backgroundColor: item.color }}
+                    />
                     <span className="tt-feed-body">
                       <span className="tt-feed-name">{item.name}</span>
                       <span className="tt-feed-text">{item.text}</span>
