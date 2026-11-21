@@ -37,6 +37,11 @@ function Stage() {
       settings={settings}
       onSettingsChange={setSettings}
       onComplete={(done, chosen) => completeBeat(done, chosen)}
+      onShownLinesChange={(lines) => {
+        for (const line of lines) {
+          if (!shownLines.includes(line.text)) shownLines.push(line.text);
+        }
+      }}
       flags={state.flags}
       onFlag={() => {}}
       onMinimize={() => {}}
@@ -63,6 +68,9 @@ function Inspector() {
 }
 
 const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
+
+/** 実際に文章の窓に出た行（ScenePlayer が画面へ出したもの） */
+let shownLines: string[] = [];
 
 /** 本文を押して最後まで進め、選択肢が出たらラベルで選ぶ */
 async function playScene(
@@ -111,6 +119,7 @@ async function chooseFrom(
 async function playToDoor() {
   window.localStorage.clear();
   window.sessionStorage.clear();
+  shownLines = [];
   nav.query = new URLSearchParams();
   const entry = await EntryPage({
     params: Promise.resolve({ blogId: PHOTO_CONTEST_BLOG_ID, entryId: "e20181117" }),
@@ -158,25 +167,23 @@ async function playToDoor() {
   return user;
 }
 
-/** 場面を最後まで進め、画面に出た本文を集める */
+/** 場面を最後まで進める（本文は ScenePlayer が出した行をそのまま集める） */
 async function finishScene(user: ReturnType<typeof userEvent.setup>, id: string) {
-  const seen: string[] = [];
   const started = Date.now();
   while (Date.now() - started < 60_000) {
-    const text = document.querySelector(".sw-text")?.textContent;
-    if (text && seen.at(-1) !== text) seen.push(text);
     if (screen.getAllByTestId("completed").at(-1)?.textContent?.includes(id)) break;
     const body = document.querySelector(".sw-body");
     if (body) await user.click(body);
     await sleep(80);
   }
-  return seen.join(String.fromCharCode(10));
+  return shownLines.join(String.fromCharCode(10));
 }
 
 describe("でんちゃん誤認の分岐（#120・実プレイ経由）", () => {
   beforeEach(() => {
     window.localStorage.clear();
     window.sessionStorage.clear();
+    shownLines = [];
   });
 
   it("「でんちゃん」を選ぶと、誤認の結末が画面に出る", async () => {
