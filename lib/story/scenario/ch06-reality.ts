@@ -11,6 +11,7 @@ export const chapter6: Beat[] = [
     chapter: 6,
     layout: "overlay",
     when: ["s11-address", "kaiToldDenchan"],
+    unless: ["choseTrueEnd", "choseBadEndAgain", "reachedBadEnd"],
     after: ["ch5-talkup"],
     source: "Issue #120・#76（カイの助言 → 誤認）",
     script: [
@@ -40,8 +41,10 @@ export const chapter6: Beat[] = [
     chapter: 6,
     layout: "fullscreen",
     when: ["s11-address", "usedDenchan"],
+    unless: ["choseTrueEnd"],
     after: ["ch5-talkup", "ch6-call-name"],
     source: "Google Docs 箱書き 第六章（Bad End）",
+    memo: "引っかかる違和感がある。Discord・Twixer・Talkupの記録をもう一度確かめよう",
     script: [
       background("black", { transition: "cut" }),
       title("第六章　現実"),
@@ -90,12 +93,27 @@ export const chapter6: Beat[] = [
       effect("fade-to-black", { wait: true }),
       title("主人公ストーカーEND"),
     ],
+    choices: [
+      {
+        id: "reinvestigate",
+        label: "違和感を調べ直す",
+        unless: ["choseBadEnd"],
+        sets: ["reachedBadEnd"],
+      },
+      {
+        id: "reconsider",
+        label: "もう一度、判断をやり直す",
+        requires: ["choseBadEnd"],
+        sets: ["reconsiderBranch"],
+      },
+    ],
   },
   {
     id: "ch6-wait-end",
     chapter: 6,
     layout: "fullscreen",
     when: ["s11-address", "calledByName"],
+    unless: ["choseTrueEnd"],
     after: ["ch6-call-name"],
     source: "Issue #120（呼び名を使わなかった場合の分岐）",
     script: [
@@ -110,6 +128,14 @@ export const chapter6: Beat[] = [
       narrate("声は震えていたけれど、扉は開かなかった。通報も、されなかった。"),
       narrate("帰り道、スマホを何度も見た。返事は、来なかった。"),
       title("……"),
+    ],
+    choices: [
+      {
+        id: "reconsider",
+        label: "もう一度、判断をやり直す",
+        requires: ["choseBadEnd"],
+        sets: ["reconsiderBranch"],
+      },
     ],
   },
 ];

@@ -62,7 +62,7 @@ export type ScenePlayerProps = {
 };
 
 /** 読んでいる位置。進行状態（終わった場面だけを保存）とは別に、タブを閉じるまで覚えておく */
-const READING_KEY = "hackstage:story-reading:v3";
+const READING_KEY = "hackstage:story-reading:v4";
 type Reading = { beatId: string; index: number; chosen: string[] };
 
 function loadReading(beatId: string): Reading | undefined {

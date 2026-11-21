@@ -144,22 +144,7 @@ describe("旧ブログの写真の実体（#113）", () => {
     expect(existsSync(`public${image.src}`)).toBe(true);
   });
 
-  it("卒業式は WebP（1200×800）を参照し、alt を実物の構図に合わせる", () => {
-    const images = checkout("e20180316");
-    const image = images.find(
-      (block) => block.kind === "image" && block.src.includes("graduation"),
-    );
-    if (image?.kind !== "image") throw new Error("graduation missing");
-    expect(image.src).toBe("/blog-like/photos/graduation.webp");
-    expect(image.width).toBe(1200);
-    expect(image.height).toBe(800);
-    expect(existsSync(`public${image.src}`)).toBe(true);
-    const alt = image.alt;
-    expect(alt).toContain("左の子が卒業証書の筒を持ち");
-    expect(alt).toContain("右の子の肩に腕を回している");
-    expect(alt).not.toContain("右の子が卒業証書を広げて持っている");
-    // 本名・呼び名は書かない
-    expect(alt).not.toContain("かのん");
-    expect(image.caption).toBe("右が私です笑");
+  it("卒業記事では、後の人物照合に先立って本人の写真を出さない", () => {
+    expect(checkout("e20180316")).toHaveLength(0);
   });
 });

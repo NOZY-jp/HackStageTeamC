@@ -58,11 +58,18 @@ export function parseState(value: unknown): StoryState {
     return initial();
   }
   const candidate = value as Record<string, unknown>;
-  return {
-    flags: strings(candidate.flags).filter(isFlag),
-    completed: strings(candidate.completed),
-    choices: readChoices(candidate.choices),
-  };
+  const flags = new Set(strings(candidate.flags).filter(isFlag));
+  const completed = strings(candidate.completed);
+  const choices = readChoices(candidate.choices);
+
+  // これらのフラグを追加する前のセーブでも、完了済みの場面から進行を復元する。
+  if (completed.includes("ch4-old-account")) flags.add("toldKaiOldAccount");
+  if (completed.includes("ch5-kai-contact")) flags.add("kaiToldDenchan");
+  if (completed.includes("ch6-bad-end") && !choices["ch6-bad-end"]?.length) {
+    flags.add("reachedBadEnd");
+  }
+
+  return { flags: [...flags], completed, choices };
 }
 
 /** 試作版の保存値（flags / completedScenes / choices）を、いまの形に移す。移せるのはフラグだけ */

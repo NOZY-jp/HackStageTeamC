@@ -16,6 +16,7 @@ export function toMessageView(page: MessagePage): MessageView {
       id: message.authorId,
       displayName: user?.displayName ?? message.authorId,
       avatarColor: user?.avatarColor ?? "#5865f2",
+      handle: user?.handle,
       profileUrl: user?.profileUrl,
     };
   }
