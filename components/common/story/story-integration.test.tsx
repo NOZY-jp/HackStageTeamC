@@ -73,7 +73,7 @@ describe("段階7・8・10・結末（実ページ経由・本名は結果ペー
         <Probe onState={(flags) => seen.push(flags)} />
       </StoryProvider>,
     );
-    expect(await screen.findByText("服部 由比")).toBeTruthy();
+    expect(await screen.findByText(/服部 由比/)).toBeTruthy();
     await waitFor(() => expect(seen.at(-1)).toContain("s08-real-name"));
   });
 
