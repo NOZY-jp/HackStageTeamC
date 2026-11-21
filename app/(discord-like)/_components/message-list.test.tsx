@@ -3,6 +3,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { StoryProvider, useStory } from "@/components/common/story/story-provider";
 import { AppShell } from "@/components/discord-like/app-shell";
 import type { MemberView, Message, MessageAuthor } from "@/lib/discord-like/types";
+import { STORAGE_KEY } from "@/lib/story";
 import { MessageList } from "./message-list";
 
 function FlagProbe() {
@@ -360,5 +361,83 @@ describe("旧垢発見のストーリーフラグ連携（順序5）", () => {
     await waitFor(() => {
       expect(screen.getByTestId("story-flags").textContent).toContain("s05-old-discord-user");
     });
+  });
+
+  it("True End 手がかり2: toldKaiOldAccount の前には kai を隠し、後に出して開くと te02-kai-joined-mhc が立つ", async () => {
+    const kaiEntry = {
+      member: {
+        id: "kai",
+        displayName: "χ",
+        handle: "imperial_chi",
+        avatarColor: "#6e4e3a",
+        status: "online" as const,
+      },
+      showWhenFlag: "toldKaiOldAccount" as const,
+      onOpenFlag: "te02-kai-joined-mhc" as const,
+      note: "最近このサーバーに参加",
+    };
+
+    // 報告前: メンバー一覧に χ は居ない
+    const before = render(
+      <StoryProvider>
+        <FlagProbe />
+        <AppShell rail={<span />}>
+          <MessageList
+            messages={messages}
+            authors={authors}
+            title="雑談"
+            showHash
+            onLoadOlder={() => {}}
+            members={members}
+            storyMember={kaiEntry}
+          />
+        </AppShell>
+      </StoryProvider>,
+    );
+    fireEvent.click(before.container.querySelector('button[aria-label="メンバー"]') as HTMLElement);
+    await waitFor(() => {
+      expect(before.container.querySelectorAll(".members-row")).toHaveLength(1);
+    });
+    expect(before.container.textContent).not.toContain("imperial_chi");
+    before.unmount();
+
+    // 報告後: メンバー一覧に χ が加わり、開くと注記と te02-kai-joined-mhc が立つ
+    localStorage.setItem(
+      STORAGE_KEY,
+      JSON.stringify({ flags: ["toldKaiOldAccount"], completed: [], choices: {} }),
+    );
+    const after = render(
+      <StoryProvider>
+        <FlagProbe />
+        <AppShell rail={<span />}>
+          <MessageList
+            messages={messages}
+            authors={authors}
+            title="雑談"
+            showHash
+            onLoadOlder={() => {}}
+            members={members}
+            storyMember={kaiEntry}
+          />
+        </AppShell>
+      </StoryProvider>,
+    );
+    fireEvent.click(after.container.querySelector('button[aria-label="メンバー"]') as HTMLElement);
+
+    const kaiRow = await waitFor(() => {
+      const row = [...after.container.querySelectorAll(".members-row")].find((el) =>
+        el.textContent?.includes("imperial_chi"),
+      );
+      expect(row).toBeDefined();
+      return row as HTMLElement;
+    });
+    fireEvent.click(kaiRow);
+
+    await waitFor(() => {
+      expect(screen.getByTestId("story-flags").textContent).toContain("te02-kai-joined-mhc");
+    });
+    expect(after.container.querySelector(".members-profile-note")?.textContent).toBe(
+      "最近このサーバーに参加",
+    );
   });
 });

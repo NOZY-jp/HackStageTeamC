@@ -1,5 +1,6 @@
-import { chat, narrate, say, think, title } from "../stage";
+import { hideWindow, narrate, think, title } from "../stage";
 import type { Beat } from "../types";
+import { kaiDm } from "./kai-dm";
 
 /**
  * 第五章：欠片（Google Docs「HackStageTeamC」の箱書き 第五章。清書ができたら差し替える）。
@@ -16,33 +17,19 @@ export const chapter5: Beat[] = [
     source: "Google Docs 箱書き 第五章・Issue #76 順序9",
     script: [
       title("第五章　欠片"),
-      say("kai", "今の進捗どう？"),
-      say("ryo", "今ようやく前に聞いたブログの中身が分かったところ"),
-      chat(
-        "discord:dm-kai",
-        "ryo",
-        "今ようやく前に聞いたブログの中身が分かったところ",
-        "2026-11-23T21:11:00+09:00",
-      ),
-      say("ryo", "本名も分かったんだけど、そこから先がなかなか進まなくて"),
-      chat(
-        "discord:dm-kai",
+      hideWindow(),
+      kaiDm("kai", "今の進捗どう？", "2026-11-25T23:50:00+09:00"),
+      kaiDm("ryo", "今ようやく前に聞いたブログの中身が分かったところ", "2026-11-25T23:51:00+09:00"),
+      kaiDm(
         "ryo",
         "本名も分かったんだけど、そこから先がなかなか進まなくて",
-        "2026-11-23T21:11:30+09:00",
+        "2026-11-25T23:51:30+09:00",
       ),
-      say("kai", "Talkupだと本名で検索したら結構出てくるぞ？"),
-      chat(
-        "discord:dm-kai",
-        "kai",
-        "Talkupだと本名で検索したら結構出てくるぞ？",
-        "2026-11-23T21:12:00+09:00",
-      ),
-      say("ryo", "て、天才か？"),
-      chat("discord:dm-kai", "ryo", "て、天才か？", "2026-11-23T21:12:30+09:00"),
-      say("kai", "そういえば、でんちゃんって呼ぶと喜ぶぞ"),
-      say("ryo", "でんちゃん？"),
-      say("kai", "昔の呼び名らしい。俺も聞いただけだけどな"),
+      kaiDm("kai", "Talkupだと本名で検索したら結構出てくるぞ？", "2026-11-25T23:52:00+09:00"),
+      kaiDm("ryo", "て、天才か？", "2026-11-25T23:52:30+09:00"),
+      kaiDm("kai", "そういえば、でんちゃんって呼ぶと喜ぶぞ", "2026-11-25T23:53:00+09:00"),
+      kaiDm("ryo", "でんちゃん？", "2026-11-25T23:53:30+09:00"),
+      kaiDm("kai", "昔の呼び名らしい。俺も聞いただけだけどな", "2026-11-25T23:54:00+09:00"),
       think("本名でTalkupを検索してみよう。"),
     ],
   },

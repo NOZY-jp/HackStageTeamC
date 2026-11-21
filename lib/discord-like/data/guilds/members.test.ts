@@ -10,8 +10,8 @@ import { FRIEND_MEMBERS, UNIV_MEMBERS } from "./members";
 const ids = (list: readonly { id: string }[]) => new Set(list.map((user) => user.id));
 
 describe("サーバーごとのメンバー定義（#163）", () => {
-  it("人数が決めた数（mhc 260・univ 120・friend 20）と一致し、重複しない", () => {
-    expect(MHC_MEMBER_IDS).toHaveLength(260);
+  it("人数が決めた数（初期 mhc 259・univ 120・friend 20）と一致し、重複しない", () => {
+    expect(MHC_MEMBER_IDS).toHaveLength(259);
     expect(UNIV_MEMBER_IDS).toHaveLength(120);
     expect(FRIEND_MEMBER_IDS).toHaveLength(20);
     for (const list of [MHC_MEMBER_IDS, UNIV_MEMBER_IDS, FRIEND_MEMBER_IDS]) {
@@ -48,10 +48,10 @@ describe("サーバーごとのメンバー定義（#163）", () => {
     const univ = new Set(UNIV_MEMBER_IDS);
     const friend = new Set(FRIEND_MEMBER_IDS);
     const thread = (id: string) => dmThreads.find((item) => item.id === id);
-    // モンハン仲間・オンラインの知人
-    for (const id of ["kai", "gunlance"]) {
-      expect(mhc.has(id), id).toBe(true);
-    }
+    // モンハン仲間・オンラインの知人（kai は第四章で旧垢報告後に動的参加するため初期は gunlance のみ）
+    expect(mhc.has("gunlance")).toBe(true);
+    expect(mhc.has("kai")).toBe(false);
+    expect(thread("dm-kai")?.participantIds).toContain("kai");
     // 学科の先輩・後輩
     for (const id of ["ootsuka", "hayashi", "yama"]) {
       expect(univ.has(id), id).toBe(true);

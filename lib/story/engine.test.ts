@@ -132,4 +132,54 @@ describe("lib/story の進行", () => {
       ).toEqual(["どうする？", "相談する", "でんちゃんって呼ぶと喜ぶぞ", "検索する"]);
     });
   });
+
+  describe("unless（いずれかのフラグが立っているときの除外）", () => {
+    it("Beat.unless に含まれるフラグが1つでも立っていれば availableBeats / nextBeat から外れる", () => {
+      const guarded: Beat[] = [
+        {
+          id: "bad",
+          chapter: 6,
+          when: ["s11-address"],
+          unless: ["choseTrueEnd"],
+          script: [say("ryo", "Bad")],
+        },
+        {
+          id: "true",
+          chapter: 6,
+          when: ["s11-address", "choseTrueEnd"],
+          script: [say("ryo", "True")],
+        },
+      ];
+      const atAddress = setFlag(initialState, "s11-address");
+      expect(availableBeats(atAddress, guarded).map((b) => b.id)).toEqual(["bad"]);
+      expect(nextBeat(atAddress, guarded)?.id).toBe("bad");
+
+      const choseTrue = setFlag(atAddress, "choseTrueEnd");
+      expect(availableBeats(choseTrue, guarded).map((b) => b.id)).toEqual(["true"]);
+      expect(nextBeat(choseTrue, guarded)?.id).toBe("true");
+    });
+
+    it("Choice.unless に含まれるフラグが1つでも立っていれば choicesLeft / remainingChoices から外れる", () => {
+      const branchBeat: Beat = {
+        id: "branch",
+        chapter: 6,
+        when: [],
+        script: [say("ryo", "分岐")],
+        choices: [
+          { id: "first", label: "初めて行く", unless: ["reachedBadEnd"] },
+          { id: "again", label: "もう一度行く", requires: ["reachedBadEnd"] },
+          { id: "truth", label: "真相を確かめる" },
+        ],
+      };
+
+      expect(remainingChoices(initialState, branchBeat).map((c) => c.id)).toEqual([
+        "first",
+        "truth",
+      ]);
+
+      const afterBad = setFlag(initialState, "reachedBadEnd");
+      expect(remainingChoices(afterBad, branchBeat).map((c) => c.id)).toEqual(["again", "truth"]);
+      expect(() => choose(afterBad, branchBeat, "first")).toThrow();
+    });
+  });
 });
