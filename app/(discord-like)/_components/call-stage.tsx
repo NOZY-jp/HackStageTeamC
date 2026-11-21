@@ -238,8 +238,11 @@ export function CallStage({
   const tabIndex = controlsVisible ? 0 : -1;
 
   // 発話の切り替え（固定の「話しています」をやめる）。動きを減らす設定では止める。
+  // 台本が話者を指定しているときは、擬似の発話で上書きしない
+  const scriptSpeaking = participants.some((participant) => participant.speaking === true);
+
   useEffect(() => {
-    if (!connected || sharing || participants.length === 0) {
+    if (!connected || sharing || scriptSpeaking || participants.length === 0) {
       setSpeakerId(null);
       return;
     }
@@ -262,7 +265,7 @@ export function CallStage({
       setSpeakerId(index === 0 ? null : others[index - 1].id);
     }, speakingIntervalMs);
     return () => clearInterval(timer);
-  }, [connected, participants, selfId, sharing, speakingIntervalMs]);
+  }, [connected, participants, scriptSpeaking, selfId, sharing, speakingIntervalMs]);
 
   useEffect(
     () => () => {
@@ -277,23 +280,37 @@ export function CallStage({
     noteTimer.current = setTimeout(() => setNote(null), 2000);
   }, []);
 
+  const [manualInvite, setManualInvite] = useState<string | null>(null);
   const copyInvite = useCallback(async () => {
     const url = inviteUrl ?? (typeof window !== "undefined" ? window.location.href : "");
     try {
-      await navigator.clipboard?.writeText(url);
+      await navigator.clipboard.writeText(url);
+      setManualInvite(null);
+      showNote("招待リンクをコピーしました");
     } catch {
-      // クリップボードが使えなくても、案内だけ出す（モック）
+      // 失敗したら成功と言わない。選択してコピーできる導線を出す
+      setManualInvite(url);
+      showNote("コピーできませんでした。下のリンクを選択してください");
     }
-    showNote("招待リンクをコピーしました");
   }, [inviteUrl, showNote]);
+
+  // 通話が終わったら、共有・参加者一覧・発話を初期化する（次の通話に残さない）
+  useEffect(() => {
+    if (joined) return;
+    setSharing(false);
+    setPanelOpen(false);
+    setSpeakerId(null);
+    setNote(null);
+    setManualInvite(null);
+  }, [joined]);
 
   const shown = useMemo(
     () =>
       participants.map((participant) => ({
         ...participant,
-        speaking: participant.id === speakerId,
+        speaking: scriptSpeaking ? participant.speaking === true : participant.id === speakerId,
       })),
-    [participants, speakerId],
+    [participants, speakerId, scriptSpeaking],
   );
 
   return (
@@ -480,6 +497,15 @@ export function CallStage({
         <p className="call-controls-note" role="status">
           {note}
         </p>
+      ) : null}
+      {manualInvite ? (
+        <input
+          className="call-invite-manual"
+          aria-label="招待リンク（手動でコピー）"
+          readOnly
+          value={manualInvite}
+          onFocus={(event) => event.currentTarget.select()}
+        />
       ) : null}
     </section>
   );

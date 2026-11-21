@@ -175,3 +175,60 @@ describe("共有を止めた後の通常表示", () => {
     );
   });
 });
+
+describe("終了時のリセットと台本の発話", () => {
+  beforeEach(() => {
+    vi.useFakeTimers();
+  });
+  afterEach(() => {
+    vi.useRealTimers();
+  });
+
+  it("通話が終わると共有・参加者一覧・発話を初期化する", () => {
+    const { container, rerender } = render(<CallStage {...base} />);
+    showControls(container);
+    fireEvent.click(screen.getByRole("button", { name: "画面共有" }));
+    fireEvent.click(screen.getByRole("button", { name: "参加者一覧" }));
+    expect(container.querySelector(".call-share")).toBeTruthy();
+    expect(screen.getByRole("complementary", { name: "参加者一覧" })).toBeTruthy();
+
+    rerender(<CallStage {...base} joined={false} />);
+    expect(container.querySelector(".call-share")).toBeNull();
+    expect(screen.queryByRole("complementary", { name: "参加者一覧" })).toBeNull();
+  });
+
+  it("台本が話者を指定しているときは、擬似の発話で上書きしない", () => {
+    const speakingOther = { ...other, speaking: true };
+    const { container } = render(
+      <CallStage {...base} participants={[speakingOther, self]} speakingIntervalMs={1000} />,
+    );
+    act(() => vi.advanceTimersByTime(5000));
+    const speaking = [...container.querySelectorAll('.call-tile[data-speaking="true"]')];
+    expect(speaking).toHaveLength(1);
+    expect(speaking[0].textContent).toContain("MaiMai");
+  });
+
+  it("招待のコピーに失敗したら成功と言わず、手動コピー欄を出す", async () => {
+    Object.assign(navigator, {
+      clipboard: { writeText: vi.fn().mockRejectedValue(new Error("no")) },
+    });
+    const { container } = render(<CallStage {...base} inviteUrl="https://example.com/invite" />);
+    showControls(container);
+    await act(async () => {
+      fireEvent.click(screen.getByRole("button", { name: "招待リンクをコピー" }));
+    });
+    expect(screen.getByRole("status").textContent).toContain("コピーできませんでした");
+    expect(screen.getByLabelText("招待リンク（手動でコピー）")).toBeTruthy();
+  });
+});
+
+describe("参加者一覧が操作バーを覆わない", () => {
+  it("一覧は下の操作バーの上で止まり、狭い画面でも重ならない", async () => {
+    const css = await import("node:fs/promises").then((fs) =>
+      fs.readFile("app/globals.css", "utf8"),
+    );
+    expect(css).toMatch(/\.call-participants\s*\{[^}]*bottom:\s*88px/);
+    expect(css).toMatch(/\.call-participants\s*\{[^}]*max-height:\s*calc\(100% - 100px\)/);
+    expect(css).toMatch(/@media \(max-width: 640px\)[^}]*\.call-participants[^}]*bottom:\s*96px/);
+  });
+});

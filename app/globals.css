@@ -6989,7 +6989,9 @@ a.tw-dm-item:focus-visible {
   position: absolute;
   top: 12px;
   right: 12px;
-  bottom: 12px;
+  /* 下の操作バー（切断）に重ならない高さで止める */
+  bottom: 88px;
+  max-height: calc(100% - 100px);
   z-index: 3;
   width: min(280px, 42%);
   overflow: auto;
@@ -7038,4 +7040,28 @@ a.tw-dm-item:focus-visible {
 /* 呼び出し中は経過時間を 0:00 のまま、操作バーは出さない */
 .call-stage[data-connecting="true"] .call-controls {
   display: none;
+}
+
+/* 狭い画面では参加者一覧を横幅いっぱいにし、操作バーの上に収める */
+@media (max-width: 640px) {
+  .call-participants {
+    left: 12px;
+    width: auto;
+    bottom: 96px;
+  }
+}
+
+/* 招待リンクのコピーに失敗したときの手動コピー欄 */
+.call-invite-manual {
+  position: absolute;
+  left: 50%;
+  bottom: 84px;
+  width: min(420px, 76%);
+  transform: translateX(-50%);
+  padding: 6px 8px;
+  border: 1px solid var(--color-divider);
+  border-radius: 8px;
+  background-color: var(--color-bg-input);
+  color: var(--color-text);
+  font-size: 12px;
 }

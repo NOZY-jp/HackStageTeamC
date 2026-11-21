@@ -1,5 +1,5 @@
 import { fireEvent, render, screen, waitFor, within } from "@testing-library/react";
-import { Activity } from "react";
+import { Activity, useEffect } from "react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { AppShell } from "@/components/discord-like/app-shell";
 import { dmThreadPath } from "@/lib/platform/app-prefix";
@@ -122,6 +122,7 @@ describe("通話の終了と重複防止（#140）", () => {
     await waitFor(() => {
       expect(screen.getByTestId("log").textContent).toContain("通話を終了しました");
     });
+    console.log("LOG", screen.getByTestId("log").textContent);
     expect(screen.getByTestId("log-system").textContent).toBe("true / true");
     unmount();
   });
@@ -152,11 +153,7 @@ function Harness({ showCall }: { showCall: boolean }) {
     <AppShell rail={<span />}>
       <LocalMessagesProvider>
         <Activity mode={showCall ? "hidden" : "visible"}>
-          <StartCallLink
-            href={`${dmThreadPath(threadUrlId)}/call`}
-            threadId="dm-maimai"
-            ariaLabel="通話を開始"
-          >
+          <StartCallLink href={`${dmThreadPath(threadUrlId)}/call`} ariaLabel="通話を開始">
             <span>通話を開始</span>
           </StartCallLink>
         </Activity>
@@ -228,5 +225,38 @@ describe("入場→退出→再入場（#140）", () => {
     expect(container.querySelector(".call-stage h2")).toBeNull();
     // 相手の名前と経過時間はステージに出す
     expect(container.querySelector(".call-stage-timer")).toBeTruthy();
+  });
+});
+
+function SeedActiveCall({ threadId }: { threadId: string }) {
+  const { activeCallThreadId, startCall } = useLocalMessages();
+  useEffect(() => {
+    if (activeCallThreadId !== threadId) startCall(threadId);
+  }, [activeCallThreadId, startCall, threadId]);
+  return null;
+}
+
+describe("接続中に戻ったときのDM通話", () => {
+  it("すでに接続中なら呼び出し中に戻さず、経過時間の起点も変えない", async () => {
+    mockPathname = "/discord.com/channels/@me/1187002356428841501/call";
+    const { container } = render(
+      <AppShell rail={<span />}>
+        <LocalMessagesProvider>
+          <SeedActiveCall threadId="dm-maimai" />
+          <DmCallView
+            threadId="dm-maimai"
+            threadUrlId={threadUrlId}
+            self={self}
+            other={other}
+            connectDelayMs={1000}
+          />
+        </LocalMessagesProvider>
+      </AppShell>,
+    );
+    await waitFor(() =>
+      expect(container.querySelector(".call-stage-status")?.textContent).toBe("接続中"),
+    );
+    // 呼び出し中を経由しない（0:00 に戻さない）
+    expect(container.querySelector(".call-stage")?.getAttribute("data-connecting")).toBe("false");
   });
 });

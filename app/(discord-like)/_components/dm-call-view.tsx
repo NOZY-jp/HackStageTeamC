@@ -34,10 +34,14 @@ export function DmCallView({
   const { activeCallThreadId, activeCallJoinedAt, startCall, endCall } = useLocalMessages();
   const [muted, setMuted] = useState(false);
   // 入室 → 呼び出し中（0:00）→ 接続、の2段階（直リンクでも「終了しました」を出さない）
-  const [connecting, setConnecting] = useState(true);
+  // 切断したあと、同じ画面に留まっているあいだは再接続しない（終了ログの後に開始ログを足さない）
+  const [ended, setEnded] = useState(false);
   const [deafened, setDeafened] = useState(false);
   // 通話中かどうかは Provider が持つ（ページが再マウントされなくても再入場を拾える）
   const connected = activeCallThreadId === threadId;
+  // 接続が成立するまでは「呼び出し中」（切断後は出さない）
+  const connecting = !connected && !ended;
+
   // 通話画面に「入り直した」ことを検知する（SPA で同じ画面が再利用されても初期化する）。
   // 生成したパスと完全一致で比べると、末尾スラッシュや %40 の差で一致しないことがあるため、
   // 正規化した pathname が /call で終わるかで判定する。
@@ -45,18 +49,26 @@ export function DmCallView({
   const onCallPath = normalizedPath.endsWith("/call");
   const [entry, setEntry] = useState(0);
 
+  // 通話画面に「入り直した」ら、切断済みの状態を解いて再接続できるようにする
+  // （同じ画面に留まったままの切断では entry が変わらないので、再接続しない）
+  useEffect(() => {
+    if (entry === 0) return;
+    setEnded(false);
+  }, [entry]);
+
   // 直リンクで開いたときも、呼び出し中のあとで通話を開始する（同じスレッドで二重開始はしない）
   useEffect(() => {
-    setConnecting(true);
-    const timer = setTimeout(() => {
-      startCall(threadId);
-      setConnecting(false);
-    }, connectDelayMs);
+    if (ended || !onCallPath || connected) return;
+    const timer = setTimeout(() => startCall(threadId), connectDelayMs);
     return () => clearTimeout(timer);
-  }, [connectDelayMs, startCall, threadId]);
+  }, [connectDelayMs, connected, ended, onCallPath, startCall, threadId]);
 
   useEffect(() => {
-    if (!onCallPath) return;
+    if (!onCallPath) {
+      // 通話画面を離れたら、次に来たときは再接続できるようにする
+      setEnded(false);
+      return;
+    }
     setEntry((value) => value + 1);
   }, [onCallPath]);
 
@@ -69,6 +81,7 @@ export function DmCallView({
 
   /** 通話を終える（切断ボタン・「チャットに戻る」のどちらでも同じ処理を通す）。 */
   const hangUp = () => {
+    setEnded(true);
     endCall(threadId);
     router.push(dmThreadPath(threadUrlId));
   };
@@ -90,7 +103,10 @@ export function DmCallView({
           href={dmThreadPath(threadUrlId)}
           className="message-header-icon message-header-button"
           aria-label="チャットに戻る"
-          onClick={() => endCall(threadId)}
+          onClick={() => {
+            setEnded(true);
+            endCall(threadId);
+          }}
         >
           <svg
             aria-hidden="true"
@@ -111,7 +127,7 @@ export function DmCallView({
       <div className="pane-scroll voice-body">
         <CallStage
           joined={connected}
-          connecting={connecting || !connected}
+          connecting={connecting}
           muted={muted}
           deafened={deafened}
           participants={
