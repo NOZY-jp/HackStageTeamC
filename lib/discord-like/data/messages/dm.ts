@@ -146,4 +146,56 @@ export const messagesByDMThread: Record<string, Message[]> = {
       body: "狩りの話はいいから、見られたらスタンプ一個だけでも送って",
     },
   ],
+  "dm-kai": [
+    {
+      id: "dm-kai-clue-01",
+      channelId: "dm-kai",
+      sentAt: "2026-11-13T18:10:00+09:00",
+      authorId: "hal",
+      body: "カイさん、ちょっと相談してもいいですか",
+    },
+    {
+      id: "dm-kai-clue-02",
+      channelId: "dm-kai",
+      sentAt: "2026-11-13T18:12:00+09:00",
+      authorId: "kai",
+      body: "どうしたんですか、珍しいですね",
+    },
+    {
+      id: "dm-kai-clue-03",
+      channelId: "dm-kai",
+      sentAt: "2026-11-13T18:15:00+09:00",
+      authorId: "hal",
+      body: "来週末、まいまいと初めてリアルで会うことになったんですけど、緊張してて",
+    },
+    {
+      id: "dm-kai-clue-04",
+      channelId: "dm-kai",
+      sentAt: "2026-11-13T18:17:00+09:00",
+      authorId: "kai",
+      body: "おお、ついにですか。それはめでたいですね",
+    },
+    {
+      // True End 手がかり1: KAI_NICKNAME_ADVICE_MESSAGE_ID (lib/story/places.ts と一致)
+      id: "dm-kai-nickname-advice",
+      channelId: "dm-kai",
+      sentAt: "2026-11-13T18:19:00+09:00",
+      authorId: "kai",
+      body: "距離を縮めたいなら、ちょっとしたあだ名で呼んでみるのもいいですよ。まいまいってカタツムリみたいだから、でんでんむしで「でんちゃん」って呼んでみたら？",
+    },
+    {
+      id: "dm-kai-clue-05",
+      channelId: "dm-kai",
+      sentAt: "2026-11-13T18:22:00+09:00",
+      authorId: "hal",
+      body: "でんちゃん……語呂いいですね。今度さりげなく呼んでみます！",
+    },
+    {
+      id: "dm-kai-clue-06",
+      channelId: "dm-kai",
+      sentAt: "2026-11-13T18:24:00+09:00",
+      authorId: "kai",
+      body: "きっと反応ありますよ。応援してますね",
+    },
+  ],
 };

@@ -1,4 +1,4 @@
-import { render, screen } from "@testing-library/react";
+import { fireEvent, render, screen } from "@testing-library/react";
 import { describe, expect, it } from "vitest";
 import type { Message, MessageAuthor } from "@/lib/discord-like/types";
 import { MessageRow } from "./message-row";
@@ -49,30 +49,41 @@ describe("MessageRow の同一タブリンク", () => {
       id: "denden",
       displayName: "hunter_denden",
       avatarColor: "#7289da",
+      handle: "hunter_denden3243",
       profileUrl: "/pochiblo/mylist/k7q2m9d4",
     },
   };
 
-  it("profileUrl 付きの投稿者は target=_blank なしの内部リンクにする", () => {
+  it("投稿者名を押すとプロフィール内に記事一覧へのリンクを表示する", () => {
     render(
       <MessageRow
         message={{
-          id: "mhc-lfg-0901",
+          id: "mhc-lfg-0903",
           channelId: "mhc-lfg",
           authorId: "denden",
-          sentAt: "2018-04-20T21:14:00+09:00",
-          body: "ネルギガンテを周回するパーティー組みたいです！",
+          sentAt: "2018-04-20T21:24:00+09:00",
+          body: "ゲーマーIDは hunter_denden3243 です！フレンド飛ばしてくれたらロビー招待します！",
         }}
         authors={dendenAuthors}
         grouped={false}
         replyTarget={undefined}
-        time="21:14"
+        time="21:24"
       />,
     );
-    const authorLink = screen.getByRole("link", { name: "hunter_denden" });
-    expect(authorLink).toHaveAttribute("href", "/pochiblo/mylist/k7q2m9d4");
-    expect(authorLink).toHaveClass("message-author");
-    expect(authorLink).not.toHaveAttribute("target");
+    const authorButton = screen.getByRole("button", { name: "hunter_denden" });
+    expect(authorButton).toHaveAttribute("aria-expanded", "false");
+    expect(screen.queryByRole("link")).not.toBeInTheDocument();
+
+    fireEvent.click(authorButton);
+    expect(authorButton).toHaveAttribute("aria-expanded", "true");
+    expect(screen.getByText("hunter_denden3243")).toBeVisible();
+    const profileLink = screen.getByRole("link", { name: "pochiblo/mylist/k7q2m9d4" });
+    expect(profileLink).toHaveAttribute("href", "/pochiblo/mylist/k7q2m9d4");
+    expect(profileLink).not.toHaveAttribute("target");
+
+    fireEvent.click(authorButton);
+    expect(authorButton).toHaveAttribute("aria-expanded", "false");
+    expect(profileLink).not.toBeInTheDocument();
   });
 
   it("本文内の pochiblo.jp URL を同一タブの /pochiblo リンクにし、外部モックURLはそのまま残す", () => {

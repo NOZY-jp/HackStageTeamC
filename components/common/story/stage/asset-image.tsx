@@ -1,6 +1,7 @@
 "use client";
 
 import {
+  type Asset,
   BACKGROUNDS,
   type BackgroundId,
   characters,
@@ -26,7 +27,10 @@ export function BackgroundImage({ background }: { background: BackgroundId | { c
   if (typeof background !== "string") {
     return <div className="sp-fill" style={{ backgroundColor: background.color }} />;
   }
-  const asset: { label: string; color: string; src?: string } = BACKGROUNDS[background];
+  const asset: Asset = BACKGROUNDS[background];
+  if (asset.solid) {
+    return <div className="sp-fill" style={{ backgroundColor: asset.color }} />;
+  }
   if (!asset.src) {
     return <Placeholder label={`背景：${asset.label}`} color={asset.color} kind="background" />;
   }

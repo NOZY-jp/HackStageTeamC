@@ -210,7 +210,7 @@ export const entries: Entry[] = [
         id: "c-e20180316-2",
         authorName: "モンハン部の先輩",
         postedAt: "2018-03-17T07:35:00+09:00",
-        body: "ご卒業おめでとうございます。写真の2人、いい笑顔ですね",
+        body: "ご卒業おめでとうございます。高校でも一緒に狩りに行けるといいですね",
       },
       {
         id: "c-e20180316-3",
@@ -234,7 +234,7 @@ export const entries: Entry[] = [
         id: "c-e20180316-6",
         authorName: "通りすがりのハンター",
         postedAt: "2018-03-27T18:52:00+09:00",
-        body: "卒業おめでとうございます。制服姿、青春って感じでいいですね",
+        body: "卒業おめでとうございます。友達と同じ高校に行けるっていいですね",
       },
       {
         id: "c-e20180316-7",
@@ -255,14 +255,6 @@ export const entries: Entry[] = [
       {
         kind: "paragraph",
         text: "いちばん仲のいい友達と写真を撮ってもらいました。高校も同じなので、これからもずっと一緒に狩りに行けます！",
-      },
-      {
-        kind: "image",
-        src: "/blog-like/photos/graduation.webp",
-        alt: "中学校の卒業式の看板の前で、制服姿の2人が並んで立っている。左の子が卒業証書の筒を持ち、右の子の肩に腕を回している",
-        width: 1200,
-        height: 800,
-        caption: "右が私です笑",
       },
     ],
   },
@@ -413,7 +405,7 @@ export const entries: Entry[] = [
         id: "c-e20181117-5",
         authorName: "夜更かしハンター",
         postedAt: "2018-11-24T00:33:00+09:00",
-        body: "遅れましたが受賞おめでとう！ 川面のオレンジ、ずっと見てられる",
+        body: "遅れましたが受賞おめでとう！ ビルのあいだのオレンジ、ずっと見てられる",
       },
       {
         id: "c-e20181117-6",
@@ -437,7 +429,7 @@ export const entries: Entry[] = [
         id: "c-e20181117-9",
         authorName: "ガンナー見習い",
         postedAt: "2018-12-10T22:19:00+09:00",
-        body: "受賞おめでとうございます。橋の向こうの夕日、いい構図ですね",
+        body: "受賞おめでとうございます。鳩と同じ目線で撮ってるの、いい構図ですね",
       },
     ],
     visibility: "unlisted",
@@ -452,8 +444,8 @@ export const entries: Entry[] = [
       },
       {
         kind: "image",
-        src: "/blog-like/photos/contest-photo.svg",
-        alt: "夕方の川沿い。橋の向こうに沈む夕日と、川面に映るオレンジの光",
+        src: "/blog-like/photos/contest-photo.webp",
+        alt: "夕方のビル街。ビルのあいだに沈む夕日と、歩道の縁石にとまる一羽の鳩",
         width: 1200,
         height: 800,
         caption: "賞をもらった写真です。タイトルは「帰り道」",

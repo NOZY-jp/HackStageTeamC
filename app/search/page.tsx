@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Suspense } from "react";
 import { SearchView } from "@/components/search/search-view";
 import { searchWeb } from "@/lib/search";
+import { searchGoogle } from "@/lib/search/google";
 
 type Props = {
   searchParams: Promise<{ q?: string | string[] }>;
@@ -13,8 +14,8 @@ export const metadata: Metadata = {
 
 async function SearchResults({ searchParams }: Props) {
   const { q } = await searchParams;
-  const query = (Array.isArray(q) ? q[0] : (q ?? "")).trim();
-  const results = query ? searchWeb(query) : [];
+  const query = ((Array.isArray(q) ? q[0] : q) ?? "").trim();
+  const results = query ? [...searchWeb(query), ...(await searchGoogle(query))] : [];
   return <SearchView query={query} results={results} />;
 }
 

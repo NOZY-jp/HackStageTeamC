@@ -58,7 +58,7 @@ export type SearchDocument = {
 
 export type SearchResult = {
   id: string;
-  kind: SearchResultKind;
+  kind: SearchResultKind | "web";
   title: string;
   url: string;
   displayUrl: string;
@@ -168,7 +168,7 @@ function buildContestDocuments(): SearchDocument[] {
       primaryTitle: `${PHOTO_CONTEST_NAME} 結果`,
       url: PHOTO_CONTEST_RESULT_PATH,
       displayUrl: toDisplayUrl(PHOTO_CONTEST_RESULT_PATH),
-      summary: `「${PHOTO_CONTEST_NAME}」の結果ページ。優秀賞に「帰り道」（夕方の川沿いを写した作品）が選ばれました。`,
+      summary: `「${PHOTO_CONTEST_NAME}」の結果ページ。優秀賞に「帰り道」（夕方のビル街を写した作品）が選ばれました。`,
       siteName: PHOTO_CONTEST_NAME,
       keywords: [
         PHOTO_CONTEST_NAME,
@@ -181,7 +181,7 @@ function buildContestDocuments(): SearchDocument[] {
       ],
       chunks: [
         `「${PHOTO_CONTEST_NAME}」の結果が発表されました。`,
-        "優秀賞 受賞作品「帰り道」。夕方の川沿いで、橋の向こうに沈む夕日を撮った一枚。",
+        "優秀賞 受賞作品「帰り道」。夕方のビル街で、縁石にとまる鳩とビルのあいだに沈む夕日を撮った一枚。",
       ],
     },
   ];

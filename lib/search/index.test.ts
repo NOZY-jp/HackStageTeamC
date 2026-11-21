@@ -170,6 +170,8 @@ describe("SearchView (Seek UI)", () => {
     const contestLink = screen.getByRole("link", { name: `${PHOTO_CONTEST_NAME} 結果` });
     expect(contestLink).toHaveAttribute("href", PHOTO_CONTEST_RESULT_PATH);
     expect(contestLink).not.toHaveAttribute("target");
+    const googleLink = screen.getByRole<HTMLAnchorElement>("link", { name: "Googleで検索" });
+    expect(new URL(googleLink.href).searchParams.get("q")).toBe(PHOTO_CONTEST_NAME);
     expect(
       screen.getByText("pochiblo.jp/denden0102/contest/soukyuu-photo-award-2020"),
     ).toBeInTheDocument();

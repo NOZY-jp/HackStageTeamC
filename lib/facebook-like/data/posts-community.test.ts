@@ -68,7 +68,7 @@ describe("fbCommunityPosts", () => {
       counts.set(post.authorId, (counts.get(post.authorId) ?? 0) + 1);
     }
     expect(counts.get("u40") ?? 0).toBe(0);
-    const communityUsers = fbUsers.filter((u) => u.id !== "u40");
+    const communityUsers = fbUsers.filter((u) => u.id !== "u40" && !u.hiddenFromDirectory);
     expect(communityUsers).toHaveLength(19);
     for (const user of communityUsers) {
       const count = counts.get(user.id) ?? 0;
