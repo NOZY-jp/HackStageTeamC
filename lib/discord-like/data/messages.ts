@@ -1,5 +1,5 @@
 import type { Message } from "../types";
-import { messagesByDMThread } from "./messages/dm";
+import { messagesByDMThread } from "./messages/dm-expanded";
 import { messagesByChannelMhc } from "./messages/mhc";
 import { serversHistory } from "./messages/servers";
 

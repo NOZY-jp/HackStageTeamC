@@ -115,9 +115,19 @@ describe("ダミーデータの整合性", () => {
     expect(new Set(handles).size).toBe(handles.length);
   });
 
-  it("DM スレッドは MaiMai とカイの2件（調査の会話は公開チャンネルに置かない・#121）", () => {
+  it("DM スレッドは9本（恋人・依頼主・友人・先輩・後輩。#133）", () => {
     const threads = listDMThreads();
-    expect(threads.map((thread) => thread.id).sort()).toEqual(["dm-kai", DM_THREAD_ID]);
+    expect(threads.map((thread) => thread.id).sort()).toEqual([
+      "dm-gunlance",
+      "dm-hayashi",
+      "dm-jun",
+      "dm-kai",
+      DM_THREAD_ID,
+      "dm-miyu",
+      "dm-ootsuka",
+      "dm-taku",
+      "dm-yama",
+    ]);
     const mai = threads.find((thread) => thread.id === DM_THREAD_ID);
     expect(mai?.participantIds).toEqual([SELF_USER_ID, "maimai"]);
     const kai = threads.find((thread) => thread.id === "dm-kai");
@@ -239,7 +249,8 @@ describe("ダミーデータの整合性", () => {
     const dm = allDMMessages();
     // 期間比はサーバー全体（3サーバー合算）で見る
     const server = allServerMessages();
-    // データ量で絶対値は動くため、「後半ほど DM が濃い」傾向だけを見る
+    // データ量（#131〜#133）で絶対値は動くため、「時間が進むほど DM が濃くなる」傾向を見る。
+    // 最初の期間に対して最後の期間が trendMultiplier 倍以上になっていること。
     const ratios: number[] = [];
     for (const period of PERIODS) {
       const inRange = (message: { sentAt: string }) =>
@@ -256,8 +267,9 @@ describe("ダミーデータの整合性", () => {
   });
 
   it("付き合った後は週5日以上やり取りし、空いても3日まで（#130 で新仕様化）", () => {
-    // 現状はデータが少ないので、しきい値は「週の日数の下限」「連続空白の上限」に置いている
-    expect(VOLUME_LIMITS.datingWeek.minDays).toBeGreaterThanOrEqual(2);
+    // 受入条件そのもの（週5日以上・空き3日まで）を固定する。緩めるとここで落ちる
+    expect(VOLUME_LIMITS.datingWeek.minDays).toBe(5);
+    expect(VOLUME_LIMITS.datingWeek.maxGapDays).toBe(3);
     const dm = dmMessages();
     const days = [
       ...new Set(

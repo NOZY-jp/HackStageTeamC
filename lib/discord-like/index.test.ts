@@ -19,8 +19,18 @@ describe("lib/discord-like のアクセサ", () => {
 
   it("listDMThreads は lastMessageAt 降順で返す", () => {
     const threads = listDMThreads();
-    // MaiMai との DM と、カイとの DM（調査の会話は非公開の場・#121）
-    expect(threads.map((thread) => thread.id)).toEqual(["dm-kai", "dm-maimai"]);
+    // 恋人・依頼主・友達・先輩・後輩など9本（#133）
+    expect(threads.map((thread) => thread.id).sort()).toEqual([
+      "dm-gunlance",
+      "dm-hayashi",
+      "dm-jun",
+      "dm-kai",
+      "dm-maimai",
+      "dm-miyu",
+      "dm-ootsuka",
+      "dm-taku",
+      "dm-yama",
+    ]);
     const times = threads.map((thread) => thread.lastMessageAt);
     expect(times).toEqual([...times].sort().reverse());
     for (const thread of threads) {

@@ -43,7 +43,7 @@ export const VOLUME_LIMITS = {
   /** サーバーの数（旧3サーバー名は禁止のまま） */
   guildCount: 3, // mhc・univ・friend（#132）
   /** DM の総メッセージ数（範囲） */
-  dmMessages: { min: 436, max: 2000 }, // 目標 1,400〜1,650
+  dmMessages: { min: 1400, max: 2000 }, // #133 の 1,500 通を下限で守る
   /** サーバーの総メッセージ数（3サーバー合算・範囲） */
   serverMessages: { min: 1570, max: 2900 }, // #131 で 1,570。目標 2,500〜2,900
   /**
@@ -76,6 +76,10 @@ export const QUALITY_LIMITS = {
   /** mhc 内での kai の発言上限（D10） */
   kaiInMhc: 5,
   /** 各月で最低限発言がある日数（以上） */
+  /** 各月で会話しない日を最低これだけ残す（#133） */
+  silentDaysPerMonthMin: 2,
+  /** 会話が空いてよい連続日数（#133） */
+  silentGapMaxDays: 3,
   minActiveDaysPerMonth: 10,
   /** 各月で「6日以降」にも発言があること */
   activityAfterDay: 6,
