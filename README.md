@@ -26,6 +26,10 @@ npm run dev   # http://localhost:3000
 
 `.github/workflows/ci.yml` が `main` への push と `main` 向け PR で `npm ci` → `biome ci .` → `npm run build` を実行する。チェック名は `ci`。
 
+## デプロイ
+
+Vercel free プランの 1日100デプロイ上限を踏まないため、Git 連携の自動デプロイは `vercel.json` の `git.deploymentEnabled` で **main のみ**に絞っている（それ以外のブランチ push や PR ではデプロイされない）。プレビューが必要な PR では、都度そのブランチ名を `deploymentEnabled` に `true` で足して1回だけ作る（Issue #167 の PM 判断）。本番デプロイは main へのマージ時のみ。検証は Vercel プレビュー前提にせず、`npm run build` → `next start` のローカル実測（必要に応じてスクリーンショット添付）を標準とする。
+
 ## ボイスチャンネル（疑似）
 
 ボイスチャンネルの参加・退出は UI だけの疑似実装で、**参加しても音は出ない**（実音声・マイク権限・WebRTC は使わない）。
