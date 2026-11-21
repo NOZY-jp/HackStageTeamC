@@ -51,7 +51,7 @@ export const twitterProfiles: Profile[] = [
     // 記事の名前で検索すると見つかる（bio に記事名を残している）。
     // 改名したことと旧ハンドル・旧表示名を bio に残す（今は誰も使っていない）
     userId: "tw-old-denden",
-    bio: "前は @hunter_denden0102。「写真コンテストで賞をもらいました！」書いた人。BFF: @kanon__dayo",
+    bio: "前は @hunter_denden0102（hunter_denden って名前だった）。「写真コンテストで賞をもらいました！」書いた人。BFF: @kanon__dayo",
     // 旧ブログの最古記事（2018-01-27）より前から使っているアカウント
     joinedAt: "2017-12-01",
     followingCount: 38,
@@ -366,10 +366,13 @@ export const twitterViewCounts: Record<string, number> = {
   "post-203": 18,
 };
 
+// トレンドを押すと名前のまま検索される。着弾先はリョウのゲーム仲間（Hal・Mai・ソウ）の
+// 雑談だけに絞る — 手がかりの投稿（post-101/102）やかのん・旧アカウントに直行する名前は置かない。
+// postCount は劇中の小さなコミュニティらしい件数に留める。
 export const twitterTrends: Trend[] = [
-  { id: "trend-1", category: "ゲーム · トレンド", name: "例のゲーム", postCount: 12400 },
-  { id: "trend-2", category: "ゲーム · トレンド", name: "レイド", postCount: 8921 },
-  { id: "trend-3", category: "ゲーム · トレンド", name: "双剣", postCount: 3560 },
-  { id: "trend-4", category: "トレンド", name: "ブログ", postCount: 1204 },
-  { id: "trend-5", category: "トレンド", name: "アルバム", postCount: 987 },
+  { id: "trend-1", category: "ゲーム · トレンド", name: "例のゲーム", postCount: 46 },
+  { id: "trend-2", category: "ゲーム · トレンド", name: "レイド", postCount: 31 },
+  { id: "trend-3", category: "ゲーム · トレンド", name: "迷子", postCount: 24 },
+  { id: "trend-4", category: "トレンド", name: "週末", postCount: 15 },
+  { id: "trend-5", category: "トレンド", name: "電話", postCount: 9 },
 ];

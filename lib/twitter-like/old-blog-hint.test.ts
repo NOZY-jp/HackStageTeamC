@@ -72,7 +72,9 @@ describe("第三章 Twitter 側（#94）", () => {
     // 旧名は bio から直接読める（handle の先頭一致では通らない形で検査する）
     const profile = accounts().find((candidate) => candidate.handle === RENAMED_HANDLE);
     expect(profile?.bio).toContain(OLD_HANDLE);
-    expect(profile?.bio).toContain("hunter_denden");
+    // 旧表示名は旧ハンドルの部分文字列としてではなく、独立した要素として bio に残す
+    const bioWithoutOldHandle = (profile?.bio ?? "").replaceAll(OLD_HANDLE, "");
+    expect(bioWithoutOldHandle).toContain("hunter_denden");
     // 記事名も bio にあり、記事名検索でこのアカウントに届く
     expect(profile?.bio).toContain(ARTICLE_TITLE);
     expect(old?.handle).not.toBe("maimaimaimai");

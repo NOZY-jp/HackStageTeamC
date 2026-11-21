@@ -197,6 +197,22 @@ describe("twitterTrends（いま話題）", () => {
       .map((trend) => trend.name);
     expect(deadEnds).toEqual([]);
   });
+
+  it("どのトレンドもゲーム仲間の雑談にしか着弾しない（手がかりの投稿に直行させない）", () => {
+    // リョウがこの SNS で知っているのは Hal・Mai・ソウだけ。
+    // かのん・リア友・旧アカウントの投稿に着弾する名前はトレンドに置かない
+    const smallTalkAuthors = new Set(["tw-hal", "tw-mai", "tw-sou"]);
+    // 段階2の手がかり投稿。post-101 は Mai 本人の投稿なので authorId だけでは弾けない
+    const cluePostIds = new Set(["post-101", "post-102"]);
+    for (const trend of listTrends()) {
+      const hits = searchPosts(trend.name);
+      expect(hits.length).toBeGreaterThan(0);
+      for (const hit of hits) {
+        expect(smallTalkAuthors.has(hit.authorId)).toBe(true);
+        expect(cluePostIds.has(hit.id)).toBe(false);
+      }
+    }
+  });
 });
 
 describe("searchUsers", () => {
