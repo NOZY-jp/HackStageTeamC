@@ -160,7 +160,7 @@ describe("フリーワードと順序", () => {
 describe("旧垢と不正フィルタ", () => {
   it("旧ハンドルは発言が無くても「該当ユーザー」として返る", () => {
     const response = run("from:hunter_denden3243");
-    expect(response.hits).toHaveLength(0);
+    expect(response.hits.length).toBeGreaterThan(0);
     expect(response.matchedUsers.map((user) => user.handle)).toContain("hunter_denden3243");
   });
 

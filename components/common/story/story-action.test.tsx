@@ -59,8 +59,8 @@ describe("手がかりの導線（#119）", () => {
 
     const state = { flags: seen.at(-1) ?? [], completed: ["ch5-kai-contact"], choices: {} };
     expect(state.flags).toContain("s10-talkup-match");
-    const report = availableBeats(state).find((beat) => beat.place === "discord:dm-kai");
-    expect(report?.choices?.[0]?.label).toBe("住所を特定しました");
+    const report = availableBeats(state).find((beat) => beat.id === "ch5-talkup");
+    expect(report?.choices?.[0]?.label).toBe("現地へ向かう");
   });
 
   it("順序7の前に段階8のボタンは出ない（飛ばせない）", () => {
@@ -112,7 +112,7 @@ describe("手がかりの導線（#119）", () => {
     };
     expect(
       availableBeats(skipped).some((beat) =>
-        beat.choices?.some((choice) => choice.label === "住所を特定しました"),
+        beat.choices?.some((choice) => choice.label === "現地へ向かう"),
       ),
     ).toBe(false);
     const done = {
@@ -122,7 +122,7 @@ describe("手がかりの導線（#119）", () => {
     };
     expect(
       availableBeats(done).some((beat) =>
-        beat.choices?.some((choice) => choice.label === "住所を特定しました"),
+        beat.choices?.some((choice) => choice.label === "現地へ向かう"),
       ),
     ).toBe(true);
   });

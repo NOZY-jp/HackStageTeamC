@@ -150,14 +150,36 @@ export function searchPosts(query: string): Post[] {
 }
 
 /**
- * ユーザーを検索する。対象は displayName・handle・bio。
+ * 旧アカウントを過去ブログの記事タイトル等でも検索で見つけられるようにする補助キーワード。
+ * 鍵垢のため投稿本文自体は検索に出さないが、旧記事タイトル等の特定語句でアカウント検索に載せる。
+ * （「ブログ」単体のような一般語ではステップ2でネタバレしないよう除外する）
+ */
+const EXTRA_USER_SEARCH_KEYWORDS: Record<string, readonly string[]> = {
+  "tw-old-denden": [
+    "写真コンテストで賞をもらいました！",
+    "【MHW】弓属性強化ガン積み構成まとめ",
+    "ブログはじめました！",
+    "hunter_denden0102",
+  ],
+};
+
+/**
+ * ユーザーを検索する。対象は displayName・handle・bio（および補助キーワード）。
  */
 export function searchUsers(query: string): TwitterUser[] {
   const terms = toTerms(query);
+  const normalizedQuery = query.trim().toLowerCase();
   return copyOf(
     twitterUsers.filter((user) => {
       const bio = twitterProfiles.find((profile) => profile.userId === user.id)?.bio ?? "";
-      return matchesAllTerms([user.displayName, user.handle, bio].join("\n"), terms);
+      if (matchesAllTerms([user.displayName, user.handle, bio].join("\n"), terms)) {
+        return true;
+      }
+      const extras = EXTRA_USER_SEARCH_KEYWORDS[user.id];
+      if (!extras || normalizedQuery === "ブログ") {
+        return false;
+      }
+      return extras.some((keyword) => matchesAllTerms(keyword, terms));
     }),
   );
 }

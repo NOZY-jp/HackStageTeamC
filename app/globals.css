@@ -39,6 +39,14 @@
   /* 動きの長さ。prefers-reduced-motion では 0 にする（!important を使わない） */
   --motion-fast: 120ms;
   --motion-normal: 160ms;
+
+  /* ブラウザバー・ストーリーのドックの高さを引いた表示領域 */
+  --story-dock-height: 0px;
+  --story-viewport: calc(
+    100dvh -
+    var(--browser-chrome-height, 0px) -
+    var(--story-dock-height, 0px)
+  );
 }
 
 @theme inline {
@@ -6211,7 +6219,7 @@ a.tw-dm-item:focus-visible {
 /* 物語の中でチャットが届いたときの知らせ（画面右上） */
 .sw-notice {
   position: fixed;
-  top: 16px;
+  top: calc(var(--browser-chrome-height, 0px) + 12px);
   right: 16px;
   display: flex;
   align-items: center;

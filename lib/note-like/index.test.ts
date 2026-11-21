@@ -63,12 +63,23 @@ describe("lib/note-like のアクセサ", () => {
 });
 
 describe("matchesQuery / searchArticles", () => {
-  it("タイトル・本文・タグ・書き手の名前とIDに一致する", () => {
+  it("タイトル・本文・タグ・書き手の名前/自己紹介/IDに一致する", () => {
     expect(matchesQuery(article, creator, "駅前")).toBe(true);
     expect(matchesQuery(article, creator, "窓際")).toBe(true);
     expect(matchesQuery(article, creator, "日記")).toBe(true);
     expect(matchesQuery(article, creator, "書き手A")).toBe(true);
+    expect(matchesQuery(article, creator, "テスト用")).toBe(true);
     expect(matchesQuery(article, creator, "writer_a")).toBe(true);
+  });
+
+  it("「でんでん」「MaiMai」「弓属性強化ガン積み構成」で旧ブログ移行記事・スクショ記事が見つかる", () => {
+    expect(searchArticles("でんでん").map((item) => item.id)).toContain(
+      "maimai-2020-02-screenshot",
+    );
+    expect(searchArticles("MaiMai").map((item) => item.id)).toContain("maimai-2020-02-screenshot");
+    expect(searchArticles("弓属性強化ガン積み構成").map((item) => item.id)).toContain(
+      "maimai-2019-08-bow-build",
+    );
   });
 
   it("大文字小文字と先頭の # を無視する", () => {

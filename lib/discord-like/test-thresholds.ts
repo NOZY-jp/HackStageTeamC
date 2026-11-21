@@ -64,6 +64,17 @@ export const NATURALNESS_LIMITS = {
 
 /** 「モンハンコミュニティ」に発言を載せる人物と、カイの登場範囲。 */
 export const QUALITY_LIMITS = {
-  mhcSpeakers: ["hal", "maimai", "gunlance", "mina", "haruka", "slime", "jijii", "master", "kai"],
+  mhcSpeakers: [
+    "hal",
+    "maimai",
+    "gunlance",
+    "mina",
+    "haruka",
+    "slime",
+    "jijii",
+    "master",
+    "kai",
+    "denden",
+  ],
   kaiInMhc: 5,
 } as const;

@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { BlogFrame } from "@/components/blog-like/blog-frame";
+import { StoryTrigger } from "@/components/common/story/story-trigger";
 import {
   entryPath,
   formatDate,
@@ -42,6 +43,7 @@ export default async function MylistPage({ params }: Props) {
 
   return (
     <BlogFrame blog={blog}>
+      {mylist.id === "k7q2m9d4" ? <StoryTrigger flag="s06-old-profile-link" /> : null}
       <section className="pb-mylist">
         <p className="pb-entry-date">マイリスト</p>
         <h1 className="pb-entry-title">{mylist.title}</h1>

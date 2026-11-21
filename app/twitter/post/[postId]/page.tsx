@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
+import { StoryTrigger } from "@/components/common/story/story-trigger";
 import { ReplyComposer } from "@/components/twitter-like/composer";
 import { replyTargetAuthor, usersById } from "@/components/twitter-like/lookup";
 import { PageHeader } from "@/components/twitter-like/page-header";
@@ -59,6 +60,9 @@ export default async function TwitterPostPage({ params }: Props) {
 
   return (
     <>
+      {post.id === "post-101" || post.id === "post-102" ? (
+        <StoryTrigger flag="s02-bff-reply" />
+      ) : null}
       <main className="tw-main">
         <PageHeader title="ポスト" backHref="/twitter" />
         {ancestors.map((ancestor, i) => {

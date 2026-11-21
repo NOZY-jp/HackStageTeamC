@@ -54,6 +54,7 @@ describe("lib/blog-like のダミーデータの整合性", () => {
   it("昔の呼び方と本名は、コメントも含めて出てこない", () => {
     // 検査する語そのものをリポジトリに残さない（文字コードで組み立てる）
     const forbidden = [
+      String.fromCodePoint(0x3086, 0x3044), // 旧名ひらがな
       String.fromCodePoint(0x3086, 0x3063, 0x3061, 0x3083, 0x3093), // 旧呼称
       String.fromCodePoint(0x670d, 0x90e8), // 姓
       String.fromCodePoint(0x7531, 0x6bd4), // 名
@@ -124,5 +125,15 @@ describe("lib/blog-like のダミーデータの整合性", () => {
     for (const src of sources) {
       expect(existsSync(join(process.cwd(), "public", src)), src).toBe(true);
     }
+  });
+
+  it("閉鎖のお知らせのコメントと限定公開の弓構成記事が遷移導線に沿って存在する", () => {
+    const notice = entries.find((entry) => entry.id === "e20200211");
+    expect(notice?.visibility).toBe("public");
+    expect(notice?.comments.some((c) => c.body.includes("弓属性強化ガン積み構成"))).toBe(true);
+
+    const bowEntry = entries.find((entry) => entry.id === "e20190811");
+    expect(bowEntry?.visibility).toBe("unlisted");
+    expect(bowEntry?.title).toContain("弓属性強化ガン積み構成");
   });
 });

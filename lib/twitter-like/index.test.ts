@@ -71,7 +71,7 @@ describe("ホームのタイムライン（listHomePosts）", () => {
     expect(getPost("post-101")).toBeDefined();
     expect(getPost("post-103")).toBeDefined();
     expect(listReplies("post-101").map((post) => post.id)).toEqual(["post-102"]);
-    expect(searchPosts("クラッチクロー").map((post) => post.id)).toEqual(["post-101"]);
+    expect(searchPosts("スキル枠").map((post) => post.id)).toEqual(["post-101"]);
     // フォロー中・自分の近況の投稿は出る
     expect(ids).toContain("post-014");
     expect(ids).toContain("post-023");
@@ -221,6 +221,14 @@ describe("searchUsers", () => {
     expect(searchUsers("ソウ").map((user) => user.id)).toEqual(["tw-sou"]);
     const bioMatch = searchUsers("古い友達");
     expect(bioMatch.map((user) => user.id)).toEqual(["tw-kanon"]);
+  });
+
+  it("過去ブログの記事タイトル等で旧アカウントをユーザー検索できる（単体の一般語「ブログ」では出さない）", () => {
+    expect(searchUsers("弓属性強化ガン積み構成").map((user) => user.handle)).toContain(
+      "maimai_mhw",
+    );
+    expect(searchUsers("ブログはじめました！").map((user) => user.handle)).toContain("maimai_mhw");
+    expect(searchUsers("ブログ")).toEqual([]);
   });
 
   it("空のクエリでは何も返さない", () => {

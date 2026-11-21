@@ -1,8 +1,39 @@
 import type { Message } from "../../types";
+import { OLD_HANDLE } from "../names";
 import { mhcScript } from "./mhc-script";
 
 /** 添付画像とピン留めの固定IDを含む投稿。返信はチャンネルの台本に記載。 */
 const fixedPosts: Record<string, Message[]> = {
+  "mhc-lfg": [
+    {
+      id: "mhc-lfg-0901",
+      channelId: "mhc-lfg",
+      authorId: "denden",
+      sentAt: "2018-04-20T21:14:00+09:00",
+      body: "ネルギガンテを周回するパーティー組みたいです！",
+    },
+    {
+      id: "mhc-lfg-0902",
+      channelId: "mhc-lfg",
+      authorId: "jijii",
+      sentAt: "2018-04-20T21:20:00+09:00",
+      body: "参加したいです！",
+    },
+    {
+      id: "mhc-lfg-0903",
+      channelId: "mhc-lfg",
+      authorId: "denden",
+      sentAt: "2018-04-20T21:24:00+09:00",
+      body: `ゲーマーIDは ${OLD_HANDLE} です！フレンド飛ばしてくれたらロビー招待します！`,
+    },
+    {
+      id: "mhc-lfg-0904",
+      channelId: "mhc-lfg",
+      authorId: "denden",
+      sentAt: "2018-04-21T20:42:00+09:00",
+      body: "双剣と弓の装備メモ、ブログの記事一覧にまとめました！よかったら見てください https://pochiblo.jp/mylist/k7q2m9d4",
+    },
+  ],
   "mhc-clips": [
     {
       id: "mhc-clips-0001",

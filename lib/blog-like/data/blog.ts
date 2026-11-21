@@ -1,6 +1,6 @@
 import { migrationArticles } from "../../blog-migration/articles";
 import type { Blog, Entry, Mylist } from "../types";
-import { LEAF_CREATOR_ID, LEAF_HOST, OLD_TWIXER_HANDLE } from "./names";
+import { LEAF_HOST, OLD_TWIXER_HANDLE } from "./names";
 
 /**
  * 彼女（ゆい、2003-01-02 生まれ）が中高生のころ書いていた元のブログ「でんでんの狩猟日記」。
@@ -462,6 +462,7 @@ export const entries: Entry[] = [
         kind: "paragraph",
         text: "ゲームの景色を撮るのが好きで、現実でもやってみたら楽しかったです。また何か出してみたい！",
       },
+      twixerLink("1063765192483155968"),
     ],
   },
   {
@@ -532,6 +533,51 @@ export const entries: Entry[] = [
         kind: "paragraph",
         text: "秋にワールドの大型の追加コンテンツが出るらしいので、それまでに装備を整えておきます！",
       },
+    ],
+  },
+  {
+    id: "e20190811",
+    blogId: "denden0102",
+    title: "【MHW】弓属性強化ガン積み構成まとめ",
+    category: "攻略",
+    publishedAt: "2019-08-11T21:15:00+09:00",
+    comments: [
+      {
+        id: "c-e20190811-1",
+        authorName: "弓の人",
+        postedAt: "2019-08-11T23:08:00+09:00",
+        body: "属性強化を最大まで積む構成、たしかに会心撃【属性】と噛み合いますよね。体術の調整が参考になります",
+      },
+      {
+        id: "c-e20190811-2",
+        authorName: "ガンナー見習い",
+        postedAt: "2019-08-13T18:45:00+09:00",
+        body: "双剣だけじゃなくて弓の装備記事も助かります！ 強走薬が手放せなくなりそう",
+      },
+      {
+        id: "c-e20190811-3",
+        authorName: "通りすがりのハンター",
+        postedAt: "2019-08-16T12:19:00+09:00",
+        body: "火・氷・雷の3属性だけでも揃えると世界が変わりますよね",
+      },
+    ],
+    visibility: "unlisted",
+    body: [
+      {
+        kind: "paragraph",
+        text: "最近は双剣だけじゃなく弓も触っていて、各属性の弓をひと通り作りました！ とにかく属性ダメージを盛る構成をメモしておきます。",
+      },
+      { kind: "heading", text: "基本の考え方" },
+      {
+        kind: "paragraph",
+        text: "レウス2部位で「会心撃【属性】」を出しつつ、武器に合わせた属性攻撃強化を上限まで積むのがいちばん火力が伸びました。見切りと弱点特効で会心率を上げておくと、剛射のダメージがかなり変わります。",
+      },
+      { kind: "heading", text: "スタミナ管理" },
+      {
+        kind: "paragraph",
+        text: "体術をLv3まで積んでおけば、強走薬やネコの体術と合わせてステップをずっと回せます。枠がかつかつのときは、攻撃系より先に体術を残したほうが立ち回りやすいです。",
+      },
+      twixerLink("1163051284920143872"),
     ],
   },
   {
@@ -678,6 +724,12 @@ export const entries: Entry[] = [
         postedAt: "2020-02-27T22:07:00+09:00",
         body: "お礼を言いたくて。双剣の装飾品の記事、いまだに開いてます。ありがとう",
       },
+      {
+        id: "c-e20200211-7",
+        authorName: "弓使い",
+        postedAt: "2020-02-28T21:34:00+09:00",
+        body: "弓属性強化ガン積み構成の記事、何度も助けられました。お疲れさまでした",
+      },
     ],
     visibility: "public",
     body: [
@@ -686,7 +738,7 @@ export const entries: Entry[] = [
         text: "このブログは今日で閉鎖します。中3から2年間、読んでくれた人、コメントをくれた人、本当にありがとうございました。",
       },
       { kind: "paragraph", text: "これからは leaf で書きます。記事は少しずつ向こうに移しました。" },
-      { kind: "link", lead: "新しい場所はこちら", url: `${LEAF_HOST}/${LEAF_CREATOR_ID}` },
+      { kind: "link", lead: "新しい場所はこちら", url: LEAF_HOST },
     ],
   },
   ...migrationArticles.map(

@@ -179,6 +179,11 @@ export function useStoryOptional(): StoryContextValue | null {
   return useContext(StoryContext);
 }
 
+/** 共通クローム・検索パネル向けの互換エクスポート。 */
+export function useOptionalStory(): StoryContextValue | null {
+  return useContext(StoryContext);
+}
+
 export function useStory(): StoryContextValue {
   const context = useContext(StoryContext);
   if (!context) {
