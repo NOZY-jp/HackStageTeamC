@@ -197,6 +197,13 @@ describe("ゲームでの場面の進行", () => {
     play("ch1-prologue");
     play("ch2-disappearance");
     play("ch3-ask-kai");
+    expect(completedChats(state)).toContainEqual(
+      expect.objectContaining({
+        channel: "discord:dm-kai",
+        from: "kai",
+        text: "え、連絡取れなくなったってほんと？",
+      }),
+    );
     expect(state.flags).toContain("askedKai");
     expect(state.flags).toContain("s01-blog-talk");
     play("ch3-kai-twixer-lead");
@@ -208,6 +215,13 @@ describe("ゲームでの場面の進行", () => {
 
     state = setFlag(state, "s04-old-id-screenshot");
     play("ch4-leaf");
+    expect(completedChats(state)).toContainEqual(
+      expect.objectContaining({
+        channel: "discord:dm-kai",
+        from: "ryo",
+        text: "ありがとう、その線で探してみる",
+      }),
+    );
     expect(nextBeat(state)).toBeUndefined();
 
     state = setFlag(state, "s05-old-discord-user");
@@ -226,17 +240,13 @@ describe("ゲームでの場面の進行", () => {
     expect(kaiContact?.place).toBe("discord:dm-kai");
     play("ch5-kai-contact");
     expect(state.flags).toContain("s09-kai-contact");
+    expect(completedChats(state)).toContainEqual(
+      expect.objectContaining({ channel: "discord:dm-kai", from: "kai", text: "今の進捗どう？" }),
+    );
     expect(nextBeat(state)).toBeUndefined();
 
     state = setFlag(state, "foundBff");
     play("ch4-bff");
-    expect(completedChats(state)).toContainEqual(
-      expect.objectContaining({
-        channel: "discord:dm-kai",
-        from: "kai",
-        text: "今の進捗どう？",
-      }),
-    );
     expect(nextBeat(state)).toBeUndefined();
 
     state = setFlag(state, "s10-talkup-match");
