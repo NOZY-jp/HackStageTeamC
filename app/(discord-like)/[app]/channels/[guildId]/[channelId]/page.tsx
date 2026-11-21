@@ -21,6 +21,7 @@ import {
 import { resolveChannelRoute } from "@/lib/discord-like/route-resolution";
 import { listMemberViews, toMessageView } from "@/lib/discord-like/view";
 import { dmThreadPath } from "@/lib/platform/app-prefix";
+import { BLOG_TALK_MESSAGE_ID } from "@/lib/story/places";
 
 /**
  * Discord と同じ2セグメント構成。
@@ -95,6 +96,12 @@ async function DmThread({
       voiceSessions={listVoiceSessions({ channelId: thread.id })}
       showHash={false}
       headerAvatar={{ displayName: otherName, avatarColor: other?.avatarColor ?? "transparent" }}
+      // 段階1: MaiMai の「攻略ブログ」の発言が画面に見えたらフラグを立てる（検索ジャンプ・過去ログの閲覧のどちらでも届く）
+      seen={
+        thread.id === "dm-maimai"
+          ? { messageId: BLOG_TALK_MESSAGE_ID, flag: "s01-blog-talk" }
+          : undefined
+      }
       headerAction={
         // DM の通話画面への導線（通話を開始する）
         <StartCallLink
