@@ -14,6 +14,7 @@ import {
   isAtPlace,
   isWithinPlace,
   type Line,
+  openedChatIds,
   PLACES,
   unreadChats,
   windowLog,
@@ -51,13 +52,12 @@ function useChatNotice(pathname: string, chats: ChatMessage[], ready: boolean) {
     if (!ready) {
       return;
     }
-    const opened = chats.filter(
-      (chat) => !seen.includes(chat.id) && unreadChats([chat], seen, pathname).length === 0,
-    );
+    // 開いている画面（@me と %40me の表記ゆれを含む）のチャットだけを既読にする
+    const opened = openedChatIds(chats, seen, pathname);
     if (opened.length === 0) {
       return;
     }
-    const next = [...seen, ...opened.map((chat) => chat.id)];
+    const next = [...seen, ...opened];
     setSeen(next);
     try {
       window.localStorage.setItem(SEEN_CHATS_KEY, JSON.stringify(next));
@@ -295,6 +295,12 @@ export function StoryStage() {
     setCovering(covering);
     return () => setCovering(false);
   }, [covering, setCovering]);
+  // 探索を挟んだ次の場面は、スキップせずに読み始める。
+  useEffect(() => {
+    if (!covering && settings.mode === "skip") {
+      setSettings({ ...settings, mode: "click" });
+    }
+  }, [covering, settings, setSettings]);
   // たたんでいるとき（絵を見ている）は、Enter・Space・Esc で文章の窓に戻る
   useRestoreKeys(inScene && minimized, () => setMinimized(false));
 

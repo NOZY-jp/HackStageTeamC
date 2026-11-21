@@ -128,7 +128,9 @@ export type MessageAuthor = {
   id: string;
   displayName: string;
   avatarColor: string;
-  /** プロフィールのリンク（あれば著者名をリンクにする）。 */
+  /** プロフィールに表示するアカウントID。 */
+  handle?: string;
+  /** 投稿者のプロフィール内に表示するリンク。 */
   profileUrl?: string;
 };
 
