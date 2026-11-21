@@ -1900,7 +1900,7 @@ const scripts: Record<string, string> = {
 21:20 hal いいですよ
 21:22 kai 21時で`,
   "dm-taku": `2025-11-26
-22:31 taku 琥珀、今日やる？
+22:31 taku リョウ、今日やる？
 22:34 hal 何時から
 22:36 taku 今
 22:38 hal 準備します
@@ -1952,7 +1952,7 @@ const scripts: Record<string, string> = {
 14:28 hal 本だけです
 14:31 taku 本が重いんだよ`,
   "dm-jun": `2025-11-28
-21:14 jun 琥珀、明日空いてる？
+21:14 jun リョウ、明日空いてる？
 21:17 hal 昼まで
 21:19 jun じゃあ昼飯
 21:21 hal いいですよ
@@ -1973,7 +1973,7 @@ const scripts: Record<string, string> = {
 22:18 hal 消してください
 22:20 jun 消さない`,
   "dm-miyu": `2025-11-29
-13:31 miyu 琥珀、写真見る？
+13:31 miyu リョウ、写真見る？
 13:34 hal 何の
 13:36 miyu 空
 13:38 hal 見ます
@@ -2017,7 +2017,7 @@ const scripts: Record<string, string> = {
 18:48 hal 来月から
 18:51 yama じゃあ来月`,
   "dm-ootsuka": `2025-12-02
-21:31 ootsuka 琥珀、発表の練習はしてる？
+21:31 ootsuka リョウ、発表の練習はしてる？
 21:34 hal しています
 21:36 ootsuka 人前でやった？
 21:38 hal まだです

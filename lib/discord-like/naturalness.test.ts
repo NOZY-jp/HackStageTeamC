@@ -286,5 +286,13 @@ describe("会話の自然さ（#154 の6指標）", () => {
       (message) => message.body.includes("リョウ") && !allowedChannel(message.channelId),
     );
     expect(realName.map((message) => `${message.channelId} ${message.id}`)).toEqual([]);
+    // 逆方向: 本名を知る間柄（friend/univ/指定DM）では「琥珀」と呼ばない
+    const wrongName = messages.filter(
+      (message) =>
+        message.body.includes("琥珀") &&
+        allowedChannel(message.channelId) &&
+        !message.channelId.startsWith("dm-maimai"),
+    );
+    expect(wrongName.map((message) => `${message.channelId} ${message.id}`)).toEqual([]);
   });
 });

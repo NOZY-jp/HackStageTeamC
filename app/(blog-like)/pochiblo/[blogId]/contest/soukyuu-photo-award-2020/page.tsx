@@ -1,9 +1,7 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { BlogFrame } from "@/components/blog-like/blog-frame";
-import { ContestWinnerName } from "@/components/common/story/contest-winner";
-import { StoryAction } from "@/components/common/story/story-action";
-import { StoryGoto } from "@/components/common/story/story-goto";
+import { ContestResultReveal } from "@/components/common/story/contest-result-reveal";
 import { getBlog } from "@/lib/blog-like";
 import {
   PHOTO_CONTEST_BLOG_ID,
@@ -46,7 +44,7 @@ export default async function ContestResultPage({ params }: Props) {
 
         <h2>優秀賞</h2>
         <p>
-          受賞者: <ContestWinnerName name="服部 由比" />
+          受賞者: <ContestResultReveal />
           <br />
           受賞作品: 「帰り道」
         </p>
@@ -56,20 +54,6 @@ export default async function ContestResultPage({ params }: Props) {
         </p>
 
         <p>受賞者のみなさま、おめでとうございます。作品は当時のブログでも紹介しています。</p>
-
-        {/* 受賞者を見たことを記録し、その名前で検索へ進む（#119 の段階7→8） */}
-        <div className="pb-mylist-actions">
-          <StoryAction flag="s07-contest-entry" className="pb-mylist-action">
-            受賞者を確認する
-          </StoryAction>
-          <StoryGoto
-            href={`/talkup?q=${encodeURIComponent("服部 由比")}`}
-            requires={["s07-contest-entry"]}
-            className="pb-mylist-action"
-          >
-            この名前で検索する
-          </StoryGoto>
-        </div>
       </article>
     </BlogFrame>
   );
