@@ -77,7 +77,7 @@ export function listHomePosts(viewerId: string): Post[] {
  */
 export function listRecommendedPosts(viewerId: string): Post[] {
   const hidden = new Set(["tw-kanon", "tw-old-denden"]);
-  const since = "2026-09-01T00:00:00+09:00";
+  const since = "2026-08-01T00:00:00+09:00";
   return copyOf(
     twitterPosts
       .filter(isVisiblePost)

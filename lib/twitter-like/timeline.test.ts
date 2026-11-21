@@ -13,8 +13,8 @@ const ids = (posts: { id: string }[]) => posts.map((post) => post.id);
 
 describe("Twixer のタイムライン（#212）", () => {
   it("アカウントと投稿が増え、MaiMai は20件以上", () => {
-    expect(twitterUsers.length).toBeGreaterThanOrEqual(12);
-    expect(twitterPosts.length).toBeGreaterThanOrEqual(70);
+    expect(twitterUsers.length).toBeGreaterThanOrEqual(200);
+    expect(twitterPosts.length).toBeGreaterThanOrEqual(2000);
     expect(twitterPosts.filter((post) => post.authorId === "tw-mai").length).toBeGreaterThanOrEqual(
       20,
     );
