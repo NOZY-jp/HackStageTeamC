@@ -12,7 +12,7 @@ export const VOLUME_LIMITS = {
   /** DM 全体の通数（実測 1,853） */
   dmTotal: { min: 1600, max: 2300 },
   /** サーバーの通数（実測 799。VC の入退室を含む） */
-  serverTotal: { min: 700, max: 1200 },
+  serverTotal: { min: 1200, max: 1700 },
   /** 付き合った後の週あたりの日数と、空けてよい日数 */
   datingWeek: { minDays: 5, maxGapDays: 3 },
   /** 未返信で終わる DM スレッドの割合の下限（実測 3/9） */
