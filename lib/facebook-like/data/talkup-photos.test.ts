@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
-import { fbPosts } from "./posts";
 import type { FbPost } from "../types";
+import { fbPosts } from "./posts";
 
 /**
  * #228: TalkUp の仮写真の整理。人物の照合に使う写真だけを残し、
@@ -12,7 +12,8 @@ const u40: FbPost[] = fbPosts.filter((post) => post.authorId === "u40");
 describe("TalkUp の写真（#228）", () => {
   it("人物の照合に使う写真は、入学式と高校の友達の2枚だけ", () => {
     const matching = u40.filter(
-      (post) => post.attachment?.kind === "photo" && (post.attachment.alt ?? "").includes("黒髪のボブ"),
+      (post) =>
+        post.attachment?.kind === "photo" && (post.attachment.alt ?? "").includes("黒髪のボブ"),
     );
     expect(matching.map((post) => post.id)).toEqual(["fbp-201", "fbp-203"]);
     const sea = u40.find((post) => post.id === "fbp-202");
