@@ -80,4 +80,12 @@ describe("fbYuiPosts", () => {
       }
     }
   });
+
+  it("sets audience to public on all 23 u40 posts so search/profile matches visibility", () => {
+    const u40Posts = listPostsByAuthor("u40");
+    expect(u40Posts).toHaveLength(23);
+    for (const post of u40Posts) {
+      expect(post.audience, `${post.id} の公開範囲`).toBe("public");
+    }
+  });
 });
