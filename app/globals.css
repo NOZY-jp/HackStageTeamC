@@ -6883,6 +6883,45 @@ article.fb-card {
   color: var(--tw-muted);
 }
 
+/* 文言は折り返さない（1〜2文字だけ次の行に落ちるのを防ぐ）。収まらないときは余白と字間で詰める */
+.fb-primary-btn,
+.fb-action-btn,
+.fb-chip,
+.fb-person-action,
+.tw-post-button,
+.tw-tab,
+.tw-profile-actions button,
+.tw-follow-button {
+  white-space: nowrap;
+}
+
+.fb-primary-btn,
+.tw-post-button,
+.tw-button {
+  flex: none;
+}
+
+.tw-button {
+  white-space: nowrap;
+}
+
+/* リアクションの内訳（絵文字の並びと件数、コメント/シェア）は、単位ごと折り返す */
+article div[class~="justify-between"][class~="text-xs"] {
+  flex-wrap: wrap;
+  gap: 2px 8px;
+}
+
+article div[class~="justify-between"][class~="text-xs"] > div {
+  flex: none;
+  white-space: nowrap;
+}
+
+.fb-action-btn > span,
+.fb-action-btn .tw-icon,
+.fb-chip > span {
+  white-space: nowrap;
+}
+
 /* モバイル: 余白を詰めて、横スクロールを出さない */
 @media (max-width: 639.98px) {
   .fb-feed-grid {
@@ -6904,6 +6943,34 @@ article.fb-card {
     border-radius: 12px;
   }
 
+  /* 操作列（いいね・コメント・シェア）は3等分のまま、各操作を1行に収める */
+  /* 投稿カードの操作列（grid-cols-3 の行）は隙間を詰めて1行を確保する */
+  article [class~="grid-cols-3"] {
+    gap: 2px;
+  }
+
+  .fb-action-btn {
+    gap: 4px;
+    padding: 7px 2px;
+    font-size: 13px;
+  }
+
+  .fb-action-btn .tw-icon,
+  .fb-action-btn svg {
+    width: 15px;
+    height: 15px;
+    flex: none;
+  }
+
+  .fb-primary-btn {
+    padding: 7px 12px;
+  }
+
+  .tw-button {
+    padding: 0 12px;
+    font-size: 14px;
+  }
+
   .tw-shell {
     --tw-main-width: 100%;
   }
@@ -6916,6 +6983,20 @@ article.fb-card {
   .tw-post {
     padding-left: 12px;
     padding-right: 12px;
+  }
+
+  /* プロフィールの数値・タブは1行のまま */
+  .tw-profile-stats,
+  .tw-profile-stats span,
+  .tw-tab,
+  .tw-follow-button,
+  .tw-post-button {
+    white-space: nowrap;
+  }
+
+  .tw-follow-button {
+    padding-left: 14px;
+    padding-right: 14px;
   }
 
   .tw-profile .tw-profile-body {
