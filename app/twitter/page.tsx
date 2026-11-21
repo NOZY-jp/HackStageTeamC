@@ -3,7 +3,7 @@ import { HomeTabs } from "@/components/twitter-like/home-tabs";
 import { replyTargetAuthor, usersById } from "@/components/twitter-like/lookup";
 import { PostCard } from "@/components/twitter-like/post-card";
 import { RightSidebar } from "@/components/twitter-like/right-sidebar";
-import { getPost, listHomePosts, TWITTER_ME_ID } from "@/lib/twitter-like";
+import { getPost, listHomePosts, listRecommendedPosts, TWITTER_ME_ID } from "@/lib/twitter-like";
 import type { Post, TwitterUser } from "@/lib/twitter-like/types";
 
 export const metadata = { title: { absolute: "ホーム | Twixer" } };
@@ -11,7 +11,8 @@ export const metadata = { title: { absolute: "ホーム | Twixer" } };
 /** ホームのタイムライン。トップレベルの投稿のみで、返信は個別投稿ページとプロフィールに出す。 */
 export default function TwitterTimelinePage() {
   const users = usersById();
-  const posts = listHomePosts(TWITTER_ME_ID);
+  const followingPosts = listHomePosts(TWITTER_ME_ID);
+  const recommendedPosts = listRecommendedPosts(TWITTER_ME_ID);
   const me = users.get(TWITTER_ME_ID);
 
   const renderPost = (post: Post, users: Map<string, TwitterUser>) => {
@@ -26,10 +27,10 @@ export default function TwitterTimelinePage() {
     ) : null;
   };
 
-  // 「おすすめ」も「フォロー中」も同じ並び：hal がフォローしている人（と自分）の
-  // 投稿だけを出す。かのんは hal がまだ知らないのでホームには出さない。
-  const forYou = <div>{posts.map((post) => renderPost(post, users))}</div>;
-  const following = <div>{posts.map((post) => renderPost(post, users))}</div>;
+  // 「おすすめ」はフォロー外も含む（かのん・旧垢は順序のため出さない）。
+  // 「フォロー中」は hal がフォローしている人と自分の投稿だけ。
+  const forYou = <div>{recommendedPosts.map((post) => renderPost(post, users))}</div>;
+  const following = <div>{followingPosts.map((post) => renderPost(post, users))}</div>;
 
   return (
     <>

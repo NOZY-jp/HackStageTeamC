@@ -158,7 +158,17 @@ describe("フリーワードと順序", () => {
 });
 
 describe("旧垢と不正フィルタ", () => {
-  it("旧ハンドルは発言が無くても「該当ユーザー」として返る", () => {
+  it.each(["den", "hunter_denden", "hunter_denden324", "@HUNTER_DENDEN3243"])(
+    "表示名やハンドルに一致するユーザーをフリーワード（%s）で見つけられる",
+    (query) => {
+      const { matchedUsers } = run(query);
+      expect(matchedUsers).toContainEqual(
+        expect.objectContaining({ id: "denden", status: "offline" }),
+      );
+    },
+  );
+
+  it("from: に旧ハンドルを指定すると発言と該当ユーザーが返る", () => {
     const response = run("from:hunter_denden3243");
     expect(response.hits.length).toBeGreaterThan(0);
     expect(response.matchedUsers.map((user) => user.handle)).toContain("hunter_denden3243");

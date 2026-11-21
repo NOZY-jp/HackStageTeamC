@@ -2,6 +2,11 @@ import type { Message } from "../../types";
 import { readConversationScripts } from "./read-conversation-scripts";
 
 export const univScript = readConversationScripts({
+  "univ-vc-1": `2026-11-08
+20:30 hal! 琥珀 がボイスチャンネルに参加しました
+20:33 sato! 佐藤 がボイスチャンネルに参加しました
+21:40 sato! 佐藤 がボイスチャンネルから退出しました
+21:45 hal! 琥珀 がボイスチャンネルから退出しました`,
   "univ-contact": `2025-11-27
 18:31 nishimura 研究室の見学、来週から始めます
 18:34 yamamoto 何曜日ですか
@@ -302,7 +307,29 @@ export const univScript = readConversationScripts({
 11:17 hal 休講です
 11:19 tanaka 連絡くれて助かる
 11:21 hal 掲示にありました
-11:23 sato 見てない`,
+11:23 sato 見てない
+2026-09-09
+15:02 tanaka 教室、変わった?
+15:05 hal 第二に移りました
+15:07 sato 掲示見てない
+15:09 hal 次から気をつけて
+15:12 sato 助かる
+2026-10-19
+10:40 sato 出席、今日は取る?
+10:43 hal 取ります
+10:45 tanaka 行く
+10:47 sato 間に合う
+2026-11-10
+13:15 tanaka 小テスト、来週?
+13:18 hal 来週の木曜です
+13:20 sato 範囲は
+13:22 hal 六章まで
+13:24 sato 間に合うかな
+2026-11-25
+09:20 tanaka 今日、休講になった
+09:23 hal 掲示にありました
+09:25 sato 知らなかった
+09:27 tanaka 助かった`,
   "univ-chat": `2025-12-05
 12:31 yama 学食、新しいの出てた
 12:34 okada 何
@@ -505,7 +532,50 @@ export const univScript = readConversationScripts({
 14:27 sato 面接の練習しようか
 14:30 hal お願いします
 14:32 tanaka 俺も混ぜて
-14:35 sato じゃあ来週`,
+14:35 sato じゃあ来週
+2026-09-02
+12:05 tanaka 後期、始まった
+12:08 hal 早いですね
+12:10 sato まだ夏気分
+12:12 tanaka 切り替えろ
+12:15 sato 切り替えは無理
+2026-09-18
+19:40 sato ゼミの発表、誰から
+19:43 hal 順番表を見ます
+19:45 tanaka 俺は後半
+19:47 sato ゼミの準備できる
+2026-10-08
+13:20 tanaka 学祭、来る?
+13:23 hal 行きます
+13:25 sato 何時から
+13:27 tanaka 11時
+13:30 hal じゃあ昼に
+2026-10-21
+18:10 sato インターン、面接入った
+18:13 hal おめでとうございます
+18:15 tanaka すごい
+18:17 sato 緊張する
+18:20 hal 面接の練習しましょうか
+2026-11-12
+22:03 tanaka レポート、終わらない
+22:05 hal 何枚ですか
+22:07 tanaka 六枚
+22:09 sato それはつらい
+22:11 hal レポートは分けて書くといいです
+2026-11-22
+14:30 sato 卒論のテーマ、決めた
+14:33 hal 何にしました
+14:35 sato 写真と記憶
+14:37 tanaka いいね
+14:40 hal 卒論、面白そうです
+2026-10-27
+20:10 sato ゼミの資料、共有しました
+20:13 hal 確認します
+20:15 tanaka 図が多い
+20:17 sato 説明しやすくて
+20:20 hal 助かります
+20:22 tanaka 発表、楽しみ
+20:24 sato 緊張する`,
   "univ-job": `2025-12-09
 20:31 ootsuka 説明会、行くなら早めに予約したほうがいい
 20:34 yama もう埋まってる？
@@ -749,7 +819,17 @@ export const univScript = readConversationScripts({
 19:34 tanaka 毎回それ
 19:36 sato 今回は大丈夫か
 19:38 tanaka 出した
-19:40 hal お疲れさまです`,
+19:40 hal お疲れさまです
+2026-11-15
+20:02 tanaka 図の出典、どこに書く
+20:04 hal 図の下です
+20:06 tanaka ページも
+20:08 hal 必要なら書きます
+20:10 tanaka 書いとく
+2026-11-24
+21:30 sato 提出、明日まで?
+21:32 hal 明日の23時59分です
+21:34 sato 今日やる`,
   "univ-any": `2025-12-17
 21:14 nishimura 落とし物、3号館の受付に届いてます
 21:17:53 yama 何が
@@ -853,7 +933,12 @@ export const univScript = readConversationScripts({
 2026-11-16
 18:22 sato 学食、混んでる?
 18:24 hal 今は空いてます
-18:26 sato 行く`,
+18:26 sato 行く
+2026-11-20
+16:20 hal 実験室の予約、取りました
+16:23 sato ありがとう
+16:25 tanaka 助かる
+16:27 hal 実験室は一時間だけです`,
 });
 
 const calls = [
