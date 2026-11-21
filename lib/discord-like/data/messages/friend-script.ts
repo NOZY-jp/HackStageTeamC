@@ -2,6 +2,11 @@ import type { Message } from "../../types";
 import { readConversationScripts } from "./read-conversation-scripts";
 
 export const friendScript = readConversationScripts({
+  "friend-vc": `2026-10-11
+20:00 taku! タク がボイスチャンネルに参加しました
+20:03 hal! 琥珀 がボイスチャンネルに参加しました
+21:05 hal! 琥珀 がボイスチャンネルから退出しました
+21:10 taku! タク がボイスチャンネルから退出しました`,
   "friend-chat": `2025-11-30
 21:41 taku リョウ、最近ゲーム来ないじゃん
 21:44 hal 来てます
@@ -218,7 +223,63 @@ export const friendScript = readConversationScripts({
 22:34 taku 今週長かった
 22:36 hal わかります
 22:38 taku 寝る
-22:40 hal おやすみなさい`,
+22:40 hal おやすみなさい
+2026-09-05
+19:02 taku 今日の空、赤い
+19:04 hal 見ました
+19:06 taku 写真撮った
+19:08 hal 送ってください
+19:10 taku あとで
+2026-09-19
+22:10 taku ゲームやる?
+22:12 hal やります
+22:14 taku 22時から
+22:16 hal わかりました
+22:18 taku 通話なしで
+2026-10-03
+21:40 taku この前の店、うまかった
+21:42 hal また行きたいです
+21:44 taku 来週
+21:46 hal いいですよ
+2026-10-17
+20:30 taku 写真あげた
+20:32 hal 見ました
+20:34 taku 加工なし
+20:36 hal 色がいい
+2026-11-01
+18:20 taku 風邪ひいた
+18:22 hal 大丈夫ですか
+18:24 taku 寝てる
+18:26 hal 無理しないで
+2026-11-15
+23:02 taku おつかれ
+23:04 hal おつかれさまです
+23:06 taku 寝る
+23:08 hal おやすみなさい
+2026-11-22
+21:10 taku 今年の写真、まとめた
+21:12 hal 見たいです
+21:14 taku 送る
+21:16 hal ありがとうございます
+21:18 taku また撮る
+2026-09-27
+13:30 taku 昼、何食べた
+13:32 hal 蕎麦です
+13:34 taku いいな
+13:36 hal そちらは
+13:38 taku パン
+2026-10-25
+22:40 taku 明日、早い?
+22:42 hal 9時からです
+22:44 taku じゃあ寝る
+22:46 hal おやすみなさい
+22:48 taku おやすみ
+2026-11-08
+19:05 taku 散歩した
+19:07 hal どこまで
+19:09 taku 川沿い
+19:11 hal 気持ちよさそう
+19:13 taku 寒かった`,
   "friend-plan": `2025-12-20
 18:02 taku 今日20時、駅前
 18:05 riku バイト終わり次第
@@ -350,7 +411,12 @@ export const friendScript = readConversationScripts({
 20:36 hal 帰省ですか
 20:38 taku そう
 20:40 hal じゃあその前に会いましょう
-20:43 taku いいね`,
+20:43 taku いいね
+2026-11-19
+20:10 taku 年末、いつまでこっち
+20:12 hal 28日までです
+20:14 taku じゃあ27に会おう
+20:16 hal いいですよ`,
   "friend-memory": `2025-12-21
 22:02 nao 中学の写真、出てきた
 22:05 taku どれ

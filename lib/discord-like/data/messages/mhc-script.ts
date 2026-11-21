@@ -2,6 +2,18 @@ import { HAL_NAME, MAIMAI_NAME } from "../names";
 import { readConversationScripts } from "./read-conversation-scripts";
 
 export const mhcScript = readConversationScripts({
+  "mhc-vc-1": `2026-11-22
+20:05 haruka! 弓ハルカ がボイスチャンネルに参加しました
+20:07 mina! 双剣ミナ がボイスチャンネルに参加しました
+21:02 mina! 双剣ミナ がボイスチャンネルから退出しました
+21:06 haruka! 弓ハルカ がボイスチャンネルから退出しました`,
+
+  "mhc-vc-3": `2026-09-20
+20:00 mina! 双剣ミナ がボイスチャンネルに参加しました
+20:02 hal! 琥珀 がボイスチャンネルに参加しました
+21:10 hal! 琥珀 がボイスチャンネルから退出しました
+21:15 mina! 双剣ミナ がボイスチャンネルから退出しました`,
+
   "mhc-lfg": `2025-03-10
 20:34 slime 21時からバーラハーラ行きます。採取もしたいので、のんびりでいい人
 20:41 hal 途中からでもいいですか。まだ装備が揃ってなくて
@@ -231,7 +243,22 @@ export const mhcScript = readConversationScripts({
 20:25 haruka 何時まで
 20:27 mina 22時から2時間
 20:29 slime 私は一次会で抜けます
-20:31 mina 了解です`,
+20:31 mina 了解です
+2026-07-25
+20:10 mina 21時からナルガ、2枠
+20:13 hal お願いします
+20:15 gunlance 入る
+20:17 mina 集まりました
+2026-08-15
+19:30 haruka 20時からディア、捕獲で
+19:33 slime 回復で入ります
+19:35 haruka 助かります
+19:37 hal 頭は避けます
+2026-10-08
+22:02 mina 深夜枠、人来ますか
+22:05 gunlance 行く
+22:07 hal 明日早いのでやめときます
+22:09 mina 了解`,
   "mhc-chat": `2025-03-03
 22:14 mina 今日の集会所、人が多い
 22:17 slime イベント前だからですね
@@ -624,7 +651,69 @@ export const mhcScript = readConversationScripts({
 20:44 hal 僕も
 20:46 slime 仕事が早く終われば
 20:48 gunlance 行く
-20:50 mina じゃあ28日`,
+20:50 mina じゃあ28日
+2026-08-08
+21:02 mina 夏祭り、今年もやります
+21:05 haruka 参加します
+21:07 slime 浴衣で行きます
+21:09 gunlance 俺は普通に
+21:11 hal 僕も参加します
+21:13 mina 集合は駅前
+2026-08-29
+20:15 mina 大会の告知です
+20:18 mina 9月20日、20時から
+20:20 haruka ルールは
+20:22 mina 通常クエストのタイム勝負
+20:24 slime 装備制限は
+20:26 mina なしです
+20:28 hal 参加します
+20:30 gunlance 俺も出る
+2026-09-20
+20:02 mina 大会、始めます
+20:05 haruka よろしくお願いします
+20:07 slime 緊張する
+20:09 gunlance 負けない
+20:11 hal がんばります
+20:35 mina 一位、harukaさん
+20:37 haruka まぐれです
+20:39 slime おめでとう
+20:41 hal おめでとうございます
+2026-10-12
+19:44 mina 通話募集、21時から
+19:47 hal 参加します
+19:49 gunlance 入る
+19:51 haruka 少し遅れます
+19:53 mina 待ちます
+2026-11-02
+22:05 mina 最近、集まりが少ない
+22:08 haruka 忙しい時期ですし
+22:10 slime 年末まで無理かも
+22:12 mina 仕方ない
+22:14 gunlance たまには来いよ
+22:16 hal 行きます
+2026-11-20
+20:20 mina 12月の予定、決めたい
+20:23 hal 週末なら
+20:25 haruka 私も週末
+20:27 slime 平日夜なら
+20:29 mina じゃあ二回やります
+2026-06-20
+21:10 mina 大会の景品、どうする
+21:13 haruka 素材系がいい
+21:15 gunlance 武器
+21:17 slime 装飾品
+21:19 hal 何でも嬉しいです
+21:21 mina 多数決で
+2026-11-24
+21:08 hal また出ます
+21:10 mina じゃあ来月
+2026-09-30
+20:20 haruka 装備の染色、変えました
+20:23 hal いい色ですね
+20:25 haruka 秋っぽく
+20:27 slime 真似します
+20:29 haruka どうぞ
+20:31 mina 私も`,
   "mhc-questions": `2025-03-13
 19:31 hal 弓で尻尾を切るのは無理ですか
 19:35 mina 切れます。ただし時間かかります
@@ -755,7 +844,19 @@ export const mhcScript = readConversationScripts({
 21:00 hal 最初は体力でいいと思います
 21:03 haruka 全部入りませんか
 21:05 haruka 入りません
-21:07 mina 少しずつで大丈夫です`,
+21:07 mina 少しずつで大丈夫です
+2026-08-05
+19:20 haruka スキル構成、見てもらえますか
+19:23 hal 画面ください
+19:25 haruka 送りました
+19:27 hal 攻撃は十分です
+19:29 haruka 防御が薄いですか
+19:31 hal 少し足しましょう
+2026-10-30
+20:40 mina 護石、厳選してますか
+20:43 slime してないです
+20:45 mina 必須ではないです
+20:47 slime 安心しました`,
   "mhc-clips": `2025-04-05
 21:31:43 gunlance 今日の大砲、いいとこで当たった
 21:34:43 mina 見たい
@@ -843,7 +944,17 @@ export const mhcScript = readConversationScripts({
 19:42 haruka すごい勢い
 19:44 mina 音が大きい
 19:46 gunlance 褒めてる？
-19:48 haruka 褒めてます`,
+19:48 haruka 褒めてます
+2026-09-21
+20:10 mina 大会の切り抜き、あげました
+20:13 haruka 見ました
+20:15 gunlance 俺のとこだけ遅い
+20:17 mina そこがいい
+2026-11-21
+19:30 haruka オフ会の集合写真、加工しました
+19:33 mina ありがとう
+19:35 hal 保存しました
+19:37 slime 私も`,
   "mhc-notice": `2025-11-25
 21:02 master 12月の集会所イベント、12月13日21時からです
 21:05 mina 内容は
@@ -922,7 +1033,18 @@ export const mhcScript = readConversationScripts({
 19:00 mina 28日の集会、20時からです
 19:03 hal 参加します
 19:05 haruka 参加します
-19:08 mina 集まりました`,
+19:08 mina 集まりました
+2026-08-29
+19:00 mina 9月20日20時、大会を開催します
+19:02 mina 参加希望は今週中に
+19:05 hal 参加します
+19:07 haruka 参加します
+19:09 gunlance 出る
+2026-10-12
+18:30 mina 21時から通話募集します
+18:33 hal 参加します
+18:35 haruka 遅れます
+18:37 mina 待ってます`,
   "mhc-gear": `2025-03-18
 22:14:43 hal 弓の装備、最初に何を作ればいいですか
 22:17 mina 矢の数が増えるやつ
