@@ -275,11 +275,11 @@ export const voice = (channel: VoiceChannel, who: CharacterId, action: VoiceActi
 export const hideWindow = (): WindowCue => ({ type: "window", visible: false });
 /**
  * 絵を見せて、押すまで待つ。文章の窓を隠し、押す（Enter・Space・クリック）と次へ進む。
- * 手がかりの写真や風景など、窓に隠れると困る絵をしっかり見せたいときに、背景や小物を出した直後に置く
+ * 写真を渡すと中央に表示し、省略するとすでに舞台に出ている絵を見せる。
  */
-export const look = (): [WindowCue, CustomCue] => [
+export const look = (photo?: { src: string; label: string }): [WindowCue, CustomCue] => [
   hideWindow(),
-  custom("look", undefined, { wait: true }),
+  custom("look", photo, { wait: true }),
 ];
 /** 文章の窓を出す */
 export const showWindow = (): WindowCue => ({ type: "window", visible: true });

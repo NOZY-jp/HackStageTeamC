@@ -3,6 +3,7 @@ import { join } from "node:path";
 import { fireEvent, render, screen } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
 import { BACKGROUNDS, look } from "@/lib/story";
+import { chapter5 } from "@/lib/story/scenario/ch05-fragments";
 import { BackgroundImage } from "./asset-image";
 import { CUSTOM_CUE_COMPONENTS } from "./custom-cues";
 
@@ -38,6 +39,25 @@ describe("look（絵を見せて、押すまで待つ）", () => {
       { type: "window", visible: false },
       { type: "custom", name: "look", props: undefined, wait: true },
     ]);
+  });
+
+  it("第5章のマップ散策では、背景を差し替えずに2枚の写真を表示する", () => {
+    const script = chapter5.find((beat) => beat.id === "ch5-talkup")?.script ?? [];
+    expect(script.some((cue) => cue.type === "background")).toBe(false);
+    const photos = script
+      .filter((cue) => cue.type === "custom")
+      .filter((cue) => cue.name === "look");
+    expect(photos).toHaveLength(2);
+    for (const [index, label] of ["地元の洋菓子店", "マンホールのある住宅街"].entries()) {
+      const cue = photos[index];
+      expect(cue.wait).toBe(true);
+      const view = render(<Look props={cue.props ?? {}} onDone={vi.fn()} instant={false} />);
+      const image = screen.getByAltText(label);
+      const src = image.getAttribute("src") ?? "";
+      expect(src).toMatch(/^\/story\/.*\.webp$/);
+      expect(existsSync(join(process.cwd(), "public", src))).toBe(true);
+      view.unmount();
+    }
   });
 
   it("押すと次へ進む", () => {

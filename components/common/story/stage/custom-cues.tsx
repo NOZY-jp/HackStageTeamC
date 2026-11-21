@@ -88,9 +88,12 @@ function BigText({ props, onDone, instant }: CustomCueProps) {
 
 /**
  * 絵を見せて、押すまで待つ。画面全体を押せる面にして、押す・Enter・Space で次へ。
- * 文章の窓は look() が先に隠している。右下に小さく「押すと続く」印だけを出す
+ * 文章の窓は look() が先に隠す。写真が指定されていれば中央に表示する。
  */
-function Look({ onDone, instant }: CustomCueProps) {
+function Look({ props, onDone, instant }: CustomCueProps) {
+  const src = typeof props.src === "string" ? props.src : undefined;
+  const label = typeof props.label === "string" ? props.label : undefined;
+
   useEffect(() => {
     if (instant) {
       onDone();
@@ -115,12 +118,17 @@ function Look({ onDone, instant }: CustomCueProps) {
       type="button"
       className="sp-look"
       aria-label="続ける"
+      aria-description={src ? label : undefined}
       onClick={onDone}
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
       transition={{ delay: 0.6, duration: 0.6 }}
     >
+      {src && (
+        // biome-ignore lint/performance/noImgElement: 演出画像を縦横比に合わせて表示する
+        <img className="sp-look-photo" src={src} alt={label ?? ""} />
+      )}
       <span className="sp-look-hint" aria-hidden="true">
         ▼
       </span>

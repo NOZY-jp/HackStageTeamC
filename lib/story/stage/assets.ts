@@ -29,16 +29,6 @@ export const BACKGROUNDS = {
     src: "/story/backgrounds/station-dusk.webp",
     color: "#d08a6a",
   },
-  "sweets-shop": {
-    label: "地元の洋菓子店",
-    src: "/story/backgrounds/sweets-shop.webp",
-    color: "#a9825f",
-  },
-  "manhole-street": {
-    label: "マンホールのある住宅街",
-    src: "/story/backgrounds/manhole-street.webp",
-    color: "#7d6a78",
-  },
   cafe: { label: "喫茶店", color: "#a9825f" },
   street: { label: "住宅街", color: "#7d8a74" },
   black: { label: "暗転", color: "#000000", solid: true },

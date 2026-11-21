@@ -6577,11 +6577,24 @@ a.tw-dm-item:focus-visible {
 .sp-look {
   position: absolute;
   inset: 0;
-  display: block;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
   border: 0;
   background: transparent;
   cursor: pointer;
   pointer-events: auto;
+}
+
+.sp-look-photo {
+  width: auto;
+  height: auto;
+  max-width: min(100%, 720px);
+  max-height: 70dvh;
+  object-fit: contain;
+  border-radius: 8px;
+  box-shadow: 0 8px 28px rgb(0 0 0 / 0.45);
 }
 
 .sp-look-hint {
