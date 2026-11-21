@@ -58,7 +58,7 @@ export type SearchDocument = {
 
 export type SearchResult = {
   id: string;
-  kind: SearchResultKind;
+  kind: SearchResultKind | "web";
   title: string;
   url: string;
   displayUrl: string;
