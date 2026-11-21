@@ -15,6 +15,16 @@ export {
 } from "./sites";
 export * from "./stage";
 export { getStep, STEP_IDS, type Step, type StepId, steps } from "./steps";
+export {
+  clearState,
+  fromLegacy,
+  LEGACY_STORAGE_KEYS,
+  loadState,
+  parseState,
+  readChoices,
+  STORAGE_KEY,
+  saveState,
+} from "./storage";
 export type * from "./types";
 
 /** 章の名前（シナリオの章立て） */
