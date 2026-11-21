@@ -7,7 +7,6 @@ import {
   TWITTER_ME_ID,
 } from "@/lib/twitter-like";
 import { Avatar } from "./avatar";
-import { formatCount } from "./format";
 import { SearchIcon } from "./icons";
 
 export function RightSidebar({ hideSearch = false }: { hideSearch?: boolean }) {
@@ -45,7 +44,6 @@ export function RightSidebar({ hideSearch = false }: { hideSearch?: boolean }) {
               >
                 <span className="tw-trend-meta">{trend.category}</span>
                 <span className="tw-trend-name">{trend.name}</span>
-                <span className="tw-trend-meta">{formatCount(trend.postCount)} 件のポスト</span>
               </Link>
             </li>
           ))}

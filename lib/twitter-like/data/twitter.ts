@@ -369,11 +369,11 @@ export const twitterViewCounts: Record<string, number> = {
 
 // トレンドを押すと名前のまま検索される。着弾先はリョウのゲーム仲間（Hal・Mai・ソウ）の
 // 雑談だけに絞る — 手がかりの投稿（post-101/102）やかのん・旧アカウントに直行する名前は置かない。
-// postCount は劇中の小さなコミュニティらしい件数に留める。
+// ポスト件数は出さない — 実際の検索結果（各1〜2件）と食い違う数字を見せないため。
 export const twitterTrends: Trend[] = [
-  { id: "trend-1", category: "ゲーム · トレンド", name: "例のゲーム", postCount: 46 },
-  { id: "trend-2", category: "ゲーム · トレンド", name: "レイド", postCount: 31 },
-  { id: "trend-3", category: "ゲーム · トレンド", name: "迷子", postCount: 24 },
-  { id: "trend-4", category: "トレンド", name: "週末", postCount: 15 },
-  { id: "trend-5", category: "トレンド", name: "電話", postCount: 9 },
+  { id: "trend-1", category: "ゲーム · トレンド", name: "例のゲーム" },
+  { id: "trend-2", category: "ゲーム · トレンド", name: "レイド" },
+  { id: "trend-3", category: "ゲーム · トレンド", name: "迷子" },
+  { id: "trend-4", category: "トレンド", name: "週末" },
+  { id: "trend-5", category: "トレンド", name: "電話" },
 ];
