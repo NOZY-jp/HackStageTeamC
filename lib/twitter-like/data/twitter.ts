@@ -49,7 +49,7 @@ export const twitterProfiles: Profile[] = [
     // 記事の名前で検索すると見つかる（bio に記事名を残している）。
     // 改名したことと旧ハンドル・旧表示名を bio に残す（今は誰も使っていない）
     userId: "tw-old-denden",
-    bio: "前は @hunter_denden0102（表示名 hunter_denden）で活動していました。「写真コンテストで賞をもらいました！」を書いた頃のアカウントです。BFF: @kanon__dayo",
+    bio: "前は @hunter_denden0102。「写真コンテストで賞をもらいました！」書いた人。BFF: @kanon__dayo",
     // 旧ブログの最古記事（2018-01-27）より前から使っているアカウント
     joinedAt: "2017-12-01",
     followingCount: 38,
@@ -357,9 +357,9 @@ export const twitterViewCounts: Record<string, number> = {
 };
 
 export const twitterTrends: Trend[] = [
-  { id: "trend-1", category: "ゲーム · トレンド", name: "#紅葉の谷", postCount: 12400 },
-  { id: "trend-2", category: "ゲーム · トレンド", name: "週末レイド", postCount: 8921 },
-  { id: "trend-3", category: "ゲーム · トレンド", name: "ギルド勧誘", postCount: 3560 },
-  { id: "trend-4", category: "トレンド", name: "オフ会", postCount: 1204 },
-  { id: "trend-5", category: "ゲーム · トレンド", name: "深夜メンテ", postCount: 987 },
+  { id: "trend-1", category: "ゲーム · トレンド", name: "例のゲーム", postCount: 12400 },
+  { id: "trend-2", category: "ゲーム · トレンド", name: "レイド", postCount: 8921 },
+  { id: "trend-3", category: "ゲーム · トレンド", name: "双剣", postCount: 3560 },
+  { id: "trend-4", category: "トレンド", name: "ブログ", postCount: 1204 },
+  { id: "trend-5", category: "トレンド", name: "アルバム", postCount: 987 },
 ];

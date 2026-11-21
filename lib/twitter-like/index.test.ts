@@ -9,6 +9,7 @@ import {
   listPosts,
   listPostsByAuthor,
   listReplies,
+  listTrends,
   listUsers,
   searchPosts,
   searchUsers,
@@ -183,6 +184,18 @@ describe("searchPosts", () => {
     expect(searchPosts("ブログもはじめてみた")).toEqual([]);
     // 「ブログ」で見つかるのは公開の返信（post-102）だけ。鍵垢の投稿（post-202/203）は出ない
     expect(searchPosts("ブログ").map((post) => post.id)).toEqual(["post-102"]);
+  });
+});
+
+describe("twitterTrends（いま話題）", () => {
+  it("どのトレンドも検索で1件以上見つかる（行き止まりにしない）", () => {
+    const trends = listTrends();
+    expect(trends.length).toBeGreaterThan(0);
+    // トレンドを押すとその名前で検索されるので、0件になる名前は置かない
+    const deadEnds = trends
+      .filter((trend) => searchPosts(trend.name).length === 0)
+      .map((trend) => trend.name);
+    expect(deadEnds).toEqual([]);
   });
 });
 
