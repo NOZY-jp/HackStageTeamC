@@ -1,6 +1,5 @@
-import Link from "next/link";
 import type { ReactNode } from "react";
-import { BackIcon } from "./icons";
+import { BackButton } from "./back-button";
 
 export function PageHeader({
   title,
@@ -15,11 +14,7 @@ export function PageHeader({
 }) {
   return (
     <div className="tw-page-header">
-      {backHref ? (
-        <Link href={backHref} className="tw-back" aria-label="戻る">
-          <BackIcon />
-        </Link>
-      ) : null}
+      {backHref ? <BackButton fallbackHref={backHref} /> : null}
       <div className="tw-page-header-text">
         <h1 className="tw-page-title">
           {title}
