@@ -342,7 +342,7 @@ describe("データ品質（#131 / D9・D10）", () => {
   it("#133追記: dm-maimai に画像かリンク付きの投稿が20件以上ある", () => {
     const list = listDMMessages({ threadId: "dm-maimai", limit: 5000 }).messages;
     const media = list.filter(
-      (message) => (message.attachments?.length ?? 0) > 0 || /https?:/, //.test(message.body),
+      (message) => (message.attachments?.length ?? 0) > 0 || /https?:/.test(message.body),
     );
     expect(media.length).toBeGreaterThanOrEqual(20);
   });
