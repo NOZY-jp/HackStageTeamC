@@ -1,3 +1,4 @@
+import { HAL_NAME, MAIMAI_NAME } from "../names";
 import { readConversationScripts } from "./read-conversation-scripts";
 
 export const mhcScript = readConversationScripts({
@@ -184,12 +185,12 @@ export const mhcScript = readConversationScripts({
 22:19 slime 常連の中でも古い
 22:21 jijii 一番古い
 2025-08-30
-21:02 gunlance 今日、砲撃で尻尾切った
-21:05 mina 切れないですよ
-21:07 gunlance 切れた
-21:09 mina 嘘
-21:11 gunlance 切れたことにしておいてくれ
-21:14 haruka 笑いました
+21:02 gunlance 聞いてくれ、今日砲撃で尻尾切ったわ
+21:05 mina いや斬属性ないから切れないでしょw
+21:07 gunlance 切れたんだよ
+21:09 mina 誰か他の人の斬撃でしょそれw
+21:11 gunlance 細かいこと言うな、俺の気持ち的には俺が切った
+21:14 haruka 気持ちで尻尾切るの面白すぎます😂
 2025-09-20
 19:41 master サーバー、来月で三年です
 19:44 jijii 俺は最初からいる
@@ -217,10 +218,10 @@ export const mhcScript = readConversationScripts({
 22:38 gunlance それが幸せ
 22:41 haruka 幸せです
 2026-03-28
-21:14 slime 装備の組み方、まとめてる人がいたので置いときます
+21:14 slime 最近の環境装備わかりやすくまとめてる記事あったんで置いときますね〜
 21:15 slime https://example.com/mhc/gear-notes
-21:18 mina 見ました。わかりやすい
-21:20 hal あとで読んでみます
+21:18 mina おーありがとう！スキル優先度わかりやすいねこれ
+21:20 hal めっちゃ助かります、あとでブクマして読みます！
 2026-04-04
 13:12 hal 新年度ですね
 13:15 mina 関係ない
@@ -707,17 +708,17 @@ export const mhcScript = readConversationScripts({
 22:48 mina 地図で一番細い道の先
 22:51 slime 行ってきます`,
   "mhc-intro": `2025-03-03
-20:31 hal はじめまして。halです。弓を使っています
+20:31 hal はじめまして！${HAL_NAME}っていいます。弓を使ってます
 20:34 master ようこそ。のんびりで大丈夫です
 20:36 slime よろしくお願いします
 20:38 hal よろしくお願いします
 2025-05-08
-21:11 haruka はじめまして。harukaです。弓です
+21:11 haruka はじめまして、弓ハルカです！弓メインでやってます
 21:14 mina 弓が増えた
 21:16 haruka 下手ですけど
 21:18 mina 慣れます
 2025-07-02
-22:31 maimai はじめまして。maimaiです。双剣です
+22:31 maimai はじめまして、${MAIMAI_NAME}です！双剣使ってます〜
 22:34 mina 双剣仲間
 22:36 maimai よろしくお願いします
 22:38 mina こっちも
@@ -734,7 +735,7 @@ export const mhcScript = readConversationScripts({
 21:36 master もう書いてます
 21:38 gunlance 忘れてください
 2026-05-04
-20:02 haruka はじめまして。harukaです。弓です
+20:02 haruka はじめまして。弓ハルカです。弓です
 20:05 mina 弓が増えた
 20:07 haruka 下手ですけど
 20:09 mina 慣れます
