@@ -7174,41 +7174,6 @@ a.tw-dm-item:focus-visible {
   color: #f4f1ea;
 }
 
-/* 右上：連絡が途絶えた相手の、最後のオンライン */
-.tt-presence {
-  position: absolute;
-  top: 22px;
-  right: 26px;
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  padding: 7px 14px;
-  border: 1px solid rgb(255 255 255 / 0.1);
-  border-radius: 999px;
-  background-color: rgb(10 12 20 / 0.55);
-  color: rgb(244 241 234 / 0.6);
-  font-family: system-ui, sans-serif;
-  font-size: 12px;
-  letter-spacing: 0.04em;
-}
-
-.tt-presence-dot {
-  width: 8px;
-  height: 8px;
-  border-radius: 50%;
-  background-color: #80848e;
-  animation: tt-pulse 2.6s ease-in-out infinite;
-}
-
-.tt-presence-name {
-  color: rgb(244 241 234 / 0.85);
-  font-weight: 600;
-}
-
-.tt-presence-sep {
-  color: rgb(244 241 234 / 0.3);
-}
-
 /* 下の段：左に制作、右に GitHub */
 .tt-footer {
   position: absolute;
@@ -7287,12 +7252,6 @@ a.tw-dm-item:focus-visible {
   }
 }
 
-@keyframes tt-pulse {
-  50% {
-    opacity: 0.35;
-  }
-}
-
 @keyframes tt-fade-in {
   from {
     opacity: 0;
@@ -7309,7 +7268,6 @@ a.tw-dm-item:focus-visible {
   .tt-feed-track,
   .tt-content,
   .tt-caret,
-  .tt-presence-dot,
   .tt-bubble {
     animation: none;
   }

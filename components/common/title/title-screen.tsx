@@ -149,14 +149,6 @@ function TitleContent() {
 
   return (
     <main className="tt-content" data-typed={done || undefined}>
-      {/* 連絡が途絶えた相手の、最後のオンライン（物語の導入をさりげなく見せる） */}
-      <p className="tt-presence" aria-hidden="true">
-        <span className="tt-presence-dot" />
-        <span className="tt-presence-name">MaiMai</span>
-        <span className="tt-presence-sep">・</span>
-        <span>最終オンライン 3日前</span>
-      </p>
-
       <p className="tt-kicker">{GAME_TITLE_EN}</p>
       <h1 className="tt-title" aria-label={GAME_TITLE}>
         {/* 打ち終わったときの幅を先に取っておき、打っているあいだ文字が左右に動かないようにする */}
