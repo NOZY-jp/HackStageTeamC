@@ -152,7 +152,51 @@ export const mhcScript = readConversationScripts({
 21:36 mina 21時から
 21:38 gunlance 一人足りない
 21:41 mina 募集出す
-22:04 mina 来なかったので三人で`,
+22:04 mina 来なかったので三人で
+2025-12-13
+20:31:43 master アップデート記念で、今夜は24時まで集会所を開けます
+20:34:43 mina 新装備の話か
+20:36:43 master そうです。素材のドロップも変わったらしい
+20:38 gunlance じゃあ砲撃の強化が来てるかも
+20:41:43 jijii 来てない
+20:43:43 gunlance まだ見てないだろ
+20:45 jijii 見た
+20:48 slime 21時から四人で行きません？
+20:51 mina 入ります
+20:53 haruka 私も
+20:56 gunlance じゃあ四人で
+21:02:43 slime 入りました
+21:05 mina 新素材、どこで出る？
+21:08 haruka 上の方の巣
+21:11 slime 行ってきます
+21:19 slime 出ました
+21:22 gunlance 早い
+21:25 slime 一回で
+21:27 jijii 嘘
+21:29 slime 本当です
+2026-08-08
+19:02 master 夏祭りイベント、今夜21時からです
+19:05 mina 何をする
+19:07 master 四人で花火を集める
+19:09 gunlance 花火で砲撃はできるか
+19:11 master できません
+19:13 jijii 残念そう
+19:15 gunlance 残念だ
+19:18 slime 21時からですね
+19:21 master 浴衣の人は優先で
+19:23 haruka 浴衣ない
+19:25 mina 私もある
+19:27 slime じゃあ普通ので
+21:02 haruka 花火、三個集まりました
+21:05 mina 私は二個
+21:07 slime 一個
+21:09 gunlance 俺はゼロ
+21:11 jijii 探してないだろ
+21:15 gunlance 探してる
+21:18 mina 足りない
+21:21 haruka あと一個
+21:31 master 時間です。花火は来年
+21:34 gunlance 来年こそ`,
   "mhc-chat": `2025-03-03
 22:14 mina 今日の集会所、人が多い
 22:17 slime イベント前だからですね
@@ -411,7 +455,66 @@ export const mhcScript = readConversationScripts({
 12:04 mina 何食べた
 12:06 haruka パン
 12:08 mina それだけ
-12:11 haruka あとコーヒー`,
+12:11 haruka あとコーヒー
+2025-12-31
+22:41:43 gunlance 年越し狩り、やるぞ
+22:44:43 jijii 寝る
+22:46 gunlance まだ10時だぞ
+22:48 jijii 年寄りは寝る
+22:51 slime 私は起きてます
+22:54:43 mina 私も
+22:57 gunlance 三人か
+23:02 slime カウントダウンまで雑談しましょう
+23:06 mina 何時に集まる
+23:09 gunlance 23時半
+23:12 jijii 起きてたら行く
+23:31 slime 入りました
+23:34 mina 私も
+23:36 gunlance あと一人
+23:41:43 jijii 起きた
+23:44:43 gunlance 来た
+23:58 slime あと二分
+00:01 mina あけましておめでとう
+00:02 gunlance おめでとう
+00:03 jijii おめ
+00:05 slime 今年もよろしくお願いします
+00:08 gunlance 今年こそ砲撃縛り
+00:10 jijii やらない
+00:12 mina 毎年それ
+00:15 slime 笑いました
+00:18 gunlance 笑うな
+00:22 mina 初狩りは明日
+00:25 jijii 今日だ
+00:27 mina 寝ます
+2026-08-09
+12:02 slime 昨日の花火、結局足りませんでしたね
+12:05 mina 一個
+12:07 gunlance 来年だ
+12:09 jijii 来年も来ない
+12:11 mina それ
+12:13 slime 浴衣の話だけ聞きました
+12:15 haruka 誰も着てなかった
+12:17 mina 暑いから
+12:20 gunlance 花火より大砲
+12:22 jijii 帰れ
+2026-08-10
+21:41 master 夏祭りの記念に、クリップを三枚選びました
+21:44 slime 見ました
+21:46 mina 二枚目がいい
+21:48 haruka 私のは暗い
+21:51 master 暗いのも残します
+21:53 gunlance 全部俺の大砲
+21:55 jijii 写ってない
+2026-03-15
+12:31 gunlance アプデ記念の装備、作った
+12:34 mina 何を
+12:36 gunlance 砲撃が二連
+12:38 mina 嘘
+12:40 gunlance 盛った
+12:42 jijii 正直
+12:45 slime 笑いました
+12:47 haruka 素材は
+12:50 gunlance まだ`,
   "mhc-questions": `2025-03-13
 19:31 hal 弓で尻尾を切るのは無理ですか
 19:35 mina 切れます。ただし時間かかります
@@ -518,11 +621,11 @@ export const mhcScript = readConversationScripts({
 21:38 mina 一択でいい
 21:41 haruka じゃあ一択`,
   "mhc-clips": `2025-04-05
-21:31 gunlance 今日の大砲、いいとこで当たった
-21:34 mina 見たい
-21:36 gunlance あげた
+21:31:43 gunlance 今日の大砲、いいとこで当たった
+21:34:43 mina 見たい
+21:36:43 gunlance あげた
 21:39 mina 遠い
-21:41 gunlance それがいい
+21:41:43 gunlance それがいい
 2025-06-21
 22:11 haruka 綺麗に撮れました
 22:14 slime いいですね
@@ -635,11 +738,18 @@ export const mhcScript = readConversationScripts({
 20:02 master 22日は昼から点検です。夜は開けます
 20:05 jijii 昼は関係ない
 20:07 master 一応
-20:09 jijii 一応言うな`,
+20:09 jijii 一応言うな
+2026-08-07
+20:02 master 夏祭りは8月8日21時から。花火を集めるだけの短いイベントです
+20:05 mina 参加します
+20:07 gunlance 花火は撃てないのか
+20:09 master 撃てません
+20:11 jijii 残念がってる
+20:13 slime 楽しみです`,
   "mhc-gear": `2025-03-18
-22:14 hal 弓の装備、最初に何を作ればいいですか
+22:14:43 hal 弓の装備、最初に何を作ればいいですか
 22:17 mina 矢の数が増えるやつ
-22:19 hal それだけで変わりますか
+22:19:43 hal それだけで変わりますか
 22:21 mina かなり変わる
 22:24 hal じゃあそれにします
 2025-06-03
@@ -706,7 +816,27 @@ export const mhcScript = readConversationScripts({
 22:44 mina 上の方
 22:46 slime 上
 22:48 mina 地図で一番細い道の先
-22:51 slime 行ってきます`,
+22:51 slime 行ってきます
+2026-03-14
+20:02 mina アップデートで防具のスキル枠、増えた？
+20:05 hal 増えてました
+20:07 mina 何を入れた
+20:09 hal 回復にしました
+20:11 gunlance 俺は砲撃
+20:13 jijii それしかないのか
+20:15 gunlance ある
+20:18 hal 組み替えるの、時間かかりますね
+20:21 mina 一気にやると迷う
+20:23 hal じゃあ一つずつ
+20:25 mina それがいい
+20:28 hal まず武器から
+20:31:43 mina 正解
+2025-12-14
+21:14 haruka 新装備、強化素材が足りない
+21:17 mina どこで出る
+21:19 haruka 巣の上
+21:22 mina 今日は人多かった
+21:24 haruka 明日にします`,
   "mhc-intro": `2025-03-03
 20:31 hal はじめまして！${HAL_NAME}っていいます。弓を使ってます
 20:34 master ようこそ。のんびりで大丈夫です

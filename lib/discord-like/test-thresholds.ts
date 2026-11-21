@@ -8,13 +8,15 @@ export const VOLUME_LIMITS = {
   guildCount: 3,
   dmThreads: 9,
   /** dm-maimai の通数（2026-11-21 実測 1,666） */
-  dmMaimai: { min: 1300, max: 2000 },
+  dmMaimai: { min: 1700, max: 2100 },
   /** DM 全体の通数（実測 1,853） */
-  dmTotal: { min: 1600, max: 2300 },
+  dmTotal: { min: 1900, max: 2400 },
   /** サーバーの通数（実測 799。VC の入退室を含む） */
-  serverTotal: { min: 1200, max: 1700 },
+  serverTotal: { min: 1700, max: 2100 },
   /** 付き合った後の週あたりの日数と、空けてよい日数 */
   datingWeek: { minDays: 5, maxGapDays: 3 },
+  /** dm-maimai の通話と不在着信の下限（実測 14・4） */
+  dmCalls: { total: 14, missed: 4 },
   /** 未返信で終わる DM スレッドの割合の下限（実測 3/9） */
   unrepliedThreadRatioMin: 0.2,
   /** 1分未満で返す割合の上限と、返信間隔の中央値の範囲（実測 4%・3分） */

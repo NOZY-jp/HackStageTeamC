@@ -457,7 +457,7 @@ const scripts: Record<string, string> = {
 15:24 hal あります
 15:26 maimai 買い物は
 15:28 hal 昨日してあるので大丈夫です
-15:31 maimai なんかあったら言って
+15:31:43 maimai なんかあったら言って
 15:33 maimai ほんとに
 15:40 hal ありがとうございます
 15:42 maimai 敬語
@@ -779,9 +779,10 @@ const scripts: Record<string, string> = {
 22:10 hal 7時でいいですか
 22:13 maimai いい
 22:14 maimai じゃあ頼む
+2026-05-06
+23:31 hal! ${HAL_NAME} が通話を開始しました
+23:39 hal! ${HAL_NAME} が通話を終了しました
 2026-05-07
-07:01 hal! ${HAL_NAME} が通話を開始しました
-07:09 hal! ${HAL_NAME} が通話を終了しました
 07:31 maimai 起きた
 07:31:40 maimai ありがと
 07:44 hal よかったです
@@ -1829,7 +1830,67 @@ const scripts: Record<string, string> = {
 21:30 hal 今だから言いました
 21:33 maimai じゃあご飯
 21:36 hal いってらっしゃい
-21:39 maimai いってきます`,
+21:39 maimai いってきます
+2025-12-30
+21:12:43 maimai 仕事納め
+21:15 hal おつかれ
+21:18 maimai 今年あと一日
+21:21 maimai 電話いい？
+21:23 hal いいです
+21:24 maimai! ${MAIMAI_NAME} が通話を開始しました
+22:41 maimai! ${MAIMAI_NAME} が通話を終了しました
+22:44 maimai 声だけでこんなに話したの初めて
+22:46 hal また明日
+2026-02-08
+20:02 hal 今日、発表の練習を一人でやってました
+20:05 maimai 聞くよ
+20:07 hal じゃあ電話します
+20:08 hal! ${HAL_NAME} が通話を開始しました
+20:52 hal! ${HAL_NAME} が通話を終了しました
+20:55 maimai 前より落ち着いてた
+20:57 hal ありがとうございます
+2026-04-25
+22:02 maimai 土曜の夜、暇
+22:05 maimai 電話しない？
+22:07 hal かけます
+22:08 hal! ${HAL_NAME} が通話を開始しました
+22:11 hal! ${HAL_NAME} に応答がありませんでした
+22:41 maimai ごめん、寝てた
+22:43 hal 大丈夫です。また今度
+2026-06-14
+19:31 maimai 雨で予定なくなった
+19:33 hal じゃあ電話でも
+19:35 maimai いいよ
+19:36 maimai! ${MAIMAI_NAME} が通話を開始しました
+20:12 maimai! ${MAIMAI_NAME} が通話を終了しました
+20:15 maimai 雨の音うるさかった
+20:17 hal でも聞こえました
+2026-07-19
+21:41 hal 今夜、少し話せますか
+21:44 maimai いいよ
+21:45 hal! ${HAL_NAME} が通話を開始しました
+22:31 hal! ${HAL_NAME} が通話を終了しました
+22:34 maimai 夏の匂いするね
+22:36 hal わかります
+2026-09-21
+23:02 maimai 寝る前に声だけ聞きたい
+23:04 hal じゃあかけます
+23:05 hal! ${HAL_NAME} が通話を開始しました
+23:07 hal! ${HAL_NAME} に応答がありませんでした
+23:31 maimai ごめん、風呂で気づかなかった
+23:33 hal 明日にします
+2026-10-12
+22:14 maimai ちょっとだけ
+22:16 maimai! ${MAIMAI_NAME} が通話を開始しました
+22:47 maimai! ${MAIMAI_NAME} が通話を終了しました
+22:50 maimai 短くても声聞くと違う
+22:52 hal そうですね
+2026-11-08
+21:02:43 maimai 電話する
+21:03 maimai! ${MAIMAI_NAME} が通話を開始しました
+21:06 maimai! ${MAIMAI_NAME} に応答がありませんでした
+21:31 maimai ごめん、手が離せなかった
+21:33 hal 大丈夫です`,
   "dm-kai": `2025-11-28
 22:56 kai 琥珀さん、前のチームの人たち、まだあのゲームやってます？
 23:01 hal たまにですね
