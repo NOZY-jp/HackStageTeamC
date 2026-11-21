@@ -13,21 +13,28 @@ import {
   useRef,
   useState,
 } from "react";
-import { useStory } from "@/components/common/story/story-provider";
-import { getBlog, getEntry, getMylist } from "@/lib/blog-like";
+import { useOptionalStory } from "@/components/common/story/story-provider";
 import { resolveOmniboxInput, toDisplayUrl } from "@/lib/browser/url-map";
-import { getUserByHandle as getTalkupUserByHandle } from "@/lib/facebook-like";
-import { getArticle, getCreator } from "@/lib/note-like";
 import { APP_PREFIX, dmListPath } from "@/lib/platform/app-prefix";
 import { PHOTO_CONTEST_NAME, PHOTO_CONTEST_RESULT_PATH } from "@/lib/seo/contest";
 import { unreadChats } from "@/lib/story";
-import { getUserByHandle as getTwitterUserByHandle } from "@/lib/twitter-like";
 import "./browser.css";
 
 const HIDDEN_PREFIXES = ["/story", "/screens"] as const;
 const SEEN_CHATS_KEY = "hackstage:story-seen-chats:v1";
 const BROWSER_HISTORY_KEY = "hackstage:browser-history:v1";
 const MAX_HISTORY_ITEMS = 24;
+
+const GENERIC_PAGE_TITLES = new Set([
+  "",
+  "HackStage",
+  "Seek 検索",
+  "Twixer",
+  "talkup",
+  "leaf",
+  "ぽちブロ",
+]);
+const NOT_FOUND_TITLE_RE = /(?:404|not found|見つかりません)/i;
 
 export type HistoryEntry = {
   path: string;
@@ -41,6 +48,12 @@ type BookmarkItem = {
   label: string;
   href: string;
   matchPrefix: string;
+};
+
+type DiscoveryTarget = {
+  path: string;
+  displayUrl: string;
+  fallbackTitle: string;
 };
 
 function startsWithPrefix(pathname: string, prefix: string): boolean {
@@ -87,102 +100,102 @@ function saveHistory(entries: HistoryEntry[]) {
   }
 }
 
-/** 探索で発見した個別ページ・プロフィール等を静かに履歴へ記録するための判定。 */
-function resolveDiscoveryEntry(pathname: string): Omit<HistoryEntry, "visitedAt"> | null {
+function normalizeDocumentTitle(rawTitle: string): string | null {
+  const stripped = rawTitle.replace(/\s*\|\s*HackStage$/, "").trim();
+  if (GENERIC_PAGE_TITLES.has(stripped)) {
+    return null;
+  }
+  return stripped;
+}
+
+/**
+ * URL パターンだけで探索発見ページかどうかを判定する（クライアントバンドルに各 SNS のデータを混ぜない）。
+ * タイトルは document.title 優先とし、更新前や未設定時は非ネタバレのパス由来フォールバックを使う。
+ */
+function resolveDiscoveryTarget(pathname: string): DiscoveryTarget | null {
   const clean = pathname.length > 1 ? pathname.replace(/\/+$/, "") : pathname;
 
   if (clean === PHOTO_CONTEST_RESULT_PATH) {
     return {
       path: clean,
       displayUrl: toDisplayUrl(clean),
-      title: `${PHOTO_CONTEST_NAME} 結果`,
+      fallbackTitle: `${PHOTO_CONTEST_NAME} 結果`,
     };
   }
 
-  // /pochiblo/...
   if (clean.startsWith("/pochiblo/")) {
     const rest = clean.slice("/pochiblo/".length).split("/").filter(Boolean);
-    if (rest[0] === "mylist" && rest[1]) {
-      const mylist = getMylist(rest[1]);
-      if (!mylist) return null;
+    if (rest[0] === "mylist" && rest.length === 2) {
       return {
         path: clean,
         displayUrl: toDisplayUrl(clean),
-        title: `マイリスト：${mylist.title}`,
+        fallbackTitle: "マイリスト - ぽちブロ",
       };
     }
     if (rest.length === 3 && rest[1] === "entry") {
-      const entry = getEntry(rest[0], rest[2]);
-      if (!entry) return null;
       return {
         path: clean,
         displayUrl: toDisplayUrl(clean),
-        title: entry.title,
+        fallbackTitle: toDisplayUrl(clean),
       };
     }
     if (rest.length === 1) {
-      const blog = getBlog(rest[0]);
-      if (!blog) return null;
       return {
         path: clean,
         displayUrl: toDisplayUrl(clean),
-        title: blog.title,
+        fallbackTitle: `${rest[0]} - ぽちブロ`,
       };
     }
     return null;
   }
 
-  // /note/<creatorId> または /note/<creatorId>/n/<noteId>
   if (clean.startsWith("/note/")) {
     const rest = clean.slice("/note/".length).split("/").filter(Boolean);
     if (rest.length === 0 || rest[0] === "search") {
       return null;
     }
     if (rest.length === 3 && rest[1] === "n") {
-      const article = getArticle(rest[0], rest[2]);
-      if (!article) return null;
       return {
         path: clean,
         displayUrl: toDisplayUrl(clean),
-        title: `${article.title}｜leaf`,
+        fallbackTitle: `${rest[0]} の記事｜leaf`,
       };
     }
     if (rest.length === 1) {
-      const creator = getCreator(rest[0]);
-      if (!creator) return null;
       return {
         path: clean,
         displayUrl: toDisplayUrl(clean),
-        title: `${creator.displayName}｜leaf`,
+        fallbackTitle: `${rest[0]}｜leaf`,
       };
     }
     return null;
   }
 
-  // /twitter/profile/<handle>...
   if (clean.startsWith("/twitter/profile/")) {
     const rest = clean.slice("/twitter/profile/".length).split("/").filter(Boolean);
-    if (rest.length === 0) return null;
-    const user = getTwitterUserByHandle(rest[0]);
-    if (!user) return null;
-    return {
-      path: clean,
-      displayUrl: toDisplayUrl(clean),
-      title: `${user.displayName} (@${user.handle}) - Twixer`,
-    };
+    if (
+      rest.length === 1 ||
+      (rest.length === 2 && ["likes", "media", "with_replies"].includes(rest[1]))
+    ) {
+      return {
+        path: clean,
+        displayUrl: toDisplayUrl(clean),
+        fallbackTitle: `@${rest[0]} - Twixer`,
+      };
+    }
+    return null;
   }
 
-  // /talkup/profile/<handle>
   if (clean.startsWith("/talkup/profile/")) {
     const rest = clean.slice("/talkup/profile/".length).split("/").filter(Boolean);
-    if (rest.length === 0) return null;
-    const user = getTalkupUserByHandle(rest[0]);
-    if (!user) return null;
-    return {
-      path: clean,
-      displayUrl: toDisplayUrl(clean),
-      title: `${user.displayName} - talkup`,
-    };
+    if (rest.length === 1) {
+      return {
+        path: clean,
+        displayUrl: toDisplayUrl(clean),
+        fallbackTitle: `@${rest[0]} - talkup`,
+      };
+    }
+    return null;
   }
 
   return null;
@@ -235,13 +248,19 @@ function BrowserChromeInner() {
   const pathname = usePathname() ?? "/";
   const searchParams = useSearchParams();
   const router = useRouter();
-  const { upcoming, chats, covering, ready } = useStory();
+  const story = useOptionalStory();
+  const upcoming = story?.upcoming;
+  const chats = story?.chats ?? [];
+  const covering = story?.covering ?? false;
+  const ready = story?.ready ?? false;
 
   const omniboxId = useId();
   const historyPanelId = useId();
   const inputRef = useRef<HTMLInputElement>(null);
   const historyWrapRef = useRef<HTMLDivElement>(null);
   const historyBtnRef = useRef<HTMLButtonElement>(null);
+  const lastRecordedPathRef = useRef<string | null>(null);
+  const staleRawTitleRef = useRef<string>("");
 
   const [headerEl, setHeaderEl] = useState<HTMLElement | null>(null);
   const [mounted, setMounted] = useState(false);
@@ -325,20 +344,87 @@ function BrowserChromeInner() {
     setDraft(displayUrl);
   }, [displayUrl]);
 
-  // 発見済みページなら静かに履歴へ追加する
+  // 発見済みページなら静かに履歴へ追加し、Next.js の非同期 <title> 更新も追従する
   useEffect(() => {
     if (!mounted) return;
-    const discovered = resolveDiscoveryEntry(pathname);
-    if (!discovered) return;
-    setHistory((prev) => {
-      const filtered = prev.filter((item) => item.path !== discovered.path);
-      const next = [{ ...discovered, visitedAt: Date.now() }, ...filtered].slice(
-        0,
-        MAX_HISTORY_ITEMS,
-      );
-      saveHistory(next);
-      return next;
+
+    const previousPath = lastRecordedPathRef.current;
+    const pathChanged = previousPath !== null && previousPath !== pathname;
+    const previousRawTitle = pathChanged ? staleRawTitleRef.current : "";
+    lastRecordedPathRef.current = pathname;
+
+    const target = resolveDiscoveryTarget(pathname);
+    if (!target) {
+      staleRawTitleRef.current = document.title;
+      return;
+    }
+
+    const resolveTitleFromDocument = (): { title: string; isNotFound: boolean } => {
+      const currentRaw = document.title;
+      if (pathChanged && currentRaw === previousRawTitle) {
+        return { title: target.fallbackTitle, isNotFound: false };
+      }
+      if (NOT_FOUND_TITLE_RE.test(currentRaw)) {
+        return { title: target.fallbackTitle, isNotFound: true };
+      }
+      return {
+        title: normalizeDocumentTitle(currentRaw) ?? target.fallbackTitle,
+        isNotFound: false,
+      };
+    };
+
+    const upsert = (title: string) => {
+      setHistory((prev) => {
+        const filtered = prev.filter((item) => item.path !== target.path);
+        const next = [
+          { path: target.path, displayUrl: target.displayUrl, title, visitedAt: Date.now() },
+          ...filtered,
+        ].slice(0, MAX_HISTORY_ITEMS);
+        saveHistory(next);
+        return next;
+      });
+    };
+
+    const removeTarget = () => {
+      setHistory((prev) => {
+        if (!prev.some((item) => item.path === target.path)) return prev;
+        const next = prev.filter((item) => item.path !== target.path);
+        saveHistory(next);
+        return next;
+      });
+    };
+
+    const initial = resolveTitleFromDocument();
+    if (initial.isNotFound) {
+      removeTarget();
+      staleRawTitleRef.current = document.title;
+      return;
+    }
+
+    upsert(initial.title);
+    staleRawTitleRef.current = document.title;
+
+    if (typeof MutationObserver === "undefined" || !document.head) {
+      return;
+    }
+
+    const observer = new MutationObserver(() => {
+      const nextRaw = document.title;
+      if (nextRaw === previousRawTitle) {
+        return;
+      }
+      staleRawTitleRef.current = nextRaw;
+      if (NOT_FOUND_TITLE_RE.test(nextRaw)) {
+        removeTarget();
+        return;
+      }
+      const normalized = normalizeDocumentTitle(nextRaw);
+      if (normalized) {
+        upsert(normalized);
+      }
     });
+    observer.observe(document.head, { subtree: true, childList: true, characterData: true });
+    return () => observer.disconnect();
   }, [mounted, pathname]);
 
   // Esc キーまたは領域外クリックで発見履歴パネルを閉じる

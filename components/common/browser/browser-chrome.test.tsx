@@ -1,10 +1,12 @@
+import { readFileSync } from "node:fs";
+import { resolve } from "node:path";
 import { act, render, screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { useEffect } from "react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { StoryProvider, useStory } from "@/components/common/story/story-provider";
 import { dmListPath } from "@/lib/platform/app-prefix";
-import { PHOTO_CONTEST_RESULT_PATH } from "@/lib/seo/contest";
+import { PHOTO_CONTEST_NAME, PHOTO_CONTEST_RESULT_PATH } from "@/lib/seo/contest";
 import { beats } from "@/lib/story";
 import { BrowserChrome } from "./browser-chrome";
 
@@ -91,12 +93,21 @@ function renderChrome(
 describe("BrowserChrome", () => {
   beforeEach(() => {
     window.localStorage.clear();
+    document.title = "HackStage";
     document.documentElement.style.removeProperty("--browser-chrome-height");
     nav.pathname = "/twitter";
     nav.search = "";
     nav.push.mockReset();
     nav.back.mockReset();
     nav.forward.mockReset();
+  });
+
+  it("ルートバンドル肥大化や本名混入を防ぐため、プラットフォームのデータモジュールを直接 import しない", () => {
+    const source = readFileSync(
+      resolve(process.cwd(), "components/common/browser/browser-chrome.tsx"),
+      "utf8",
+    );
+    expect(source).not.toMatch(/@\/lib\/(?:blog|facebook|note|twitter)-like/);
   });
 
   it("現在の URL を作中 URL で表示し、アクティブなサービスに aria-current=page を付ける", () => {
@@ -197,17 +208,24 @@ describe("BrowserChrome", () => {
     });
   });
 
-  it("探索で訪れた個人・手がかりページを静かに発見履歴へ記録し、Esc と外部クリックで閉じる", async () => {
+  it("探索で訪れた個人・手がかりページを静かに発見履歴へ記録し、前ページの古いタイトルを持ち越さず、Esc と外部クリックで閉じる", async () => {
     const user = userEvent.setup();
+    document.title = `${PHOTO_CONTEST_NAME} 結果`;
     nav.pathname = PHOTO_CONTEST_RESULT_PATH;
     const { rerender } = renderChrome();
 
+    // 遷移直後に document.title が前ページのままでも古いタイトルで上書きしない
     nav.pathname = "/pochiblo/denden0102";
     rerender(
       <StoryProvider>
         <BrowserChrome />
       </StoryProvider>,
     );
+
+    // 遷移後に document.title が更新された場合は新しいタイトルへ追従する
+    act(() => {
+      document.title = "でんでんの狩猟日記 | HackStage";
+    });
 
     const historyBtn = screen.getByRole("button", { name: "発見履歴" });
     expect(historyBtn).toHaveAttribute("aria-expanded", "false");
@@ -216,10 +234,12 @@ describe("BrowserChrome", () => {
     expect(historyBtn).toHaveAttribute("aria-expanded", "true");
 
     const panel = screen.getByRole("region", { name: "発見したページの履歴" });
-    expect(within(panel).getByRole("link", { name: /でんでんの狩猟日記/ })).toHaveAttribute(
-      "href",
-      "/pochiblo/denden0102",
-    );
+    await waitFor(() => {
+      expect(within(panel).getByRole("link", { name: /でんでんの狩猟日記/ })).toHaveAttribute(
+        "href",
+        "/pochiblo/denden0102",
+      );
+    });
     expect(
       within(panel).getByRole("link", { name: /蒼穹フォトアワード 2020 結果/ }),
     ).toHaveAttribute("href", PHOTO_CONTEST_RESULT_PATH);
@@ -238,9 +258,13 @@ describe("BrowserChrome", () => {
     expect(screen.queryByRole("region", { name: "発見したページの履歴" })).toBeNull();
   });
 
-  it("通常ルートでは Discord リンク先が dmListPath になる", () => {
+  it("通常ルート・検索ページは履歴に記録せず、Discord リンク先が dmListPath になる", async () => {
+    const user = userEvent.setup();
     nav.pathname = "/search";
     renderChrome();
     expect(screen.getByRole("link", { name: /Discord/ })).toHaveAttribute("href", dmListPath());
+
+    await user.click(screen.getByRole("button", { name: "発見履歴" }));
+    expect(screen.getByText("まだ発見したページはありません。")).toBeInTheDocument();
   });
 });
