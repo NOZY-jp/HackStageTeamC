@@ -8,6 +8,7 @@ import { APP_PREFIX, dmListPath } from "@/lib/platform/app-prefix";
  * - `/note...` <-> `leaf.jp/...`
  * - `/talkup...` <-> `talkup.jp/...`
  * - `/search` <-> `seek.jp`
+ * - `/soukyuu-photo...` <-> `soukyuu-photo.jp/...`（写真コンテストの主催者サイト）
  */
 
 const DISCORD_HOST = "discord.com";
@@ -16,6 +17,7 @@ const POCHIBLO_HOST = "pochiblo.jp";
 const LEAF_HOST = "leaf.jp";
 const TALKUP_HOST = "talkup.jp";
 const SEEK_HOST = "seek.jp";
+const SOUKYUU_HOST = "soukyuu-photo.jp";
 
 const TWITTER_RESERVED_ROOTS = new Set(["search", "messages", "post", "profile"]);
 
@@ -110,6 +112,11 @@ export function toDisplayUrl(pathname: string, search?: string): string {
     return joinHostPath(SEEK_HOST, rest, query);
   }
 
+  if (startsWithPrefix(cleanPath, "/soukyuu-photo")) {
+    const rest = cleanPath.slice("/soukyuu-photo".length);
+    return joinHostPath(SOUKYUU_HOST, rest, query);
+  }
+
   return `${cleanPath}${query}`;
 }
 
@@ -184,6 +191,8 @@ export function resolveOmniboxInput(input: string): string {
             return `/note${subPath}${search}`;
           case TALKUP_HOST:
             return `/talkup${subPath}${search}`;
+          case SOUKYUU_HOST:
+            return `/soukyuu-photo${subPath}${search}`;
           case SEEK_HOST:
             return subPath === "" || subPath === "/search"
               ? `/search${search}`

@@ -7957,3 +7957,187 @@ article div[class~="justify-between"][class~="text-xs"] > div {
     transition: none;
   }
 }
+
+/* ---- 写真コンテストの主催者サイト（/soukyuu-photo・#222）。でんでんのブログとは別の、すっきりした公式サイトの見た目 ---- */
+
+.sk-site {
+  --sk-ink: #1f2a37;
+  --sk-sub: #5b6b7d;
+  --sk-sky: #2f6fb3;
+  --sk-sky-pale: #eaf3fb;
+  --sk-line: #d7e3ee;
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  background-color: #f7fafc;
+  color: var(--sk-ink);
+  font-family: "Hiragino Sans", "Noto Sans JP", system-ui, sans-serif;
+}
+
+.sk-header {
+  border-bottom: 1px solid var(--sk-line);
+  background: linear-gradient(180deg, #ffffff, var(--sk-sky-pale));
+}
+
+.sk-header-inner {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px 24px;
+  max-width: 960px;
+  margin: 0 auto;
+  padding: 18px 20px;
+}
+
+.sk-logo {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin: 0;
+}
+
+/* 空の色のグラデーションに、白い地平線を1本 */
+.sk-logo-mark {
+  position: relative;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: linear-gradient(180deg, #7fb6e8, var(--sk-sky));
+  box-shadow: inset 0 -12px 0 -10px #fff;
+}
+
+.sk-logo-text {
+  display: flex;
+  flex-direction: column;
+  font-size: 18px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  line-height: 1.2;
+}
+
+.sk-logo-en {
+  color: var(--sk-sub);
+  font-size: 10px;
+  font-weight: 500;
+  letter-spacing: 0.24em;
+}
+
+.sk-nav {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 20px;
+  font-size: 13px;
+}
+
+.sk-nav-item {
+  padding: 4px 0;
+  border-bottom: 2px solid transparent;
+  color: var(--sk-sub);
+}
+
+.sk-nav-item[data-current] {
+  border-bottom-color: var(--sk-sky);
+  color: var(--sk-ink);
+  font-weight: 700;
+}
+
+.sk-main {
+  flex: 1;
+  width: 100%;
+  max-width: 960px;
+  margin: 0 auto;
+  padding: 40px 20px 64px;
+}
+
+.sk-article {
+  padding: 36px clamp(20px, 5vw, 48px);
+  border: 1px solid var(--sk-line);
+  border-radius: 8px;
+  background-color: #fff;
+}
+
+.sk-date {
+  margin: 0 0 8px;
+  color: var(--sk-sub);
+  font-size: 13px;
+  letter-spacing: 0.04em;
+}
+
+.sk-title {
+  margin: 0 0 20px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid var(--sk-line);
+  font-size: clamp(22px, 3vw, 28px);
+  font-weight: 700;
+  letter-spacing: 0.04em;
+}
+
+.sk-lead,
+.sk-review,
+.sk-closing {
+  margin: 0 0 16px;
+  font-size: 15px;
+  line-height: 1.9;
+}
+
+.sk-prize {
+  margin: 32px 0;
+}
+
+.sk-prize-name {
+  display: inline-block;
+  margin: 0 0 16px;
+  padding: 4px 14px;
+  border-radius: 999px;
+  background-color: var(--sk-sky);
+  color: #fff;
+  font-size: 14px;
+  font-weight: 700;
+  letter-spacing: 0.2em;
+}
+
+.sk-work {
+  margin: 0 0 16px;
+}
+
+.sk-work-image {
+  display: block;
+  width: 100%;
+  height: auto;
+  border-radius: 4px;
+}
+
+.sk-meta {
+  display: grid;
+  gap: 8px;
+  margin: 0 0 16px;
+  padding: 14px 18px;
+  border-radius: 6px;
+  background-color: var(--sk-sky-pale);
+  font-size: 15px;
+}
+
+.sk-meta-row {
+  display: flex;
+  gap: 16px;
+}
+
+.sk-meta dt {
+  flex: none;
+  width: 4em;
+  color: var(--sk-sub);
+}
+
+.sk-meta dd {
+  margin: 0;
+  font-weight: 700;
+}
+
+.sk-footer {
+  padding: 20px;
+  border-top: 1px solid var(--sk-line);
+  color: var(--sk-sub);
+  font-size: 12px;
+  text-align: center;
+}

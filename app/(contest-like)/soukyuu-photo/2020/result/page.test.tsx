@@ -1,15 +1,22 @@
 import { render } from "@testing-library/react";
 import { describe, expect, it } from "vitest";
+import EntryPage, {
+  generateMetadata as entryMetadata,
+} from "@/app/(blog-like)/pochiblo/[blogId]/entry/[entryId]/page";
+import BlogTopPage, {
+  generateMetadata as blogMetadata,
+} from "@/app/(blog-like)/pochiblo/[blogId]/page";
 import sitemap from "@/app/sitemap";
 import { listAllEntries, listBlogs } from "@/lib/blog-like";
+import { toDisplayUrl } from "@/lib/browser/url-map";
 import {
   PHOTO_CONTEST_BLOG_ID,
+  PHOTO_CONTEST_LEGACY_PATH,
   PHOTO_CONTEST_NAME,
   PHOTO_CONTEST_RESULT_PATH,
 } from "@/lib/seo/contest";
 import { canonicalUrl } from "@/lib/seo/site";
-import EntryPage, { generateMetadata as entryMetadata } from "../../entry/[entryId]/page";
-import BlogTopPage, { generateMetadata as blogMetadata } from "../../page";
+import nextConfig from "@/next.config";
 import ContestResultPage, { metadata } from "./page";
 
 const BLOG = listBlogs().find((blog) => blog.id === PHOTO_CONTEST_BLOG_ID);
@@ -22,7 +29,7 @@ const emptySearch = Promise.resolve({});
 
 describe("写真コンテストの結果ページ（#77 手順8）", () => {
   it("結果ページは200で、コンテスト名・受賞者の本名・作品名を出す", async () => {
-    const { container } = render(await ContestResultPage({ params, searchParams: emptySearch }));
+    const { container } = render(<ContestResultPage />);
     const html = container.innerHTML;
 
     expect(html).toContain(PHOTO_CONTEST_NAME);
@@ -35,7 +42,7 @@ describe("写真コンテストの結果ページ（#77 手順8）", () => {
   });
 
   it("受賞作の写真を載せ、まだ分からない名前は黒く塗って伏せる", async () => {
-    const { container } = render(await ContestResultPage({ params, searchParams: emptySearch }));
+    const { container } = render(<ContestResultPage />);
     expect(
       container.querySelector('img[src="/blog-like/photos/contest-photo.webp"]'),
     ).not.toBeNull();
@@ -51,18 +58,25 @@ describe("写真コンテストの結果ページ（#77 手順8）", () => {
     expect(metadata.robots).toBeUndefined();
   });
 
-  it("存在しないブログでは 404（notFound）", async () => {
-    await expect(
-      ContestResultPage({
-        params: Promise.resolve({ blogId: "nope" }),
-        searchParams: emptySearch,
-      }),
-    ).rejects.toThrow();
+  it("主催者のサイトとして、でんでんのブログとは別の URL・見た目で出す（#222）", () => {
+    expect(toDisplayUrl(PHOTO_CONTEST_RESULT_PATH)).toBe("soukyuu-photo.jp/2020/result");
+    const { container } = render(<ContestResultPage />);
+    expect(container.querySelector(".sk-site")).not.toBeNull();
+    expect(container.textContent).not.toContain("でんでんの狩猟日記");
+  });
+
+  it("以前の URL（ブログの中）からは、新しいページへ恒久的に転送する", async () => {
+    const redirects = (await nextConfig.redirects?.()) ?? [];
+    expect(redirects).toContainEqual({
+      source: PHOTO_CONTEST_LEGACY_PATH,
+      destination: PHOTO_CONTEST_RESULT_PATH,
+      permanent: true,
+    });
   });
 
   it("ブログのトップと記事に結果ページへのリンクが無い", async () => {
     const top = render(await BlogTopPage({ params, searchParams: emptySearch }));
-    expect(top.container.innerHTML).not.toContain("soukyuu-photo-award-2020");
+    expect(top.container.innerHTML).not.toContain("soukyuu-photo");
     top.unmount();
 
     const entry = render(
@@ -71,7 +85,7 @@ describe("写真コンテストの結果ページ（#77 手順8）", () => {
         searchParams: emptySearch,
       }),
     );
-    expect(entry.container.innerHTML).not.toContain("soukyuu-photo-award-2020");
+    expect(entry.container.innerHTML).not.toContain("soukyuu-photo");
   });
 
   it("sitemap に結果ページが1件だけ入る", () => {
