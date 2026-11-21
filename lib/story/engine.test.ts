@@ -12,7 +12,6 @@ import {
   setFlag,
   transcript,
 } from "./engine";
-import { beats as scenarioBeats } from "./scenario";
 import { say } from "./stage";
 import type { Beat } from "./types";
 
