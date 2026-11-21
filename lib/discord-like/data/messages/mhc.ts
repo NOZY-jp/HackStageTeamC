@@ -1,5 +1,4 @@
 import type { Message } from "../../types";
-import { OLD_HANDLE } from "../names";
 import { mhcScript } from "./mhc-script";
 
 /** 添付画像とピン留めの固定IDを含む投稿。返信はチャンネルの台本に記載。 */
@@ -24,7 +23,7 @@ const fixedPosts: Record<string, Message[]> = {
       channelId: "mhc-lfg",
       authorId: "denden",
       sentAt: "2018-04-20T21:24:00+09:00",
-      body: `ゲーマーIDは ${OLD_HANDLE} です！フレンド飛ばしてくれたらロビー招待します！`,
+      body: "フレンド申請送ってくれたらロビー招待します！",
     },
     {
       id: "mhc-lfg-0904",
