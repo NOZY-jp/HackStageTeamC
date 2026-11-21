@@ -176,7 +176,13 @@ export const friendScript = readConversationScripts({
 22:05 jun 当たり前
 22:07 riku 当たり前って言うな
 22:09 jun 11月だぞ
-22:11 riku 知ってる`,
+22:11 riku 知ってる
+2026-07-26
+21:31 taku 夏、どこ行く
+21:34 jun 海
+21:36 taku それだけ
+21:38 jun それだけ
+21:41 taku じゃあ決まり`,
   "friend-plan": `2025-12-20
 18:02 taku 今日20時、駅前
 18:05 riku バイト終わり次第
@@ -286,7 +292,12 @@ export const friendScript = readConversationScripts({
 21:14 taku 22日、空けておいて
 21:17 hal 何かあるんですか
 21:19 taku 言わない
-21:21 hal 気になります`,
+21:21 hal 気になります
+2026-11-23
+20:02 miyu 忘年会、何着る
+20:05 taku 普通
+20:07 miyu それ毎回
+20:09 taku 毎回でいい`,
   "friend-memory": `2025-12-21
 22:02 nao 中学の写真、出てきた
 22:05 taku どれ

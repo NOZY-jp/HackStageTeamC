@@ -1,4 +1,4 @@
-import { GAME_NOW } from "../../discord-like/data/now";
+import { GAME_NOW } from "../../platform/game-time";
 import { chat, think } from "../stage";
 import type { Beat } from "../types";
 
@@ -27,7 +27,7 @@ export const kaiContact: Beat[] = [
       chat(
         channel,
         "kai",
-        "FaceBookだと本名で検索したら結構出てくるぞ？",
+        "Facebookだと本名で検索したら結構出てくるぞ？",
         "2026-11-25T23:32:00+09:00",
       ),
       think("写真に写っていた人と照らし合わせてみよう。"),

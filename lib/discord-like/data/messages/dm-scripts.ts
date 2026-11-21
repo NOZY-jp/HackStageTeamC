@@ -1537,7 +1537,7 @@ const scripts: Record<string, string> = {
 11:44 hal 一人で
 11:46 maimai そういう意味じゃない
 2026-10-13
-21:02 maimai 22日は？
+21:02 maimai 20日は？
 21:05 hal 大丈夫です
 21:07 maimai 何時
 21:09 hal 何時でも
@@ -1685,7 +1685,7 @@ const scripts: Record<string, string> = {
 21:31 maimai 三連休、何する
 21:34 hal 準備します
 21:36 maimai 何の
-21:38 hal 22日の
+21:38 hal 20日の
 21:41 maimai まだ三週間ある
 21:43 hal あります
 21:45 maimai ハル、そういうとこ真面目
@@ -1730,7 +1730,7 @@ const scripts: Record<string, string> = {
 23:08 maimai 緊張してるのかも
 23:10 hal 何に
 23:12 maimai わかんない
-23:14 maimai 22日のことかも
+23:14 maimai 20日のことかも
 23:17 hal 僕も、少し
 23:19 maimai 少し？
 23:21 hal けっこう
@@ -1741,7 +1741,7 @@ const scripts: Record<string, string> = {
 23:31 maimai 髪切った
 23:34 hal 見たいです
 23:36 maimai もう暗いから写真無理
-23:39 hal じゃあ22日まで
+23:39 hal じゃあ20日まで
 23:41 maimai 楽しみにしといて
 2026-11-11
 21:41 maimai 何時に着く？
@@ -1794,11 +1794,11 @@ const scripts: Record<string, string> = {
 2026-11-18
 22:14 maimai 明日、19時半から入れる
 22:17 hal 待ってます
-22:19 maimai 22日は、その
+22:19 maimai 20日は、その
 22:21 hal はい
 22:23:41 maimai なんでもない
 22:25 hal なんでもなくないです
-22:27 maimai 22日、楽しみ
+22:27 maimai 20日、楽しみ
 22:30 hal 僕もです
 22:32 maimai じゃあ寝る
 22:34:41 hal おやすみなさい
@@ -2016,7 +2016,7 @@ const scripts: Record<string, string> = {
 18:48 hal 来月から
 18:51 yama じゃあ来月`,
   "dm-ootsuka": `2025-12-02
-21:31 ootsuka 琥珀、発表の練習はしてる？
+21:31 ootsuka リョウ、発表の練習はしてる？
 21:34 hal しています
 21:36 ootsuka 人前でやった？
 21:38 hal まだです

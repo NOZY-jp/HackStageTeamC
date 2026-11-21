@@ -88,6 +88,7 @@ describe("会話の時刻・人物設定", () => {
     const word = (...codePoints: number[]) => String.fromCodePoint(...codePoints);
     const forbiddenMaimaiNames = [
       word(0x670d, 0x90e8, 0x7531, 0x6bd4),
+      word(0x670d, 0x90e8),
       word(0x7531, 0x6bd4),
       word(0x3086, 0x3044, 0x3061, 0x3083, 0x3093),
       word(0x3086, 0x3063, 0x3061, 0x3083, 0x3093),

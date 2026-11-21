@@ -114,7 +114,13 @@ export const univScript = readConversationScripts({
 2026-11-12
 17:41 maeda 11月の最終週、実験は休みです
 17:44 yamada 助かる
-17:46 maeda レポートは出してください`,
+17:46 maeda レポートは出してください
+2025-12-22
+18:31 sato 年末の提出、どこに出すか確認したい
+18:34 yama 事務の箱
+18:36 sato 三号館の？
+18:38 yama そう
+18:41 sato 明日出す`,
   "univ-class": `2025-12-03
 15:31 sato 今日の説明、最後のところ聞き取れた人いる？
 15:34 yama 次回までに各班でテーマを決める、まで
@@ -610,7 +616,13 @@ export const univScript = readConversationScripts({
 10:34 sasaki どこが
 10:36 ishikawa 合計の列
 10:38 sasaki 一個上を見て
-10:41 ishikawa 直りました`,
+10:41 ishikawa 直りました
+2026-11-24
+19:41 yamada 卒制の発表、来月だ
+19:44 hal 準備しています
+19:46 yamada 何分
+19:48 hal 10分
+19:51 yamada 短いの難しい`,
 });
 
 const calls = [

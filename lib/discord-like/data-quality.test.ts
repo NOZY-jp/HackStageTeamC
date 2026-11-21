@@ -108,3 +108,52 @@ describe("Discord の会話データの配置", () => {
     }
   });
 });
+
+describe("本文の品質（旧 data-quality から復活）", () => {
+  it("本文に生成の穴（undefined・null・NaN・{{ }}・TODO）が無い", () => {
+    const bad = messages.filter((message) =>
+      /undefined|null|NaN|\{\{|\}\}|TODO|FIXME/.test(message.body),
+    );
+    expect(bad.map((message) => message.id)).toEqual([]);
+  });
+
+  it("英語の定型文が無い（ASCII だけの長い本文を作らない）", () => {
+    const asciiOnly = messages.filter(
+      (message) => message.body.length >= 20 && /^[ -~]+$/.test(message.body.trim()),
+    );
+    // リンクだけの投稿は本文ではなく URL として扱う
+    const bad = asciiOnly.filter((message) => !/^https?:\/\/\S+$/.test(message.body.trim()));
+    expect(bad.map((message) => message.id)).toEqual([]);
+  });
+
+  it("8文字以上の本文のユニーク率は95%以上（短い相槌は重複してよい）", () => {
+    const bodies = messages
+      .filter((message) => message.system !== true && message.body.length >= 8)
+      .map((message) => message.body);
+    expect(bodies.length).toBeGreaterThan(500);
+    expect(new Set(bodies).size / bodies.length).toBeGreaterThanOrEqual(0.95);
+  });
+
+  it("サーバーごと・月ごとに発言があり、月の後半にも続く", () => {
+    for (const guild of listGuilds()) {
+      const days = new Map<string, Set<string>>();
+      for (const channel of listChannels(guild.id).filter((item) => item.kind === "text")) {
+        for (const message of listMessages({ channelId: channel.id, limit: 5000 }).messages) {
+          const month = message.sentAt.slice(0, 7);
+          const set = days.get(month) ?? new Set<string>();
+          set.add(message.sentAt.slice(0, 10));
+          days.set(month, set);
+        }
+      }
+      for (const [month, set] of days) {
+        // 対象期間（2025-11〜2026-11）だけを検査する。それ以前は前史の場面
+        if (month < "2025-12") continue;
+        expect(set.size, `${guild.id} ${month}`).toBeGreaterThanOrEqual(3);
+        expect(
+          [...set].some((day) => Number(day.slice(8, 10)) >= 20),
+          `${guild.id} ${month} 後半`,
+        ).toBe(true);
+      }
+    }
+  });
+});

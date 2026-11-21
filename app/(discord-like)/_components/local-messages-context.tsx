@@ -26,6 +26,11 @@ function toMessage(channelKey: string, chat: ChatMessage): Message {
   };
 }
 
+/** 過去ログと、物語で流れたメッセージを時刻順に混ぜる（同時刻は過去ログが先） */
+export function mergeMessages(...lists: Message[][]): Message[] {
+  return lists.flat().sort((a, b) => a.sentAt.localeCompare(b.sentAt));
+}
+
 type LocalMessages = {
   messagesFor: (channelKey: string) => Message[];
   /** 送信（表示のみ）。`system` はデータを変えずにシステム行として描くための印。 */
@@ -110,11 +115,13 @@ export function LocalMessagesProvider({ children }: { children: ReactNode }) {
 
   const controls = useMemo<LocalMessages>(
     () => ({
-      messagesFor: (channelKey) => [
-        ...(channelKey === "dm-maimai" ? storyDm.map((chat) => toMessage(channelKey, chat)) : []),
-        ...(channelKey === "dm-kai" ? storyKai.map((chat) => toMessage(channelKey, chat)) : []),
-        ...(byKey[channelKey] ?? []),
-      ],
+      // 物語で流れたメッセージと過去ログを時刻順に混ぜる（後から届いたものを末尾に足さない）
+      messagesFor: (channelKey) =>
+        mergeMessages(
+          channelKey === "dm-maimai" ? storyDm.map((chat) => toMessage(channelKey, chat)) : [],
+          channelKey === "dm-kai" ? storyKai.map((chat) => toMessage(channelKey, chat)) : [],
+          byKey[channelKey] ?? [],
+        ),
       addMessage,
       activeCallThreadId,
       startCall,
