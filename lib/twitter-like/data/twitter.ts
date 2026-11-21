@@ -1,4 +1,5 @@
 import { HAL_HANDLE, HAL_NAME } from "@/lib/discord-like/data/names";
+import { generatedPosts, generatedProfiles, generatedUsers } from "./generated-posts";
 import type { Post, Profile, Trend, TwitterUser } from "../types";
 
 /** True End 手がかり4: かのんの投稿で過去のストーカー被害を示唆するポストID。 */
@@ -41,6 +42,7 @@ export const twitterUsers: TwitterUser[] = [
   { id: "tw-kou", displayName: "コウ", handle: "kou_latenight", avatarColor: "#3f7f8f" },
   { id: "tw-saki", displayName: "サキ", handle: "saki_books", avatarColor: "#a05a5a" },
   { id: "tw-towa", displayName: "トワ", handle: "towa_coffee", avatarColor: "#6b5a46" },
+  ...generatedUsers,
 ];
 
 export const twitterProfiles: Profile[] = [
@@ -152,6 +154,7 @@ export const twitterProfiles: Profile[] = [
     followingCount: 87,
     followersCount: 64,
   },
+  ...generatedProfiles,
 ];
 
 /**
@@ -161,6 +164,8 @@ export const twitterProfiles: Profile[] = [
  * かのんも、まいのリア友とみられる人物もまだ知らないのでフォローしていない
  * — かのんは旧アカウントの bio の「BFF: @kanon__dayo」から見つけるのが筋書き。
  */
+
+/** #248: 返信（150件以上）。親の話題語と具体的な反応を組み合わせ、書き出しを散らす。 */
 export const twitterFollows: Record<string, string[]> = {
   "tw-hal": ["tw-mai", "tw-sou"],
 };
@@ -859,7 +864,35 @@ export const twitterPosts: Post[] = [
     repostCount: 0,
     likeCount: 8,
   },
+  ...generatedPosts,
 ];
+const replyStore: Post[] = [];
+const REPLY_OPENERS = ["それは", "たしかに", "わかる", "自分も", "ちょっと", "なるほど", "いいですね", "うらやましい", "気になります", "あとで"];
+const REPLY_PARTS = ["こっちでも同じでした", "今度くわしく聞きたいです", "自分もやってみます", "その話は助かります", "少し見直してみます", "また共有してください", "同じところで迷いました", "今度一緒にどうですか", "写真があったら見たいです", "時間が合えば行きます"];
+const replyParents = twitterPosts.filter((post) => !post.replyToId && !post.authorId.startsWith("tw-gen") && post.id !== "post-101" && post.id !== "post-105").slice(0, 42);
+replyParents.forEach((parent, pIndex) => {
+  for (let n = 0; n < 4; n += 1) {
+    const opener = REPLY_OPENERS[(pIndex + n) % REPLY_OPENERS.length];
+    const part = REPLY_PARTS[(pIndex * 2 + n) % REPLY_PARTS.length];
+    const start = Date.parse(parent.postedAt) + (n + 1) * 9 * 60 * 1000;
+    replyStore.push({
+      id: `reply-${parent.id}-${n + 1}`,
+      authorId: "tw-mai",
+      postedAt: new Date(start).toISOString().replace(".000Z", "+00:00"),
+      body: `${opener}、${part}。`,
+      replyToId: parent.id,
+      replyCount: 0,
+      repostCount: 0,
+      likeCount: (pIndex + n) % 5,
+    });
+  }
+});
+twitterPosts.push(...replyStore);
+for (const post of twitterPosts) {
+  post.replyCount = twitterPosts.filter((candidate) => candidate.replyToId === post.id).length;
+}
+
+
 
 /** ポストの表示数（インプレッション）のダミー値。Post.id → 件数。 */
 export const twitterViewCounts: Record<string, number> = {

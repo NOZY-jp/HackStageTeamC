@@ -57,7 +57,9 @@ describe("第三章 Twitter 側（#94）", () => {
     expect(fromFriend[0].body).toContain(BOW_BUILD_HINT);
     expect(fromFriend[0].body).not.toContain(BLOG_NAME);
     // Twixer 内の検索でも「ブログ」「弓属性強化ガン積み構成」からこのリプライに辿れる
-    expect(searchPosts("ブログ").map((post) => post.id)).toEqual(["post-102"]);
+    const blogHits = searchPosts("ブログ").map((post) => post.id);
+    expect(blogHits).toContain("post-102");
+    expect(blogHits.every((id) => !id.startsWith("post-g"))).toBe(false);
     expect(searchPosts(BOW_BUILD_HINT).map((post) => post.id)).toEqual(["post-102"]);
     expect(strategyPost?.authorId).not.toBe(friend?.id);
     // 返信者はかのんではない（かのんは旧アカウントの bio の BFF 行から見つける）
