@@ -1,4 +1,5 @@
 import { notFound } from "next/navigation";
+import { lastCallMinutes } from "@/app/(discord-like)/_components/call-history";
 import { ChannelNotFound } from "@/app/(discord-like)/_components/channel-not-found";
 import { channelFallback } from "@/app/(discord-like)/_components/channel-route-fallback";
 import { DmNotFound } from "@/app/(discord-like)/_components/dm-not-found";
@@ -13,6 +14,7 @@ import {
   getUser,
   listDMMessages,
   listMessages,
+  listVoiceSessions,
   listVoiceStates,
   loadUntil,
 } from "@/lib/discord-like";
@@ -90,6 +92,7 @@ async function DmThread({
       mode="dm"
       initialView={toMessageView(page)}
       title={otherName}
+      voiceSessions={listVoiceSessions({ channelId: thread.id })}
       showHash={false}
       headerAvatar={{ displayName: otherName, avatarColor: other?.avatarColor ?? "transparent" }}
       headerAction={
@@ -157,6 +160,7 @@ async function GuildChannel({
           mode="channel"
           initialView={toMessageView(page)}
           title={channel.name}
+          voiceSessions={listVoiceSessions({ channelId: channel.id })}
           topic={channel.topic}
           showHash
           members={members}
@@ -170,6 +174,10 @@ async function GuildChannel({
           channelUrlId={channel.urlId}
           channelName={channel.name}
           currentUser={currentUser}
+          lastSessionMinutes={lastCallMinutes(
+            listVoiceSessions({ channelId: channel.id, scope: "guild" }),
+            channel.id,
+          )}
           participants={listVoiceStates(channel.id).map((state) => {
             const user = getUser(state.userId);
             return {

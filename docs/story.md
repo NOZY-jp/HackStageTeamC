@@ -159,6 +159,15 @@ choices: [
 - **流せる場所を足す**: `stage/cues.ts` の `CHAT_CHANNELS` に足し、受け取る側の画面で `useStoryChats("<場所>")`（`components/common/story/story-provider.tsx`）を読んで、過去のデータの後ろに並べる。いまは Discord の MaiMai との DM だけ（`app/(discord-like)/_components/local-messages-context.tsx`）。通話は `VOICE_CHANNELS` と `useStoryVoice(...)`（`voice-channel-view.tsx`）
 - 時刻は、そのプラットフォームの過去のデータとつじつまが合うように書く（`+09:00` 付き）
 
+### サイトの開放（ブックマーク）
+
+物語や謎解きの段階が進むと、行けるサイトが増えます。開放したサイトは、画面の左端の「ブックマーク」に並びます。新しく開放したときは、上に「ブックマークに追加しました」と短く知らせます。
+
+- 開放の条件は `lib/story/sites.ts` の `SITES`（`unlockWith` のフラグが全部そろったら）。はじめは Discord だけ
+- **締め出しはしない**。URL や検索でたどり着けたら、そのサイトはその時点で開放する
+- 場面を流しているあいだは、ブックマークを出さない
+- サイトを足すときは `SITES` に1行足す（並び順が開放される順）
+
 ### 組み合わせの注意
 
 - `wait: true` を付けた命令は、終わるまで次へ進まない。付けなければ、動きと並行して次の命令が流れる

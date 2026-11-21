@@ -4,7 +4,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { type FormEvent, useState } from "react";
 import { getUserById } from "@/lib/facebook-like";
-import type { FbPost, FbReactionType } from "@/lib/facebook-like/types";
+import type { FbPost, FbPostAttachment, FbReactionType } from "@/lib/facebook-like/types";
 import { FbAvatar } from "./avatar";
 import { useFacebook } from "./facebook-context";
 import {
@@ -16,6 +16,48 @@ import {
 import { CommentIcon, GlobeIcon, ShareIcon, ThumbUpIcon, UsersIcon } from "./icons";
 
 const REACTION_TYPES: FbReactionType[] = ["like", "love", "haha", "wow", "sad", "angry"];
+
+/**
+ * 投稿に付いた写真・リンク。
+ * 写真は画像があれば画像だけを出す（画像が未用意のあいだは、題名入りの仮の枠）。リンクはリンクカードにする
+ */
+function PostAttachment({ attachment }: { attachment: FbPostAttachment }) {
+  if (attachment.kind === "photo") {
+    return attachment.src ? (
+      <Image
+        src={attachment.src}
+        alt={attachment.alt ?? attachment.title}
+        width={attachment.width ?? 800}
+        height={attachment.height ?? 600}
+        unoptimized
+        className="fb-photo"
+      />
+    ) : (
+      <div
+        className="fb-photo-placeholder"
+        role="img"
+        aria-label={attachment.alt ?? attachment.title}
+      >
+        {attachment.title}
+      </div>
+    );
+  }
+  return (
+    <div className="fb-link-card">
+      <div
+        className="fb-link-card-thumb"
+        style={{ backgroundColor: attachment.accentColor ?? "var(--fb-hover)" }}
+        aria-hidden="true"
+      />
+      <div className="fb-link-card-body">
+        {attachment.subtitle ? (
+          <div className="fb-link-card-site">{attachment.subtitle}</div>
+        ) : null}
+        <div className="fb-link-card-title">{attachment.title}</div>
+      </div>
+    </div>
+  );
+}
 
 type PostCardProps = {
   post: FbPost;
@@ -92,30 +134,7 @@ export function PostCard({ post, showAllComments = false }: PostCardProps) {
         {post.body}
       </div>
 
-      {post.attachment?.kind === "photo" && post.attachment.src ? (
-        <Image
-          src={post.attachment.src}
-          alt={post.attachment.alt ?? post.attachment.title}
-          width={post.attachment.width ?? 800}
-          height={post.attachment.height ?? 600}
-          unoptimized
-          className="h-auto w-full"
-        />
-      ) : null}
-      {post.attachment ? (
-        <div
-          className="fb-attachment"
-          style={{ borderLeftColor: post.attachment.accentColor ?? "var(--fb-accent)" }}
-        >
-          <div className="text-xs font-semibold uppercase tracking-wide text-[var(--fb-muted)]">
-            {post.attachment.kind === "photo" ? "PHOTO PREVIEW" : "LINK PREVIEW"}
-          </div>
-          <div className="text-sm font-semibold mt-0.5">{post.attachment.title}</div>
-          {post.attachment.subtitle ? (
-            <div className="text-xs text-[var(--fb-muted)] mt-0.5">{post.attachment.subtitle}</div>
-          ) : null}
-        </div>
-      ) : null}
+      {post.attachment ? <PostAttachment attachment={post.attachment} /> : null}
 
       <div className="px-4 py-2 flex items-center justify-between text-xs text-[var(--fb-muted)] border-b border-[var(--fb-border)] mx-4">
         <div className="flex items-center gap-1.5">
