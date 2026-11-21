@@ -1,7 +1,7 @@
 /** タイトル画面の文言（差し替えるときはここだけ直す） */
 
-/** ゲームのタイトル（仮。第六章の「その呼び方……」から） */
-export const GAME_TITLE = "その呼び方で";
+/** ゲームのタイトル */
+export const GAME_TITLE = "電子の海から紡ぐ跡";
 export const GAME_SUBTITLE = "まだ“好き”に出会えていない誰かへ";
 /** タイトルの前に出す制作のロゴ */
 export const STUDIO_NAME = "Quadrant";
