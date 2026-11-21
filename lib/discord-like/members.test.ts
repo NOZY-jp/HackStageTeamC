@@ -1,13 +1,13 @@
 import { describe, expect, it } from "vitest";
 import { FORBIDDEN_WORDS } from "../story/characters";
-import { acquaintances } from "./data/people/acquaintances";
 import {
   FRIEND_MEMBERS,
   UNIV_JUNIORS,
   UNIV_MEMBERS,
   UNIV_PEERS,
   UNIV_SENIORS,
-} from "./generators/servers";
+} from "./data/guilds/members";
+import { acquaintances } from "./data/people/acquaintances";
 import { getGuild, getUser, listChannels, listGuilds, listMessages } from "./index";
 import { listMemberViews } from "./view";
 

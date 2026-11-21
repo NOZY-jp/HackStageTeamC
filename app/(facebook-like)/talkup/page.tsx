@@ -1,7 +1,9 @@
 "use client";
 
 import Link from "next/link";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
+import { StoryAction } from "@/components/common/story/story-action";
+import { useStoryOptional } from "@/components/common/story/story-provider";
 import { FbAvatar } from "@/components/facebook-like/avatar";
 import { useFacebook } from "@/components/facebook-like/facebook-context";
 import { FacebookLeftSidebar } from "@/components/facebook-like/left-sidebar";
@@ -9,6 +11,7 @@ import { PostCard } from "@/components/facebook-like/post-card";
 import { PostComposer } from "@/components/facebook-like/post-composer";
 import { FacebookRightSidebar } from "@/components/facebook-like/right-sidebar";
 import { filterFeedPosts, filterPostsByQuery, searchFacebook } from "@/lib/facebook-like";
+import { canConfirmTalkup } from "./reveal";
 
 /** 検索結果の絞り込み（すべて・人・投稿） */
 type SearchFilter = "all" | "people" | "posts";
@@ -25,6 +28,12 @@ export default function FacebookFeedPage() {
 
   // URL の ?q= から始まる検索状態で、該当ユーザーと投稿だけを出す
   const matchedUsers = useMemo(() => (query ? searchFacebook(query).users : []), [query]);
+  const story = useStoryOptional();
+  // 本人（u40）が結果に出ていて、カイの連絡の後だけ、確かめた操作を出せる
+  const canConfirm = canConfirmTalkup(
+    story?.state.flags ?? [],
+    matchedUsers.map((user) => user.id),
+  );
 
   // 通常のフィードでは u40（本名で捜す相手）の投稿を出さない。
   // 検索中は本人の投稿も結果に含める（検索とプロフィールからだけ見せる）。
@@ -64,6 +73,12 @@ export default function FacebookFeedPage() {
                   </button>
                 ))}
               </fieldset>
+              {/* 検索結果を本人と確かめた操作を記録する（#119） */}
+              {canConfirm ? (
+                <StoryAction flag="s10-talkup-match" className="fb-text-btn">
+                  この人物で間違いない
+                </StoryAction>
+              ) : null}
             </div>
 
             {filter !== "posts" && matchedUsers.length > 0 ? (

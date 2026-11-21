@@ -1,4 +1,4 @@
-import { FRIEND_MEMBERS, UNIV_MEMBERS } from "../generators/servers";
+import { FRIEND_MEMBERS, UNIV_MEMBERS } from "./guilds/members";
 import { BACKGROUND_SPLIT, backgroundUsers } from "./people/background";
 import { named } from "./people/named";
 

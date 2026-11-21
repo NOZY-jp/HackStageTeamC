@@ -26,6 +26,11 @@ function toMessage(channelKey: string, chat: ChatMessage): Message {
   };
 }
 
+/** 過去ログと、物語で流れたメッセージを時刻順に混ぜる（同時刻は過去ログが先） */
+export function mergeMessages(...lists: Message[][]): Message[] {
+  return lists.flat().sort((a, b) => a.sentAt.localeCompare(b.sentAt));
+}
+
 type LocalMessages = {
   messagesFor: (channelKey: string) => Message[];
   /** 送信（表示のみ）。`system` はデータを変えずにシステム行として描くための印。 */
@@ -66,8 +71,9 @@ export function LocalMessagesProvider({ children }: { children: ReactNode }) {
   // 再マウントされないことがあり、ページ内 state では再入場を拾えないため。
   const [activeCallThreadId, setActiveCallThreadId] = useState<string | null>(null);
   const [activeCallJoinedAt, setActiveCallJoinedAt] = useState<string | null>(null);
-  // 物語の中で流したメッセージ（場面の進み具合で増える）。いまは MaiMai との DM だけ
+  // 場面の進行に合わせて、その相手とのDMにメッセージを出す（MaiMai・カイ）
   const storyDm = useStoryChats("discord:dm-maimai");
+  const storyKai = useStoryChats("discord:dm-kai");
   const sequence = useRef(0);
 
   const addMessage = useCallback(
@@ -114,17 +120,29 @@ export function LocalMessagesProvider({ children }: { children: ReactNode }) {
 
   const controls = useMemo<LocalMessages>(
     () => ({
-      messagesFor: (channelKey) => [
-        ...(channelKey === "dm-maimai" ? storyDm.map((chat) => toMessage(channelKey, chat)) : []),
-        ...(byKey[channelKey] ?? []),
-      ],
+      // 物語で流れたメッセージと過去ログを時刻順に混ぜる（後から届いたものを末尾に足さない）
+      messagesFor: (channelKey) =>
+        mergeMessages(
+          channelKey === "dm-maimai" ? storyDm.map((chat) => toMessage(channelKey, chat)) : [],
+          channelKey === "dm-kai" ? storyKai.map((chat) => toMessage(channelKey, chat)) : [],
+          byKey[channelKey] ?? [],
+        ),
       addMessage,
       activeCallThreadId,
       activeCallJoinedAt,
       startCall,
       endCall,
     }),
-    [activeCallThreadId, activeCallJoinedAt, addMessage, byKey, endCall, startCall, storyDm],
+    [
+      activeCallThreadId,
+      activeCallJoinedAt,
+      addMessage,
+      byKey,
+      endCall,
+      startCall,
+      storyDm,
+      storyKai,
+    ],
   );
 
   return <LocalMessagesContext.Provider value={controls}>{children}</LocalMessagesContext.Provider>;

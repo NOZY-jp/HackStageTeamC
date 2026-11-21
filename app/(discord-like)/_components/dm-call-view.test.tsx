@@ -72,7 +72,7 @@ describe("DM の通話画面（#137）", () => {
     );
   });
 
-  it("操作バーはホバー中だけ出て、外すと消える（#134 と同じ作法）", async () => {
+  it("通話中は操作バーが常に出る（PM決定）", async () => {
     const { container } = render(view());
     await screen.findByRole("main", { name: "MaiMai との通話" });
     const stage = container.querySelector(".call-stage");
@@ -81,11 +81,12 @@ describe("DM の通話画面（#137）", () => {
     await waitFor(() => expect(container.querySelector(".call-controls")).toBeTruthy());
     const controls = container.querySelector(".call-controls");
     if (!controls) throw new Error("controls missing");
-    expect(controls.getAttribute("data-visible")).toBe("false");
+    // 入った時点から常に表示（ホバーで出し入れしない）
+    expect(controls.getAttribute("data-visible")).toBe("true");
     fireEvent.pointerEnter(stage);
     expect(controls.getAttribute("data-visible")).toBe("true");
     fireEvent.pointerLeave(stage);
-    expect(controls.getAttribute("data-visible")).toBe("false");
+    expect(controls.getAttribute("data-visible")).toBe("true");
   });
 
   it("開始でログに残り、終了でDMチャットへ戻る", async () => {

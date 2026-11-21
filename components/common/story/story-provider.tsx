@@ -174,6 +174,11 @@ export function useStoryVoice(channel: VoiceChannel | undefined): VoiceRoom | un
   return channel ? context?.voice.find((room) => room.channel === channel) : undefined;
 }
 
+/** StoryProvider の外でも安全に呼べる版（部品の単体テスト用）。 */
+export function useStoryOptional(): StoryContextValue | null {
+  return useContext(StoryContext);
+}
+
 export function useStory(): StoryContextValue {
   const context = useContext(StoryContext);
   if (!context) {

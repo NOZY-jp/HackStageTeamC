@@ -9,12 +9,14 @@ import {
   useState,
 } from "react";
 import { searchMessages } from "@/app/(discord-like)/_actions/message-search";
+import { useStoryOptional } from "@/components/common/story/story-provider";
 import type { SearchHit, SearchResponse } from "@/lib/discord-like/search";
 import {
   parseQuery,
   type SearchOrder,
   type SearchParseError,
 } from "@/lib/discord-like/search-query";
+import { BLOG_TALK_MESSAGE_ID } from "@/lib/story/places";
 
 /**
  * メッセージ検索（#69）。ブラウザ版 Discord と同じく、ヘッダの検索バーを押すと
@@ -110,6 +112,7 @@ export function MessageSearch() {
 
   const parsed = useMemo(() => parseQuery(query), [query]);
   const terms = parsed.terms;
+  const story = useStoryOptional();
 
   const close = useCallback(() => setOpen(false), []);
 
@@ -195,6 +198,15 @@ export function MessageSearch() {
       clearTimeout(timer);
     };
   }, [open, query, order, parsed.error]);
+
+  // 段階1: MaiMai の「攻略ブログ」の発言が検索結果に出た時点で、その事実を確認したとみなす
+  // （検索はグローバルでも、手がかりのメッセージは dm-maimai のこの1件だけ）。
+  useEffect(() => {
+    if (state.kind !== "results") return;
+    if (state.response.hits.some((hit) => hit.id === BLOG_TALK_MESSAGE_ID)) {
+      story?.setFlag("s01-blog-talk");
+    }
+  }, [state, story]);
 
   const jump = useCallback((hit: SearchHit) => {
     const href = hrefFor(hit);

@@ -226,14 +226,13 @@ export function CallStage({
   /** 発話表示の切り替え間隔（テストで注入する） */
   speakingIntervalMs?: number;
 }) {
-  const [active, setActive] = useState(false);
-  const [focused, setFocused] = useState(false);
   const [sharing, setSharing] = useState(false);
   const [panelOpen, setPanelOpen] = useState(false);
   const [note, setNote] = useState<string | null>(null);
   const [speakerId, setSpeakerId] = useState<string | null>(null);
   const noteTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const controlsVisible = active || focused;
+  // 通話中は操作バーを常に出す（PM決定）。タイル上のホバー要素だけを隠す。
+  const controlsVisible = joined;
   const connected = joined && !connecting;
   const elapsed = useCallTimer(connected, startedAt);
   const tabIndex = controlsVisible ? 0 : -1;
@@ -305,26 +304,7 @@ export function CallStage({
       data-connecting={connecting ? "true" : "false"}
       data-sharing={sharing ? "true" : "false"}
       data-layout={layout}
-      onPointerEnter={() => setActive(true)}
-      onPointerLeave={() => setActive(false)}
-      onFocus={() => setFocused(true)}
-      onBlur={(event) => {
-        if (!event.currentTarget.contains(event.relatedTarget as Node | null)) {
-          setFocused(false);
-        }
-      }}
     >
-      {joined ? (
-        <button
-          type="button"
-          className="call-reveal sr-only"
-          onClick={() => setActive(true)}
-          onFocus={() => setFocused(true)}
-        >
-          通話の操作を表示
-        </button>
-      ) : null}
-
       {layout === "dm" ? (
         <div className="call-stage-info call-stage-info-dm">
           <p className="call-stage-meta">

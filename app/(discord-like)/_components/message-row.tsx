@@ -2,6 +2,7 @@
 
 import type { Message, MessageAuthor } from "@/lib/discord-like/types";
 import { MessageAttachments } from "./message-attachments";
+import { MessageEmbeds } from "./message-embeds";
 
 /**
  * 1件のメッセージ行。grouped（同一作者が5分以内に連続発言）のときは
@@ -96,6 +97,8 @@ export function MessageRow({
           {message.body}
           {grouped && message.editedAt ? <span className="message-edited"> (編集済み)</span> : null}
         </p>
+
+        <MessageEmbeds body={message.body} />
 
         {message.attachments && message.attachments.length > 0 ? (
           <MessageAttachments attachments={message.attachments} />

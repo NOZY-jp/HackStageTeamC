@@ -11,6 +11,12 @@ import {
   OLD_DISPLAY_NAME,
   OLD_HANDLE,
 } from "@/lib/discord-like/data/names";
+import {
+  FORBIDDEN_NICKNAMES,
+  MAIMAI_KANA_READINGS,
+  MAIMAI_REAL_NAME_PARTS,
+  MAIMAI_ROMAJI_READINGS,
+} from "@/lib/platform/story-text-policy";
 import type { Character, CharacterId, Nickname } from "./types";
 
 /**
@@ -91,16 +97,10 @@ export const nicknames: Nickname[] = [
 
 /** 作中のテキストに出してはいけない語（台本のテストで確認する） */
 export const FORBIDDEN_WORDS = [
-  "ゆい",
-  "ゆっちゃん",
-  "服部",
-  "由比",
-  "ユイ",
-  "ユッチャン",
-  "ハットリ",
-  "hattori",
-  "yui",
-  "yucchan",
+  ...FORBIDDEN_NICKNAMES,
+  ...MAIMAI_REAL_NAME_PARTS,
+  ...MAIMAI_KANA_READINGS,
+  ...MAIMAI_ROMAJI_READINGS,
 ];
 
 export function getCharacter(id: CharacterId): Character {

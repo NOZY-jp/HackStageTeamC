@@ -118,6 +118,7 @@ export type ChatCue = {
 
 /** チャットを流せる場所。足すときは、そのプラットフォームで受け取る処理も足す（docs/story.md） */
 export const CHAT_CHANNELS = {
+  "discord:dm-kai": { label: "Discord：カイとのDM", place: "discord:dm-kai" },
   "discord:dm-maimai": { label: "Discord：MaiMai との DM", place: "discord:dm-maimai" },
 } as const satisfies Record<string, { label: string; place: PlaceId }>;
 export type ChatChannel = keyof typeof CHAT_CHANNELS;

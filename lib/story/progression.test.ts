@@ -4,12 +4,36 @@
  * 段階の status を done にしたら、ここに確認を足す。
  */
 import { describe, expect, it } from "vitest";
-import { getEntry, getMylist, listMylistEntries, listPublicEntries } from "@/lib/blog-like";
-import { getChannel, getDMThread, getGuild } from "@/lib/discord-like";
+import {
+  getBlog,
+  getEntry,
+  getMylist,
+  listMylistEntries,
+  listPublicEntries,
+} from "@/lib/blog-like";
+import { getChannel, getDMThread, getGuild, listGuilds } from "@/lib/discord-like";
 import { channelMessages, dmMessages } from "@/lib/discord-like/data/messages";
 import { users } from "@/lib/discord-like/data/users";
+import { buildSearchIndex } from "@/lib/discord-like/search";
+import { resolveLinkEmbeds } from "@/lib/link-embed";
+import { getPost } from "@/lib/twitter-like";
 import { characters } from "./characters";
-import { MAIMAI_DM_URL_ID, MHC_GUILD_URL_ID, NIGHT_VC_URL_ID } from "./places";
+import {
+  availableBeats,
+  choose,
+  completeBeat,
+  completedChats,
+  initialState,
+  setFlag,
+  transcript,
+} from "./engine";
+import {
+  BLOG_TALK_MESSAGE_ID,
+  MAIMAI_DM_URL_ID,
+  MHC_GUILD_URL_ID,
+  NIGHT_VC_URL_ID,
+} from "./places";
+import { STORY_NOW } from "./scenario/kai-contact";
 import { OLD_BLOG_ID } from "./sites";
 import { VOICE_CHANNELS } from "./stage";
 import { STEP_IDS, steps } from "./steps";
@@ -47,15 +71,108 @@ describe("進行チェック（各プラットフォームのデータに手が�
     expect(talk.length).toBeGreaterThan(0);
   });
 
-  it("段階9: カイが、本名で検索すれば出てくると言う", () => {
-    const hint = allDiscordMessages.filter(
-      (message) => message.authorId === "kai" && message.body.includes("本名で検索"),
-    );
-    expect(hint.length).toBeGreaterThan(0);
+  it("段階1の合図に使うメッセージIDは、MaiMai の「攻略ブログ」の発言そのもの", () => {
+    const message = (dmMessages["dm-maimai"] ?? []).find(({ id }) => id === BLOG_TALK_MESSAGE_ID);
+    expect(message?.authorId).toBe("maimai");
+    expect(message?.body).toContain("攻略ブログ");
   });
 
-  it("段階11: 「住所を特定しました」で終わる", () => {
-    expect(allDiscordMessages.some((message) => message.body === "住所を特定しました")).toBe(true);
+  it("段階2の導線（#172）: 段階1のあと、カイとのDMに公開Twixer投稿のURLが届く", () => {
+    const atTalk = setFlag(initialState, "s01-blog-talk");
+    const lead = availableBeats(atTalk).find((beat) => beat.place === "discord:dm-kai");
+    if (!lead) throw new Error("カイの手がかりが届かない");
+    const after = completeBeat(atTalk, lead);
+    const url = completedChats(after).find(
+      (chat) => chat.channel === "discord:dm-kai" && chat.text.includes("twixer.com"),
+    )?.text;
+    expect(url, "DM に貼られるURL").toContain("mai2mai2");
+    // 鍵付きの旧アカウント（maimai_mhw）ではなく、実在する公開投稿 post-101 へ解決できる
+    expect(url).not.toContain("maimai_mhw");
+    expect(resolveLinkEmbeds(url ?? "").map((embed) => embed.href)).toEqual([
+      "/twitter/post/post-101",
+    ]);
+  });
+
+  it("11月25日までの通常ログはゲーム開始より前にある", () => {
+    const times = allDiscordMessages.map((message) => message.sentAt).sort();
+    expect(times.at(-1)?.slice(0, 10)).toBe(STORY_NOW.slice(0, 10));
+    expect(Date.parse(times.at(-1) ?? "")).toBeLessThan(Date.parse(STORY_NOW));
+  });
+
+  it("主要なログは前年11月25日から当年11月25日まで、月を飛ばさずに続く", () => {
+    const startDate = "2025-11-25";
+    const endDate = STORY_NOW.slice(0, 10);
+    const months: string[] = [];
+    const cursor = new Date("2025-11-01T00:00:00Z");
+    while (cursor.toISOString().slice(0, 7) <= endDate.slice(0, 7)) {
+      months.push(cursor.toISOString().slice(0, 7));
+      cursor.setUTCMonth(cursor.getUTCMonth() + 1);
+    }
+
+    const groups = [
+      { id: "dm-maimai", messages: dmMessages["dm-maimai"] },
+      ...listGuilds().map(({ id, channels }) => ({
+        id,
+        messages: channels
+          .filter(({ kind }) => kind === "text")
+          .flatMap(({ id }) => channelMessages[id] ?? []),
+      })),
+    ];
+    for (const { id, messages } of groups) {
+      const dates = (messages ?? [])
+        .filter(({ system }) => system !== true)
+        .map(({ sentAt }) => sentAt.slice(0, 10))
+        .filter((day) => day >= startDate && day <= endDate)
+        .sort();
+      expect([...new Set(dates.map((day) => day.slice(0, 7)))], id).toEqual(months);
+    }
+  });
+
+  it("進行前のDiscord履歴と検索に、カイの助言や結末は含まれない", () => {
+    const plotText = /本名で検索|でんちゃん|住所を特定しました|例の件、どこまで進んだ/;
+    expect(allDiscordMessages.filter((message) => plotText.test(message.body))).toEqual([]);
+    expect(buildSearchIndex().documents.filter((doc) => plotText.test(doc.body))).toEqual([]);
+    expect(availableBeats(initialState).some((beat) => beat.place === "discord:dm-kai")).toBe(
+      false,
+    );
+    expect(completedChats(initialState)).toEqual([]);
+  });
+
+  it("カイの助言は段階8のあとに届き、結末は段階10を経て選んだときだけDMに残る", () => {
+    const atName = setFlag(initialState, "s08-real-name");
+    const contact = availableBeats(atName).find((beat) => beat.place === "discord:dm-kai");
+    if (!contact) throw new Error("カイの連絡が始まらない");
+    const afterContact = completeBeat(atName, contact);
+    expect(afterContact.flags).toContain("s09-kai-contact");
+    expect(completedChats(afterContact)).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          from: "kai",
+          channel: "discord:dm-kai",
+          text: expect.stringContaining("本名で検索"),
+        }),
+      ]),
+    );
+    expect(availableBeats(afterContact).some((beat) => beat.place === "discord:dm-kai")).toBe(
+      false,
+    );
+
+    const atMatch = setFlag(afterContact, "s10-talkup-match");
+    const closing = availableBeats(atMatch).find((beat) => beat.place === "discord:dm-kai");
+    if (!closing) throw new Error("結末を送信できる場面がない");
+    expect(completedChats(atMatch).some((chat) => chat.text === "住所を特定しました")).toBe(false);
+    const send = closing.choices?.find((choice) => choice.label === "住所を特定しました");
+    if (!send) throw new Error("結末の送信を選択できない");
+    const ended = choose(atMatch, closing, send.id);
+    expect(ended.flags).toContain("s11-address");
+    expect(completedChats(ended).at(-1)).toMatchObject({
+      from: "ryo",
+      channel: "discord:dm-kai",
+      text: "住所を特定しました",
+    });
+    expect(transcript(ended).at(-1)?.lines).toContainEqual(
+      expect.objectContaining({ text: "住所を特定しました" }),
+    );
   });
 
   it("段階3: 元のブログのトップは、閉鎖のお知らせだけが公開されている", () => {
@@ -85,8 +202,14 @@ describe("進行チェック（各プラットフォームのデータに手が�
     expect(listMylistEntries(mylist).map((item) => item.id)).toContain("e20181117");
   });
 
+  it("段階2: Twixer で、リア友とみられる人物のリプライがブログ名を挙げている", () => {
+    const reply = getPost("post-102");
+    expect(reply?.replyToId).toBe("post-101");
+    const blogTitle = getBlog("denden0102")?.title ?? "";
+    expect(reply?.body).toContain(blogTitle);
+  });
+
   it.todo("段階7・8: コンテスト名が造語「蒼穹フォトアワード 2020」になっている（#77）");
-  it.todo("段階2: Twixer にリア友とみられる人物の「○○にも書いてたよな」リプライがある");
   it.todo("段階10: talkup に本人のプロフィールと写真がある");
 });
 
