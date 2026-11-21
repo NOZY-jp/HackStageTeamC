@@ -1,3 +1,5 @@
+import { readFileSync } from "node:fs";
+import { join } from "node:path";
 import { describe, expect, it } from "vitest";
 import { LEAF_CREATOR_ID } from "@/lib/blog-migration/articles";
 import { articles } from "./data/articles";
@@ -9,7 +11,10 @@ import { listArticles } from "./index";
  * MaiMai の既存3記事は物語の手がかりなので、ID・本文とも変えない。
  */
 
-const MAIMAI_IDS = ["maimai-2020-02-screenshot", "maimai-2019-08-bow-build"];
+/** MaiMai の既存記事の完全な写し（本文・日付・いいね・タグまで含む）。 */
+const SNAPSHOT: { id: string; creatorId: string }[] = JSON.parse(
+  readFileSync(join(process.cwd(), "lib/note-like/maimai-articles.snapshot.json"), "utf8"),
+);
 const FORBIDDEN = ["でんちゃん", "服部", "由比", "神奈川", "住所"];
 
 describe("Leaf のダミー記事（#211）", () => {
@@ -43,13 +48,17 @@ describe("Leaf のダミー記事（#211）", () => {
     }
   });
 
-  it("MaiMaiの既存記事はID・本文が変わっていない", () => {
-    for (const id of MAIMAI_IDS) {
-      const article = articles.find((item) => item.id === id);
-      expect(article, id).toBeDefined();
-      expect(article?.creatorId).toBe(LEAF_CREATOR_ID);
+  it("MaiMaiの既存記事は、全フィールドが完全一致のまま変わっていない", () => {
+    // 1件ずつIDで突き合わせる（新しい記事が増えても既存の検査は効く）
+    for (const expected of SNAPSHOT) {
+      const actual = articles.find((article) => article.id === expected.id);
+      expect(actual, expected.id).toEqual(expected);
     }
-    const screenshot = articles.find((item) => item.id === "maimai-2020-02-screenshot");
-    expect(JSON.stringify(screenshot?.body)).toContain("/discord-like/screenshot-2018-game.png");
+    for (const id of ["maimai-2020-02-screenshot", "maimai-2019-08-bow-build"]) {
+      expect(
+        SNAPSHOT.some((entry) => entry.id === id),
+        id,
+      ).toBe(true);
+    }
   });
 });
