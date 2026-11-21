@@ -9,6 +9,7 @@ import { APP_PREFIX, dmListPath, dmThreadPath, guildChannelPath } from "@/lib/pl
  * URL の数値 ID は lib/discord-like/data と同じ値（progression.test.ts で突き合わせる）。
  */
 export const MAIMAI_DM_URL_ID = "1187002356428841501";
+export const KAI_DM_URL_ID = "1187002356428841502";
 /** モンハンコミュニティ（サーバー）と、そのボイスチャンネル「深夜の集会」 */
 export const MHC_GUILD_URL_ID = "1187002356428840961";
 export const NIGHT_VC_URL_ID = "1187002356428840973";
@@ -33,6 +34,11 @@ export const PLACES = {
     label: "MaiMai との DM",
     href: dmThreadPath(MAIMAI_DM_URL_ID),
     match: dmThreadPath(MAIMAI_DM_URL_ID),
+  },
+  "discord:dm-kai": {
+    label: "カイとのDM",
+    href: dmThreadPath(KAI_DM_URL_ID),
+    match: dmThreadPath(KAI_DM_URL_ID),
   },
   "discord:vc-night": {
     label: "Discord の「深夜の集会」",

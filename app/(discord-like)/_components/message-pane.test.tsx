@@ -1,7 +1,9 @@
 import { act, render, screen, waitFor } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import { fetchMessagePage } from "@/app/(discord-like)/_actions/message-page";
 import { AppShell } from "@/components/discord-like/app-shell";
 import { listMessages } from "@/lib/discord-like";
+import type { MessageView } from "@/lib/discord-like/types";
 import { toMessageView } from "@/lib/discord-like/view";
 import { LocalMessagesProvider } from "./local-messages-context";
 
@@ -10,21 +12,15 @@ vi.mock("@/app/(discord-like)/_actions/message-page", async () => {
   const { listDMMessages, listMessages } = await import("@/lib/discord-like");
   const { toMessageView } = await import("@/lib/discord-like/view");
   return {
-    fetchMessagePage: async ({
-      mode,
-      key,
-      before,
-    }: {
-      mode: "channel" | "dm";
-      key: string;
-      before?: string;
-    }) => {
-      const page =
-        mode === "dm"
-          ? listDMMessages({ threadId: key, before })
-          : listMessages({ channelId: key, before });
-      return toMessageView(page);
-    },
+    fetchMessagePage: vi.fn(
+      async ({ mode, key, before }: { mode: "channel" | "dm"; key: string; before?: string }) => {
+        const page =
+          mode === "dm"
+            ? listDMMessages({ threadId: key, before })
+            : listMessages({ channelId: key, before });
+        return toMessageView(page);
+      },
+    ),
   };
 });
 
@@ -102,15 +98,16 @@ const triggerIntersect = async () => {
 
 const visibleMessages = (container: HTMLElement) => container.querySelectorAll(".message").length;
 
-function renderPane(channelKey = CHANNEL_ID) {
-  const initialView = toMessageView(listMessages({ channelId: channelKey, limit: PAGE_SIZE }));
+function renderPane(channelKey = CHANNEL_ID, initialView?: MessageView) {
+  const view =
+    initialView ?? toMessageView(listMessages({ channelId: channelKey, limit: PAGE_SIZE }));
   return render(
     <AppShell rail={<span />}>
       <LocalMessagesProvider>
         <MessagePane
           channelKey={channelKey}
           mode="channel"
-          initialView={initialView}
+          initialView={view}
           title="一般"
           topic="テスト"
         />
@@ -156,33 +153,35 @@ describe("MessagePane の段階的読み込み", () => {
   });
 
   it("先頭まで遡ると終端表示を出し、それ以上は増えない", async () => {
-    const { container } = renderPane();
-    const total = listMessages({ channelId: CHANNEL_ID, limit: 1000 }).messages.length;
-
-    for (let attempt = 0; attempt < 40; attempt += 1) {
-      if (screen.queryByText("ここが最初のメッセージです")) break;
-      const before = visibleMessages(container);
-      await triggerIntersect();
-      await waitFor(
-        () => {
-          expect(visibleMessages(container)).toBeGreaterThanOrEqual(before);
-        },
-        { timeout: 8000 },
-      );
-      await new Promise((resolve) => setTimeout(resolve, 120));
-    }
-
-    await waitFor(() => {
-      expect(screen.getByText("ここが最初のメッセージです")).toBeInTheDocument();
+    const view = toMessageView(listMessages({ channelId: CHANNEL_ID, limit: 3 }));
+    const [oldest, ...recent] = view.messages;
+    const fetchPage = vi.mocked(fetchMessagePage);
+    fetchPage.mockClear();
+    fetchPage.mockResolvedValueOnce({
+      ...view,
+      messages: [oldest],
+      hasMore: false,
+      nextCursor: null,
     });
-    expect(visibleMessages(container)).toBe(total);
+    const { container } = renderPane(CHANNEL_ID, {
+      ...view,
+      messages: recent,
+      hasMore: true,
+      nextCursor: recent[0].id,
+    });
 
-    // 終端では sentinel を監視しない（追加読み込みが起きない）
-    const countAtEnd = visibleMessages(container);
-    const observerCount = observers.length;
     await triggerIntersect();
-    expect(observers.length).toBe(observerCount);
-    expect(visibleMessages(container)).toBe(countAtEnd);
+    expect(await screen.findByText("ここが最初のメッセージです")).toBeInTheDocument();
+    expect(visibleMessages(container)).toBe(view.messages.length);
+    expect(fetchPage).toHaveBeenCalledWith({
+      mode: "channel",
+      key: CHANNEL_ID,
+      before: recent[0].id,
+    });
+
+    await triggerIntersect();
+    expect(fetchPage).toHaveBeenCalledTimes(1);
+    expect(visibleMessages(container)).toBe(view.messages.length);
   });
 
   it("読み込み中に別チャンネルへ切り替えると、前のチャンネルの結果を持ち込まない", async () => {
@@ -244,16 +243,17 @@ describe("MessagePane の段階的読み込み", () => {
   });
 
   it("A→B→A と戻ると、読み込み済みの続きがそのまま残る（空にならない）", async () => {
-    const first = renderPane();
-    const total = listMessages({ channelId: CHANNEL_ID, limit: 1000 }).messages.length;
+    const backView = toMessageView(listMessages({ channelId: CHANNEL_ID, limit: PAGE_SIZE }));
+    const first = renderPane(CHANNEL_ID, backView);
+    const loadedIds = () =>
+      Array.from(first.container.querySelectorAll(".message"), (node) =>
+        node.getAttribute("data-message-id"),
+      );
 
-    // 先頭まで遡って全件読み込む
-    for (let attempt = 0; attempt < 40; attempt += 1) {
-      if (screen.queryByText("ここが最初のメッセージです")) break;
-      await triggerIntersect();
-      await new Promise((resolve) => setTimeout(resolve, 250));
-    }
-    expect(visibleMessages(first.container)).toBe(total);
+    await triggerIntersect();
+    await waitFor(() => expect(loadedIds()).toHaveLength(PAGE_SIZE * 2));
+    const cachedIds = loadedIds();
+    expect(cachedIds.slice(PAGE_SIZE)).toEqual(backView.messages.map(({ id }) => id));
 
     const otherView = toMessageView(listMessages({ channelId: "mhc-lfg", limit: PAGE_SIZE }));
     first.rerender(
@@ -271,7 +271,6 @@ describe("MessagePane の段階的読み込み", () => {
     );
     await waitFor(() => expect(visibleMessages(first.container)).toBe(PAGE_SIZE));
 
-    const backView = toMessageView(listMessages({ channelId: CHANNEL_ID, limit: PAGE_SIZE }));
     first.rerender(
       <AppShell rail={<span />}>
         <LocalMessagesProvider>
@@ -286,7 +285,7 @@ describe("MessagePane の段階的読み込み", () => {
       </AppShell>,
     );
 
-    await waitFor(() => expect(visibleMessages(first.container)).toBe(total));
+    await waitFor(() => expect(loadedIds()).toEqual(cachedIds));
   });
 
   it("読み込み中に切り替えて戻っても、スケルトンが固着せず次の読み込みができる", async () => {

@@ -63,8 +63,9 @@ export function LocalMessagesProvider({ children }: { children: ReactNode }) {
   // 通話状態は Provider（レイアウト）に置く。ページは Next のルートキャッシュで
   // 再マウントされないことがあり、ページ内 state では再入場を拾えないため。
   const [activeCallThreadId, setActiveCallThreadId] = useState<string | null>(null);
-  // 物語の中で流したメッセージ（場面の進み具合で増える）。いまは MaiMai との DM だけ
+  // 場面の進行に合わせて、その相手とのDMにメッセージを出す。
   const storyDm = useStoryChats("discord:dm-maimai");
+  const storyKai = useStoryChats("discord:dm-kai");
   const sequence = useRef(0);
 
   const addMessage = useCallback(
@@ -111,6 +112,7 @@ export function LocalMessagesProvider({ children }: { children: ReactNode }) {
     () => ({
       messagesFor: (channelKey) => [
         ...(channelKey === "dm-maimai" ? storyDm.map((chat) => toMessage(channelKey, chat)) : []),
+        ...(channelKey === "dm-kai" ? storyKai.map((chat) => toMessage(channelKey, chat)) : []),
         ...(byKey[channelKey] ?? []),
       ],
       addMessage,
@@ -118,7 +120,7 @@ export function LocalMessagesProvider({ children }: { children: ReactNode }) {
       startCall,
       endCall,
     }),
-    [activeCallThreadId, addMessage, byKey, endCall, startCall, storyDm],
+    [activeCallThreadId, addMessage, byKey, endCall, startCall, storyDm, storyKai],
   );
 
   return <LocalMessagesContext.Provider value={controls}>{children}</LocalMessagesContext.Provider>;
