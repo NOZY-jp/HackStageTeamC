@@ -5,6 +5,7 @@ import {
   getEntry,
   getMylist,
   listMylistEntries,
+  parseTwixerStatusUrl,
 } from "@/lib/blog-like";
 import { getChannel, getDMThread, getGuild, getUser } from "@/lib/discord-like";
 import { resolveChannelRoute } from "@/lib/discord-like/route-resolution";
@@ -76,12 +77,16 @@ export function normalizeAppPath(candidate: string, selfHost?: string): string |
 
 const idOf = (path: string, pattern: RegExp): string | undefined => pattern.exec(path)?.[1];
 
-function resolveTwixer(path: string): LinkEmbed | undefined {
+function resolveTwixer(path: string, candidate: string): LinkEmbed | undefined {
   const postId = idOf(path, /^\/twitter\/post\/([\w-]+)$/);
   if (postId !== undefined) {
     const post = getPost(postId);
     if (!post) return undefined;
     const author = getTwitterUser(post.authorId);
+    // twixer.com/<handle>/status/<id> のURLは、ハンドルが投稿の作者と一致するときだけ
+    // カードにする（別人のハンドル＋実在の投稿IDで、他人の投稿をカードにしない）
+    const statusUrl = parseTwixerStatusUrl(candidate.split(/[?#]/)[0]);
+    if (statusUrl && author?.handle !== statusUrl.handle) return undefined;
     const media = post.media?.[0];
     return {
       href: `/twitter/post/${post.id}`,
@@ -263,7 +268,7 @@ function resolveDiscord(path: string): LinkEmbed | undefined {
  * アプリ内パス → 埋め込みの解決関数。新しい種類の画面を足すときはここに並べる。
  * 先に当たったものを採用するので、重なりうるパターンは具体的なものを先に。
  */
-const ROUTE_RESOLVERS: ((path: string) => LinkEmbed | undefined)[] = [
+const ROUTE_RESOLVERS: ((path: string, candidate: string) => LinkEmbed | undefined)[] = [
   resolveTwixer,
   resolvePochiblo,
   resolveLeaf,
@@ -280,16 +285,21 @@ export function resolveLinkEmbeds(body: string, selfHost?: string, limit = 3): L
   const embeds: LinkEmbed[] = [];
   const seen = new Set<string>();
   for (const candidate of extractLinkCandidates(body)) {
-    const path = normalizeAppPath(candidate, selfHost);
-    if (!path) continue;
-    for (const resolve of ROUTE_RESOLVERS) {
-      const embed = resolve(path);
-      if (!embed) continue;
-      if (!seen.has(embed.href)) {
-        seen.add(embed.href);
-        embeds.push(embed);
+    // 壊れたURLが1つあっても例外で全体を落とさない。失敗した候補だけを捨てて続ける
+    try {
+      const path = normalizeAppPath(candidate, selfHost);
+      if (!path) continue;
+      for (const resolve of ROUTE_RESOLVERS) {
+        const embed = resolve(path, candidate);
+        if (!embed) continue;
+        if (!seen.has(embed.href)) {
+          seen.add(embed.href);
+          embeds.push(embed);
+        }
+        break;
       }
-      break;
+    } catch {
+      continue;
     }
     if (embeds.length >= limit) break;
   }

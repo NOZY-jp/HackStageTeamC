@@ -18,7 +18,7 @@ export const kaiContact: Beat[] = [
     sets: ["s09-kai-contact"],
     script: [
       chat(channel, "kai", "琥珀さん、前にブログで見た写真の話だけど", STORY_NOW),
-      chat(channel, "kai", "この前のTwixer、見れた？", "2026-11-25T23:30:20+09:00"),
+      chat(channel, "kai", "あれから、どこまで進んだ？", "2026-11-25T23:30:20+09:00"),
       chat(
         channel,
         "ryo",

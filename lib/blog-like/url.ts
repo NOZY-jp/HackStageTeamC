@@ -17,15 +17,34 @@ export function externalHref(url: string): string | undefined {
     case LEAF_HOST:
       return path.length > 0 ? `/note/${path.join("/")}` : "/note";
     case TWIXER_HOST: {
-      const [handle, section, statusId] = path;
-      if (handle && section === "status" && statusId) {
-        return `/twitter/post/${statusId}`;
+      const status = parseTwixerStatusUrl(url);
+      if (status) {
+        return `/twitter/post/${status.statusId}`;
       }
+      const [handle] = path;
       return handle ? `/twitter/profile/${handle}` : "/twitter";
     }
     default:
       return undefined;
   }
+}
+
+/**
+ * `twixer.com/<handle>/status/<id>` 形式のURLを、ハンドルと投稿IDに分解する。
+ * 埋め込みカードで「URLのハンドルが投稿の作者と一致するか」を確かめるために使う
+ * （`externalHref` はハンドルを捨てて `/twitter/post/<id>` に寄せるため）。
+ */
+export function parseTwixerStatusUrl(
+  url: string,
+): { handle: string; statusId: string } | undefined {
+  const [host, handle, section, statusId] = url
+    .replace(/^[a-z]+:\/\//i, "")
+    .replace(/\/+$/, "")
+    .split("/");
+  if (host.toLowerCase() !== TWIXER_HOST || !handle || section !== "status" || !statusId) {
+    return undefined;
+  }
+  return { handle, statusId };
 }
 
 /** ブログのトップ: /pochiblo/<blogId> */

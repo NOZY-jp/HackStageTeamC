@@ -19,6 +19,12 @@ describe("extractLinkCandidates", () => {
   it("URL が無い本文からは拾わない", () => {
     expect(extractLinkCandidates("URL はないよ")).toEqual([]);
   });
+
+  it("@ を含むアプリ内パスも切れずに拾う（/channels/@me/...）", () => {
+    expect(
+      extractLinkCandidates("ここ /discord.com/channels/@me/1187002356428841501 だよ"),
+    ).toEqual(["/discord.com/channels/@me/1187002356428841501"]);
+  });
 });
 
 describe("normalizeAppPath（作中ドメイン→アプリ内パス）", () => {
@@ -131,5 +137,31 @@ describe("resolveLinkEmbeds", () => {
       "/twitter/post/post-101",
       "/twitter/post/post-102",
     ]);
+  });
+
+  it("相対パスの Discord DM リンクもカードになる（/discord.com/channels/@me/...）", () => {
+    const embeds = resolveLinkEmbeds("/discord.com/channels/@me/1187002356428841501");
+    expect(embeds[0]).toMatchObject({ siteName: "Discord" });
+    expect(embeds[0]?.title).toContain("DM");
+    expect(embeds[0]?.href).toBe("/discord.com/channels/@me/1187002356428841501");
+  });
+
+  it("壊れたURLが混ざっていても、他のURLのカードは出す（候補ごとに失敗を切り分ける）", () => {
+    // "%zz" は decodeURIComponent が例外を投げる壊れたパーセントエンコード。
+    // これが原因でメッセージ全体のカードが消えないことを確かめる
+    const embeds = resolveLinkEmbeds(
+      `壊れた https://discord.com/channels/%zz/1187002356428841502 と ${POST_101_URL}`,
+    );
+    expect(embeds.map((embed) => embed.href)).toEqual(["/twitter/post/post-101"]);
+    // 壊れたURLだけならカードは出ない（例外は投げない）
+    expect(resolveLinkEmbeds("https://discord.com/channels/%zz/1187002356428841502")).toEqual([]);
+  });
+
+  it("Twixer のURLは、ハンドルが投稿の作者と違うとカードにしない", () => {
+    // 実在する投稿IDでも、URLのハンドルが作者でなければ他人の投稿をカードにしない
+    expect(resolveLinkEmbeds("https://twixer.com/nobody/status/post-101")).toEqual([]);
+    expect(resolveLinkEmbeds("twixer.com/mai2mai2_fake/status/post-101")).toEqual([]);
+    // 作者のハンドルなら従来どおりカードになる
+    expect(resolveLinkEmbeds(POST_101_URL)[0]?.href).toBe("/twitter/post/post-101");
   });
 });
