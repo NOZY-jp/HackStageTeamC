@@ -7,7 +7,9 @@ describe("TwitterProfilePage", () => {
   it.each([
     { handle: HAL_HANDLE, action: "プロフィールを編集" },
     { handle: "kanon__dayo", action: "フォロー" },
-  ])("$action ボタンを無効状態で表示する", async ({ handle, action }) => {
+    { handle: "mai2mai2", action: "フォロー中" },
+    { handle: "kaiser018023071", action: "フォロー中" },
+  ])("@$handle に $action ボタンを無効状態で表示する", async ({ handle, action }) => {
     render(await TwitterProfilePage({ params: Promise.resolve({ handle }) }));
     const profile = within(screen.getByRole("region", { name: "プロフィール" }));
     expect(profile.getByRole("button", { name: action })).toBeDisabled();

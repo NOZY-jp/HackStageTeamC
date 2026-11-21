@@ -1,10 +1,31 @@
 import { render, screen, within } from "@testing-library/react";
-import { describe, expect, it } from "vitest";
+import { afterEach, describe, expect, it, vi } from "vitest";
+import * as twitter from "@/lib/twitter-like";
+import type { Post } from "@/lib/twitter-like/types";
 import TwitterSearchPage from "./page";
 
 const params = (q: string, f?: string) => ({ searchParams: Promise.resolve({ q, f }) });
 
+const textPost: Post = {
+  id: "test-text",
+  authorId: "tw-kanon",
+  postedAt: "2026-11-01T12:00:00+09:00",
+  body: "添付なしのテスト投稿",
+  replyCount: 0,
+  repostCount: 0,
+  likeCount: 0,
+};
+const mediaPost: Post = {
+  ...textPost,
+  id: "test-media",
+  body: "画像つきのテスト投稿",
+  media: [{ src: "/test.png", alt: "テスト画像", width: 100, height: 100 }],
+};
+
 describe("TwitterSearchPage", () => {
+  afterEach(() => {
+    vi.restoreAllMocks();
+  });
   it.each([
     { f: "top", label: "話題", showsUsers: true, showsTextPost: true, showsMediaPost: true },
     { f: "live", label: "最新", showsUsers: false, showsTextPost: true, showsMediaPost: true },
@@ -27,6 +48,7 @@ describe("TwitterSearchPage", () => {
     "$f のタブで対象の検索結果を表示する",
     async ({ f, label, showsUsers, showsTextPost, showsMediaPost }) => {
       const query = "かのん";
+      vi.spyOn(twitter, "searchPosts").mockReturnValueOnce([textPost, mediaPost]);
       render(await TwitterSearchPage(params(query, f)));
 
       const tabs = within(screen.getByRole("navigation", { name: "検索結果の切り替え" }));
@@ -36,8 +58,8 @@ describe("TwitterSearchPage", () => {
         `/twitter/search?q=${encodeURIComponent(query)}&f=media`,
       );
       expect(Boolean(screen.queryByRole("region", { name: "ユーザー" }))).toBe(showsUsers);
-      expect(Boolean(screen.queryByText(/ブログにも書いて/))).toBe(showsTextPost);
-      expect(Boolean(screen.queryByText(/アルバムを整理してたら/))).toBe(showsMediaPost);
+      expect(Boolean(screen.queryByText(textPost.body))).toBe(showsTextPost);
+      expect(Boolean(screen.queryByText(mediaPost.body))).toBe(showsMediaPost);
 
       const form = screen.getByRole("searchbox", { name: "検索キーワード" }).closest("form");
       const search = new FormData(form ?? undefined);
