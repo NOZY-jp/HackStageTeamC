@@ -372,12 +372,13 @@ describe("データ品質（#131 / D9・D10）", () => {
     }
   });
 
-  it("#133追記: リンク投稿の本文は書き分けられている（連番の水増しをしない）", () => {
+  it("#133追記: リンク投稿の本文は書き分けられている（URLを除いて95%以上一意）", () => {
     const list = listDMMessages({ threadId: "dm-maimai", limit: 5000 }).messages;
     const links = list.filter((message) => /https?:\/\//.test(message.body));
-    expect(links.length).toBeGreaterThanOrEqual(80);
-    const unique = new Set(links.map((message) => message.body)).size;
-    expect(unique).toBeGreaterThanOrEqual(70);
+    expect(links.length).toBeGreaterThanOrEqual(50);
+    const texts = links.map((message) => message.body.replace(/https?:\/\/\S+/g, "").trim());
+    const unique = new Set(texts).size / texts.length;
+    expect(unique).toBeGreaterThanOrEqual(0.95);
   });
 
   it("#133追記: docs の DM 内訳が実データと一致する（表のセル単位）", async () => {
@@ -441,6 +442,16 @@ describe("データ品質（#131 / D9・D10）", () => {
     expect(toNumber(callRow[2])).toBe(starts.length);
     const missedRow = rowFor(/^\|\s*不在着信/);
     expect(toNumber(missedRow[2])).toBe(missed.length);
+  });
+
+  it("#133追記: 既存 dm.ts（base 431通）は origin/main と完全一致する", async () => {
+    const fs = await import("node:fs/promises");
+    const { execFileSync } = await import("node:child_process");
+    const file = "lib/discord-like/data/messages/dm.ts";
+    const current = await fs.readFile(file, "utf8");
+    const base = execFileSync("git", ["show", `origin/main:${file}`], { encoding: "utf8" });
+    // 1行でも変われば落ちる（D9: 既存は本文も時刻もIDも書き換えない）
+    expect(current).toBe(base);
   });
 
   it("voice チャンネルには入室/退出のシステムメッセージしか無い（#129 で VoiceSession を追加）", () => {

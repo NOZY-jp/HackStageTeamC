@@ -374,7 +374,10 @@ const jst = (ms: number) => {
 export const looksSpliced = (body: string): boolean => /(の件|の話)[、。].*(の件|の話)/.test(body);
 
 export const looksPadded = (body: string): boolean => {
-  // URL は数字を含んでもよい（本文を数字で水増ししたものだけを弾く）
+  const trimmed = body.trim();
+  // URL だけを貼った投稿で、パス末尾が番号なのは水増し（本文があれば許す）
+  if (/^https?:\/\/\S+\/\d+$/.test(trimmed)) return true;
+  // 本文付きの URL は数字を含んでもよい（本文を数字で水増ししたものだけを弾く）
   if (/https?:\/\//.test(body)) return false;
   return /[（(]\s*\d{1,4}\s*[)）]\s*$/.test(body) || /\d{3,}\s*$/.test(body);
 };
