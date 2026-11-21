@@ -49,10 +49,10 @@ const ACCENT = {
  * 本文に出たURL候補をアプリ内パスに正規化する。
  * - "/..." のアプリ内パス → そのまま
  * - 作中ドメイン（twixer.com / leaf.jp / pochiblo.jp / discord.com）→ 対応するアプリ内パス
- * - それ以外の http(s) URL → 同一オリジン（selfHost = このアプリのデプロイURLをそのまま貼った場合）だけ
+ * - それ以外の URL → 同一オリジン（selfOrigin = このアプリのデプロイURLをそのまま貼った場合）だけ
  *   パス部分を見る。外部サイトがたまたまアプリ内ルートと同じパスを持っていてもカードにしない。
  */
-export function normalizeAppPath(candidate: string, selfHost?: string): string | undefined {
+export function normalizeAppPath(candidate: string, selfOrigin?: string): string | undefined {
   const strip = (path: string) => path.replace(/\/+$/, "") || "/";
   if (candidate.startsWith("/")) return strip(candidate);
   // twixer.com / leaf.jp は blog-like/url.ts が作中URL→アプリ内パスの対応を持っている
@@ -71,7 +71,24 @@ export function normalizeAppPath(candidate: string, selfHost?: string): string |
     case APP_PREFIX:
       return `/${APP_PREFIX}${path === "/" ? "" : path}`;
     default:
-      return selfHost && url.host.toLowerCase() === selfHost.toLowerCase() ? path : undefined;
+      return isSameOrigin(url, selfOrigin) ? path : undefined;
+  }
+}
+
+/**
+ * 同一オリジン判定。selfOrigin はクライアントの location.origin（スキーム込み）。
+ * スキームを含めて比べるので、ホストとポートが同じでも http と https は別オリジン。
+ * スキームなしの値が来た場合はホスト名:ポートだけで比べる（後方互換）。
+ */
+function isSameOrigin(url: URL, selfOrigin?: string): boolean {
+  if (!selfOrigin) return false;
+  if (!selfOrigin.includes("://")) {
+    return url.host.toLowerCase() === selfOrigin.toLowerCase();
+  }
+  try {
+    return url.origin === new URL(selfOrigin).origin;
+  } catch {
+    return false;
   }
 }
 
@@ -279,15 +296,15 @@ const ROUTE_RESOLVERS: ((path: string, candidate: string) => LinkEmbed | undefin
 /**
  * 本文中のURLのうちアプリ内ページに解決できたもののカード情報。
  * 本文に出た順に、同じリンク先は1件だけ。上限は Discord と同じく少数に絞る。
- * selfHost は同一オリジン判定に使うこのアプリのホスト（クライアントの location.host）。
+ * selfOrigin は同一オリジン判定に使うこのアプリのオリジン（クライアントの location.origin）。
  */
-export function resolveLinkEmbeds(body: string, selfHost?: string, limit = 3): LinkEmbed[] {
+export function resolveLinkEmbeds(body: string, selfOrigin?: string, limit = 3): LinkEmbed[] {
   const embeds: LinkEmbed[] = [];
   const seen = new Set<string>();
   for (const candidate of extractLinkCandidates(body)) {
     // 壊れたURLが1つあっても例外で全体を落とさない。失敗した候補だけを捨てて続ける
     try {
-      const path = normalizeAppPath(candidate, selfHost);
+      const path = normalizeAppPath(candidate, selfOrigin);
       if (!path) continue;
       for (const resolve of ROUTE_RESOLVERS) {
         const embed = resolve(path, candidate);

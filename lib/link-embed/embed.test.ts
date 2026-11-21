@@ -20,6 +20,12 @@ describe("extractLinkCandidates", () => {
     expect(extractLinkCandidates("URL はないよ")).toEqual([]);
   });
 
+  it("大文字スキーム＋ポートのURLも丸ごと1トークンで取る（パスだけを拾わない）", () => {
+    expect(extractLinkCandidates("罠 HTTPS://evil.example:443/twitter/post/post-101 だよ")).toEqual(
+      ["HTTPS://evil.example:443/twitter/post/post-101"],
+    );
+  });
+
   it("@ を含むアプリ内パスも切れずに拾う（/channels/@me/...）", () => {
     expect(
       extractLinkCandidates("ここ /discord.com/channels/@me/1187002356428841501 だよ"),
@@ -56,6 +62,16 @@ describe("normalizeAppPath（作中ドメイン→アプリ内パス）", () => 
     expect(
       normalizeAppPath("https://app.local:3000/twitter/post/post-101", "app.local"),
     ).toBeUndefined();
+  });
+
+  it("オリジンを渡すとスキーム込みで比べる（http と https は別オリジン）", () => {
+    // location.origin を渡した場合、ホスト・ポートが同じでもスキームが違えばカードにしない
+    expect(
+      normalizeAppPath("https://app.local:3000/twitter/post/post-101", "http://app.local:3000"),
+    ).toBeUndefined();
+    expect(
+      normalizeAppPath("http://app.local:3000/twitter/post/post-101", "http://app.local:3000"),
+    ).toBe("/twitter/post/post-101");
   });
 });
 
@@ -155,6 +171,23 @@ describe("resolveLinkEmbeds", () => {
     expect(embeds.map((embed) => embed.href)).toEqual(["/twitter/post/post-101"]);
     // 壊れたURLだけならカードは出ない（例外は投げない）
     expect(resolveLinkEmbeds("https://discord.com/channels/%zz/1187002356428841502")).toEqual([]);
+  });
+
+  it("大文字スキーム＋ポートの外部URLは、パスがアプリ内ルートでもカードにしない", () => {
+    // 以前は HTTPS:// をURLとして拾えず、ホスト部のあとの /twitter/... だけが
+    // アプリ内パスとして解決されてカードになっていた
+    expect(resolveLinkEmbeds("これ見て HTTPS://evil.example:443/twitter/post/post-101")).toEqual(
+      [],
+    );
+  });
+
+  it("Twixer の投稿URLに余分なパスを足したURLはカードにしない", () => {
+    // 実在する投稿URL + /nonexistent は別ページなので、その投稿のカードにしない
+    expect(resolveLinkEmbeds("https://twixer.com/mai2mai2/status/post-101/nonexistent")).toEqual(
+      [],
+    );
+    // status の形が壊れたURLは、プロフィールにもフォールバックしない
+    expect(resolveLinkEmbeds("https://twixer.com/mai2mai2/status")).toEqual([]);
   });
 
   it("Twixer のURLは、ハンドルが投稿の作者と違うとカードにしない", () => {

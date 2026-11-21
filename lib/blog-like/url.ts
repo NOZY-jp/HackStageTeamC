@@ -21,8 +21,13 @@ export function externalHref(url: string): string | undefined {
       if (status) {
         return `/twitter/post/${status.statusId}`;
       }
+      // プロフィールに解決するのは <handle> だけのURL。<handle>/status/<id> の形を
+      // 壊したものや余分なセグメントのあるURLは存在しないページなのでリンクにしない
       const [handle] = path;
-      return handle ? `/twitter/profile/${handle}` : "/twitter";
+      if (handle === undefined) {
+        return "/twitter";
+      }
+      return path.length === 1 ? `/twitter/profile/${handle}` : undefined;
     }
     default:
       return undefined;
@@ -37,11 +42,18 @@ export function externalHref(url: string): string | undefined {
 export function parseTwixerStatusUrl(
   url: string,
 ): { handle: string; statusId: string } | undefined {
-  const [host, handle, section, statusId] = url
+  const [host, handle, section, statusId, ...rest] = url
     .replace(/^[a-z]+:\/\//i, "")
     .replace(/\/+$/, "")
     .split("/");
-  if (host.toLowerCase() !== TWIXER_HOST || !handle || section !== "status" || !statusId) {
+  // status/<id> の後ろにさらにセグメントがあるURLは別ページなので投稿URLとして扱わない
+  if (
+    host.toLowerCase() !== TWIXER_HOST ||
+    !handle ||
+    section !== "status" ||
+    !statusId ||
+    rest.length > 0
+  ) {
     return undefined;
   }
   return { handle, statusId };
