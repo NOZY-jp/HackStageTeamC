@@ -1,5 +1,8 @@
 import type { FbUser } from "../types";
 
+/** #76 段階10で、検索から見つける相手。 */
+export const SPOILER_USER_ID = "u40";
+
 /**
  * タイムライン上の一般メンバー定義（u1〜u6, u8, u10, u12, u35, u36）、段階10の対象アカウント（u40: MaiMai）、
  * および追加メンバー（u41〜u48）を定義する（u7, u9, u11 など未参照の人物は含めない）。
@@ -151,7 +154,7 @@ export const fbUsers: FbUser[] = [
     friendIds: ["u1", "u4", "u12"],
   },
   {
-    id: "u40",
+    id: SPOILER_USER_ID,
     displayName: "服部 由比",
     handle: "yui__photo",
     avatarColor: "#d98c6a",

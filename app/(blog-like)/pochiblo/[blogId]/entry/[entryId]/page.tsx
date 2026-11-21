@@ -5,7 +5,7 @@ import { BlogFrame } from "@/components/blog-like/blog-frame";
 import { EntryBody } from "@/components/blog-like/entry-body";
 import { EntryComments } from "@/components/blog-like/entry-comments";
 import { EntryDate, EntryFooter } from "@/components/blog-like/entry-meta";
-import { StoryGoto } from "@/components/common/story/story-goto";
+import { StoryAction } from "@/components/common/story/story-action";
 import {
   blogPath,
   entryPath,
@@ -15,7 +15,6 @@ import {
   listBlogs,
   listPublicEntries,
 } from "@/lib/blog-like";
-import { PHOTO_CONTEST_RESULT_PATH } from "@/lib/seo/contest";
 import { entryDescription } from "@/lib/seo/description";
 import { canonicalUrl } from "@/lib/seo/site";
 
@@ -74,7 +73,7 @@ export default async function EntryPage({ params }: Props) {
         {/* 受賞した記事から結果ページへ進む（本番ではこの操作で順序7が立つ・#119） */}
         {entry.id === "e20181117" ? (
           <p className="pb-contest-link">
-            <StoryGoto href={PHOTO_CONTEST_RESULT_PATH}>結果ページを見る</StoryGoto>
+            <StoryAction flag="s07-contest-entry">コンテスト名を控える</StoryAction>
           </p>
         ) : null}
         <EntryComments comments={entry.comments} />

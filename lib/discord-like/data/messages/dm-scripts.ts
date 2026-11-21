@@ -28,6 +28,7 @@ const scripts: Record<string, string> = {
 2025-03-19
 21:07 hal 今日、爪が出るクエスト回せますか
 21:31 maimai 回せます
+21:31:30 maimai 琥珀さんは爪だけですか
 21:31:42 maimai ただ21時半から30分だけ
 21:33 hal じゃあその前に入ります
 21:40 maimai もう入ってます
@@ -39,13 +40,10 @@ const scripts: Record<string, string> = {
 20:16:40 hal 他の人はまいまいって呼んでました
 20:41 maimai どっちでもいいよ
 20:41:35 maimai さんは外す
-20:42 maimai じゃあ、なんて呼べばいい？
-20:44 hal ハルでいいです
-20:44:40 hal 昔のハンター名がHalなので、ハルで呼ばれてます
-20:45 hal まいまい
+20:42 maimai 琥珀
+20:44 hal じゃあ、まいまい
 20:47 maimai うん
-20:47:40 maimai わたしはまいまいでいいよ
-20:48 maimai でもハルの敬語、抜けないでしょ
+20:48 maimai でも琥珀の敬語、抜けないでしょ
 20:50 hal 抜けないです
 20:51 maimai それでいいよ
 20:53 hal 装備変えるたびにおじぎしてる人、なんなんですか
@@ -192,7 +190,7 @@ const scripts: Record<string, string> = {
 22:36:44 maimai 何が分かりにくいか聞いても答えない
 22:41 hal それは腹立ちますね
 22:42 maimai ね？
-22:42:40 maimai ハルに言ってもらえるとまし
+22:42:40 maimai 琥珀に言ってもらえるとまし
 23:04 hal 明日もやるんですか
 23:06 maimai 明日はやらない。もう知らない
 2025-09-28
@@ -231,7 +229,7 @@ const scripts: Record<string, string> = {
 21:14:52 maimai 一日はゲーム
 22:02 hal 理想的です
 22:04 maimai でしょ
-22:04:40 maimai ハルは何してた
+22:04:40 maimai 琥珀は何してた
 22:31 hal 課題と、あと寝てました
 22:33 maimai おそろいだ
 2025-11-25
@@ -274,7 +272,7 @@ const scripts: Record<string, string> = {
 18:31 maimai 布団から出られない
 18:31:40 maimai 休みの日ってこれでいいの
 18:36 hal いいと思います
-18:40 maimai ハルも出られないの
+18:40 maimai 琥珀も出られないの
 18:44 hal 出ました。洗濯したので
 18:47 maimai えらい
 18:48 maimai わたしは干すのだけ明日にする
@@ -357,7 +355,7 @@ const scripts: Record<string, string> = {
 22:16 maimai らしいけど多すぎ
 22:31 hal 年越しそばは
 22:34 maimai もう食べた
-22:35 maimai ハルは
+22:35 maimai 琥珀は
 22:38 hal 今からゆでます
 22:40 maimai 一人で？
 22:41 hal はい
@@ -436,7 +434,7 @@ const scripts: Record<string, string> = {
 12:41 maimai 誕生日だからね
 21:16 hal! ${HAL_NAME} が通話を開始しました
 22:04 hal! ${HAL_NAME} が通話を終了しました
-22:07 maimai 今日はハルがかけてきたの珍しい
+22:07 maimai 今日は琥珀がかけてきたの珍しい
 22:09 hal 誕生日なので
 22:10 maimai 理由がそれ
 22:12 hal あと、声が聞きたかったです
@@ -476,7 +474,7 @@ const scripts: Record<string, string> = {
 21:20 maimai 知らなかった
 2026-01-30
 23:31 maimai なんか今日さ
-23:31:40 maimai 帰り道にハルのこと考えてた
+23:31:40 maimai 帰り道に琥珀のこと考えてた
 23:34 hal どういう
 23:37 maimai わかんない
 23:37:40 maimai なんとなく
@@ -543,7 +541,7 @@ const scripts: Record<string, string> = {
 22:04 maimai 昨日のチョコ、職場に持ってった
 22:06 maimai 全部なくなった
 22:09 hal よかったですね
-22:11 maimai ハルの分は残してある
+22:11 maimai 琥珀の分は残してある
 22:14 hal え
 22:16 maimai 送る
 22:18 hal いいんですか
@@ -606,7 +604,7 @@ const scripts: Record<string, string> = {
 22:44 maimai なる
 22:44:40 maimai 送別会で泣きそうになったのわたしだけ
 22:49 hal 泣いていいと思います
-22:52 maimai ハルは泣くの
+22:52 maimai 琥珀は泣くの
 22:56 hal 人前では泣かないです
 22:58 maimai じゃあ一人のとき
 23:01 hal それは、たぶん
@@ -637,7 +635,7 @@ const scripts: Record<string, string> = {
 15:34 hal はい
 15:36 maimai わたし今日特に何もしてないのに気分いい
 15:41 hal いいことです
-15:43 maimai ハルのおかげってことにしとく
+15:43 maimai 琥珀のおかげってことにしとく
 15:47 hal それは、はい
 15:49 maimai 照れてる
 2026-03-19
@@ -658,7 +656,7 @@ const scripts: Record<string, string> = {
 23:48 maimai 楽しかった？
 23:52 hal 楽しかったです
 23:53 maimai よかった
-23:55 maimai ハルが楽しそうだとこっちも嬉しい
+23:55 maimai 琥珀が楽しそうだとこっちも嬉しい
 00:01 hal そういうこと言うんですね
 00:03 maimai たまにね
 2026-03-29
@@ -713,7 +711,7 @@ const scripts: Record<string, string> = {
 20:36 maimai 写真撮らなかった
 20:39 hal 来年があります
 20:41 maimai 来年
-20:42 maimai ハルと来年も話してるのかな
+20:42 maimai 琥珀と来年も話してるのかな
 20:47 hal 話してると思います
 20:49 maimai 根拠は
 20:52 hal 今話してるから
@@ -722,7 +720,7 @@ const scripts: Record<string, string> = {
 23:12 hal 今日、研究室の人と初めて話しました
 23:15 maimai どんな人
 23:18 hal 静かな人です
-23:20 maimai ハルと似てる
+23:20 maimai 琥珀と似てる
 23:22 hal かもしれないです
 23:24 maimai じゃあ二人で無言なの
 23:26 hal 今のところは
@@ -758,7 +756,7 @@ const scripts: Record<string, string> = {
 21:04 hal できました
 21:06 maimai 見せて
 21:09 hal 先にどうぞ
-21:11 maimai いやハルから
+21:11 maimai いや琥珀から
 21:14 hal じゃあ
 21:17 maimai わ、おいしそう
 21:19 maimai わたしのより上手い
@@ -793,7 +791,7 @@ const scripts: Record<string, string> = {
 2026-05-12
 22:31 maimai 今日、変な夢見た
 22:34 hal どんな
-22:36 maimai ハルが知らない人で、でもハルってわかるの
+22:36 maimai 琥珀が知らない人で、でも琥珀ってわかるの
 22:41 hal こわいですね
 22:43 maimai こわくないよ
 22:44 maimai なんか、変な感じだった
@@ -829,7 +827,7 @@ const scripts: Record<string, string> = {
 21:17 maimai 二回言わせた
 2026-05-27
 23:04 hal 今日、学科の人がゼミで詰められてました
-23:07 maimai ハルは？
+23:07 maimai 琥珀は？
 23:09 hal 僕は大丈夫でした
 23:11 maimai よかった
 23:13 maimai でもそういうの見ると怖くない？
@@ -860,7 +858,7 @@ const scripts: Record<string, string> = {
 22:31 maimai ねえ
 22:32 maimai 聞いていい？
 22:35 hal どうぞ
-22:37 maimai ハルって、わたしのことどう思ってる
+22:37 maimai 琥珀って、わたしのことどう思ってる
 22:44 hal え
 22:46 maimai 重い質問じゃないから
 22:50 hal 大事な話なので、少し考えたいです
@@ -903,7 +901,7 @@ const scripts: Record<string, string> = {
 21:46 maimai わかんない
 21:48 maimai 22時は超える
 21:52 hal じゃあ今日は早く寝てください
-21:55 maimai ハルと話したい
+21:55 maimai 琥珀と話したい
 21:58 hal 明日の夜に
 22:01 maimai 明日も残業かもしれない
 22:04 hal じゃあ明後日
@@ -918,7 +916,7 @@ const scripts: Record<string, string> = {
 19:09 maimai 二回連続で流れた
 19:12 hal 縁がないですね
 19:14 maimai 笑えない
-19:16 maimai ハルは雨の日何する
+19:16 maimai 琥珀は雨の日何する
 19:19 hal 家にいます
 19:21 maimai それだけ
 19:23 hal あと、まいまいと話します
@@ -942,7 +940,7 @@ const scripts: Record<string, string> = {
 21:48 maimai わたしも
 21:49 maimai でもちょっと尊敬する
 21:53 hal 僕は無理です
-21:55 maimai ハルは三日で飽きそう
+21:55 maimai 琥珀は三日で飽きそう
 21:58 hal 二日です
 22:01 maimai 二日
 2026-07-04
@@ -953,7 +951,7 @@ const scripts: Record<string, string> = {
 15:21 maimai 毎日は無理
 15:23 maimai 最初の三日だけでいい
 15:26 hal じゃあその三日で
-15:28 maimai ハルは全部やるの
+15:28 maimai 琥珀は全部やるの
 15:31 hal たぶん
 15:33 maimai たぶん
 15:34 maimai ほどほどにね
@@ -997,7 +995,7 @@ const scripts: Record<string, string> = {
 14:06 hal そうですか
 14:08 maimai 弓なのに黒い
 14:10 hal それがいいんです
-14:12 maimai ハル、たまに熱くなるよね
+14:12 maimai 琥珀、たまに熱くなるよね
 2026-07-23
 23:31 maimai 眠い
 23:33 maimai でも寝たくない
@@ -1200,7 +1198,7 @@ const scripts: Record<string, string> = {
 21:51 maimai じゃあ十月
 21:53 maimai まだ二ヶ月ある
 21:56 hal あっという間です
-21:58 maimai ハルはそうかもね
+21:58 maimai 琥珀はそうかもね
 22:02 hal まいまいは違うんですか
 22:05 maimai 長い
 22:07 maimai すごく長い
@@ -1308,7 +1306,7 @@ const scripts: Record<string, string> = {
 22:41 maimai 今日ね、昼に同期と食べた
 22:44 hal 楽しかったですか
 22:46 maimai 楽しかった
-22:47 maimai でも、ハルの話した
+22:47 maimai でも、琥珀の話した
 22:51 hal 僕の
 22:53 maimai うん
 22:54 maimai なんて言ったかは内緒
@@ -1415,7 +1413,7 @@ const scripts: Record<string, string> = {
 13:09 hal まだ一ヶ月先です
 13:11 maimai 一ヶ月あるから見てる
 13:14 hal なるほど、一ヶ月あると選ぶのも楽しいですね
-13:16 maimai ハルは何着るの
+13:16 maimai 琥珀は何着るの
 13:18 hal 普通の
 13:20 maimai 普通って
 13:22 hal シャツと、ズボン
@@ -1456,7 +1454,7 @@ const scripts: Record<string, string> = {
 12:41 maimai 終わった
 12:43 maimai あと二ヶ月で今年終わる
 12:46 hal 早いです
-12:48 maimai ハルと知り合って、もう一年半
+12:48 maimai 琥珀と知り合って、もう一年半
 12:53 hal そんなに経ちましたっけ
 12:55 maimai 経ってる
 12:57 maimai わたしは数えてる
@@ -1526,7 +1524,7 @@ const scripts: Record<string, string> = {
 13:34 hal いいです
 13:36 maimai ごめんね、十月無理そうで
 13:39 hal 謝らないでください
-13:41 maimai ハルも忙しいし
+13:41 maimai 琥珀も忙しいし
 13:43 hal 十一月、楽しみにしてます
 13:46 maimai まだ日決めてない
 13:48 hal じゃあ決めましょう
@@ -1561,7 +1559,7 @@ const scripts: Record<string, string> = {
 22:44 hal 早いですね
 22:46 maimai 遅刻したくないから
 22:49 hal 僕も調べます
-22:51 maimai ハルの分はいいよ
+22:51 maimai 琥珀の分はいいよ
 22:53 hal 調べます
 22:56 maimai そういうとこ
 2026-10-17
@@ -1673,7 +1671,7 @@ const scripts: Record<string, string> = {
 13:07 maimai なんか、変な感じ
 13:09 maimai 会ったことないのに、会う約束してる
 13:12 hal 不思議ですね
-13:14 maimai ハルは平気なの
+13:14 maimai 琥珀は平気なの
 13:17 hal 平気じゃないです
 13:19 maimai よかった
 13:21 hal よくないです
@@ -1691,7 +1689,7 @@ const scripts: Record<string, string> = {
 21:38 hal 20日の
 21:41 maimai まだ二週間以上ある
 21:43 hal あります
-21:45 maimai ハル、そういうとこ真面目
+21:45 maimai 琥珀、そういうとこ真面目
 21:48 hal 真面目です
 21:50 maimai 知ってる
 2026-11-05

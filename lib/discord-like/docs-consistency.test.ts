@@ -83,3 +83,24 @@ describe("docs/04 の DM 表も実データと一致する", () => {
     }
   });
 });
+
+describe("docs に古い呼称が残っていない", () => {
+  it("docs/discord に旧呼び名と本名が無い（弓ハルカは除く）", () => {
+    const docs = [
+      "00-overview.md",
+      "01-naturalness.md",
+      "02-timeline-volume.md",
+      "03-people.md",
+      "04-servers-dms.md",
+      "05-voice-ui.md",
+    ].map((name) => readFileSync(resolve(process.cwd(), "docs/discord", name), "utf8"));
+    for (const text of docs) {
+      expect(/ハル(?!カ)/.test(text)).toBe(false);
+    }
+    // 主人公の呼び名「リョウ」は、方針と人物表（00・01・03）でだけ使う
+    const policyDocs = docs.filter((_, index) => ![0, 1, 3].includes(index));
+    for (const text of policyDocs) {
+      expect(text.includes("リョウ")).toBe(false);
+    }
+  });
+});

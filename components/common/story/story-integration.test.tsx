@@ -4,7 +4,7 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 import ContestResultPage from "@/app/(blog-like)/pochiblo/[blogId]/contest/soukyuu-photo-award-2020/page";
 import EntryPage from "@/app/(blog-like)/pochiblo/[blogId]/entry/[entryId]/page";
 import TalkupPage from "@/app/(facebook-like)/talkup/page";
-import { canConfirmTalkup, shouldRecordMatch } from "@/app/(facebook-like)/talkup/reveal";
+import { canConfirmTalkup } from "@/app/(facebook-like)/talkup/reveal";
 import { StoryConsole } from "@/app/(story)/_components/story-console";
 import { FacebookProvider } from "@/components/facebook-like/facebook-context";
 import { PHOTO_CONTEST_BLOG_ID } from "@/lib/seo/contest";
@@ -21,37 +21,22 @@ vi.mock("next/navigation", () => ({
   useRouter: () => ({ push: vi.fn(), replace: vi.fn(), refresh: vi.fn() }),
 }));
 
-/** 進行状態を読むだけの表示（テストからフラグを直接入れない） */
 function Probe({ onState }: { onState: (flags: FlagId[]) => void }) {
   const { state, ready } = useStory();
   if (ready) onState(state.flags);
   return null;
 }
 
-const renderContest = async (onState: (flags: FlagId[]) => void) => {
-  const page = await ContestResultPage({
+const entryPage = () =>
+  EntryPage({
+    params: Promise.resolve({ blogId: PHOTO_CONTEST_BLOG_ID, entryId: "e20181117" }),
+    searchParams: Promise.resolve({}),
+  });
+const resultPage = () =>
+  ContestResultPage({
     params: Promise.resolve({ blogId: PHOTO_CONTEST_BLOG_ID }),
     searchParams: Promise.resolve({}),
   });
-  return render(
-    <StoryProvider>
-      <StoryConsole />
-      {page}
-      <Probe onState={onState} />
-    </StoryProvider>,
-  );
-};
-
-const renderTalkup = (onState: (flags: FlagId[]) => void) =>
-  render(
-    <StoryProvider>
-      <StoryConsole />
-      <FacebookProvider>
-        <TalkupPage />
-      </FacebookProvider>
-      <Probe onState={onState} />
-    </StoryProvider>,
-  );
 
 const seed = (flags: string[]) =>
   window.localStorage.setItem(
@@ -59,63 +44,89 @@ const seed = (flags: string[]) =>
     JSON.stringify({ flags, completed: ["ch5-kai-contact"], choices: {} }),
   );
 
-describe("段階7・8・10・結末（実ページ経由）", () => {
+describe("段階7・8・10・結末（実ページ経由・本名は結果ページでだけ）", () => {
   beforeEach(() => {
     window.localStorage.clear();
     nav.query = new URLSearchParams();
   });
 
-  it("コンテスト結果ページで受賞者を確認すると段階7が立ち、検索への導線が出る", async () => {
+  it("受賞記事でコンテスト名を控えると段階7が立ち、結果ページへのリンクは無い", async () => {
     const seen: FlagId[][] = [];
-    await renderContest((flags) => seen.push(flags));
+    render(
+      <StoryProvider>
+        {await entryPage()}
+        <Probe onState={(flags) => seen.push(flags)} />
+      </StoryProvider>,
+    );
+    // 結果ページへの直リンクは置かない（順序8は検索で発見する）
+    expect(screen.queryByRole("button", { name: "結果ページを見る" })).toBeNull();
 
-    expect(screen.queryByRole("button", { name: "この名前で検索する" })).toBeNull();
-    await userEvent.setup().click(screen.getByRole("button", { name: "受賞者を確認する" }));
-
+    await userEvent.setup().click(screen.getByRole("button", { name: "コンテスト名を控える" }));
     await waitFor(() => expect(seen.at(-1)).toContain("s07-contest-entry"));
-    expect(await screen.findByRole("button", { name: "この名前で検索する" })).toBeTruthy();
   });
 
-  it("talkup で本名検索して本人が出ると段階8が立ち、カイの連絡後に確認できる", async () => {
+  it("段階7の後に結果ページを見ると本名が出て段階8が立つ", async () => {
     seed(["started", "s07-contest-entry"]);
-    nav.query = new URLSearchParams({ q: BFF_QUERY });
     const seen: FlagId[][] = [];
-    await renderTalkup((flags) => seen.push(flags));
-
+    render(
+      <StoryProvider>
+        {await resultPage()}
+        <Probe onState={(flags) => seen.push(flags)} />
+      </StoryProvider>,
+    );
+    expect(await screen.findByText("服部 由比")).toBeTruthy();
     await waitFor(() => expect(seen.at(-1)).toContain("s08-real-name"));
-    expect(screen.queryByRole("button", { name: "この人物で間違いない" })).toBeNull();
-
-    // 段階9（カイの連絡）まで進める
-    const user = userEvent.setup();
-    for (let i = 0; i < 7; i += 1) {
-      await user.click(screen.getAllByRole("button", { name: "着いた" })[0]);
-    }
-    const button = await screen.findByRole("button", { name: "この人物で間違いない" });
-    await user.click(button);
-    await waitFor(() => expect(seen.at(-1)).toContain("s10-talkup-match"));
   });
 
-  it("受賞者を確認していなければ、検索で本人が出ても段階8は立たない", async () => {
+  it("段階7の前に結果ページを開いても、本名を出さず段階8も立てない", async () => {
     seed(["started"]);
-    nav.query = new URLSearchParams({ q: BFF_QUERY });
     const seen: FlagId[][] = [];
-    await renderTalkup((flags) => seen.push(flags));
+    const { container } = render(
+      <StoryProvider>
+        {await resultPage()}
+        <Probe onState={(flags) => seen.push(flags)} />
+      </StoryProvider>,
+    );
     await waitFor(() => expect(seen.length).toBeGreaterThan(0));
+    expect(container.innerHTML).not.toContain("服部 由比");
     expect(seen.at(-1)).not.toContain("s08-real-name");
-    expect(shouldRecordMatch([], ["u40"])).toBe(false);
   });
 
-  it("talkup は、検索結果が本人（u40）でなければ確認ボタンを出さない", async () => {
-    seed(["started", "s07-contest-entry", "s08-real-name", "s09-kai-contact"]);
-    nav.query = new URLSearchParams({ q: "member01" });
-    await renderTalkup(() => {});
-    expect(screen.queryByRole("button", { name: "この人物で間違いない" })).toBeNull();
+  it("talkup の確認は s07・s08・s09 と本人（u40）が揃ったときだけ", () => {
+    expect(canConfirmTalkup([], ["u40"])).toBe(false);
+    expect(canConfirmTalkup(["s07-contest-entry", "s08-real-name"], ["u40"])).toBe(false);
+    expect(canConfirmTalkup(["s07-contest-entry", "s08-real-name", "s09-kai-contact"], [])).toBe(
+      false,
+    );
     expect(
       canConfirmTalkup(["s07-contest-entry", "s08-real-name", "s09-kai-contact"], ["u1"]),
     ).toBe(false);
+    expect(
+      canConfirmTalkup(["s07-contest-entry", "s08-real-name", "s09-kai-contact"], ["u40"]),
+    ).toBe(true);
   });
 
-  it("段階8を飛ばすと結末は解禁されない", () => {
+  it("通常UI（コンソール無し）で 受賞記事→結果ページ の順に進み、結末は s08 無しでは出ない", async () => {
+    const seen: FlagId[][] = [];
+    render(
+      <StoryProvider>
+        {await entryPage()}
+        <Probe onState={(flags) => seen.push(flags)} />
+      </StoryProvider>,
+    );
+    expect(screen.queryByRole("button", { name: "着いた" })).toBeNull();
+    await userEvent.setup().click(screen.getByRole("button", { name: "コンテスト名を控える" }));
+    await waitFor(() => expect(seen.at(-1)).toContain("s07-contest-entry"));
+
+    // 検索で結果ページに着いた想定で、結果ページを開く（同じ進行状態）
+    render(
+      <StoryProvider>
+        {await resultPage()}
+        <Probe onState={(flags) => seen.push(flags)} />
+      </StoryProvider>,
+    );
+    await waitFor(() => expect(seen.at(-1)).toContain("s08-real-name"));
+
     const skipped = {
       flags: ["s07-contest-entry", "s09-kai-contact", "s10-talkup-match"] as FlagId[],
       completed: ["ch5-kai-contact"],
@@ -127,49 +138,18 @@ describe("段階7・8・10・結末（実ページ経由）", () => {
       ),
     ).toBe(false);
   });
+});
 
-  it("開発用コンソール無し（本番相当）でも、受賞記事→結果→確認→検索の順で進める", async () => {
-    const seen: FlagId[][] = [];
-    const entry = await EntryPage({
-      params: Promise.resolve({ blogId: PHOTO_CONTEST_BLOG_ID, entryId: "e20181117" }),
-      searchParams: Promise.resolve({}),
-    });
-    const result = await ContestResultPage({
-      params: Promise.resolve({ blogId: PHOTO_CONTEST_BLOG_ID }),
-      searchParams: Promise.resolve({}),
-    });
-    render(
-      <StoryProvider>
-        {entry}
-        {result}
-        <Probe onState={(flags) => seen.push(flags)} />
-      </StoryProvider>,
-    );
-
-    // コンソールは描画していない（本番と同じ）
-    expect(screen.queryByRole("button", { name: "着いた" })).toBeNull();
-    // 受賞記事から結果ページへは移動だけ（段階7はまだ立たない）
-    await userEvent.setup().click(screen.getByRole("button", { name: "結果ページを見る" }));
-    await waitFor(() => expect(seen.length).toBeGreaterThan(0));
-    expect(seen.at(-1)).not.toContain("s07-contest-entry");
-
-    await userEvent.setup().click(screen.getByRole("button", { name: "受賞者を確認する" }));
-    await waitFor(() => expect(seen.at(-1)).toContain("s07-contest-entry"));
-    expect(await screen.findByRole("button", { name: "この名前で検索する" })).toBeTruthy();
-
-    // その名前で検索すると段階8が立ち、カイの連絡（段階9）が届く状態になる
-    nav.query = new URLSearchParams({ q: BFF_QUERY });
-    const talkupSeen: FlagId[][] = [];
+describe("talkup の確認ボタン", () => {
+  it("本人が出ていても、段階9の前は確認ボタンを出さない", () => {
     render(
       <StoryProvider>
         <FacebookProvider>
           <TalkupPage />
         </FacebookProvider>
-        <Probe onState={(flags) => talkupSeen.push(flags)} />
       </StoryProvider>,
     );
-    await waitFor(() => expect(talkupSeen.at(-1)).toContain("s08-real-name"));
-    const afterSearch = { flags: talkupSeen.at(-1) ?? [], completed: [], choices: {} };
-    expect(availableBeats(afterSearch).some((beat) => beat.place === "discord:dm-kai")).toBe(true);
+    nav.query = new URLSearchParams({ q: BFF_QUERY });
+    expect(screen.queryByRole("button", { name: "この人物で間違いない" })).toBeNull();
   });
 });

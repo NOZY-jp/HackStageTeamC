@@ -13,7 +13,8 @@
     "format": "biome format --write .",
     "check": "biome check --write .",
     "test": "vitest run",
-    "test:watch": "vitest"
+    "test:watch": "vitest",
+    "data:check": "vitest run lib/data-check"
   },
   "dependencies": {
     "motion": "^12.43.0",

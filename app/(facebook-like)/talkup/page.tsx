@@ -11,7 +11,7 @@ import { PostCard } from "@/components/facebook-like/post-card";
 import { PostComposer } from "@/components/facebook-like/post-composer";
 import { FacebookRightSidebar } from "@/components/facebook-like/right-sidebar";
 import { filterFeedPosts, filterPostsByQuery, searchFacebook } from "@/lib/facebook-like";
-import { canConfirmTalkup, shouldRecordMatch } from "./reveal";
+import { canConfirmTalkup } from "./reveal";
 
 /** 検索結果の絞り込み（すべて・人・投稿） */
 type SearchFilter = "all" | "people" | "posts";
@@ -44,13 +44,6 @@ export default function FacebookFeedPage() {
 
   return (
     <div className="fb-feed-grid">
-      <RecordMatch
-        active={shouldRecordMatch(
-          story?.state.flags ?? [],
-          matchedUsers.map((user) => user.id),
-        )}
-        onRecord={() => story?.setFlag("s08-real-name")}
-      />
       <FacebookLeftSidebar />
 
       <div className="fb-feed-center">
@@ -145,12 +138,4 @@ export default function FacebookFeedPage() {
       <FacebookRightSidebar />
     </div>
   );
-}
-
-/** 本名で検索して本人（u40）が結果に出たら、段階8を記録する（その場の自分の操作） */
-function RecordMatch({ active, onRecord }: { active: boolean; onRecord: () => void }) {
-  useEffect(() => {
-    if (active) onRecord();
-  }, [active, onRecord]);
-  return null;
 }

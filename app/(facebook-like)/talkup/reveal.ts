@@ -15,11 +15,3 @@ export function canConfirmTalkup(
     matchedUserIds.includes("u40")
   );
 }
-
-/** 検索結果から段階8を記録する条件（受賞者を確認済みで、本人 u40 が結果にある） */
-export function shouldRecordMatch(
-  flags: readonly FlagId[],
-  matchedUserIds: readonly string[],
-): boolean {
-  return flags.includes("s07-contest-entry") && matchedUserIds.includes("u40");
-}
