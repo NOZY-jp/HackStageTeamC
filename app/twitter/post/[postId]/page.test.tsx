@@ -1,9 +1,11 @@
 import { render, waitFor } from "@testing-library/react";
-import { beforeEach, describe, expect, it } from "vitest";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 import { StoryProvider, useStory } from "@/components/common/story/story-provider";
 import type { FlagId } from "@/lib/story";
 import { KANON_STALKER_POST_ID } from "@/lib/twitter-like/data/twitter";
 import TwitterPostPage from "./page";
+
+vi.mock("next/navigation", () => ({ useRouter: () => ({ replace: vi.fn() }) }));
 
 function FlagProbe({ onFlags }: { onFlags: (flags: FlagId[]) => void }) {
   const { state, ready } = useStory();

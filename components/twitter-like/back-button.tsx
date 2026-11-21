@@ -1,33 +1,35 @@
 "use client";
 
-import type { MouseEvent } from "react";
-import { goBackInsideApp } from "./history-tracker";
+import { useRouter } from "next/navigation";
+import { type MouseEvent, useEffect, useRef } from "react";
 import { BackIcon } from "./icons";
 
-/** referrer が同じオリジンか。空・壊れた値は外部として扱う（#249 QA）。 */
-export function isSameOriginReferrer(referrer: string, origin: string): boolean {
-  if (!referrer) return false;
-  try {
-    return new URL(referrer).origin === origin;
-  } catch {
-    return false;
-  }
-}
-
-/**
- * 戻るボタン（#249）。アプリ内に入ってからの履歴が残っていれば1つ戻り、
- * 無ければ fallback へ。外部から入っただけでは戻らない。
- */
 export function BackButton({ fallbackHref }: { fallbackHref: string }) {
+  const router = useRouter();
+  const pendingBack = useRef<number | undefined>(undefined);
+
+  useEffect(() => () => window.clearTimeout(pendingBack.current), []);
+
   const onClick = (event: MouseEvent<HTMLAnchorElement>) => {
-    if (goBackInsideApp()) {
+    if (event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
+
+    if (pendingBack.current !== undefined) {
       event.preventDefault();
       return;
     }
-    if (isSameOriginReferrer(window.document.referrer, window.location.origin)) {
-      event.preventDefault();
-      window.history.back();
-    }
+
+    // This checks the actual previous entry, including after browser Back or Forward.
+    // A document's referrer and the total history length cannot identify that entry.
+    const { navigation } = window as Window & { navigation?: { canGoBack: boolean } };
+    if (window.history.length <= 1 || !navigation?.canGoBack) return;
+
+    event.preventDefault();
+    const url = window.location.href;
+    pendingBack.current = window.setTimeout(() => {
+      pendingBack.current = undefined;
+      if (window.location.href === url) router.replace(fallbackHref);
+    }, 300);
+    window.history.back();
   };
 
   return (
