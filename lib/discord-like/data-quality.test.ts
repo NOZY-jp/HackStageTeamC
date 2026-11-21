@@ -359,6 +359,11 @@ describe("データ品質（#131 / D9・D10）", () => {
   });
 
   it("#133追記: 全DMの作者はそのスレッドの参加者に限る", () => {
+    // dm-kai は hal と kai だけ（maimai が混ざっていないことを明示）
+    const kaiAuthors = new Set(
+      listDMMessages({ threadId: "dm-kai", limit: 5000 }).messages.map((m) => m.authorId),
+    );
+    expect(kaiAuthors.has("maimai")).toBe(false);
     for (const thread of listDMThreads()) {
       const ids = new Set(thread.participantIds);
       for (const message of listDMMessages({ threadId: thread.id, limit: 5000 }).messages) {
@@ -375,18 +380,52 @@ describe("データ品質（#131 / D9・D10）", () => {
     expect(unique).toBeGreaterThanOrEqual(70);
   });
 
-  it("#133追記: docs の DM 内訳が実データと一致する", async () => {
+  it("#133追記: docs の DM 内訳が実データと一致する（表のセル単位）", async () => {
     const fs = await import("node:fs/promises");
     const doc = await fs.readFile("docs/discord/02-timeline-volume.md", "utf8");
+    const rows = doc.split(/\r?\n/).filter((line) => line.startsWith("|"));
+    const cells = (line: string) => line.split("|").map((cell) => cell.trim());
+    const toNumber = (value: string) => Number(value.replace(/[^0-9]/g, ""));
+
+    // 明示行は dm-maimai と dm-kai、残り7本は「新DM 7本」にまとめている
+    const dmRows = rows.filter((line) => /^\|\s*`dm-[a-z]+`/.test(line));
+    expect(dmRows.length).toBe(2);
+    expect(rows.some((line) => /^\|\s*新DM 7本/.test(line))).toBe(true);
+
+    const rowFor = (pattern: RegExp) => {
+      const row = rows.find((line) => pattern.test(line));
+      expect(row, String(pattern)).toBeDefined();
+      return cells(row as string);
+    };
+
     const maimai = listDMMessages({ threadId: "dm-maimai", limit: 5000 }).messages;
     const kai = listDMMessages({ threadId: "dm-kai", limit: 5000 }).messages;
-    expect(doc).toContain("1,650");
-    expect(doc).toContain(maimai.length.toLocaleString("en-US"));
-    expect(doc).toContain(String(kai.length));
+
+    // 行ごとに「目標」セル（3列目）を実測と比較する
+    const maimaiRow = rowFor(/^\|\s*`dm-maimai`/);
+    expect(toNumber(maimaiRow[3])).toBe(maimai.length);
+    expect(maimaiRow[3]).toBe("**1,300**");
+    const kaiRow = rowFor(/^\|\s*`dm-kai`/);
+    expect(toNumber(kaiRow[3])).toBe(kai.length);
+    expect(kaiRow[3]).toBe("**95**");
+
+    // DM 小計 = 全 DM の実測合計
+    const dmTotal = listDMThreads().reduce(
+      (total, thread) =>
+        total + listDMMessages({ threadId: thread.id, limit: 5000 }).messages.length,
+      0,
+    );
+    const subtotal = rowFor(/^\|\s*DM 小計/);
+    expect(toNumber(subtotal[3])).toBe(dmTotal);
+    expect(subtotal[3]).toBe("**1,650**");
+
+    // 通話回数・不在着信もセルで照合
     const starts = maimai.filter((message) => message.body.includes("通話を開始しました"));
-    expect(doc).toContain(String(starts.length));
     const missed = maimai.filter((message) => message.body.includes("応答がありませんでした"));
-    expect(doc).toContain(String(missed.length));
+    const callRow = rowFor(/^\|\s*DM 通話（`dm-maimai`）/);
+    expect(toNumber(callRow[2])).toBe(starts.length);
+    const missedRow = rowFor(/^\|\s*不在着信/);
+    expect(toNumber(missedRow[2])).toBe(missed.length);
   });
 
   it("voice チャンネルには入室/退出のシステムメッセージしか無い（#129 で VoiceSession を追加）", () => {
