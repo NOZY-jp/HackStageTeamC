@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import type { ReactNode } from "react";
+import { type ReactNode, useId, useState } from "react";
 import { useOptionalStory } from "@/components/common/story/story-provider";
 import type { Message, MessageAuthor } from "@/lib/discord-like/types";
 import { MessageAttachments } from "./message-attachments";
@@ -63,6 +63,8 @@ export function MessageRow({
   focused?: boolean;
 }) {
   const story = useOptionalStory();
+  const [profileOpen, setProfileOpen] = useState(false);
+  const profileId = useId();
   const author = authors[message.authorId];
   const displayName = author?.displayName ?? message.authorId;
   const hasReply = Boolean(message.replyToId);
@@ -109,10 +111,20 @@ export function MessageRow({
         {grouped ? null : (
           <p className="message-meta">
             {author?.profileUrl ? (
-              // プロフィールのリンクがある書き手だけ、名前をリンクにする（新しい画面は作らない）
-              <Link className="message-author" href={author.profileUrl} onClick={onDendenLinkClick}>
+              <button
+                type="button"
+                className="message-author"
+                aria-expanded={profileOpen}
+                aria-controls={profileOpen ? profileId : undefined}
+                onClick={() => {
+                  if (!profileOpen) {
+                    onDendenLinkClick?.();
+                  }
+                  setProfileOpen(!profileOpen);
+                }}
+              >
                 {displayName}
-              </Link>
+              </button>
             ) : (
               <span className="message-author">{displayName}</span>
             )}
@@ -122,6 +134,15 @@ export function MessageRow({
             {message.editedAt ? <span className="message-edited">(編集済み)</span> : null}
           </p>
         )}
+
+        {!grouped && profileOpen && author?.profileUrl ? (
+          <div id={profileId} className="message-profile">
+            {author.handle ? <p className="members-profile-handle">{author.handle}</p> : null}
+            <Link className="members-profile-link" href={author.profileUrl}>
+              {author.profileUrl.replace(/^\//, "")}
+            </Link>
+          </div>
+        ) : null}
 
         <p className="message-body" data-system={message.system ? "true" : undefined}>
           {message.pinned ? (
