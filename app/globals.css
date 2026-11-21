@@ -6778,9 +6778,11 @@ a.tw-dm-item:focus-visible {
 .call-share {
   display: grid;
   flex: 1;
-  place-content: center;
-  gap: 6px;
-  padding: 24px;
+  grid-template-columns: minmax(0, 1fr);
+  align-content: center;
+  justify-items: center;
+  gap: 8px;
+  padding: 12px;
   border: 2px dashed var(--color-divider);
   border-radius: 12px;
   color: var(--color-text-muted);
@@ -6850,10 +6852,14 @@ a.tw-dm-item:focus-visible {
 /* 共有中のプレースホルダー（ウィンドウ風） */
 .call-share-window {
   display: grid;
-  gap: 6px;
-  width: min(560px, 72%);
+  grid-template-rows: auto auto minmax(0, 1fr);
+  gap: 8px;
+  width: min(1180px, 88%);
+  min-width: 0;
+  min-height: 50vh;
+  aspect-ratio: 16 / 9;
   margin: 0 auto;
-  padding: 10px;
+  padding: 12px;
   border: 1px solid var(--color-divider);
   border-radius: 10px;
   background-color: var(--color-bg-panel);
@@ -6880,7 +6886,8 @@ a.tw-dm-item:focus-visible {
 
 .call-share-canvas {
   display: block;
-  height: 120px;
+  height: auto;
+  min-height: 0;
   border-radius: 6px;
   background-color: color-mix(in srgb, var(--color-bg-input) 85%, transparent);
   background-image: linear-gradient(
