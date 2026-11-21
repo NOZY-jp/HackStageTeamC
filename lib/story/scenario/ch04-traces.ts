@@ -39,6 +39,7 @@ export const chapter4: Beat[] = [
     layout: "overlay",
     when: ["s05-old-discord-user"],
     after: ["ch4-leaf"],
+    sets: ["toldKaiOldAccount"],
     source: "Google Docs 箱書き 第四章",
     script: [
       narrate("古いアカウント『このモンスターを周回するパーティー組みたいです！』"),
@@ -48,6 +49,20 @@ export const chapter4: Beat[] = [
       ),
       think("よし、同じIDでメッセージを投稿してるアカウントを見つけたぞ"),
       narrate("アカウントのステータスはずっとオフラインで、長い間運用されていないのが分かる。"),
+      think("一応、カイにも見つかったって伝えておこう。"),
+      chat(
+        "discord:dm-kai",
+        "ryo",
+        "モンハンコミュニティでまいまいの旧アカウント見つけたよ！",
+        "2026-11-25T23:40:00+09:00",
+      ),
+      chat(
+        "discord:dm-kai",
+        "kai",
+        "おお、さすがだな。そこから何か辿れそう？",
+        "2026-11-25T23:41:00+09:00",
+        { wait: "normal" },
+      ),
     ],
   },
   {
