@@ -70,6 +70,22 @@ export function listHomePosts(viewerId: string): Post[] {
   );
 }
 
+/**
+ * 「おすすめ」のタイムライン。フォローしていない人の投稿も含めるが、
+ * 物語の順序を守るため、かのんと旧アカウントは出さない（#209/#212）。
+ * 返信と、昔すぎる投稿は出さない。
+ */
+export function listRecommendedPosts(viewerId: string): Post[] {
+  const hidden = new Set(["tw-kanon", "tw-old-denden"]);
+  const since = "2026-09-01T00:00:00+09:00";
+  return copyOf(
+    twitterPosts
+      .filter(isVisiblePost)
+      .filter((post) => !post.replyToId && !hidden.has(post.authorId) && post.postedAt >= since)
+      .sort(byPostedAtDesc),
+  );
+}
+
 export function getPost(id: string): Post | undefined {
   const post = twitterPosts.find((candidate) => candidate.id === id);
   return post && isVisiblePost(post) ? copyOf(post) : undefined;
