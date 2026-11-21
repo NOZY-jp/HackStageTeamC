@@ -252,7 +252,8 @@ export function StoryStage() {
     // 通話の様子は、その場面を流しているあいだだけ出す
     setVoice([]);
   }, [upcomingId]);
-  const hidden = HIDDEN_PREFIXES.some((prefix) => pathname.startsWith(prefix));
+  // タイトル画面（/）と確認画面では出さない
+  const hidden = pathname === "/" || HIDDEN_PREFIXES.some((prefix) => pathname.startsWith(prefix));
   const memo = useMemo(() => currentMemo(state, upcoming), [state, upcoming]);
   const hasLog = state.completed.length > 0;
   // 窓・タブの入れ物（高さを測ってページを縮める）。callback ref で受け取る

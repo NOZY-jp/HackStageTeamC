@@ -6666,3 +6666,319 @@ a.tw-dm-item:focus-visible {
     animation: none;
   }
 }
+
+/* ---- タイトル画面（/）。背景に3つの SNS を流し、ぼかして重ねる。components/common/title ---- */
+
+.tt-screen {
+  position: relative;
+  height: 100dvh;
+  overflow: hidden;
+  background-color: #07080d;
+  color: #f4f1ea;
+}
+
+/* 背景：3つの SNS を横に並べ、それぞれ縦に流し続ける */
+.tt-feeds {
+  position: absolute;
+  inset: -40px;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 28px;
+  padding: 0 28px;
+}
+
+.tt-feed {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  overflow: hidden;
+  border-radius: 14px;
+  font-family: system-ui, sans-serif;
+}
+
+.tt-feed-head {
+  flex: none;
+  padding: 18px 18px 10px;
+  font-size: 18px;
+  font-weight: 800;
+}
+
+.tt-feed-track {
+  display: flex;
+  flex-direction: column;
+  animation: tt-scroll 70s linear infinite;
+}
+
+.tt-feed[data-platform="twixer"] .tt-feed-track {
+  animation-duration: 58s;
+  animation-direction: reverse;
+}
+
+.tt-feed[data-platform="talkup"] .tt-feed-track {
+  animation-duration: 82s;
+}
+
+.tt-feed-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin: 0;
+  padding: 0 14px 12px;
+  list-style: none;
+}
+
+.tt-feed-item {
+  display: flex;
+  gap: 10px;
+  padding: 12px;
+  border-radius: 10px;
+}
+
+.tt-feed-avatar {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex: none;
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  color: #fff;
+  font-size: 14px;
+  font-weight: 700;
+}
+
+.tt-feed-body {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.tt-feed-name {
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.tt-feed-text {
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+/* 各 SNS の色味（本物の配色に寄せる） */
+.tt-feed[data-platform="discord"] {
+  background-color: #313338;
+  color: #dbdee1;
+}
+
+.tt-feed[data-platform="discord"] .tt-feed-item {
+  background-color: #2b2d31;
+}
+
+.tt-feed[data-platform="twixer"] {
+  background-color: #000;
+  color: #e7e9ea;
+  border: 1px solid #2f3336;
+}
+
+.tt-feed[data-platform="twixer"] .tt-feed-item {
+  border-bottom: 1px solid #2f3336;
+  border-radius: 0;
+}
+
+.tt-feed[data-platform="talkup"] {
+  background-color: #f0f2f5;
+  color: #050505;
+}
+
+.tt-feed[data-platform="talkup"] .tt-feed-head {
+  color: #7c3aed;
+}
+
+.tt-feed[data-platform="talkup"] .tt-feed-item {
+  background-color: #fff;
+  box-shadow: 0 1px 2px rgb(0 0 0 / 0.1);
+}
+
+@keyframes tt-scroll {
+  to {
+    translate: 0 -50%;
+  }
+}
+
+/* ぼかしと暗幕。真ん中を少し明るく残して、タイトルに目が行くようにする */
+.tt-veil {
+  position: absolute;
+  inset: 0;
+  backdrop-filter: blur(6px) saturate(0.85);
+  background:
+    radial-gradient(ellipse at 50% 45%, rgb(7 8 13 / 0.45), rgb(7 8 13 / 0.72) 75%),
+    linear-gradient(to bottom, rgb(7 8 13 / 0.1), rgb(7 8 13 / 0.45));
+}
+
+/* タイトル・サブタイトル・はじめる */
+.tt-content {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  padding: 24px;
+  text-align: center;
+  animation: tt-fade-in 1.6s ease-out;
+}
+
+.tt-title {
+  font-family: var(--tt-font-title), "Hiragino Mincho ProN", "Yu Mincho", serif;
+  font-size: clamp(44px, 8vw, 96px);
+  font-weight: 600;
+  letter-spacing: 0.22em;
+  text-indent: 0.22em;
+  text-shadow:
+    0 0 24px rgb(255 255 255 / 0.25),
+    0 2px 30px rgb(0 0 0 / 0.6);
+}
+
+.tt-subtitle {
+  margin-top: 22px;
+  color: rgb(244 241 234 / 0.82);
+  font-family: var(--tt-font-title), "Hiragino Mincho ProN", "Yu Mincho", serif;
+  font-size: clamp(15px, 1.8vw, 20px);
+  letter-spacing: 0.18em;
+  text-indent: 0.18em;
+}
+
+.tt-actions {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 14px;
+  margin-top: clamp(40px, 8vh, 72px);
+}
+
+.tt-start {
+  min-width: 240px;
+  padding: 14px 40px;
+  border: 1px solid rgb(244 241 234 / 0.55);
+  border-radius: 2px;
+  background-color: rgb(7 8 13 / 0.35);
+  color: #f4f1ea;
+  font-family: var(--tt-font-title), "Hiragino Mincho ProN", "Yu Mincho", serif;
+  font-size: 18px;
+  letter-spacing: 0.4em;
+  text-indent: 0.4em;
+  cursor: pointer;
+  transition:
+    background-color 0.25s,
+    border-color 0.25s,
+    letter-spacing 0.25s;
+}
+
+.tt-start:hover,
+.tt-start:focus-visible {
+  background-color: rgb(244 241 234 / 0.12);
+  border-color: #f4f1ea;
+  letter-spacing: 0.5em;
+  outline: none;
+}
+
+.tt-start:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+
+.tt-restart {
+  padding: 4px 10px;
+  background: none;
+  border: 0;
+  color: rgb(244 241 234 / 0.6);
+  font-size: 13px;
+  letter-spacing: 0.15em;
+  cursor: pointer;
+}
+
+.tt-restart:hover {
+  color: #f4f1ea;
+  text-decoration: underline;
+}
+
+/* 右下の GitHub */
+.tt-github {
+  position: absolute;
+  right: 24px;
+  bottom: 20px;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 10px;
+  border-radius: 6px;
+  color: rgb(244 241 234 / 0.7);
+  font-family: system-ui, sans-serif;
+  font-size: 13px;
+  text-decoration: none;
+}
+
+.tt-github:hover,
+.tt-github:focus-visible {
+  color: #f4f1ea;
+  background-color: rgb(255 255 255 / 0.08);
+}
+
+/* 制作のロゴ（フェードイン → フェードアウト）。押すかキーでとばせる */
+.tt-splash {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  border: 0;
+  background-color: #000;
+  cursor: pointer;
+}
+
+.tt-splash-name {
+  color: #f4f1ea;
+  font-family: system-ui, sans-serif;
+  font-size: clamp(28px, 4vw, 44px);
+  font-weight: 300;
+  letter-spacing: 0.5em;
+  text-indent: 0.5em;
+  opacity: 0;
+  animation: tt-splash 3.2s ease-in-out forwards;
+}
+
+@keyframes tt-splash {
+  30%,
+  65% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+  }
+}
+
+@keyframes tt-fade-in {
+  from {
+    opacity: 0;
+  }
+}
+
+@media (max-width: 720px) {
+  .tt-feeds {
+    gap: 12px;
+    padding: 0 8px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .tt-feed-track,
+  .tt-content {
+    animation: none;
+  }
+
+  .tt-splash-name {
+    animation-duration: 1.2s;
+  }
+}
