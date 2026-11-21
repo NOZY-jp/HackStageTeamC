@@ -1267,10 +1267,6 @@
   grid-template-columns: repeat(2, minmax(0, 1fr));
 }
 
-.call-tiles[data-count="3"] .call-tile:first-child {
-  grid-row: span 2;
-}
-
 .call-tile {
   display: flex;
   flex-direction: column;
@@ -1329,6 +1325,13 @@
   color: var(--color-text-on-danger);
   font-size: clamp(28px, 5vh, 48px);
   font-weight: 700;
+}
+
+/* DM の相手は大きく見せる（#176）。VC のタイルは狭いので既定の小さめを使う */
+.call-tiles[data-layout="dm"] .call-tile:first-child .call-tile-avatar {
+  width: clamp(160px, 26vh, 260px);
+  height: clamp(160px, 26vh, 260px);
+  font-size: clamp(56px, 10vh, 92px);
 }
 
 .call-tile-label {
@@ -7291,4 +7294,307 @@ a.tw-dm-item:focus-visible {
   .tt-splash-name {
     animation-duration: 1.2s;
   }
+}
+
+/* ===== 通話UIの刷新（DM通話・サーバーVC 共通） ===== */
+
+/* DM 通話: ヘッダー以外にタイトルを出さない（中央は相手のアバターと名前・経過時間） */
+.call-stage-info-dm {
+  align-items: center;
+  text-align: center;
+}
+
+.call-stage-info-dm .call-stage-meta {
+  justify-content: center;
+}
+
+/* 自分は右下の小さいアバターカード（16:9の映像枠にしない） */
+.call-tiles[data-layout="dm"] .call-tile:nth-child(2) {
+  aspect-ratio: auto;
+  flex-direction: row;
+  gap: 8px;
+  align-items: center;
+  justify-content: flex-start;
+  width: min(220px, 40%);
+  min-height: 56px;
+  padding: 8px 12px;
+  border-radius: 12px;
+}
+
+.call-tiles[data-layout="dm"] .call-tile:nth-child(2) .call-tile-avatar {
+  width: 32px;
+  height: 32px;
+  font-size: 14px;
+}
+
+.call-tiles[data-layout="dm"] .call-tile:nth-child(2) .call-tile-name {
+  font-size: 13px;
+}
+
+.call-tiles[data-layout="dm"] .call-tiles {
+  position: relative;
+}
+
+/* サーバーVC: タイル左下に名前＋マイク（実Discord準拠） */
+.call-tiles[data-layout="grid"] .call-tile {
+  position: relative;
+  align-items: center;
+  justify-content: center;
+}
+
+.call-tiles[data-layout="grid"] .call-tile-label {
+  position: static;
+  margin-top: 10px;
+  gap: 6px;
+  padding: 2px 8px;
+  border-radius: 8px;
+  background-color: color-mix(in srgb, var(--color-bg-panel) 75%, transparent);
+}
+
+/* 人数で 1 / 2 / 4 / 6 列 */
+.call-tiles[data-layout="grid"] {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+.call-tiles[data-layout="grid"][data-count="3"] {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+.call-tiles[data-layout="grid"][data-count="1"] {
+  grid-template-columns: minmax(0, 1fr);
+}
+.call-tiles[data-layout="grid"][data-count="5"],
+.call-tiles[data-layout="grid"][data-count="6"] {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+/* 発話: 緑の枠＋控えめなパルス（動きを減らす設定では止める） */
+.call-tile[data-speaking="true"] {
+  border-color: var(--color-status-online);
+  box-shadow: 0 0 0 2px color-mix(in srgb, var(--color-status-online) 45%, transparent);
+  animation: call-pulse 1.8s ease-in-out infinite;
+}
+
+@keyframes call-pulse {
+  0%,
+  100% {
+    box-shadow: 0 0 0 2px color-mix(in srgb, var(--color-status-online) 35%, transparent);
+  }
+  50% {
+    box-shadow: 0 0 0 2px color-mix(in srgb, var(--color-status-online) 60%, transparent);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .call-tile[data-speaking="true"] {
+    animation: none;
+  }
+}
+
+/* 画面共有中: ステージに表示を出し、参加者は右側の縦並びに寄せる */
+.call-share {
+  display: grid;
+  flex: 1;
+  grid-template-columns: minmax(0, 1fr);
+  align-content: center;
+  justify-items: center;
+  gap: 8px;
+  padding: 12px;
+  border: 2px dashed var(--color-divider);
+  border-radius: 12px;
+  color: var(--color-text-muted);
+  text-align: center;
+}
+
+.call-share p {
+  margin: 0;
+  color: var(--color-text);
+  font-size: clamp(16px, 2.2vh, 22px);
+  font-weight: 700;
+}
+
+.call-share-hint {
+  font-size: clamp(11px, 1.4vh, 13px);
+}
+
+/* 共有中に右へ寄せるのはサーバーVCのタイルだけ（DMは中央の相手を潰さない） */
+.call-stage[data-sharing="true"] .call-tiles[data-layout="grid"] {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  bottom: 12px;
+  display: flex;
+  flex-direction: column;
+  width: min(220px, 34%);
+  gap: 8px;
+}
+
+.call-stage[data-sharing="true"] .call-tile {
+  min-height: 84px;
+  flex: 0 0 auto;
+}
+
+/* DMの共有中: 相手は右上の小窓に残し、自分は右下に幅を確保（名前を切らない） */
+.call-stage[data-sharing="true"] .call-tiles[data-layout="dm"] {
+  position: absolute;
+  inset: 0;
+  display: block;
+  pointer-events: none;
+}
+
+.call-stage[data-sharing="true"] .call-tiles[data-layout="dm"] .call-tile:first-child {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  width: min(160px, 28%);
+  height: 120px;
+  min-height: 0;
+  padding: 4px;
+}
+
+.call-stage[data-sharing="true"] .call-tile[data-muted="true"] .call-tile-avatar {
+  opacity: 0.7;
+}
+
+/* 共有中の右上の小窓だけ、アバターを小さくする（通常のDM通話には効かせない） */
+.call-stage[data-sharing="true"]
+  .call-tiles[data-layout="dm"]
+  .call-tile:first-child
+  .call-tile-avatar {
+  width: 56px;
+  height: 56px;
+  font-size: 22px;
+}
+
+.call-stage[data-sharing="true"] .call-tiles[data-layout="dm"] .call-tile:nth-child(2) {
+  width: min(240px, 46%);
+}
+
+/* 共有中のプレースホルダー（ウィンドウ風） */
+.call-share-window {
+  display: grid;
+  grid-template-rows: auto auto minmax(0, 1fr);
+  gap: 8px;
+  width: min(1180px, 88%);
+  min-width: 0;
+  min-height: 50vh;
+  aspect-ratio: 16 / 9;
+  margin: 0 auto;
+  padding: 12px;
+  border: 1px solid var(--color-divider);
+  border-radius: 10px;
+  background-color: var(--color-bg-panel);
+}
+
+.call-share-dots {
+  display: flex;
+  gap: 4px;
+}
+
+.call-share-dots i {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background-color: var(--color-divider);
+}
+
+.call-share-bar {
+  display: block;
+  height: 8px;
+  border-radius: 4px;
+  background-color: color-mix(in srgb, var(--color-divider) 60%, transparent);
+}
+
+.call-share-canvas {
+  display: block;
+  height: auto;
+  min-height: 0;
+  border-radius: 6px;
+  background-color: color-mix(in srgb, var(--color-bg-input) 85%, transparent);
+  background-image: linear-gradient(
+    135deg,
+    transparent 0 46%,
+    color-mix(in srgb, var(--color-divider) 55%, transparent) 46% 54%,
+    transparent 54%
+  );
+}
+
+/* 参加者一覧（右パネル） */
+.call-participants {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  /* 下の操作バー（切断）に重ならない高さで止める */
+  bottom: 88px;
+  max-height: calc(100% - 100px);
+  z-index: 3;
+  width: min(280px, 42%);
+  overflow: auto;
+  padding: 12px;
+  border: 1px solid var(--color-divider);
+  border-radius: 12px;
+  background-color: var(--color-bg-panel);
+}
+
+.call-participants h3 {
+  margin: 0 0 8px;
+  font-size: 13px;
+}
+
+.call-participants ul {
+  display: grid;
+  gap: 6px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.call-participants > ul > li {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  font-size: 13px;
+}
+
+.call-participants-avatar {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  color: var(--color-text-on-danger);
+  font-size: 11px;
+  font-weight: 700;
+}
+
+.call-participants-mic[data-state="muted"] {
+  color: var(--color-danger);
+}
+
+/* 呼び出し中は経過時間を 0:00 のまま、操作バーは出さない */
+.call-stage[data-connecting="true"] .call-controls {
+  display: none;
+}
+
+/* 狭い画面では参加者一覧を横幅いっぱいにし、操作バーの上に収める */
+@media (max-width: 640px) {
+  .call-participants {
+    left: 12px;
+    width: auto;
+    bottom: 96px;
+  }
+}
+
+/* 招待リンクのコピーに失敗したときの手動コピー欄 */
+.call-invite-manual {
+  position: absolute;
+  left: 50%;
+  bottom: 84px;
+  width: min(420px, 76%);
+  transform: translateX(-50%);
+  padding: 6px 8px;
+  border: 1px solid var(--color-divider);
+  border-radius: 8px;
+  background-color: var(--color-bg-input);
+  color: var(--color-text);
+  font-size: 12px;
 }
