@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { BlogFrame } from "@/components/blog-like/blog-frame";
+import { StoryAction } from "@/components/common/story/story-action";
 import { getBlog } from "@/lib/blog-like";
 import {
   PHOTO_CONTEST_BLOG_ID,
@@ -53,6 +54,17 @@ export default async function ContestResultPage({ params }: Props) {
         </p>
 
         <p>受賞者のみなさま、おめでとうございます。作品は当時のブログでも紹介しています。</p>
+
+        {/* 受賞者の本名を確認した、というプレイヤーの操作を記録する（順序6〜7を踏んでいないと出ない・#119） */}
+        <div className="pb-mylist-actions">
+          <StoryAction
+            flag="s08-real-name"
+            requires={["s07-contest-entry"]}
+            className="pb-mylist-action"
+          >
+            この受賞者で間違いない
+          </StoryAction>
+        </div>
       </article>
     </BlogFrame>
   );

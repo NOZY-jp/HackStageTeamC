@@ -129,7 +129,7 @@ export const messagesByDMThread: Record<string, Message[]> = {
       channelId: "dm-maimai",
       sentAt: "2026-11-20T20:18:00+09:00",
       authorId: "hal",
-      body: "一旦閉じるね。遅くても入れそうだったら呼んで",
+      body: "部屋は閉じた。返事、待ってる",
     },
     {
       id: "dm-maimai-0434",

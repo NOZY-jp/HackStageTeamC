@@ -41,7 +41,7 @@ const scripts: Record<string, string> = {
 20:41:35 maimai さんは外す
 20:42 maimai じゃあ、なんて呼べばいい？
 20:44 hal ハルでいいです
-20:44:40 hal ゲームの名前が琥珀なので、ハルで呼ばれてます
+20:44:40 hal 昔のハンター名がHalなので、ハルで呼ばれてます
 20:45 hal まいまい
 20:47 maimai うん
 20:47:40 maimai わたしはまいまいでいいよ
@@ -1664,11 +1664,11 @@ const scripts: Record<string, string> = {
 23:18 hal こっちもです
 23:20 maimai 来月だね
 23:23 hal 来月です
-23:25 maimai 三週間
+23:25 maimai 二週間とちょっと
 23:27 hal あっという間
 23:29 maimai またそれ
 2026-11-01
-13:02 maimai 三週間切った
+13:02 maimai 二週間切った
 13:05 hal 切りましたね
 13:07 maimai なんか、変な感じ
 13:09 maimai 会ったことないのに、会う約束してる
@@ -1689,7 +1689,7 @@ const scripts: Record<string, string> = {
 21:34 hal 準備します
 21:36 maimai 何の
 21:38 hal 20日の
-21:41 maimai まだ三週間ある
+21:41 maimai まだ二週間以上ある
 21:43 hal あります
 21:45 maimai ハル、そういうとこ真面目
 21:48 hal 真面目です

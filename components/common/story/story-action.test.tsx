@@ -1,6 +1,7 @@
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { beforeEach, describe, expect, it } from "vitest";
+import { canConfirmTalkup } from "@/app/(facebook-like)/talkup/reveal";
 import { availableBeats, type FlagId, STORAGE_KEY } from "@/lib/story";
 import { StoryAction } from "./story-action";
 import { StoryProvider, useStory } from "./story-provider";
@@ -60,5 +61,61 @@ describe("手がかりの導線（#119）", () => {
     expect(state.flags).toContain("s10-talkup-match");
     const report = availableBeats(state).find((beat) => beat.place === "discord:dm-kai");
     expect(report?.choices?.[0]?.label).toBe("住所を特定しました");
+  });
+
+  it("順序7の前に段階8のボタンは出ない（飛ばせない）", () => {
+    render(
+      <StoryProvider>
+        <StoryAction flag="s08-real-name" requires={["s07-contest-entry"]}>
+          この受賞者で間違いない
+        </StoryAction>
+      </StoryProvider>,
+    );
+    expect(screen.queryByRole("button", { name: "この受賞者で間違いない" })).toBeNull();
+
+    window.localStorage.setItem(
+      STORAGE_KEY,
+      JSON.stringify({ flags: ["s07-contest-entry"], completed: [], choices: {} }),
+    );
+    render(
+      <StoryProvider>
+        <StoryAction flag="s08-real-name" requires={["s07-contest-entry"]}>
+          この受賞者で間違いない
+        </StoryAction>
+      </StoryProvider>,
+    );
+    expect(
+      screen.getAllByRole("button", { name: "この受賞者で間違いない" }).length,
+    ).toBeGreaterThan(0);
+  });
+
+  it("talkup はカイの連絡後かつ本人（u40）が結果に出たときだけ確かめられる", () => {
+    expect(canConfirmTalkup([], ["u40"])).toBe(false); // 順序9の前
+    expect(canConfirmTalkup(["s09-kai-contact"], [])).toBe(false); // 検索0件
+    expect(canConfirmTalkup(["s09-kai-contact"], ["u1"])).toBe(false); // 別人
+    expect(canConfirmTalkup(["s09-kai-contact"], ["u40"])).toBe(true);
+  });
+
+  it("段階8を飛ばすと結末は解禁されない", () => {
+    const skipped = {
+      flags: ["s09-kai-contact", "s10-talkup-match"] as FlagId[],
+      completed: ["ch5-kai-contact"],
+      choices: {},
+    };
+    expect(
+      availableBeats(skipped).some((beat) =>
+        beat.choices?.some((choice) => choice.label === "住所を特定しました"),
+      ),
+    ).toBe(false);
+    const done = {
+      flags: ["s08-real-name", "s09-kai-contact", "s10-talkup-match"] as FlagId[],
+      completed: ["ch5-kai-contact"],
+      choices: {},
+    };
+    expect(
+      availableBeats(done).some((beat) =>
+        beat.choices?.some((choice) => choice.label === "住所を特定しました"),
+      ),
+    ).toBe(true);
   });
 });

@@ -2,7 +2,6 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { BlogFrame } from "@/components/blog-like/blog-frame";
-import { StoryAction } from "@/components/common/story/story-action";
 import {
   entryPath,
   formatDate,
@@ -70,12 +69,6 @@ export default async function MylistPage({ params }: Props) {
             ))}
           </tbody>
         </table>
-        {/* 記事一覧から本人の名前をたどった、というプレイヤーの操作を記録する（#119） */}
-        <div className="pb-mylist-actions">
-          <StoryAction flag="s08-real-name" className="pb-mylist-action">
-            この記事から本名をたどる
-          </StoryAction>
-        </div>
       </section>
     </BlogFrame>
   );

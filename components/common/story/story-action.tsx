@@ -9,11 +9,14 @@ import { useStoryOptional } from "./story-provider";
  */
 export function StoryAction({
   flag,
+  requires = [],
   children,
   doneLabel = "記録しました",
   className,
 }: {
   flag: FlagId;
+  /** これが全部立っていないと、ボタンを出さない（順序を飛ばせない） */
+  requires?: readonly FlagId[];
   children: React.ReactNode;
   doneLabel?: string;
   className?: string;
@@ -21,6 +24,7 @@ export function StoryAction({
   const story = useStoryOptional();
   // 物語の外（部品の単体テストなど）では何も出さない
   if (!story) return null;
+  if (!requires.every((required) => story.state.flags.includes(required))) return null;
   const done = story.state.flags.includes(flag);
   return (
     <button

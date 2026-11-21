@@ -8,8 +8,9 @@ import { NOISE_LIMITS as L } from "./test-thresholds";
  */
 const messages = [...Object.values(channelMessages).flat(), ...Object.values(dmMessages).flat()];
 const spoken = messages.filter((message) => message.system !== true);
+// 既読スルー・連投は会話だけを数える（通話の開始/終了などのシステム行は除く）
 const byChannel = new Map<string, typeof messages>();
-for (const message of messages) {
+for (const message of messages.filter((item) => item.system !== true)) {
   byChannel.set(message.channelId, [...(byChannel.get(message.channelId) ?? []), message]);
 }
 
