@@ -444,14 +444,14 @@ describe("データ品質（#131 / D9・D10）", () => {
     expect(toNumber(missedRow[2])).toBe(missed.length);
   });
 
-  it("#133追記: 既存 dm.ts（base 431通）は origin/main と完全一致する", async () => {
+  it("#133追記: 既存 dm.ts（base 431通）は main から不改変（内容ハッシュ固定）", async () => {
     const fs = await import("node:fs/promises");
-    const { execFileSync } = await import("node:child_process");
+    const { createHash } = await import("node:crypto");
     const file = "lib/discord-like/data/messages/dm.ts";
     const current = await fs.readFile(file, "utf8");
-    const base = execFileSync("git", ["show", `origin/main:${file}`], { encoding: "utf8" });
-    // 1行でも変われば落ちる（D9: 既存は本文も時刻もIDも書き換えない）
-    expect(current).toBe(base);
+    const hash = createHash("sha256").update(current).digest("hex");
+    // origin/main 時点の dm.ts のハッシュ。1行でも変われば落ちる（D9）
+    expect(hash).toBe("b56fba0dcf19d7403be58c0adb5177b9a16fdad3935f0d501f74fa313491aa01");
   });
 
   it("voice チャンネルには入室/退出のシステムメッセージしか無い（#129 で VoiceSession を追加）", () => {
