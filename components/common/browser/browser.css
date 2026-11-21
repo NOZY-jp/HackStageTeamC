@@ -1,0 +1,323 @@
+/* ---- 作中ブラウザ上部ツールバー（BrowserChrome） ---- */
+
+.bc-bar {
+  --bc-bg: #16171b;
+  --bc-surface: #22242a;
+  --bc-surface-hover: #2c2f37;
+  --bc-border: #2c2e36;
+  --bc-text: #f0f2f5;
+  --bc-muted: #9aa0aa;
+  --bc-accent: #8ea1ff;
+  --bc-danger: #f23f43;
+
+  position: sticky;
+  top: 0;
+  z-index: 40;
+  width: 100%;
+  min-height: 44px;
+  padding: 5px 10px;
+  border-bottom: 1px solid var(--bc-border);
+  background-color: var(--bc-bg);
+  color: var(--bc-text);
+  font-family:
+    "Hiragino Kaku Gothic ProN", "Hiragino Sans", "Noto Sans JP", "Yu Gothic UI", Meiryo, system-ui,
+    sans-serif;
+  font-size: 13px;
+  line-height: 1.3;
+}
+
+.bc-bar :focus-visible {
+  outline: 2px solid var(--bc-accent);
+  outline-offset: 2px;
+}
+
+.bc-visually-hidden:where(:not(:focus-within, :active)) {
+  position: absolute;
+  clip-path: inset(50%);
+  overflow: hidden;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  border: 0;
+  white-space: nowrap;
+}
+
+.bc-inner {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 32px;
+}
+
+.bc-history-nav {
+  display: flex;
+  flex: none;
+  align-items: center;
+  gap: 2px;
+}
+
+.bc-icon-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 28px;
+  min-height: 28px;
+  padding: 0;
+  border: 0;
+  border-radius: 6px;
+  background: transparent;
+  color: var(--bc-muted);
+  cursor: pointer;
+}
+
+.bc-icon-btn:hover {
+  background-color: var(--bc-surface-hover);
+  color: var(--bc-text);
+}
+
+.bc-omnibox {
+  flex: 1 1 200px;
+  min-width: 120px;
+}
+
+.bc-omnibox-input {
+  width: 100%;
+  height: 30px;
+  padding: 0 12px;
+  border: 1px solid var(--bc-border);
+  border-radius: 999px;
+  background-color: var(--bc-surface);
+  color: var(--bc-text);
+  font-size: 13px;
+  line-height: 1.3;
+  transition:
+    border-color 120ms ease,
+    background-color 120ms ease;
+}
+
+.bc-omnibox-input::placeholder {
+  color: var(--bc-muted);
+}
+
+.bc-omnibox-input:focus {
+  border-color: var(--bc-accent);
+  background-color: #1b1d22;
+}
+
+.bc-nav {
+  flex: 0 1 auto;
+  min-width: 0;
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+
+.bc-nav::-webkit-scrollbar {
+  display: none;
+}
+
+.bc-nav-list {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.bc-bookmark {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  min-height: 30px;
+  padding: 4px 9px;
+  border-radius: 6px;
+  color: var(--bc-muted);
+  font-size: 12px;
+  font-weight: 500;
+  text-decoration: none;
+  white-space: nowrap;
+}
+
+.bc-bookmark:hover {
+  background-color: var(--bc-surface-hover);
+  color: var(--bc-text);
+}
+
+.bc-bookmark[aria-current="page"] {
+  background-color: var(--bc-surface);
+  color: var(--bc-text);
+  font-weight: 700;
+}
+
+/* 色だけに頼らず現在ページを示す下線インジケータ（WCAG 1.4.1） */
+.bc-bookmark[aria-current="page"]::after {
+  content: "";
+  position: absolute;
+  inset-inline: 8px;
+  inset-block-end: 2px;
+  height: 2px;
+  border-radius: 999px;
+  background-color: var(--bc-accent);
+}
+
+.bc-unread-dot {
+  width: 7px;
+  height: 7px;
+  flex: none;
+  border-radius: 50%;
+  background-color: var(--bc-danger);
+}
+
+.bc-history-wrap {
+  position: relative;
+  flex: none;
+}
+
+.bc-history-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  min-height: 30px;
+  padding: 4px 10px;
+  border: 1px solid var(--bc-border);
+  border-radius: 6px;
+  background-color: var(--bc-surface);
+  color: var(--bc-text);
+  font-size: 12px;
+  font-weight: 500;
+  white-space: nowrap;
+  cursor: pointer;
+}
+
+.bc-history-btn:hover,
+.bc-history-btn[aria-expanded="true"] {
+  background-color: var(--bc-surface-hover);
+}
+
+.bc-history-panel {
+  position: absolute;
+  top: calc(100% + 6px);
+  right: 0;
+  z-index: 60;
+  width: min(320px, calc(100dvw - 20px));
+  max-height: min(380px, calc(100dvh - 64px));
+  overflow-y: auto;
+  padding: 8px;
+  border: 1px solid var(--bc-border);
+  border-radius: 10px;
+  background-color: #1c1e24;
+  box-shadow: 0 12px 28px rgb(0 0 0 / 0.45);
+}
+
+.bc-history-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 2px 6px 8px;
+  border-bottom: 1px solid var(--bc-border);
+}
+
+.bc-history-title {
+  margin: 0;
+  color: var(--bc-muted);
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.bc-history-clear {
+  padding: 2px 8px;
+  border: 0;
+  border-radius: 4px;
+  background: transparent;
+  color: var(--bc-muted);
+  font-size: 11px;
+  cursor: pointer;
+}
+
+.bc-history-clear:hover {
+  background-color: var(--bc-surface-hover);
+  color: var(--bc-text);
+}
+
+.bc-history-empty {
+  margin: 0;
+  padding: 16px 8px;
+  color: var(--bc-muted);
+  font-size: 12px;
+  text-align: center;
+}
+
+.bc-history-list {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  margin: 6px 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.bc-history-item {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 7px 8px;
+  border-radius: 6px;
+  text-decoration: none;
+}
+
+.bc-history-item:hover {
+  background-color: var(--bc-surface-hover);
+}
+
+.bc-history-item-title {
+  overflow: hidden;
+  color: var(--bc-text);
+  font-size: 13px;
+  font-weight: 600;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.bc-history-item-url {
+  overflow: hidden;
+  color: var(--bc-muted);
+  font-size: 11px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+@media (max-width: 720px) {
+  .bc-bar {
+    padding: 5px 8px;
+  }
+
+  .bc-inner {
+    gap: 5px;
+  }
+
+  .bc-bookmark {
+    padding: 4px 7px;
+  }
+
+  .bc-history-btn span {
+    display: none;
+  }
+}
+
+@media (forced-colors: active) {
+  .bc-bookmark[aria-current="page"] {
+    outline: 2px solid Highlight;
+  }
+
+  .bc-history-panel {
+    border-color: CanvasText;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .bc-omnibox-input {
+    transition: none;
+  }
+}
