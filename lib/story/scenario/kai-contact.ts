@@ -1,8 +1,9 @@
+import { GAME_NOW } from "../../discord-like/data/now";
 import { chat, think } from "../stage";
 import type { Beat } from "../types";
 
-/** ゲーム開始時点。11月25日までの通常ログは、この時刻より前に置く。 */
-export const STORY_NOW = "2026-11-25T23:30:00+09:00";
+/** ゲーム開始時点（定義は discord-like のデータ側に1か所だけ）。 */
+export const STORY_NOW = GAME_NOW;
 
 const channel = "discord:dm-kai";
 const ending = "住所を特定しました";
