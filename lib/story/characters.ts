@@ -90,7 +90,18 @@ export const nicknames: Nickname[] = [
 ];
 
 /** 作中のテキストに出してはいけない語（台本のテストで確認する） */
-export const FORBIDDEN_WORDS = ["ゆい", "ゆっちゃん", "服部", "由比"];
+export const FORBIDDEN_WORDS = [
+  "ゆい",
+  "ゆっちゃん",
+  "服部",
+  "由比",
+  "ユイ",
+  "ユッチャン",
+  "ハットリ",
+  "hattori",
+  "yui",
+  "yucchan",
+];
 
 export function getCharacter(id: CharacterId): Character {
   return characters[id];
