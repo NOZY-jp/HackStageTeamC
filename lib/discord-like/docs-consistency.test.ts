@@ -28,6 +28,15 @@ const guildCount = (guildId: string): number =>
   );
 
 const dmThreads = listDMThreads();
+const dmDoc = readFileSync(resolve(process.cwd(), "docs/discord/04-servers-dms.md"), "utf8");
+const dmDocCell = (threadId: string): number => {
+  const prefix = `| \`${threadId}\``;
+  const line = dmDoc.split("\n").find((candidate) => candidate.startsWith(prefix));
+  if (!line) throw new Error(`docs/04 に ${threadId} の行がありません`);
+  const value = line.split("|")[3].replace(/[*,\s]/g, "");
+  if (!/^\d+$/.test(value)) throw new Error(`docs/04 の通数が数値ではありません: ${line}`);
+  return Number(value);
+};
 const dmTotal = dmThreads.reduce((sum, thread) => sum + dmCount(thread.id), 0);
 const serverTotal = listGuilds().reduce((sum, guild) => sum + guildCount(guild.id), 0);
 
@@ -65,5 +74,12 @@ describe("docs/02 の台本内訳は実データと一致する", () => {
     const serverRow = cellOf(/^\|\s*\*\*サーバー 小計\*\*/).line;
     expect(serverRow).toContain("16テキストch");
     expect(serverRow).toContain("mhc 7ch");
+  });
+});
+describe("docs/04 の DM 表も実データと一致する", () => {
+  it("9スレッドすべての通数が実測と一致する", () => {
+    for (const thread of dmThreads) {
+      expect(dmDocCell(thread.id), thread.id).toBe(dmCount(thread.id));
+    }
   });
 });

@@ -2,6 +2,7 @@ import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import ContestResultPage from "@/app/(blog-like)/pochiblo/[blogId]/contest/soukyuu-photo-award-2020/page";
+import EntryPage from "@/app/(blog-like)/pochiblo/[blogId]/entry/[entryId]/page";
 import TalkupPage from "@/app/(facebook-like)/talkup/page";
 import { StoryConsole } from "@/app/(story)/_components/story-console";
 import { FacebookProvider } from "@/components/facebook-like/facebook-context";
@@ -138,5 +139,34 @@ describe("段階8・10・結末の導線（実ページ経由・フラグ注入�
       await user.click(screen.getAllByRole("button", { name: "着いた" })[0]);
     }
     expect(screen.queryByRole("button", { name: "この人物で間違いない" })).toBeNull();
+  });
+
+  it("開発用コンソール無し（本番相当）でも、受賞記事の操作から順序7→8へ進める", async () => {
+    const seen: FlagId[][] = [];
+    const entryParams = Promise.resolve({ blogId: PHOTO_CONTEST_BLOG_ID, entryId: "e20181117" });
+    const entry = await EntryPage({ params: entryParams, searchParams: Promise.resolve({}) });
+    const resultParams = Promise.resolve({ blogId: PHOTO_CONTEST_BLOG_ID });
+    const result = await ContestResultPage({
+      params: resultParams,
+      searchParams: Promise.resolve({}),
+    });
+    render(
+      <StoryProvider>
+        {entry}
+        {result}
+        <Probe onState={(flags) => seen.push(flags)} />
+      </StoryProvider>,
+    );
+
+    // 進行コンソールは描画していない（本番と同じ）
+    expect(screen.queryByRole("button", { name: "着いた" })).toBeNull();
+    expect(screen.queryByRole("button", { name: "この受賞者で間違いない" })).toBeNull();
+
+    await userEvent.setup().click(screen.getByRole("button", { name: "結果ページを見る" }));
+    expect(seen.at(-1)).toContain("s07-contest-entry");
+
+    const reveal = await screen.findByRole("button", { name: "この受賞者で間違いない" });
+    await userEvent.setup().click(reveal);
+    expect(seen.at(-1)).toContain("s08-real-name");
   });
 });
