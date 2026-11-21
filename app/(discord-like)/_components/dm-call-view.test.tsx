@@ -57,7 +57,10 @@ describe("DM の通話画面（#137）", () => {
     const main = await screen.findByRole("main", { name: "MaiMai との通話" });
     expect(within(main).getByText("MaiMai")).toBeInTheDocument();
     expect(within(main).getByText("琥珀（自分）")).toBeInTheDocument();
-    expect(main.querySelector(".call-stage-status")?.textContent).toBe("接続中");
+    // 呼び出し中→接続は非同期（effect）なので、接続まで待つ
+    await waitFor(() =>
+      expect(main.querySelector(".call-stage-status")?.textContent).toBe("接続中"),
+    );
     expect(container.querySelectorAll(".call-tile")).toHaveLength(2);
     // DM 用のレイアウト（相手が大きく、自分は右下の小窓）
     expect(container.querySelector(".call-tiles")?.getAttribute("data-layout")).toBe("dm");
