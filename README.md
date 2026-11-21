@@ -28,7 +28,7 @@ npm run dev   # http://localhost:3000
 
 ## デプロイ
 
-Vercel free プランの 1日100デプロイ上限を踏まないため、Git 連携の自動デプロイは `vercel.json` の `git.deploymentEnabled` で **main のみ**に絞っている（それ以外のブランチ push や PR ではデプロイされない）。プレビューが必要な PR では、都度そのブランチ名を `deploymentEnabled` に `true` で足して1回だけ作る（Issue #167 の PM 判断）。本番デプロイは main へのマージ時のみ。検証は Vercel プレビュー前提にせず、`npm run build` → `next start` のローカル実測（必要に応じてスクリーンショット添付）を標準とする。
+Vercel free プランの 1日100デプロイ上限を踏まないため、Git 連携の自動デプロイは `vercel.json` の `git.deploymentEnabled` で **main のみ**に絞っている（それ以外のブランチ push や PR ではデプロイされない）。この設定が有効になるのは `vercel.json` を含むコミットがあるブランチだけなので、この変更以前から open なブランチは次に push する前に rebase/merge で `vercel.json` を取り込む必要がある（取り込まないままだと従来どおりデプロイが走り、「main 以外はデプロイされない」と矛盾する）。プレビューが必要な PR では、都度そのブランチ名を `deploymentEnabled` に `true` で足して1回だけ作る（Issue #167 の PM 判断）。この許可は1回のプレビュー作成で自動失効しないので、プレビューが出来たら `true` の指定を外し、その `true` を main に持ち込まない運用とする。本番デプロイは main へのマージ時のみ。検証は Vercel プレビュー前提にせず、`npm run build` → `next start` のローカル実測（必要に応じてスクリーンショット添付）を標準とする。
 
 ## ボイスチャンネル（疑似）
 
