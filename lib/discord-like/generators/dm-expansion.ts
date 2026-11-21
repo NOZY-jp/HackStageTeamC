@@ -562,97 +562,6 @@ export function generateDmExpansion(input: DMExpansionInput): DMExpansionResult 
     }
   }
 
-  // #133 追加ラウンド: 写真・リンク付きの話題を150通（既存の行は変更しない）
-  const extraDays = [
-    ...new Set(
-      additions["dm-maimai"]
-        .map((message) => message.sentAt.slice(0, 10))
-        // 追加分は後半（2026-06 以降）に寄せる（付き合った後に濃くなる傾向を保つ）
-        .filter((day) => !silentKeys.has(day) && day >= "2026-06-01"),
-    ),
-  ].sort();
-  const anchorByDay = new Map<string, number>();
-  for (const message of additions["dm-maimai"]) {
-    const day = message.sentAt.slice(0, 10);
-    anchorByDay.set(day, Math.max(anchorByDay.get(day) ?? 0, Date.parse(message.sentAt)));
-  }
-  const linkBodies = [
-    "この写真、前のやつだけど見て",
-    "スクショ撮ったから送るね",
-    "このページのやつ、あとで見て",
-    "クリップのURLこれ",
-    "前の写真と見比べると面白い",
-  ];
-  for (let index = 0; index < 130; index += 1) {
-    const day = extraDays[index % extraDays.length];
-    const isMaimai = additions["dm-maimai"].length % 2 === 0;
-    const base = anchorByDay.get(day) ?? Date.parse(`${day}T12:00:00+09:00`);
-    const at = Math.min(base + int(1, 12) * 60000, Date.parse(`${day}T22:00:00+09:00`));
-    const { key, at: safeAt } = nextTime(at);
-    const kind = index % 10;
-    let body: string | null = null;
-    if (kind < 6) {
-      const candidate = linkBodies[index % linkBodies.length];
-      body = `${candidate} https://example.com/share/${index + 1}`;
-    } else {
-      for (let attempt = 0; attempt < 300; attempt += 1) {
-        const candidate = pick(templates.get("dm-maimai") ?? [])();
-        if (![...additions["dm-maimai"]].some((message) => message.body === candidate)) {
-          body = candidate;
-          break;
-        }
-      }
-    }
-    const shortReplies = ["うん", "わかった", "いいね", "たしかに", "ありがとう", "なるほど"];
-    const recent = additions["dm-maimai"].slice(-2).map((message) => message.body);
-    const fallback = shortReplies.find((candidate) => !recent.includes(candidate)) ?? "そうだね";
-    const message: Message = {
-      id: `dm-maimai-x${String(additions["dm-maimai"].length + 1).padStart(4, "0")}`,
-      channelId: "dm-maimai",
-      authorId: isMaimai ? "maimai" : "hal",
-      sentAt: key,
-      body: body ?? fallback,
-    };
-    void safeAt;
-    additions["dm-maimai"].push(message);
-  }
-
-  // 追加の通話 +10 回（うち3回は不在着信）。既存の通話がある日は避ける
-  const extraCallDays = extraDays.filter(
-    (day) =>
-      !additions["dm-maimai"].some(
-        (message) => message.sentAt.slice(0, 10) === day && message.system === true,
-      ),
-  );
-  for (let index = 0; index < CALL_EXTRA_TOTAL && extraCallDays.length > 0; index += 1) {
-    const day = extraCallDays[index % extraCallDays.length];
-    const start = nextTime(Date.parse(`${day}T23:${pad(int(0, 20))}:00+09:00`));
-    const starter = index % 2 === 0 ? "maimai" : "hal";
-    const displayName = starter === "maimai" ? "MaiMai" : "琥珀";
-    const missed = index >= CALL_EXTRA_TOTAL - 3;
-    additions["dm-maimai"].push({
-      id: `dm-maimai-x${String(additions["dm-maimai"].length + 1).padStart(4, "0")}`,
-      channelId: "dm-maimai",
-      authorId: starter,
-      sentAt: start.key,
-      body: `${displayName} が通話を開始しました`,
-      system: true,
-    });
-    const endLimit = Date.parse(`${day}T23:58:00+09:00`);
-    const endTime = nextTime(Math.min(start.at + int(5, 180) * 60000, endLimit));
-    const ender = missed ? starter : starter === "maimai" ? "hal" : "maimai";
-    const endName = ender === "maimai" ? "MaiMai" : "琥珀";
-    additions["dm-maimai"].push({
-      id: `dm-maimai-x${String(additions["dm-maimai"].length + 1).padStart(4, "0")}`,
-      channelId: "dm-maimai",
-      authorId: ender,
-      sentAt: endTime.key,
-      body: missed ? `${endName} が 応答がありませんでした` : `${endName} が 通話を終了しました`,
-      system: true,
-    });
-    calls.push({ startedAt: start.key, missed });
-  }
-
   // 友人・先輩・後輩・モンハン仲間
   for (const target of DM_EXPANSION_TARGETS) {
     if (["dm-maimai", "dm-kai"].includes(target.threadId)) continue;
@@ -698,6 +607,127 @@ export function generateDmExpansion(input: DMExpansionInput): DMExpansionResult 
     }
   }
 
+  // #133 追加ラウンド: 写真・リンク付きの話題を150通（既存の行は変更しない）
+  const extraDays = [
+    ...new Set(
+      additions["dm-maimai"]
+        .map((message) => message.sentAt.slice(0, 10))
+        // 追加分は後半（2026-06 以降）に寄せる（付き合った後に濃くなる傾向を保つ）
+        .filter((day) => !silentKeys.has(day) && day >= "2026-06-01"),
+    ),
+  ].sort();
+  const anchorByDay = new Map<string, number>();
+  for (const message of additions["dm-maimai"]) {
+    const day = message.sentAt.slice(0, 10);
+    anchorByDay.set(day, Math.max(anchorByDay.get(day) ?? 0, Date.parse(message.sentAt)));
+  }
+  const linkSubjects = [
+    "この写真",
+    "このスクショ",
+    "このページ",
+    "このクリップ",
+    "前の写真",
+    "ゲームの画面",
+    "集会のときの",
+    "この前撮ったやつ",
+    "見つけたページ",
+    "参考になりそうなやつ",
+  ];
+  const linkComments = [
+    "あとで見て",
+    "送っておくね",
+    "見比べると面白い",
+    "これ良さそう",
+    "保存しといて",
+    "ちょっと見てほしい",
+    "前のと違う？",
+    "これで合ってる？",
+  ];
+  let linkCounter = 0;
+  for (let index = 0; index < 130; index += 1) {
+    const day = extraDays[index % extraDays.length];
+    const isMaimai = additions["dm-maimai"].length % 2 === 0;
+    const base = anchorByDay.get(day) ?? Date.parse(`${day}T12:00:00+09:00`);
+    const at = Math.min(base + int(1, 12) * 60000, Date.parse(`${day}T22:00:00+09:00`));
+    const { key, at: safeAt } = nextTime(at);
+    const kind = index % 10;
+    let body: string | null = null;
+    if (kind < 6) {
+      // 本文は組み合わせで書き分ける（URL の連番だけで一意にしない）
+      const subject = pick(linkSubjects);
+      const comment = pick(linkComments);
+      let candidate = `${subject}、${comment} https://example.com/p/${subject.length}${comment.length}${linkCounter % 9}`;
+      let attempt = 0;
+      while ([...additions["dm-maimai"]].some((m) => m.body === candidate) && attempt < 50) {
+        linkCounter += 1;
+        candidate = `${pick(linkSubjects)}、${pick(linkComments)} https://example.com/p/${linkCounter}`;
+        attempt += 1;
+      }
+      linkCounter += 1;
+      body = candidate;
+    } else {
+      for (let attempt = 0; attempt < 300; attempt += 1) {
+        const candidate = pick(templates.get("dm-maimai") ?? [])();
+        if (![...additions["dm-maimai"]].some((message) => message.body === candidate)) {
+          body = candidate;
+          break;
+        }
+      }
+    }
+    const shortReplies = ["うん", "わかった", "いいね", "たしかに", "ありがとう", "なるほど"];
+    const recent = additions["dm-maimai"].slice(-2).map((message) => message.body);
+    const fallback = shortReplies.find((candidate) => !recent.includes(candidate)) ?? "そうだね";
+    const message: Message = {
+      id: `dm-maimai-x${String(additions["dm-maimai"].length + 1).padStart(4, "0")}`,
+      channelId: "dm-maimai",
+      authorId: isMaimai ? "maimai" : "hal",
+      sentAt: key,
+      body: body ?? fallback,
+    };
+    void safeAt;
+    additions["dm-maimai"].push(message);
+  }
+
+  // 追加の通話 +10 回（うち3回は不在着信）。既存の通話がある日は避ける
+  const allExtraDays = [
+    ...new Set(additions["dm-maimai"].map((m) => m.sentAt.slice(0, 10))),
+  ].sort();
+  const extraCallDays = allExtraDays.filter(
+    (day) =>
+      !additions["dm-maimai"].some(
+        (message) => message.sentAt.slice(0, 10) === day && message.system === true,
+      ),
+  );
+  for (let index = 0; index < CALL_EXTRA_TOTAL && extraCallDays.length > 0; index += 1) {
+    const day = extraCallDays[index % extraCallDays.length];
+    // 21:00〜22:30 に開始し、終了は同じ日の 23:59 までに収める（終了が 23:58 に固まらない）
+    const start = nextTime(Date.parse(`${day}T${pad(int(21, 22))}:${pad(int(0, 50))}:00+09:00`));
+    const starter = index % 2 === 0 ? "maimai" : "hal";
+    const displayName = starter === "maimai" ? "MaiMai" : "琥珀";
+    const missed = index >= CALL_EXTRA_TOTAL - 3;
+    additions["dm-maimai"].push({
+      id: `dm-maimai-x${String(additions["dm-maimai"].length + 1).padStart(4, "0")}`,
+      channelId: "dm-maimai",
+      authorId: starter,
+      sentAt: start.key,
+      body: `${displayName} が通話を開始しました`,
+      system: true,
+    });
+    const endLimit = Date.parse(`${day}T23:58:00+09:00`);
+    const endTime = nextTime(Math.min(start.at + int(5, 180) * 60000, endLimit));
+    const ender = missed ? starter : starter === "maimai" ? "hal" : "maimai";
+    const endName = ender === "maimai" ? "MaiMai" : "琥珀";
+    additions["dm-maimai"].push({
+      id: `dm-maimai-x${String(additions["dm-maimai"].length + 1).padStart(4, "0")}`,
+      channelId: "dm-maimai",
+      authorId: ender,
+      sentAt: endTime.key,
+      body: missed ? `${endName} が 応答がありませんでした` : `${endName} が 通話を終了しました`,
+      system: true,
+    });
+    calls.push({ startedAt: start.key, missed });
+  }
+
   // 月次表の合計は目標と一致していること（パディングで水増ししない）
   for (const target of DM_EXPANSION_TARGETS) {
     const list = additions[target.threadId];
@@ -723,7 +753,9 @@ export function generateDmExpansion(input: DMExpansionInput): DMExpansionResult 
         (message) => added.has(message.id) && message.system !== true,
       );
       if (!target) continue;
-      target.authorId = target.authorId === "hal" ? "maimai" : "hal";
+      // そのスレッドの参加者から選ぶ（参加者でない人を話者にしない）
+      const other = DM_EXPANSION_TARGETS.find((t) => t.threadId === threadId)?.personId ?? "hal";
+      target.authorId = target.authorId === "hal" ? other : "hal";
     }
   }
 

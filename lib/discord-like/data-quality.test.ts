@@ -358,6 +358,37 @@ describe("データ品質（#131 / D9・D10）", () => {
     expect(night.length / starts.length).toBeLessThanOrEqual(0.25);
   });
 
+  it("#133追記: 全DMの作者はそのスレッドの参加者に限る", () => {
+    for (const thread of listDMThreads()) {
+      const ids = new Set(thread.participantIds);
+      for (const message of listDMMessages({ threadId: thread.id, limit: 5000 }).messages) {
+        expect(ids.has(message.authorId), `${message.id} ${message.authorId}`).toBe(true);
+      }
+    }
+  });
+
+  it("#133追記: リンク投稿の本文は書き分けられている（連番の水増しをしない）", () => {
+    const list = listDMMessages({ threadId: "dm-maimai", limit: 5000 }).messages;
+    const links = list.filter((message) => /https?:\/\//.test(message.body));
+    expect(links.length).toBeGreaterThanOrEqual(80);
+    const unique = new Set(links.map((message) => message.body)).size;
+    expect(unique).toBeGreaterThanOrEqual(70);
+  });
+
+  it("#133追記: docs の DM 内訳が実データと一致する", async () => {
+    const fs = await import("node:fs/promises");
+    const doc = await fs.readFile("docs/discord/02-timeline-volume.md", "utf8");
+    const maimai = listDMMessages({ threadId: "dm-maimai", limit: 5000 }).messages;
+    const kai = listDMMessages({ threadId: "dm-kai", limit: 5000 }).messages;
+    expect(doc).toContain("1,650");
+    expect(doc).toContain(maimai.length.toLocaleString("en-US"));
+    expect(doc).toContain(String(kai.length));
+    const starts = maimai.filter((message) => message.body.includes("通話を開始しました"));
+    expect(doc).toContain(String(starts.length));
+    const missed = maimai.filter((message) => message.body.includes("応答がありませんでした"));
+    expect(doc).toContain(String(missed.length));
+  });
+
   it("voice チャンネルには入室/退出のシステムメッセージしか無い（#129 で VoiceSession を追加）", () => {
     for (const guild of listGuilds()) {
       for (const channel of listChannels(guild.id).filter((item) => item.kind === "voice")) {
