@@ -1667,7 +1667,7 @@ const scripts: Record<string, string> = {
 23:27 hal あっという間
 23:29 maimai またそれ
 2026-11-01
-13:02 maimai 二週間切った
+13:02 maimai 三週間切った
 13:05 hal 切りましたね
 13:07 maimai なんか、変な感じ
 13:09 maimai 会ったことないのに、会う約束してる
@@ -1679,7 +1679,7 @@ const scripts: Record<string, string> = {
 13:23 maimai 一人だけじゃないならよくない？
 13:26 hal そうですね
 2026-11-02
-22:16 maimai あと二週間ちょっと
+22:16 maimai あと十八日
 22:19 hal 数えてますね
 22:21 maimai 数えてる
 22:24 hal 僕もです

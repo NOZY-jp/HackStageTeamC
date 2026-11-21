@@ -49,22 +49,27 @@ describe("台本の密度（#177）", () => {
     }
   });
 
-  it("相対表現が日付差と合っている（二週間・三週間・二十日）", () => {
-    const meeting = Date.parse("2026-11-20T13:00:00+09:00");
-    const relative = dm("dm-maimai").filter((message) => /週間|二十日/.test(message.body));
-    expect(relative.length).toBeGreaterThan(0);
-    for (const message of relative) {
-      const days = Math.round((meeting - Date.parse(message.sentAt)) / 86_400_000);
-      if (message.body.includes("二週間")) {
-        expect(days, message.id).toBeGreaterThanOrEqual(13);
-        expect(days, message.id).toBeLessThanOrEqual(21);
-      }
-      if (message.body.includes("三週間")) {
-        expect(days, message.id).toBeGreaterThanOrEqual(19);
-        expect(days, message.id).toBeLessThanOrEqual(23);
-      }
-      expect(message.body, message.id).not.toContain("二十日");
-    }
+  it("相対表現を抽出して日付差と照合する（0件なら fail）", () => {
+    const all = [
+      ...Object.entries(dmMessages).flatMap(([channelId, list]) =>
+        list.map((message) => ({ ...message, channelId })),
+      ),
+      ...Object.entries(channelMessages).flatMap(([channelId, list]) =>
+        list.map((message) => ({ ...message, channelId })),
+      ),
+    ];
+    const found = all.flatMap((message) => relativeIssues(message));
+    // 空振り防止: 対象が0件なら fail
+    expect(found.length).toBeGreaterThanOrEqual(3);
+    expect(found.filter((item) => item.issue)).toEqual([]);
+    // 実効性: 数字を書き換えると落ちる（ヘルパー単体で確認）
+    const wrong = relativeIssues({
+      id: "x",
+      channelId: "dm-maimai",
+      sentAt: "2026-11-02T21:00:00+09:00",
+      body: "あと三週間ちょっと",
+    });
+    expect(wrong[0]?.issue).toBeTruthy();
   });
 
   it("増えた分も本文が空でない（写真だけの投稿を除く）", () => {
@@ -75,3 +80,61 @@ describe("台本の密度（#177）", () => {
     expect(empty.map((message) => message.id)).toEqual([]);
   });
 });
+
+/** 「あと二週間」「三週間切った」「今年あと一日」を、基準日との差と照合する */
+type RelativeMessage = { id: string; channelId: string; sentAt: string; body: string };
+const KANJI: Record<string, number> = {
+  一: 1,
+  二: 2,
+  三: 3,
+  四: 4,
+  五: 5,
+  六: 6,
+  七: 7,
+  八: 8,
+  九: 9,
+  十: 10,
+  二十: 20,
+};
+const toNumber = (value: string): number =>
+  /^\d+$/.test(value) ? Number(value) : (KANJI[value] ?? Number.NaN);
+
+function relativeIssues(message: RelativeMessage): { id: string; issue?: string }[] {
+  const pattern =
+    /(あと|まだ)?\s*([一二三四五六七八九十]+|\d+)\s*(日|週間)(以上|ちょっと|切った|ぶり|経った)?/g;
+  const issues: { id: string; issue?: string }[] = [];
+  for (const match of message.body.matchAll(pattern)) {
+    // 未来・経過を表す言い方のときだけ対象にする（「二日測った」等の数量は除く）
+    if (!match[1] && !match[4]) continue;
+    const amount = toNumber(match[2]);
+    if (Number.isNaN(amount)) continue;
+    const unit = match[3];
+    const target = message.body.includes("今年")
+      ? Date.parse(`${message.sentAt.slice(0, 4)}-12-31T00:00:00+09:00`)
+      : message.channelId === "dm-maimai"
+        ? Date.parse("2026-11-20T13:00:00+09:00")
+        : undefined;
+    if (target === undefined) {
+      issues.push({ id: message.id, issue: `基準日が決まっていない相対表現: ${message.body}` });
+      continue;
+    }
+    const days = Math.round((target - Date.parse(message.sentAt)) / 86_400_000);
+    const base = unit === "週間" ? 7 * amount : amount;
+    // 「以上」は下限だけ、「ちょっと」は少し上まで許す
+    const ok =
+      match[4] === "以上"
+        ? days >= base
+        : match[4] === "ちょっと"
+          ? days >= base - 2 && days <= base + 4
+          : Math.abs(days - base) <= (unit === "週間" ? 3 : 1);
+    if (!ok) {
+      issues.push({
+        id: message.id,
+        issue: `${amount}${unit} と日付差 ${days}日が合わない: ${message.body}`,
+      });
+    } else {
+      issues.push({ id: message.id });
+    }
+  }
+  return issues;
+}
