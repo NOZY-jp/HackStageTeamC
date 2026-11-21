@@ -84,6 +84,19 @@ describe("externalHref", () => {
     expect(externalHref("twixer.com/someone/")).toBe("/twitter/profile/someone");
     expect(externalHref("example.com/page")).toBeUndefined();
   });
+
+  it("余分なセグメントや壊れた status 形の Twixer URL はリンクにしない", () => {
+    // <handle>/status/<id> にセグメントを足したURLは別ページ（投稿にもプロフィールにもしない）
+    expect(externalHref("twixer.com/someone/status/123/extra")).toBeUndefined();
+    // status の形が壊れたURLもプロフィールへフォールバックしない
+    expect(externalHref("twixer.com/someone/status")).toBeUndefined();
+    expect(externalHref("twixer.com/someone/likes")).toBeUndefined();
+  });
+
+  it("http(s) 以外のスキームのURLはリンクにしない", () => {
+    expect(externalHref("ftp://twixer.com/someone/status/123")).toBeUndefined();
+    expect(externalHref("ftp://leaf.jp/maimai")).toBeUndefined();
+  });
 });
 
 describe("パスと日付", () => {

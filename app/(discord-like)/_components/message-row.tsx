@@ -5,6 +5,7 @@ import type { ReactNode } from "react";
 import { useOptionalStory } from "@/components/common/story/story-provider";
 import type { Message, MessageAuthor } from "@/lib/discord-like/types";
 import { MessageAttachments } from "./message-attachments";
+import { MessageEmbeds } from "./message-embeds";
 
 const POCHIBLO_URL = /https?:\/\/pochiblo\.jp(?:\/[^\s]*)?/g;
 
@@ -131,6 +132,8 @@ export function MessageRow({
           {renderMessageBody(message.body, onDendenLinkClick)}
           {grouped && message.editedAt ? <span className="message-edited"> (編集済み)</span> : null}
         </p>
+
+        <MessageEmbeds body={message.body} />
 
         {message.attachments && message.attachments.length > 0 ? (
           <MessageAttachments attachments={message.attachments} />

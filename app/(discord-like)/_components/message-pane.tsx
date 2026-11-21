@@ -10,6 +10,7 @@ import {
   useState,
 } from "react";
 import { fetchMessagePage } from "@/app/(discord-like)/_actions/message-page";
+import { useStoryOptional } from "@/components/common/story/story-provider";
 import type {
   MemberView,
   Message,
@@ -17,6 +18,7 @@ import type {
   MessageView,
   VoiceSession,
 } from "@/lib/discord-like/types";
+import type { FlagId } from "@/lib/story";
 import { useLocalMessages } from "./local-messages-context";
 import { MessageComposer } from "./message-composer";
 import { MessageList } from "./message-list";
@@ -71,6 +73,7 @@ export function MessagePane({
   voiceSessions = [],
   members = [],
   focusMessageId,
+  seen,
 }: {
   channelKey: string;
   mode: Mode;
@@ -87,8 +90,14 @@ export function MessagePane({
   members?: MemberView[];
   /** 検索結果からジャンプしてきたメッセージ（強調して表示する）。 */
   focusMessageId?: string;
+  /**
+   * このメッセージが画面に見えたら立てる物語のフラグ（手がかりを見つけた合図）。
+   * StoryProvider の外（部品テストなど）では何も起きない。
+   */
+  seen?: { messageId: string; flag: FlagId };
 }) {
   const { messagesFor, addMessage } = useLocalMessages();
+  const story = useStoryOptional();
   const localMessages = messagesFor(channelKey);
 
   const scrollRef = useRef<HTMLDivElement>(null);
@@ -280,6 +289,10 @@ export function MessagePane({
     [current.older, initialView.messages, localMessages],
   );
 
+  const handleMessageSeen = useCallback(() => {
+    if (seen) story?.setFlag(seen.flag);
+  }, [seen, story]);
+
   return (
     <MessageList
       messages={messages}
@@ -292,6 +305,8 @@ export function MessagePane({
       voiceSessions={voiceSessions}
       members={members}
       focusMessageId={focusMessageId}
+      seenMessageId={seen?.messageId}
+      onMessageSeen={seen ? handleMessageSeen : undefined}
       onLoadOlder={loadOlder}
       loadingOlder={current.loading}
       hasMore={current.hasMore}

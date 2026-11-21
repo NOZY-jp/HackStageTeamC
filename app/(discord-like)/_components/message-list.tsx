@@ -74,6 +74,8 @@ export function MessageList({
   onJumpToLatest,
   members = [],
   focusMessageId,
+  seenMessageId,
+  onMessageSeen,
 }: {
   messages: Message[];
   /** 書き手情報（サーバーから渡される）。 */
@@ -108,6 +110,12 @@ export function MessageList({
   members?: MemberView[];
   /** 検索結果からジャンプしてきたメッセージ（強調して表示する）。 */
   focusMessageId?: string;
+  /**
+   * このメッセージが画面に見えたら onMessageSeen を1回呼ぶ（手がかりを「見つけた」合図）。
+   * まだ読み込んでいなければ、追加読み込みで現れた時点から監視する。
+   */
+  seenMessageId?: string;
+  onMessageSeen?: () => void;
 }) {
   const fallbackScrollRef = useRef<HTMLDivElement>(null);
   const scrollElement = scrollRef ?? fallbackScrollRef;
@@ -192,6 +200,30 @@ export function MessageList({
     target.scrollIntoView({ block: "center" });
     appliedFocusRef.current = focusKey;
   }, [focusMessageId, resetKey, messages.length]);
+
+  // 手がかりのメッセージが画面に半分以上見えたら「見つけた」とみなす。
+  // メッセージは後から読み込まれることがあるので、件数が変わるたびに探し直す。
+  // biome-ignore lint/correctness/useExhaustiveDependencies: messages.length は対象行が現れた合図
+  useEffect(() => {
+    const root = scrollElement.current;
+    const target = seenMessageId
+      ? root?.querySelector<HTMLElement>(`[data-message-id="${seenMessageId}"]`)
+      : undefined;
+    if (!root || !target || !onMessageSeen || typeof IntersectionObserver === "undefined") {
+      return;
+    }
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries.some((entry) => entry.isIntersecting)) {
+          observer.disconnect();
+          onMessageSeen();
+        }
+      },
+      { root, threshold: 0.5 },
+    );
+    observer.observe(target);
+    return () => observer.disconnect();
+  }, [seenMessageId, onMessageSeen, messages.length]);
 
   // 上端の sentinel を監視して、古いメッセージを追加で読み込む
   // biome-ignore lint/correctness/useExhaustiveDependencies: スクロール要素の ref はマウント後も同一

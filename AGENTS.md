@@ -11,3 +11,7 @@ This block is written and re-added by `next dev` — verify at `node_modules/nex
 ## シナリオ・登場人物・謎解きの手がかりを触るとき
 
 先に `docs/story.md` を読む。正本は GitHub Issue #76（謎解きの順序・名前）と Google Docs「HackStageTeamC」（台本）。本名・「ゆい」「ゆっちゃん」を作中に出さない、答えを直接書かない、同時に複数のプラットフォームを触らない。
+
+## 仮データ（`lib/<platform>/data/`）を足す・直すとき
+
+先に `docs/data-check.md` を読み、終わったら `npm run data:check` を流す。失敗したら直す（直せず Issue があるときだけ `lib/data-check/known-issues.ts` に足す）。

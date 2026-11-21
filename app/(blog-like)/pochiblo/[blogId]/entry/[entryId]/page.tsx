@@ -5,6 +5,7 @@ import { BlogFrame } from "@/components/blog-like/blog-frame";
 import { EntryBody } from "@/components/blog-like/entry-body";
 import { EntryComments } from "@/components/blog-like/entry-comments";
 import { EntryDate, EntryFooter } from "@/components/blog-like/entry-meta";
+import { StoryAction } from "@/components/common/story/story-action";
 import { StoryTrigger } from "@/components/common/story/story-trigger";
 import {
   blogPath,
@@ -76,6 +77,12 @@ export default async function EntryPage({ params }: Props) {
         <h1 className="pb-entry-title">{entry.title}</h1>
         <EntryBody blocks={entry.body} />
         <EntryFooter entry={entry} />
+        {/* 受賞した記事から結果ページへ進む（本番ではこの操作で順序7が立つ・#119） */}
+        {entry.id === "e20181117" ? (
+          <p className="pb-contest-link">
+            <StoryAction flag="s07-contest-entry">コンテスト名を控える</StoryAction>
+          </p>
+        ) : null}
         <EntryComments comments={entry.comments} />
       </article>
       <nav className="pb-pager" aria-label="前後の記事">

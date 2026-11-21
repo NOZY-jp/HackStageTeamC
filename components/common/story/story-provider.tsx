@@ -31,7 +31,7 @@ import {
  * 保存先が無いので localStorage に持つ（このブラウザでだけ続きから遊べる。読み書きは lib/story/storage.ts）。
  */
 
-export type StoryContextValue = {
+type StoryContextValue = {
   state: StoryState;
   /** 次に始まる場面 */
   upcoming?: Beat;
@@ -174,7 +174,12 @@ export function useStoryVoice(channel: VoiceChannel | undefined): VoiceRoom | un
   return channel ? context?.voice.find((room) => room.channel === channel) : undefined;
 }
 
-/** StoryProvider の外でも安全に呼べる版（共通クローム・テスト用） */
+/** StoryProvider の外でも安全に呼べる版（部品の単体テスト用）。 */
+export function useStoryOptional(): StoryContextValue | null {
+  return useContext(StoryContext);
+}
+
+/** 共通クローム・検索パネル向けの互換エクスポート。 */
 export function useOptionalStory(): StoryContextValue | null {
   return useContext(StoryContext);
 }
