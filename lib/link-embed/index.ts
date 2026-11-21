@@ -1,11 +1,15 @@
 import {
   BLOG_SERVICE_NAME,
+  extractLinkCandidates,
   getBlog,
   getEntry,
   getMylist,
   listMylistEntries,
+  parseTwixerAppPath,
   parseTwixerStatusUrl,
   toAppPath,
+  twixerPostPath,
+  twixerProfilePath,
 } from "@/lib/blog-like";
 import { getChannel, getDMThread, getGuild, getUser } from "@/lib/discord-like";
 import { resolveChannelRoute } from "@/lib/discord-like/route-resolution";
@@ -22,10 +26,9 @@ import {
   getUser as getTwitterUser,
   getUserByHandle as getTwitterUserByHandle,
 } from "@/lib/twitter-like";
-import { extractLinkCandidates } from "./candidates";
 import type { LinkEmbed } from "./types";
 
-export { extractLinkCandidates } from "./candidates";
+export { extractLinkCandidates } from "@/lib/blog-like";
 export type { LinkEmbed } from "./types";
 
 /**
@@ -58,9 +61,10 @@ export function normalizeAppPath(candidate: string, selfOrigin?: string): string
 const idOf = (path: string, pattern: RegExp): string | undefined => pattern.exec(path)?.[1];
 
 function resolveTwixer(path: string, candidate: string): LinkEmbed | undefined {
-  const postId = idOf(path, /^\/twitter\/post\/([\w-]+)$/);
-  if (postId !== undefined) {
-    const post = getPost(postId);
+  // /twitter/post/<id> と /twitter/profile/<handle> の形の定義は lib/blog-like/url.ts 側
+  const parsed = parseTwixerAppPath(path);
+  if (parsed?.kind === "post") {
+    const post = getPost(parsed.id);
     if (!post) return undefined;
     const author = getTwitterUser(post.authorId);
     // twixer.com/<handle>/status/<id> のURLは、ハンドルが投稿の作者と一致するときだけ
@@ -69,7 +73,7 @@ function resolveTwixer(path: string, candidate: string): LinkEmbed | undefined {
     if (statusUrl && author?.handle !== statusUrl.handle) return undefined;
     const media = post.media?.[0];
     return {
-      href: `/twitter/post/${post.id}`,
+      href: twixerPostPath(post.id),
       siteName: "Twixer",
       title: author ? `${author.displayName}（@${author.handle}）` : "投稿",
       description: post.body,
@@ -79,12 +83,11 @@ function resolveTwixer(path: string, candidate: string): LinkEmbed | undefined {
         : undefined,
     };
   }
-  const handle = idOf(path, /^\/twitter\/profile\/([\w-]+)$/);
-  if (handle !== undefined) {
-    const user = getTwitterUserByHandle(handle);
+  if (parsed?.kind === "profile") {
+    const user = getTwitterUserByHandle(parsed.handle);
     if (!user) return undefined;
     return {
-      href: `/twitter/profile/${user.handle}`,
+      href: twixerProfilePath(user.handle),
       siteName: "Twixer",
       title: `${user.displayName}（@${user.handle}）`,
       description: getProfile(user.id)?.bio,

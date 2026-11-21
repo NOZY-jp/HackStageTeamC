@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { extractLinkCandidates } from "./candidates";
+import { extractLinkCandidates } from "../blog-like/url";
 import { normalizeAppPath, resolveLinkEmbeds } from "./index";
 
 const POST_101_URL = "https://twixer.com/mai2mai2/status/post-101";
@@ -36,6 +36,25 @@ describe("extractLinkCandidates", () => {
     expect(
       extractLinkCandidates("ここ /discord.com/channels/@me/1187002356428841501 だよ"),
     ).toEqual(["/discord.com/channels/@me/1187002356428841501"]);
+  });
+
+  it(":// を持たないスキームの尻尾はパスとして拾わない（data:, javascript:, mailto:）", () => {
+    // 以前は data:...,/path の /path 部分だけがアプリ内パスとして拾われてカードになっていた
+    expect(extractLinkCandidates("data:text/plain,/twitter/post/post-101")).toEqual([]);
+    expect(extractLinkCandidates("javascript:/twitter/post/post-101")).toEqual([]);
+    expect(extractLinkCandidates("javascript:alert(/twitter/post/post-101)")).toEqual([]);
+    expect(extractLinkCandidates("mailto:a@example.com/twitter/post/post-101")).toEqual([]);
+  });
+
+  it("別トークンの中の /... は拾わない（単語の中のスラッシュ・途中のカンマ）", () => {
+    expect(extractLinkCandidates("and/or")).toEqual([]);
+    expect(extractLinkCandidates("foo/twitter/post/post-101")).toEqual([]);
+    expect(extractLinkCandidates("x,y/twitter/post/post-101")).toEqual([]);
+  });
+
+  it("行頭・空白・括弧類の直後の / パスは従来どおり拾う", () => {
+    expect(extractLinkCandidates("/twitter/post/post-101")).toEqual(["/twitter/post/post-101"]);
+    expect(extractLinkCandidates("（/twitter/post/post-101）")).toEqual(["/twitter/post/post-101"]);
   });
 });
 
@@ -217,6 +236,17 @@ describe("resolveLinkEmbeds", () => {
       `罠 ftp://twixer.com/mai2mai2/status/post-101 と ${POST_101_URL}`,
     );
     expect(embeds.map((embed) => embed.href)).toEqual(["/twitter/post/post-101"]);
+  });
+
+  it(":// を持たないスキーム・相対文字列はカードにしない（投稿もプロフィールも）", () => {
+    // data: URL の尻尾が投稿とプロフィール両方のカードになっていた問題の回帰
+    expect(
+      resolveLinkEmbeds("data:text/plain,/twitter/post/post-101,/twitter/profile/mai2mai2"),
+    ).toEqual([]);
+    expect(resolveLinkEmbeds("javascript:/twitter/post/post-101")).toEqual([]);
+    expect(resolveLinkEmbeds("mailto:a@example.com/twitter/profile/mai2mai2")).toEqual([]);
+    expect(resolveLinkEmbeds("and/or")).toEqual([]);
+    expect(resolveLinkEmbeds("foo/twitter/post/post-101")).toEqual([]);
   });
 
   it("Twixer のURLは、ハンドルが投稿の作者と違うとカードにしない", () => {

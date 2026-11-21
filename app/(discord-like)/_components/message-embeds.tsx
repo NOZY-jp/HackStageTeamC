@@ -4,7 +4,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { fetchLinkEmbeds } from "@/app/(discord-like)/_actions/link-embed";
-import { extractLinkCandidates } from "@/lib/link-embed/candidates";
+import { extractLinkCandidates } from "@/lib/blog-like/url";
 import type { LinkEmbed } from "@/lib/link-embed/types";
 
 /**

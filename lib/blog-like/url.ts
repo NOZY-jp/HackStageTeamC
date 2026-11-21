@@ -4,6 +4,8 @@ import { LEAF_HOST, TWIXER_HOST } from "./data/names";
 /**
  * URLの「受理する形」の定義をこのファイルに集約する。
  * 埋め込みカード（lib/link-embed）と記事内リンク（entry-body）の両方がこの定義を使う。
+ * メッセージ本文からURL候補を切り出す規則（extractLinkCandidates）もここに置き、
+ * 切り出しと受理を別々に直さなくて済むようにする。
  * - スキーム: http/https だけ。スキーム省略は作中ドメインの直書きのみ認める
  *   （ftp: など別スキームのURLは、ホストが作中ドメインでも受理しない）
  * - オリジン: FICTION_ORIGINS の作中ドメイン、またはこのアプリ自身（selfOrigin）
@@ -15,17 +17,87 @@ const ACCEPTED_SCHEME_RE = /^https?:\/\//i;
 /** scheme:// が書かれているかの判定。書かれていて http(s) でないURLは受理しない */
 const SCHEME_RE = /^[a-zA-Z][a-zA-Z0-9+.-]*:\/\//;
 
+/**
+ * 本文から埋め込みカードの候補になるURLを拾う（クライアントでも使う純関数）。
+ * 候補は scheme:// を含むトークンと、トークン先頭にあるアプリ内の絶対パス（/twitter/...）。
+ * - スキームは大文字も含めて任意のものを丸ごと1トークンで取る。`HTTPS://host:443/path` のような
+ *   URLを取りこぼすと、ホスト部のあとの `/path` だけがアプリ内パスとして拾われてしまう。
+ *   http(s) 以外のスキームは toAppPath が弾くので、ここでは形だけ揃えて渡す。
+ * - / で始まる候補は、直前が行頭・空白・括弧類（CANDIDATE_BOUNDARY_RE）のときだけ取る。
+ *   `data:...,/path` や `and/or` のように別トークンの一部の /... は拾わない
+ *   （`://` を持たないスキームの尻尾がアプリ内パスに化けるのを防ぐ）。
+ */
+const CANDIDATE_RE = /[a-zA-Z][a-zA-Z0-9+.-]*:\/\/[^\s<>"'`（）「」『』【】]+|\/[\w\-./~!?#=&%@]+/g;
+
+/** / 候補の直前に来ていい区切り（URLの区切りになりえない文字と同じ集合＋空白） */
+const CANDIDATE_BOUNDARY_RE = /[\s<>"'`（）「」『』【】]/;
+
+/** 文末の句読点や閉じ括弧はURLに含めない（「https://...。」の「。」など） */
+const TRAILING_RE = /[.,;:!?)\]}>'"”’、。・…』」】]+$/u;
+
+export function extractLinkCandidates(body: string): string[] {
+  const candidates: string[] = [];
+  for (const match of body.matchAll(CANDIDATE_RE)) {
+    const token = match[0];
+    const before = match.index === 0 ? "" : body[match.index - 1];
+    if (token.startsWith("/") && before !== "" && !CANDIDATE_BOUNDARY_RE.test(before)) {
+      continue;
+    }
+    const candidate = token.replace(TRAILING_RE, "");
+    if (candidate.length > 1) candidates.push(candidate);
+  }
+  return candidates;
+}
+
 const stripTrailingSlash = (path: string) => path.replace(/\/+$/, "") || "/";
+
+/** 投稿ページのアプリ内パス。/twitter/post/<id> の形はここでだけ定義する */
+export function twixerPostPath(statusId: string): string {
+  return `/twitter/post/${statusId}`;
+}
+
+/** プロフィールのアプリ内パス。/twitter/profile/<handle> の形はここでだけ定義する */
+export function twixerProfilePath(handle: string): string {
+  return `/twitter/profile/${handle}`;
+}
+
+/**
+ * アプリ内の /twitter/... パスを投稿・プロフィールに分ける。
+ * 埋め込みカード側（lib/link-embed）のパス判定もこの定義を使う。
+ */
+export function parseTwixerAppPath(
+  path: string,
+): { kind: "post"; id: string } | { kind: "profile"; handle: string } | undefined {
+  const id = /^\/twitter\/post\/([\w-]+)$/.exec(path)?.[1];
+  if (id !== undefined) return { kind: "post", id };
+  const handle = /^\/twitter\/profile\/([\w-]+)$/.exec(path)?.[1];
+  if (handle !== undefined) return { kind: "profile", handle };
+  return undefined;
+}
+
+/**
+ * <handle>/status/<id> の形のセグメント列なら handle と statusId に分ける。
+ * twixerPath（パス変換）と parseTwixerStatusUrl（URL解析）が同じ形の定義を共有する。
+ */
+function twixerStatusSegments(
+  segments: string[],
+): { handle: string; statusId: string } | undefined {
+  const [handle, section, statusId, ...rest] = segments;
+  if (!handle || section !== "status" || !statusId || rest.length > 0) {
+    return undefined;
+  }
+  return { handle, statusId };
+}
 
 // twixer.com/<handle>/status/<id> → /twitter/post/<id>、twixer.com/<handle> → /twitter/profile/<handle>
 // <handle>/status/<id> の形を壊したものや余分なセグメントのあるURLは存在しないページなので受理しない
-function twixerPath([handle, section, statusId, ...rest]: string[]): string | undefined {
+function twixerPath(segments: string[]): string | undefined {
+  const [handle, section] = segments;
   if (handle === undefined) return "/twitter";
   if (!handle) return undefined;
-  if (section === undefined) return `/twitter/profile/${handle}`;
-  if (section === "status" && statusId && rest.length === 0) {
-    return `/twitter/post/${statusId}`;
-  }
+  const status = twixerStatusSegments(segments);
+  if (status) return twixerPostPath(status.statusId);
+  if (section === undefined) return twixerProfilePath(handle);
   return undefined;
 }
 
@@ -113,18 +185,9 @@ export function parseTwixerStatusUrl(
   url: string,
 ): { handle: string; statusId: string } | undefined {
   const parsed = splitUrl(url);
-  const [handle, section, statusId, ...rest] = parsed?.segments ?? [];
   // status/<id> の後ろにさらにセグメントがあるURLは別ページなので投稿URLとして扱わない
-  if (
-    parsed?.host !== TWIXER_HOST ||
-    !handle ||
-    section !== "status" ||
-    !statusId ||
-    rest.length > 0
-  ) {
-    return undefined;
-  }
-  return { handle, statusId };
+  if (parsed?.host !== TWIXER_HOST) return undefined;
+  return twixerStatusSegments(parsed.segments);
 }
 
 /** ブログのトップ: /pochiblo/<blogId> */
