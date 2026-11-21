@@ -40,28 +40,6 @@ export const BrandIcon = () => (
   </svg>
 );
 
-/** 認証バッジ（game-info 公式アカウントのみ）。青丸＋抜きのチェック。 */
-export const VerifiedBadge = () => (
-  <svg
-    className="tw-badge"
-    viewBox="0 0 22 22"
-    width="18"
-    height="18"
-    aria-hidden="true"
-    focusable="false"
-  >
-    <circle cx="11" cy="11" r="10" style={{ fill: "var(--tw-accent)" }} />
-    <path
-      d="m6.4 11.5 3 3 6.2-7"
-      fill="none"
-      style={{ stroke: "var(--tw-bg)" }}
-      strokeWidth="2.4"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    />
-  </svg>
-);
-
 export const HomeIcon = () => (
   <Icon>
     <path d="M4 11 12 4l8 7v8.5a.5.5 0 0 1-.5.5H15v-6H9v6H4.5a.5.5 0 0 1-.5-.5V11Z" />

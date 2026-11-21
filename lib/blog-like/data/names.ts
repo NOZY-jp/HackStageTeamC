@@ -4,7 +4,7 @@
  * - LEAF_CREATOR_ID: 引っ越し先の leaf のアカウント（表示名 MaiMai）。leaf のデータと揃える
  */
 export const OLD_TWIXER_HANDLE = "hunter_denden0102";
-export const LEAF_CREATOR_ID = "maimai";
+export { LEAF_CREATOR_ID } from "../../blog-migration/articles";
 
 /** 作中の架空ドメイン */
 export const LEAF_HOST = "leaf.jp";

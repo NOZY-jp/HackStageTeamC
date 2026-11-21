@@ -1,3 +1,4 @@
+import { LEAF_CREATOR_ID, migrationArticles } from "../../blog-migration/articles";
 import type { Article } from "../types";
 
 /**
@@ -9,7 +10,7 @@ import type { Article } from "../types";
 export const articles: Article[] = [
   {
     id: "maimai-2020-02-screenshot",
-    creatorId: "maimai",
+    creatorId: LEAF_CREATOR_ID,
     title: "昔のブログから、ゲーム画面を移しました",
     excerpt: "中3の頃に遊んでいたときの画面を1枚だけ。名前とIDが写っています。",
     publishedAt: "2020-02-15T20:10:00+09:00",
@@ -37,4 +38,14 @@ export const articles: Article[] = [
       },
     ],
   },
+  ...migrationArticles.map<Article>(({ publishedAt, category, title, paragraphs }) => ({
+    id: `migration-${publishedAt.slice(0, 10)}`,
+    creatorId: LEAF_CREATOR_ID,
+    title,
+    excerpt: paragraphs[0],
+    publishedAt,
+    tags: ["モンハン", category],
+    likeCount: 0,
+    body: paragraphs.map((text) => ({ kind: "paragraph", text })),
+  })),
 ];

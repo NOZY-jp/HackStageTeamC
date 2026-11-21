@@ -1,10 +1,11 @@
+import { LEAF_CREATOR_ID } from "../../blog-migration/articles";
 import type { Creator } from "../types";
 
 /** 書き手。脚本（docs/）が固まるまでの仮データ。 */
 export const creators: Creator[] = [
   {
-    // 旧ブログ（ぽちブロ）からの引っ越し先。ID は lib/blog-like の LEAF_CREATOR_ID と揃える
-    id: "maimai",
+    // 旧ブログ（ぽちブロ）からの引っ越し先。
+    id: LEAF_CREATOR_ID,
     displayName: "MaiMai",
     bio: "夜にゲームをして、朝に後悔する会社員。日記と、好きなものの話。",
     avatar: "/note-like/avatars/mai.svg",

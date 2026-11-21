@@ -4,9 +4,8 @@ import { isProtected } from "@/lib/twitter-like";
 import type { Profile, TwitterUser } from "@/lib/twitter-like/types";
 import { Avatar } from "./avatar";
 import { formatCount, formatJoinedAt } from "./format";
-import { CalendarIcon, LockIcon, VerifiedBadge } from "./icons";
+import { CalendarIcon, LockIcon } from "./icons";
 import { LinkifiedText } from "./linkify";
-import { isVerified } from "./lookup";
 import { PageHeader } from "./page-header";
 
 export type ProfileTab = "posts" | "replies" | "media" | "likes";
@@ -36,20 +35,12 @@ export function ProfileShell({
   children: ReactNode;
 }) {
   const base = `/twitter/profile/${user.handle}`;
-  const verified = isVerified(user);
   const locked = isProtected(user);
   return (
     <>
       <PageHeader
         title={user.displayName}
-        titleBadge={
-          verified || locked ? (
-            <>
-              {verified ? <VerifiedBadge /> : null}
-              {locked ? <LockIcon /> : null}
-            </>
-          ) : null
-        }
+        titleBadge={locked ? <LockIcon /> : null}
         subtitle={`${postCount} 件のポスト`}
         backHref="/twitter"
       />
@@ -65,7 +56,6 @@ export function ProfileShell({
           </div>
           <h2 className="tw-profile-name">
             {user.displayName}
-            {verified ? <VerifiedBadge /> : null}
             {locked ? <LockIcon /> : null}
           </h2>
           <p className="tw-handle">@{user.handle}</p>
