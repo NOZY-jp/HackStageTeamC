@@ -3922,8 +3922,10 @@ a.tw-dm-item:focus-visible {
   display: inline-flex;
   align-items: center;
   justify-content: center;
+  gap: 4px;
   border-radius: 9999px;
   flex-shrink: 0;
+  white-space: nowrap;
 }
 
 .fb-search-box {
@@ -7647,15 +7649,6 @@ a.tw-dm-item:focus-visible {
   box-shadow: 0 1px 2px rgba(16, 24, 40, 0.06);
 }
 
-.fb-logo-link {
-  width: 40px;
-  height: 40px;
-  background: linear-gradient(135deg, #8b5cf6, #6d28d9);
-  color: #ffffff;
-  font-weight: 800;
-  font-size: 20px;
-}
-
 .fb-search-box {
   border: 1px solid transparent;
   transition:
@@ -7800,13 +7793,25 @@ article div[class~="justify-between"][class~="text-xs"] > div {
   }
 
   .fb-header {
+    grid-template-columns: minmax(0, 1fr) auto auto;
     padding: 0 10px;
     gap: 8px;
   }
 
+  .fb-nav-tab {
+    width: 36px;
+  }
+
   .fb-search-box {
+    gap: 4px;
+    min-width: 0;
     max-width: none;
     height: 38px;
+    padding: 0 6px;
+  }
+
+  .fb-search-input {
+    min-width: 0;
   }
 
   .fb-card {
