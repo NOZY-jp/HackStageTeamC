@@ -33,7 +33,7 @@ export type DataItem = {
   /** どのデータか（"messages" "posts" など。検査の結果に出す） */
   dataset: string;
   id: string;
-  /** レコードに含まれる文字列（入れ子も含めて全部。URL や色は除く） */
+  /** レコードに含まれる文字列。本文以外では URL や色などを除く */
   texts: string[];
   /** 日時フィールドの値。形式が不正でも検査対象に含める */
   times: { key: string; value: string }[];
@@ -49,7 +49,8 @@ const looksLikeNoise = (value: string) =>
 function walk(value: unknown, key: string, path: string, item: DataItem) {
   if (typeof value === "string") {
     if (isTimeKey(key)) item.times.push({ key, value });
-    else if (!looksLikeNoise(value)) item.texts.push(value);
+    // URL だけでも、投稿やチャットの本文にはそのまま表示される。
+    else if (key === "body" || key === "text" || !looksLikeNoise(value)) item.texts.push(value);
     return;
   }
   if (Array.isArray(value)) {

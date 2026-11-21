@@ -23,7 +23,7 @@ describe("仮データの検査", () => {
   const violations = checkAll(collectCorpus());
   const known = new Set(KNOWN_ISSUES.map((issue) => issue.key));
 
-  it("新しい違反がない（決まり: forbidden-word・本名の置き場所・物語で届く文言・日時・ゲームのいま・ID の重複）", () => {
+  it("新しい違反がない（決まり: forbidden-word・本名の置き場所・プロフィールへの直接リンク・物語で届く文言・日時・ゲームのいま・ID の重複）", () => {
     const fresh = violations
       .filter((violation) => !known.has(violationKey(violation)))
       .map(violationKey);

@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { collectCorpus, itemsOf } from "./corpus";
-import { forbiddenWords, realNames, storyOnlyPhrases } from "./rules";
+import { checkAll, forbiddenWords, realNames, storyOnlyPhrases } from "./rules";
 
 describe("検査対象データの収集", () => {
   it("ハッシュタグや見出しを検査し、色コードや URL を除く", () => {
@@ -18,6 +18,22 @@ describe("検査対象データの収集", () => {
     expect(forbiddenWords(items)).toHaveLength(1);
     expect(realNames(items)).toHaveLength(1);
     expect(storyOnlyPhrases(items)).toHaveLength(1);
+  });
+
+  it("本文だけにある検索対象プロフィールへの直接パスを検出する", () => {
+    const posts = itemsOf("talkup", "posts", [
+      { id: "relative", body: "/talkup/profile/yui__photo" },
+      { id: "absolute", body: "https://example.com/talkup/profile/yui__photo?from=post" },
+      { id: "public", body: "/talkup/profile/member01" },
+      { id: "different", body: "/talkup/profile/yui__photo_extra" },
+    ]);
+
+    expect(posts[2].texts).toContain("/talkup/profile/member01");
+    expect(
+      checkAll(posts)
+        .filter(({ rule }) => rule === "direct-profile-link")
+        .map(({ ref }) => ref),
+    ).toEqual(["talkup/posts/relative", "talkup/posts/absolute"]);
   });
 
   it("日付に似た名前の本文フィールドを日時として扱わない", () => {

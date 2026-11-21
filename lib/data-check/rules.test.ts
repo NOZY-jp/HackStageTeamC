@@ -74,13 +74,22 @@ describe("検査の決まり", () => {
     "本名で検索すれば見つかる",
     "本名を調べれば分かる",
     "本名で検索してみて",
+    "Facebookなら本名で検索できるぞ",
+    "本名を入れて検索してみて",
+    "本名を入力して検索できます",
+    "本名で調べられる",
   ])("静的データに先出しされた助言・結末 %s を検出する", (text) => {
-    expect(storyOnlyPhrases([item({ texts: [text] })])).toHaveLength(1);
+    const messages = itemsOf("discord", "dmMessages", [{ id: "new-message", body: text }]);
+    expect(storyOnlyPhrases(messages)).toHaveLength(1);
   });
 
-  it.each(["タグで検索すれば見つかる", "本名で検索、やってみる", "作品の正式名称を調べて"])(
-    "対象の助言に当たらない %s は許す",
-    (text) => expect(storyOnlyPhrases([item({ texts: [text] })])).toEqual([]),
+  it.each([
+    "タグで検索すれば見つかる",
+    "タグを入れて検索してみて",
+    "本名で検索、やってみる",
+    "作品の正式名称を調べて",
+  ])("対象の助言に当たらない %s は許す", (text) =>
+    expect(storyOnlyPhrases([item({ texts: [text] })])).toEqual([]),
   );
 
   it("日時の形（タイムゾーンつき・日付だけ）を見分ける", () => {

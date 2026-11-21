@@ -1,4 +1,5 @@
 import { photoContestResult } from "@/lib/blog-like/data/contest";
+import { fbUsers, SPOILER_USER_ID } from "@/lib/facebook-like/data/users";
 import {
   FORBIDDEN_NICKNAMES,
   MAIMAI_KANA_READINGS,
@@ -23,6 +24,7 @@ export type Violation = {
 export type RuleId =
   | "forbidden-word"
   | "real-name-outside-allowed"
+  | "direct-profile-link"
   | "story-only-phrase"
   | "invalid-time"
   | "after-game-now"
@@ -33,8 +35,15 @@ const refOf = (item: DataItem) => `${item.platform}/${item.dataset}/${item.id}`;
 /** #76 段階8のコンテスト結果と、段階10の検索対象プロフィール。 */
 const MAIMAI_REAL_NAME_REFS = new Set([
   `pochiblo/contestResults/${photoContestResult.id}`,
-  "talkup/users/u40",
+  `talkup/users/${SPOILER_USER_ID}`,
 ]);
+
+const escapedSearchHandle = fbUsers
+  .find(({ id }) => id === SPOILER_USER_ID)
+  ?.handle.replace(/[.*+?^${}()[\]\\|]/g, "\\$&");
+const directProfileLink = escapedSearchHandle
+  ? new RegExp(`/talkup/profile/${escapedSearchHandle}(?![a-z0-9_.%~-])`, "i")
+  : undefined;
 
 // 漢字と読みを拾う。ローマ字は単語・ハンドルの一部として調べ、英単語の途中は除く。
 const MAIMAI_NAME_READINGS = new RegExp(
@@ -51,7 +60,7 @@ const STORY_ONLY_PHRASES = [
   {
     label: "本名で検索したら",
     pattern:
-      /本名\s*(?:で|を)\s*(?:検索(?:したら|すれば|すると|するなら|して|しよう)|調べ(?:たら|れば|ると|るなら|て|よう))/,
+      /本名\s*(?:で|を(?:\s*(?:入れ|入力し)て)?)\s*(?:検索(?:したら|すれば|すると|するなら|して|しよう|でき(?:る|ます|れば|たら))|調べ(?:たら|れば|ると|るなら|て|よう|られ(?:る|ます)))/,
   },
 ];
 
@@ -126,6 +135,17 @@ export function realNames(items: DataItem[]): Violation[] {
     }
     return violations;
   });
+}
+
+/** #76 段階10の検索を飛ばせるプロフィールの直接リンクを検出する。 */
+export function directProfileLinks(items: DataItem[]): Violation[] {
+  return items
+    .filter((item) => item.texts.some((text) => directProfileLink?.test(text.normalize("NFKC"))))
+    .map((item) => ({
+      rule: "direct-profile-link",
+      ref: refOf(item),
+      detail: "検索対象プロフィールへの直接リンクが静的なデータにある",
+    }));
 }
 
 export function storyOnlyPhrases(items: DataItem[]): Violation[] {
@@ -208,6 +228,11 @@ export const RULES: {
     id: "real-name-outside-allowed",
     summary: "本名の置き場所",
     check: realNames,
+  },
+  {
+    id: "direct-profile-link",
+    summary: "検索対象プロフィールへの直接リンク",
+    check: directProfileLinks,
   },
   {
     id: "story-only-phrase",
