@@ -122,7 +122,7 @@ export const messagesByDMThread: Record<string, Message[]> = {
       channelId: "dm-maimai",
       sentAt: "2026-11-20T19:37:00+09:00",
       authorId: "hal",
-      body: "部屋立てた。昨日言った通りまだ飯だけ",
+      body: "家に戻った。今日はもう寝る",
     },
     {
       id: "dm-maimai-0433",
@@ -134,7 +134,7 @@ export const messagesByDMThread: Record<string, Message[]> = {
     {
       id: "dm-maimai-0434",
       channelId: "dm-maimai",
-      sentAt: "2026-11-22T20:09:00+09:00",
+      sentAt: "2026-11-23T20:09:00+09:00",
       authorId: "hal",
       body: "追加のやつ予告来てたよ。この前言ってた武器ちょっと映ってた",
     },

@@ -146,13 +146,17 @@ describe("本文の品質（旧 data-quality から復活）", () => {
         }
       }
       for (const [month, set] of days) {
-        // 対象期間（2025-11〜2026-11）だけを検査する。それ以前は前史の場面
-        if (month < "2025-12") continue;
-        expect(set.size, `${guild.id} ${month}`).toBeGreaterThanOrEqual(3);
-        expect(
-          [...set].some((day) => Number(day.slice(8, 10)) >= 20),
-          `${guild.id} ${month} 後半`,
-        ).toBe(true);
+        // すべての月を見る。最初の月（2025-11）だけはサーバーを作った時期なので1日から
+        if (month < "2025-11" || month > "2026-11") continue;
+        expect(set.size, `${guild.id} ${month}`).toBeGreaterThanOrEqual(
+          month === "2025-11" ? 1 : 3,
+        );
+        if (month >= "2025-12") {
+          expect(
+            [...set].some((day) => Number(day.slice(8, 10)) >= 20),
+            `${guild.id} ${month} 後半`,
+          ).toBe(true);
+        }
       }
     }
   });

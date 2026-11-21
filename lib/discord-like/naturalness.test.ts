@@ -131,7 +131,18 @@ const burstsOf = (list: Message[]): Message[][] => {
   return bursts;
 };
 
-const isQuestion = (body: string) => /[?？]\s*[」』）)]*$/.test(body.trim());
+/**
+ * 質問の収集条件（分母を明示）: 文末が ? / ？ のもの、または疑問の終わり方をするもの。
+ * システム行（通話の開始/終了）は会話ではないので数えない。
+ */
+const isQuestion = (body: string) => {
+  const text = body.trim();
+  if (/[?？]\s*[」』）)]*$/.test(text)) return true;
+  return /(ですか|ますか|かな|だろう|どう|どこ|いつ|だれ|誰|なに|何|なんで|どうやって|ありますか|いい|いる|できる)\s*[。]?$/.test(
+    text,
+  );
+};
+const spoken = messages.filter((message) => message.system !== true);
 
 describe("会話の自然さ（#154 の6指標）", () => {
   it("① 同じバーストの中で誰も答えない質問は15%以下", () => {
@@ -146,10 +157,10 @@ describe("会話の自然さ（#154 の6指標）", () => {
       const index = list.findIndex((message) => message.id === question.id);
       const burst = burstsOf(list).find((group) => group.some((m) => m.id === question.id)) ?? [];
       const position = burst.findIndex((message) => message.id === question.id);
-      // 回答は同じバーストの中だけで数える（別バーストの発言では救済しない）
+      // 回答は同じバーストの中だけ。システム行は回答に数えない（質問→回答の対応を明示）
       const answer = burst
         .slice(position + 1)
-        .find((message) => message.authorId !== question.authorId);
+        .find((message) => message.system !== true && message.authorId !== question.authorId);
       void index;
       if (!answer) {
         unanswered += 1;
@@ -177,13 +188,16 @@ describe("会話の自然さ（#154 の6指標）", () => {
   });
 
   it("③ 3通以上のバーストが6割以上で、隣接する発言の間隔の中央値は10分未満", () => {
-    const allBursts = [...byChannel.values()].flatMap(burstsOf);
+    const spokenByChannel = new Map<string, Message[]>(
+      [...byChannel.entries()].map(([key, list]) => [key, list.filter((m) => m.system !== true)]),
+    );
+    const allBursts = [...spokenByChannel.values()].flatMap(burstsOf);
     const inLongBursts = allBursts
       .filter((burst) => burst.length >= N.burstMinMessages)
       .reduce((sum, burst) => sum + burst.length, 0);
-    expect(inLongBursts / messages.length).toBeGreaterThanOrEqual(N.burstMessageRatio);
+    expect(inLongBursts / spoken.length).toBeGreaterThanOrEqual(N.burstMessageRatio);
 
-    const gaps = [...byChannel.values()]
+    const gaps = [...spokenByChannel.values()]
       .flatMap((list) =>
         list.slice(1).map((m, i) => (Date.parse(m.sentAt) - Date.parse(list[i].sentAt)) / 60000),
       )

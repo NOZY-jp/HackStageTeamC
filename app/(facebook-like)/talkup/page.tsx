@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useMemo, useState } from "react";
+import { StoryAction } from "@/components/common/story/story-action";
 import { FbAvatar } from "@/components/facebook-like/avatar";
 import { useFacebook } from "@/components/facebook-like/facebook-context";
 import { FacebookLeftSidebar } from "@/components/facebook-like/left-sidebar";
@@ -64,6 +65,12 @@ export default function FacebookFeedPage() {
                   </button>
                 ))}
               </fieldset>
+              {/* 検索結果を本人と確かめた操作を記録する（#119） */}
+              {query ? (
+                <StoryAction flag="s10-talkup-match" className="fb-text-btn">
+                  この人物で間違いない
+                </StoryAction>
+              ) : null}
             </div>
 
             {filter !== "posts" && matchedUsers.length > 0 ? (

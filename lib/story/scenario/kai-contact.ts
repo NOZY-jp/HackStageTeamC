@@ -17,7 +17,8 @@ export const kaiContact: Beat[] = [
     source: "Issue #76 順序9・#119",
     sets: ["s09-kai-contact"],
     script: [
-      chat(channel, "kai", "琥珀さん、例の件は何か分かった？", STORY_NOW),
+      chat(channel, "kai", "琥珀さん、この前の写真の話だけど", STORY_NOW),
+      chat(channel, "kai", "例の件は何か分かった？", "2026-11-25T23:30:20+09:00"),
       chat(
         channel,
         "ryo",
