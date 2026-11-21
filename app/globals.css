@@ -6826,7 +6826,7 @@ a.tw-dm-item:focus-visible {
   list-style: none;
 }
 
-.call-participants li {
+.call-participants > ul > li {
   display: flex;
   gap: 8px;
   align-items: center;
