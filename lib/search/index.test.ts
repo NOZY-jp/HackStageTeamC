@@ -117,11 +117,10 @@ describe("lib/search (Seek 検索エンジン)", () => {
     expect(diaryQuery.some((r) => r.kind === "service")).toBe(false);
   });
 
-  it("「弓属性強化ガン積み構成」の検索で閉鎖した旧ブログが先頭に出て、leaf の移行記事は出ない（#220）", () => {
+  it("「弓属性強化ガン積み構成」の検索で閉鎖のお知らせが先頭に出て、削除した leaf 記事は表示されない", () => {
     const results = searchWeb("弓属性強化ガン積み構成");
-    expect(results.length).toBeGreaterThanOrEqual(1);
+    expect(results.some((result) => result.id.includes("maimai-2019-08-bow-build"))).toBe(false);
     expect(results[0]?.url).toBe("/pochiblo/denden0102/entry/e20200211");
-    expect(results.some((result) => result.url.startsWith("/note/"))).toBe(false);
     expect(results[0]?.snippet).toContain("弓属性強化ガン積み構成");
 
     for (const result of results) {

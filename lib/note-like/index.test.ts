@@ -72,7 +72,7 @@ describe("matchesQuery / searchArticles", () => {
     expect(matchesQuery(article, creator, "writer_a")).toBe(true);
   });
 
-  it("「でんでん」「MaiMai」でスクショ記事が見つかり、弓構成の記事は出ない（#220）", () => {
+  it("「でんでん」「MaiMai」でスクショ記事が見つかり、弓構成の記事は見つからない", () => {
     expect(searchArticles("でんでん").map((item) => item.id)).toContain(
       "maimai-2020-02-screenshot",
     );

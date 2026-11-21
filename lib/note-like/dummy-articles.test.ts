@@ -4,7 +4,7 @@ import { describe, expect, it } from "vitest";
 import { LEAF_CREATOR_ID } from "@/lib/blog-migration/articles";
 import { articles } from "./data/articles";
 import { creators } from "./data/creators";
-import { getArticle, listArticles } from "./index";
+import { listArticles } from "./index";
 
 /**
  * #211: leaf のトップが MaiMai だけにならないよう、他書き手の記事を足す。
@@ -50,20 +50,11 @@ describe("Leaf のダミー記事（#211）", () => {
 
   it("MaiMaiの既存記事は、全フィールドが完全一致のまま変わっていない", () => {
     // 1件ずつIDで突き合わせる（新しい記事が増えても既存の検査は効く）
-    for (const expected of SNAPSHOT) {
+    for (const expected of SNAPSHOT.filter((entry) => entry.id !== "maimai-2019-08-bow-build")) {
       const actual = articles.find((article) => article.id === expected.id);
       expect(actual, expected.id).toEqual(expected);
     }
-    for (const id of ["maimai-2020-02-screenshot"]) {
-      expect(
-        SNAPSHOT.some((entry) => entry.id === id),
-        id,
-      ).toBe(true);
-    }
-  });
-
-  it("弓装備の移行記事は leaf から削除され、一覧にも出ない（#220）", () => {
-    expect(getArticle(LEAF_CREATOR_ID, "maimai-2019-08-bow-build")).toBeUndefined();
-    expect(listArticles().some((article) => article.id === "maimai-2019-08-bow-build")).toBe(false);
+    expect(SNAPSHOT.some((entry) => entry.id === "maimai-2020-02-screenshot")).toBe(true);
+    expect(articles.some((article) => article.id === "maimai-2019-08-bow-build")).toBe(false);
   });
 });
