@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
+import { StoryTrigger } from "@/components/common/story/story-trigger";
 import { replyTargetAuthor, usersById } from "@/components/twitter-like/lookup";
 import { PostCard } from "@/components/twitter-like/post-card";
 import { ProfileEmpty, ProfileShell } from "@/components/twitter-like/profile-shell";
@@ -41,6 +42,7 @@ export default async function TwitterProfilePage({ params }: Props) {
 
   return (
     <>
+      {user.handle === "kanon__dayo" ? <StoryTrigger flag="foundBff" /> : null}
       <main className="tw-main">
         <ProfileShell user={user} profile={profile} postCount={allPosts.length} active="posts">
           <section aria-label="ポスト">

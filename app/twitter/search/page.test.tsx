@@ -1,8 +1,14 @@
 import { render, screen, within } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
+import { StoryProvider, useStory } from "@/components/common/story/story-provider";
 import * as twitter from "@/lib/twitter-like";
 import type { Post } from "@/lib/twitter-like/types";
 import TwitterSearchPage from "./page";
+
+function StoryFlagProbe() {
+  const { state } = useStory();
+  return <output data-testid="story-flags">{state.flags.join(",")}</output>;
+}
 
 const params = (q: string, f?: string) => ({ searchParams: Promise.resolve({ q, f }) });
 
@@ -76,10 +82,10 @@ describe("TwitterSearchPage", () => {
   });
 
   it("ポストが0件でもユーザーが見つかれば「検索結果はありません」を出す", async () => {
-    // まいまい（旧垢）は鍵垢のためユーザーだけがヒットしポストは0件になる
-    render(await TwitterSearchPage(params("まいまい")));
+    // hunter_denden は旧垢（鍵垢）の bio に一致するが公開ポストは0件のためユーザーだけがヒットする
+    render(await TwitterSearchPage(params("hunter_denden")));
     expect(screen.getByText("ユーザー")).toBeInTheDocument();
-    expect(screen.getByText("「まいまい」の検索結果はありません")).toBeInTheDocument();
+    expect(screen.getByText("「hunter_denden」の検索結果はありません")).toBeInTheDocument();
   });
 
   it("鍵アカウントのユーザーの名前の横に鍵アイコンを出す", async () => {
@@ -102,5 +108,17 @@ describe("TwitterSearchPage", () => {
   it("ユーザー・ポストとも0件なら従来の空メッセージのまま", async () => {
     render(await TwitterSearchPage(params("zzzz")));
     expect(screen.getByText(/一致する結果はありません/)).toBeInTheDocument();
+  });
+
+  it("「ブログ」でリプライ(post-102)がヒットすると s02-bff-reply フラグが立つ", async () => {
+    const view = await TwitterSearchPage(params("ブログ"));
+    render(
+      <StoryProvider>
+        <StoryFlagProbe />
+        {view}
+      </StoryProvider>,
+    );
+    expect(screen.getByText(/弓属性強化ガン積み構成/)).toBeInTheDocument();
+    expect(screen.getByTestId("story-flags")).toHaveTextContent("s02-bff-reply");
   });
 });

@@ -19,12 +19,12 @@ const GAME_SCREEN = "/discord-like/screenshot-2018-game.png";
 describe("leaf の移行記事（順序4の導線・#118）", () => {
   const article = listArticles().find((candidate) => candidate.id === ARTICLE_ID);
 
-  it("旧ブログの閉鎖告知の leaf リンク先に、書き手と記事が実在する", () => {
-    // e20200211 の「新しい場所はこちら」（leaf.jp/<LEAF_CREATOR_ID>）がそのまま開ける
+  it("旧ブログの閉鎖告知の leaf リンクから leaf トップへ遷移でき、書き手と記事が実在する", () => {
+    // e20200211 の「新しい場所はこちら」（leaf.jp）が leaf トップ（/note）へ飛ぶ
     const link = getEntry("denden0102", "e20200211")?.body.find((block) => block.kind === "link");
     if (link?.kind !== "link") throw new Error("leaf link missing");
     const href = externalHref(link.url);
-    expect(href).toBe(`/note/${CREATOR_ID}`);
+    expect(href).toBe("/note");
     expect(getCreator(CREATOR_ID)).toBeDefined();
     expect(listArticlesByCreator(CREATOR_ID).length).toBeGreaterThan(0);
   });

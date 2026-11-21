@@ -1,5 +1,6 @@
 import { notFound } from "next/navigation";
 import { Suspense } from "react";
+import { StoryTrigger } from "@/components/common/story/story-trigger";
 import { ProfileView } from "@/components/facebook-like/profile-view";
 import { getUserByHandle, listFriends } from "@/lib/facebook-like";
 
@@ -35,5 +36,10 @@ async function ProfileContent({ params }: { params: Promise<{ handle: string }> 
   }
 
   const friends = listFriends(user.id);
-  return <ProfileView user={user} friends={friends} />;
+  return (
+    <>
+      {user.id === "u40" ? <StoryTrigger flag="s10-talkup-match" delayMs={2500} /> : null}
+      <ProfileView user={user} friends={friends} />
+    </>
+  );
 }

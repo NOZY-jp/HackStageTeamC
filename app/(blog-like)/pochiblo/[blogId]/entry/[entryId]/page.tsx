@@ -5,6 +5,7 @@ import { BlogFrame } from "@/components/blog-like/blog-frame";
 import { EntryBody } from "@/components/blog-like/entry-body";
 import { EntryComments } from "@/components/blog-like/entry-comments";
 import { EntryDate, EntryFooter } from "@/components/blog-like/entry-meta";
+import { StoryTrigger } from "@/components/common/story/story-trigger";
 import {
   blogPath,
   entryPath,
@@ -64,6 +65,12 @@ export default async function EntryPage({ params }: Props) {
 
   return (
     <BlogFrame blog={blog}>
+      {blog.id === "denden0102" && entry.id === "e20200211" ? (
+        <StoryTrigger flag="s03-blog-found" />
+      ) : null}
+      {blog.id === "denden0102" && entry.id === "e20181117" ? (
+        <StoryTrigger flag="s07-contest-entry" />
+      ) : null}
       <article className="pb-entry">
         <EntryDate entry={entry} />
         <h1 className="pb-entry-title">{entry.title}</h1>
