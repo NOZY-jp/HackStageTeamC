@@ -72,12 +72,12 @@ describe("matchesQuery / searchArticles", () => {
     expect(matchesQuery(article, creator, "writer_a")).toBe(true);
   });
 
-  it("「でんでん」「MaiMai」「弓属性強化ガン積み構成」で旧ブログ移行記事・スクショ記事が見つかる", () => {
+  it("「でんでん」「MaiMai」でスクショ記事が見つかり、弓構成の記事は見つからない", () => {
     expect(searchArticles("でんでん").map((item) => item.id)).toContain(
       "maimai-2020-02-screenshot",
     );
     expect(searchArticles("MaiMai").map((item) => item.id)).toContain("maimai-2020-02-screenshot");
-    expect(searchArticles("弓属性強化ガン積み構成").map((item) => item.id)).toContain(
+    expect(searchArticles("弓属性強化ガン積み構成").map((item) => item.id)).not.toContain(
       "maimai-2019-08-bow-build",
     );
   });
