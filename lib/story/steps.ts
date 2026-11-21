@@ -1,3 +1,5 @@
+import { PLACES } from "./places";
+
 /**
  * 謎解きの順序。正本は GitHub Issue #76「spec: 謎解きの順序と手がかりの配分」。
  * #76 が変わったら、ここを同じ内容に直す（ここはコードから参照するための写し）。
@@ -69,9 +71,9 @@ export const steps: Step[] = [
     order: 3,
     chapter: 3,
     summary:
-      "ブログ名と概要で検索すると、閉鎖済みのブログ（note に移行しましたのお知らせだけ）が見つかる",
+      "ブログ名と概要で検索すると、閉鎖済みのブログ（leaf に移行しましたのお知らせだけ）が見つかる",
     places: [
-      { platform: "google", label: "実在の Google 検索（#77）" },
+      { platform: "google", label: "Seek 検索（または実在の Google 検索）", href: "/search" },
       { platform: "blog", label: "元のブログのトップ", href: "/pochiblo/denden0102" },
     ],
     status: { done: false, issue: "#77（検索で当たるようにする）" },
@@ -107,7 +109,7 @@ export const steps: Step[] = [
     id: "s07-contest-entry",
     order: 7,
     chapter: 4,
-    summary: "記事一覧に、note に移されなかった写真コンテスト受賞の記事がある",
+    summary: "記事一覧に、leaf に移されなかった写真コンテスト受賞の記事がある",
     places: [
       {
         platform: "blog",
@@ -122,7 +124,9 @@ export const steps: Step[] = [
     order: 8,
     chapter: 4,
     summary: "コンテスト名で検索すると本名が分かる",
-    places: [{ platform: "google", label: "実在の Google 検索（#77）" }],
+    places: [
+      { platform: "google", label: "Seek 検索（または実在の Google 検索）", href: "/search" },
+    ],
     status: { done: false, issue: "#77" },
   },
   {
@@ -130,7 +134,7 @@ export const steps: Step[] = [
     order: 9,
     chapter: 5,
     summary: "カイから連絡が来て進捗を聞かれ、「本名で検索したら結構出てくるぞ？」と言われる",
-    places: [{ platform: "discord", label: "カイとの会話" }],
+    places: [{ platform: "discord", label: "χ との DM", href: PLACES["discord:dm-kai"].href }],
     status: { done: true },
   },
   {
@@ -145,8 +149,8 @@ export const steps: Step[] = [
     id: "s11-address",
     order: 11,
     chapter: 6,
-    summary: "「住所を特定しました」で終わる（住所そのものは作らない）",
-    places: [{ platform: "discord", label: "最後のメッセージ" }],
+    summary: "住所を特定し、「現地へ向かう」を選択する（住所そのものは作らない）",
+    places: [{ platform: "talkup", label: "talkup の投稿・現地へ向かう選択", href: "/talkup" }],
     status: { done: true },
   },
 ];

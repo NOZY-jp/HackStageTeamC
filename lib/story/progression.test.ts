@@ -9,9 +9,15 @@ import { getChannel, getDMThread, getGuild } from "@/lib/discord-like";
 import { channelMessages, dmMessages } from "@/lib/discord-like/data/messages";
 import { users } from "@/lib/discord-like/data/users";
 import { characters } from "./characters";
-import { MAIMAI_DM_URL_ID, MHC_GUILD_URL_ID, NIGHT_VC_URL_ID } from "./places";
+import {
+  KAI_DM_URL_ID,
+  MAIMAI_DM_URL_ID,
+  MHC_GUILD_URL_ID,
+  NIGHT_VC_URL_ID,
+  PLACES,
+} from "./places";
 import { OLD_BLOG_ID } from "./sites";
-import { VOICE_CHANNELS } from "./stage";
+import { CHAT_CHANNELS, VOICE_CHANNELS } from "./stage";
 import { STEP_IDS, steps } from "./steps";
 
 const OLD_DISCORD_ID = characters.maimai.accounts.discordOldId;
@@ -93,6 +99,12 @@ describe("進行チェック（各プラットフォームのデータに手が�
 describe("物語のチャットの流し先（lib/story/places.ts）", () => {
   it("MaiMai との DM の URL が Discord のデータと一致する", () => {
     expect(getDMThread("dm-maimai")?.urlId).toBe(MAIMAI_DM_URL_ID);
+  });
+
+  it("χ（カイ）との DM の URL が Discord のデータと一致し、チャット定義がある", () => {
+    expect(getDMThread("dm-kai")?.urlId).toBe(KAI_DM_URL_ID);
+    expect(PLACES["discord:dm-kai"].href).toContain(KAI_DM_URL_ID);
+    expect(CHAT_CHANNELS["discord:dm-kai"].place).toBe("discord:dm-kai");
   });
 
   it("通話の場所が Discord のボイスチャンネルで、URL も一致する", () => {
