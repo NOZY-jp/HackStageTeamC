@@ -1,7 +1,6 @@
-import { readFileSync } from "node:fs";
-import { join } from "node:path";
 import { describe, expect, it } from "vitest";
 import { getPost } from "@/lib/twitter-like";
+import snapshot from "@/lib/twitter-like/post-101-102.snapshot.json";
 import { linesOf } from "./engine";
 import { beats } from "./scenario";
 import { steps } from "./steps";
@@ -13,9 +12,7 @@ import type { Beat } from "./types";
  */
 
 /** post-101 / post-102 の完全な写し（全フィールド）。 */
-const SNAPSHOT: { id: string }[] = JSON.parse(
-  readFileSync(join(process.cwd(), "lib/twitter-like/post-101-102.snapshot.json"), "utf8"),
-);
+const SNAPSHOT = snapshot;
 
 const lead = beats.find((beat) => beat.id === "ch3-kai-twixer-lead");
 const advice = beats.find((beat) => beat.id === "ch3-ask-kai");

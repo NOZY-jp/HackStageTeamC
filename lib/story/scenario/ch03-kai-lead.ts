@@ -25,6 +25,7 @@ export const chapter3: Beat[] = [
     memo: "カイさんが送ってくれたTwixerのアカウントを見てみよう",
     script: [
       chat(channel, "kai", "まいまいのこと、何か分かった？", sameDay("23:31:00")),
+      chat(channel, "ryo", "ブログを書いてたのは分かった。でも閉鎖されてた", sameDay("23:31:20")),
       chat(channel, "kai", "そういえば、まいまい Twixer やってた気がする", sameDay("23:31:40"), {
         wait: "slower",
       }),
