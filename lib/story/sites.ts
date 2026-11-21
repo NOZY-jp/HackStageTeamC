@@ -25,6 +25,8 @@ export const SITES = {
   discord: { label: "Discord", href: dmListPath(), match: `/${APP_PREFIX}/`, unlockWith: [] },
   // 第三章: カイに「他のプラットフォームで調べてみたら」と言われる（段階1）
   twixer: { label: "Twixer", href: "/twitter", match: "/twitter", unlockWith: ["s01-blog-talk"] },
+  // 段階2: Twixer の手がかりを確認し、ブログを検索できるようになる
+  seek: { label: "Seek", href: "/search", match: "/search", unlockWith: ["s02-bff-reply"] },
   // 段階3: ブログ名と概要が結びついて、閉鎖したブログが見つかる
   oldBlog: {
     label: "でんでんの狩猟日記",
