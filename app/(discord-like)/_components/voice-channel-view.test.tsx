@@ -291,9 +291,9 @@ describe("VC タイルの見た目（実Discord準拠・#137）", () => {
     const css = await import("node:fs/promises").then((fs) =>
       fs.readFile("app/globals.css", "utf8"),
     );
-    // 左下の名前＋マイク
+    // アバター直下の名前＋マイク（視線移動を減らす）
     expect(css).toMatch(
-      /\.call-tiles\[data-layout="grid"\] \.call-tile-label \{[^}]*position: absolute;[^}]*left: 10px;[^}]*bottom: 8px;/,
+      /\.call-tiles\[data-layout="grid"\] \.call-tile-label \{[^}]*position: static;[^}]*margin-top: 10px;/,
     );
     // 人数に応じた列（1 / 2 / 4 / 6）
     expect(css).toMatch(/\[data-count="1"\] \{[^}]*grid-template-columns: minmax\(0, 1fr\)/);

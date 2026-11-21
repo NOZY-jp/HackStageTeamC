@@ -1225,16 +1225,6 @@
   background-color: transparent;
 }
 
-.call-tiles[data-layout="dm"] .call-tile:first-child .call-tile-avatar {
-  width: clamp(160px, 26vh, 260px);
-  height: clamp(160px, 26vh, 260px);
-  font-size: clamp(56px, 10vh, 92px);
-}
-
-.call-tiles[data-layout="dm"] .call-tile:first-child .call-tile-name {
-  font-size: clamp(18px, 2.6vh, 26px);
-}
-
 .call-tiles[data-layout="dm"] .call-tile:nth-child(2) {
   position: absolute;
   right: 8px;
@@ -1279,6 +1269,20 @@
   white-space: nowrap;
 }
 
+.call-tile[data-muted="true"] .call-tile-avatar {
+  opacity: 0.7;
+}
+
+.call-tiles[data-layout="dm"] .call-tile:first-child .call-tile-avatar {
+  width: clamp(160px, 26vh, 260px);
+  height: clamp(160px, 26vh, 260px);
+  font-size: clamp(56px, 10vh, 92px);
+}
+
+.call-tiles[data-layout="dm"] .call-tile:first-child .call-tile-name {
+  font-size: clamp(18px, 2.6vh, 26px);
+}
+
 .call-tile-badge {
   display: inline-flex;
   align-items: center;
@@ -1320,10 +1324,6 @@
   color: var(--color-text-muted);
   font-size: 12px;
   white-space: nowrap;
-}
-
-.call-tile[data-muted="true"] .call-tile-avatar {
-  opacity: 0.7;
 }
 
 /* 操作はホバー中・フォーカス中だけ出す（absolute なのでレイアウトは動かない） */
@@ -6833,7 +6833,11 @@ a.tw-dm-item:focus-visible {
   padding: 4px;
 }
 
-.call-stage[data-sharing="true"] .call-tiles[data-layout="dm"] .call-tile:first-child .call-tile-avatar {
+.call-stage[data-sharing="true"] .call-tile[data-muted="true"] .call-tile-avatar {
+  opacity: 0.7;
+}
+
+.call-tiles[data-layout="dm"] .call-tile:first-child .call-tile-avatar {
   width: 56px;
   height: 56px;
   font-size: 22px;
