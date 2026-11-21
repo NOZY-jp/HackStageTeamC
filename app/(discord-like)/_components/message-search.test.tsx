@@ -185,7 +185,7 @@ describe("MessageSearch", () => {
     );
     openWithButton();
     fireEvent.change(screen.getByLabelText("メッセージを検索"), {
-      target: { value: "hunter_denden3243" },
+      target: { value: "den" },
     });
 
     const profile = await screen.findByRole("button", { name: "hunter_denden" });

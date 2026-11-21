@@ -158,19 +158,15 @@ describe("フリーワードと順序", () => {
 });
 
 describe("旧垢と不正フィルタ", () => {
-  it.each(["den", "hunter_denden", "hunter_denden324"])(
-    "旧アカウントがハンドルの一部（%s）で検索結果に出ない",
+  it.each(["den", "hunter_denden", "hunter_denden324", "@HUNTER_DENDEN3243"])(
+    "表示名やハンドルに一致するユーザーをフリーワード（%s）で見つけられる",
     (query) => {
-      const { hits, matchedUsers } = run(query);
-      expect(hits.some((hit) => hit.authorId === "denden")).toBe(false);
-      expect(matchedUsers.some((user) => user.id === "denden")).toBe(false);
+      const { matchedUsers } = run(query);
+      expect(matchedUsers).toContainEqual(
+        expect.objectContaining({ id: "denden", status: "offline" }),
+      );
     },
   );
-
-  it("フリーワードでもハンドルが完全一致すれば旧アカウントが見つかる", () => {
-    const { matchedUsers } = run("@HUNTER_DENDEN3243");
-    expect(matchedUsers).toEqual([expect.objectContaining({ id: "denden", status: "offline" })]);
-  });
 
   it("from: に旧ハンドルを指定すると発言と該当ユーザーが返る", () => {
     const response = run("from:hunter_denden3243");
