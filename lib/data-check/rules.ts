@@ -1,4 +1,11 @@
-import type { DataItem, Platform } from "./corpus";
+import { photoContestResult } from "@/lib/blog-like/data/contest";
+import {
+  FORBIDDEN_NICKNAMES,
+  MAIMAI_KANA_READINGS,
+  MAIMAI_REAL_NAME_PARTS,
+  MAIMAI_ROMAJI_READINGS,
+} from "@/lib/platform/story-text-policy";
+import type { DataItem } from "./corpus";
 
 /**
  * 仮データの検査の決まり（純関数）。正本は Issue #76（謎解きの順序・名前・出してはいけない語）。
@@ -23,23 +30,30 @@ export type RuleId =
 
 const refOf = (item: DataItem) => `${item.platform}/${item.dataset}/${item.id}`;
 
-/** 作中のどこにも出さない語（#76: 「ゆい」「ゆっちゃん」は作中に出さない） */
-export const FORBIDDEN_WORDS = ["ゆい", "ゆっちゃん"];
+/** #76 段階8のコンテスト結果と、段階10の検索対象プロフィール。 */
+const MAIMAI_REAL_NAME_REFS = new Set([
+  `pochiblo/contestResults/${photoContestResult.id}`,
+  "talkup/users/u40",
+]);
 
-/**
- * 本名。プレイヤーが本名にたどり着くのは段階8（コンテストの結果ページ）と段階10（talkup）だけ（#76）。
- * 彼女の本名は talkup にだけ置いてよい。ほかの人物の本名は、どこにも置かない
- */
-export const REAL_NAMES: { words: string[]; allowedOn: Platform[] }[] = [
-  { words: ["服部", "由比"], allowedOn: ["talkup"] },
-  { words: ["小路", "花音", "尾崎", "海斗", "杉浦"], allowedOn: [] },
+// 漢字と読みを拾う。ローマ字は単語・ハンドルの一部として調べ、英単語の途中は除く。
+const MAIMAI_NAME_READINGS = new RegExp(
+  `${MAIMAI_KANA_READINGS.join("|")}|(?<![a-z])(?:${MAIMAI_ROMAJI_READINGS.join("|")})(?![a-z])`,
+  "i",
+);
+
+// #76「追記（2026-11-19・名前とハンドルの確定）」の人物表。
+const OTHER_REAL_NAME_PARTS = ["小路", "花音", "尾崎", "海斗", "杉浦"];
+
+/** #119 の助言・結末。助言の典型的な言い換えも、同じ違反として扱う。 */
+const STORY_ONLY_PHRASES = [
+  { label: "住所を特定しました", pattern: /住所を特定しました/ },
+  {
+    label: "本名で検索したら",
+    pattern:
+      /本名\s*(?:で|を)\s*(?:検索(?:したら|すれば|すると|するなら|して|しよう)|調べ(?:たら|れば|ると|るなら|て|よう))/,
+  },
 ];
-
-/**
- * 物語の進み具合に合わせて届く文言。静的な過去のデータに置くと、ゲームを始めた直後に読めてしまう（#119）。
- * 物語の場面（lib/story/scenario）からだけ流す
- */
-export const STORY_ONLY_PHRASES = ["住所を特定しました", "本名で検索したら"];
 
 /**
  * ゲームの「いま」。静的な過去のデータは、すべてこれ以前に置く（#119）。
@@ -68,8 +82,8 @@ function parseValidTime(value: string): number {
 
 export function forbiddenWords(items: DataItem[]): Violation[] {
   return items.flatMap((item) =>
-    FORBIDDEN_WORDS.flatMap((word) =>
-      item.texts.some((text) => text.includes(word))
+    FORBIDDEN_NICKNAMES.flatMap((word) =>
+      item.texts.some((text) => text.normalize("NFKC").toLowerCase().includes(word))
         ? [
             {
               rule: "forbidden-word" as const,
@@ -83,34 +97,46 @@ export function forbiddenWords(items: DataItem[]): Violation[] {
 }
 
 export function realNames(items: DataItem[]): Violation[] {
-  return items.flatMap((item) =>
-    REAL_NAMES.flatMap(({ words, allowedOn }) =>
-      allowedOn.includes(item.platform)
-        ? []
-        : words.flatMap((word) =>
-            item.texts.some((text) => text.includes(word))
-              ? [
-                  {
-                    rule: "real-name-outside-allowed" as const,
-                    ref: refOf(item),
-                    detail: `本名の「${word}」がある（置いてよいのは ${allowedOn.join("・") || "どこにもない"}）`,
-                  },
-                ]
-              : [],
-          ),
-    ),
-  );
+  return items.flatMap((item) => {
+    const ref = refOf(item);
+    const maimaiAllowed = MAIMAI_REAL_NAME_REFS.has(ref);
+    const terms = maimaiAllowed
+      ? OTHER_REAL_NAME_PARTS
+      : [...OTHER_REAL_NAME_PARTS, ...MAIMAI_REAL_NAME_PARTS];
+    const violations: Violation[] = terms
+      .filter((term) => item.texts.some((text) => text.includes(term)))
+      .map((term) => ({
+        rule: "real-name-outside-allowed",
+        ref,
+        detail: `許可されていない場所に本名の「${term}」がある`,
+      }));
+
+    if (!maimaiAllowed) {
+      for (const text of item.texts) {
+        const reading = MAIMAI_NAME_READINGS.exec(text.normalize("NFKC"))?.[0];
+        if (reading) {
+          violations.push({
+            rule: "real-name-outside-allowed",
+            ref,
+            detail: `許可されていない場所に本名の読み「${reading}」がある`,
+          });
+          break;
+        }
+      }
+    }
+    return violations;
+  });
 }
 
 export function storyOnlyPhrases(items: DataItem[]): Violation[] {
   return items.flatMap((item) =>
-    STORY_ONLY_PHRASES.flatMap((phrase) =>
-      item.texts.some((text) => text.includes(phrase))
+    STORY_ONLY_PHRASES.flatMap(({ label, pattern }) =>
+      item.texts.some((text) => pattern.test(text.normalize("NFKC")))
         ? [
             {
               rule: "story-only-phrase" as const,
               ref: refOf(item),
-              detail: `物語で届くはずの「${phrase}」が、静的なデータにある`,
+              detail: `物語で届くはずの「${label}」が、静的なデータにある`,
             },
           ]
         : [],

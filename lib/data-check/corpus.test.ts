@@ -37,6 +37,17 @@ describe("検査対象データの収集", () => {
     ]);
   });
 
+  it("本名を含むコンテスト結果と検索対象プロフィールを収集する", () => {
+    const corpus = collectCorpus();
+    const contest = corpus.find(({ dataset }) => dataset === "contestResults");
+    const profile = corpus.find(
+      ({ platform, dataset, id }) => platform === "talkup" && dataset === "users" && id === "u40",
+    );
+    expect(contest?.texts).toContain("服部 由比");
+    expect(profile?.texts).toContain("服部 由比");
+    expect(realNames(corpus)).toEqual([]);
+  });
+
   it("サーバー、DM スレッド、通話、画像、トレンドを収集する", () => {
     const datasets = new Set(
       collectCorpus().map(({ platform, dataset }) => `${platform}/${dataset}`),

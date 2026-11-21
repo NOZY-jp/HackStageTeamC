@@ -29,15 +29,59 @@ describe("検査の決まり", () => {
     expect(forbiddenWords([item({ texts: ["まいまい"] })])).toEqual([]);
   });
 
-  it("本名は、置いてよいプラットフォームでだけ許す", () => {
-    expect(realNames([item({ platform: "talkup", texts: ["服部 由比"] })])).toEqual([]);
-    expect(realNames([item({ texts: ["服部さん"] })])).toHaveLength(1);
-    expect(realNames([item({ platform: "talkup", texts: ["尾崎"] })])).toHaveLength(1);
+  it("本名の例外はコンテスト結果と検索対象プロフィールに限る", () => {
+    const texts = ["服部 由比", "yui__photo"];
+    const contest = item({
+      platform: "pochiblo",
+      dataset: "contestResults",
+      id: "soukyuu-photo-award-2020",
+      texts,
+    });
+    const profile = item({ platform: "talkup", dataset: "users", id: "u40", texts });
+    expect(realNames([contest, profile])).toEqual([]);
+
+    expect(
+      realNames([
+        { ...contest, dataset: "entries" },
+        { ...contest, id: "other-contest" },
+        { ...profile, id: "u1" },
+        { ...profile, dataset: "posts", id: "fbp-001" },
+      ]).map(({ ref }) => ref),
+    ).toEqual(
+      expect.arrayContaining([
+        "pochiblo/entries/soukyuu-photo-award-2020",
+        "pochiblo/contestResults/other-contest",
+        "talkup/users/u1",
+        "talkup/posts/fbp-001",
+      ]),
+    );
+    expect(realNames([{ ...profile, texts: ["尾崎"] }])).toHaveLength(1);
+    expect(forbiddenWords([{ ...profile, texts: ["ゆい"] }])).toHaveLength(1);
   });
 
-  it("物語で届く文言が静的なデータにあれば見つける", () => {
-    expect(storyOnlyPhrases([item({ texts: ["住所を特定しました"] })])).toHaveLength(1);
+  it.each(["服部さん", "ハットリ", "はっとり", "Ｈａｔｔｏｒｉ", "ユイ", "@Yui_02"])(
+    "本名や読みを含む %s を静的な Discord データで検出する",
+    (text) => expect(realNames([item({ texts: [text] })])).toHaveLength(1),
+  );
+
+  it("ローマ字の断片が英単語に含まれるだけなら許す", () => {
+    expect(realNames([item({ texts: ["ryuichi", "mayuichi"] })])).toEqual([]);
   });
+
+  it.each([
+    "住所を特定しました",
+    "本名で検索したら出てくるぞ",
+    "本名で検索すれば見つかる",
+    "本名を調べれば分かる",
+    "本名で検索してみて",
+  ])("静的データに先出しされた助言・結末 %s を検出する", (text) => {
+    expect(storyOnlyPhrases([item({ texts: [text] })])).toHaveLength(1);
+  });
+
+  it.each(["タグで検索すれば見つかる", "本名で検索、やってみる", "作品の正式名称を調べて"])(
+    "対象の助言に当たらない %s は許す",
+    (text) => expect(storyOnlyPhrases([item({ texts: [text] })])).toEqual([]),
+  );
 
   it("日時の形（タイムゾーンつき・日付だけ）を見分ける", () => {
     const times = (value: string) => [item({ times: [{ key: "sentAt", value }] })];

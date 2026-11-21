@@ -1,4 +1,5 @@
 import { blogs, entries, mylists } from "@/lib/blog-like/data/blog";
+import { photoContestResult } from "@/lib/blog-like/data/contest";
 import { dmThreads } from "@/lib/discord-like/data/dm-threads";
 import { guilds } from "@/lib/discord-like/data/guilds";
 import { MESSAGE_IMAGES } from "@/lib/discord-like/data/message-images";
@@ -121,5 +122,6 @@ export function collectCorpus(): DataItem[] {
     ...itemsOf("pochiblo", "blogs", blogs),
     ...itemsOf("pochiblo", "entries", entries),
     ...itemsOf("pochiblo", "mylists", mylists),
+    ...itemsOf("pochiblo", "contestResults", [photoContestResult]),
   ];
 }
