@@ -21,7 +21,8 @@ import {
  * 「はじめる」で物語を始め、最初の場面の画面（序章なら Discord の通話）へ移る。
  */
 const SPLASH_SEEN_KEY = "hackstage:title-splash-seen:v1";
-const SPLASH_MS = 3200;
+/** ロゴが消えたらタイトルへ。アニメーションの終わりで移り、これは終わりが届かないときの予備 */
+const SPLASH_FALLBACK_MS = 3600;
 
 type Phase = "loading" | "splash" | "title";
 
@@ -51,7 +52,7 @@ export function TitleScreen({ feeds }: { feeds: TitleFeed[] }) {
 
   useEffect(() => {
     if (phase !== "splash") return;
-    const timer = window.setTimeout(skip, SPLASH_MS);
+    const timer = window.setTimeout(skip, SPLASH_FALLBACK_MS);
     const onKey = () => skip();
     window.addEventListener("keydown", onKey);
     return () => {
@@ -78,7 +79,10 @@ export function TitleScreen({ feeds }: { feeds: TitleFeed[] }) {
       {phase === "title" ? <TitleContent /> : null}
       {phase === "splash" ? (
         <button type="button" className="tt-splash" onClick={skip} aria-label="ロゴをとばす">
-          <span className="tt-splash-name">{STUDIO_NAME}</span>
+          {/* 動きを減らす設定ではアニメーションが短くなるので、時間で決めずに終わりを待つ */}
+          <span className="tt-splash-name" onAnimationEnd={skip}>
+            {STUDIO_NAME}
+          </span>
         </button>
       ) : null}
       {phase === "loading" ? <div className="tt-splash" aria-hidden="true" /> : null}
