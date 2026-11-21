@@ -295,6 +295,12 @@ export function StoryStage() {
     setCovering(covering);
     return () => setCovering(false);
   }, [covering, setCovering]);
+  // 探索を挟んだ次の場面は、スキップせずに読み始める。
+  useEffect(() => {
+    if (!covering && settings.mode === "skip") {
+      setSettings({ ...settings, mode: "click" });
+    }
+  }, [covering, settings, setSettings]);
   // たたんでいるとき（絵を見ている）は、Enter・Space・Esc で文章の窓に戻る
   useRestoreKeys(inScene && minimized, () => setMinimized(false));
 
