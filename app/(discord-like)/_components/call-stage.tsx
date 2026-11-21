@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 export type CallParticipant = {
   id: string;
   displayName: string;
@@ -12,6 +12,7 @@ export type CallParticipant = {
 
 const STATUS_LABELS: Record<string, string> = {
   connected: "接続中",
+  calling: "呼び出し中",
   idle: "待機中",
 };
 
@@ -48,13 +49,13 @@ function useCallTimer(running: boolean, startedAtIso?: string): string {
   return formatElapsed(now - startedAt);
 }
 
-function MicIcon({ muted }: { muted: boolean }) {
+function MicIcon({ muted, size = 14 }: { muted: boolean; size?: number }) {
   return (
     <svg
       aria-hidden="true"
       viewBox="0 0 24 24"
-      width="14"
-      height="14"
+      width={size}
+      height={size}
       fill="none"
       stroke="currentColor"
       strokeWidth="2"
@@ -107,6 +108,25 @@ function ShareIcon() {
   );
 }
 
+function PeopleIcon() {
+  return (
+    <svg
+      aria-hidden="true"
+      viewBox="0 0 24 24"
+      width="16"
+      height="16"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      <circle cx="9" cy="8" r="3" />
+      <path d="M3 20a6 6 0 0 1 12 0M16 5a3 3 0 0 1 0 6M18 14a5 5 0 0 1 3 4" />
+    </svg>
+  );
+}
+
 function LeaveIcon() {
   return (
     <svg
@@ -147,7 +167,6 @@ function Tile({ participant }: { participant: CallParticipant }) {
         {participant.displayName.slice(0, 1)}
       </span>
       <span className="call-tile-label">
-        <span className="call-tile-name">{participant.displayName}</span>
         <span
           className="call-tile-badge"
           data-state={participant.muted || participant.deafened ? "muted" : "on"}
@@ -155,6 +174,7 @@ function Tile({ participant }: { participant: CallParticipant }) {
           <MicIcon muted={Boolean(participant.muted || participant.deafened)} />
           <span className="sr-only">{status}</span>
         </span>
+        <span className="call-tile-name">{participant.displayName}</span>
       </span>
     </li>
   );
@@ -163,12 +183,14 @@ function Tile({ participant }: { participant: CallParticipant }) {
 /**
  * 通話画面（サーバーのVC・DMの通話で共通）。
  * - 参加者タイル・経過時間・接続状態は常に見える
- * - 操作（ミュート・スピーカー・切断）はホバー中かフォーカス中だけ出す（レイアウトは動かさない）
- * - 出ていないあいだボタンは Tab で到達しない。通話エリア自体にフォーカスすると出る
+ * - 操作（画面共有・ミュート・スピーカー・参加者・招待・切断）はホバー中かフォーカス中だけ出す
+ * - 画面共有中はステージに共有中の表示、参加者は右に寄せる
+ * - 発話は数秒おきに切り替わる（prefers-reduced-motion では動かさない）
  */
 export function CallStage({
   title,
   joined,
+  connecting = false,
   muted,
   deafened,
   participants,
@@ -178,9 +200,14 @@ export function CallStage({
   startedAt,
   subtitle,
   layout = "grid",
+  selfId,
+  inviteUrl,
+  speakingIntervalMs = 4000,
 }: {
-  title: string;
+  title?: string;
   joined: boolean;
+  /** 呼び出し中（入室直後の約1秒）。0:00 のまま「呼び出し中」を出す */
+  connecting?: boolean;
   muted: boolean;
   deafened: boolean;
   participants: CallParticipant[];
@@ -192,72 +219,194 @@ export function CallStage({
   subtitle?: string;
   /** grid = サーバーVC（並べる）/ dm = DM通話（相手を大きく、自分は右下の小窓） */
   layout?: "grid" | "dm";
+  /** 自分の参加者ID（DMの小窓を判別する） */
+  selfId?: string;
+  /** 招待リンク（省略時は現在のURL） */
+  inviteUrl?: string;
+  /** 発話表示の切り替え間隔（テストで注入する） */
+  speakingIntervalMs?: number;
 }) {
-  // ホバー中か、通話エリアの中にフォーカスがあるあいだだけ操作を出す
-  const [active, setActive] = useState(false);
-  const [focused, setFocused] = useState(false);
-  const [shareNotice, setShareNotice] = useState(false);
-  const controlsVisible = active || focused;
-  const elapsed = useCallTimer(joined, startedAt);
+  const [sharing, setSharing] = useState(false);
+  const [panelOpen, setPanelOpen] = useState(false);
+  const [note, setNote] = useState<string | null>(null);
+  const [speakerId, setSpeakerId] = useState<string | null>(null);
+  const noteTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  // 通話中は操作バーを常に出す（PM決定）。タイル上のホバー要素だけを隠す。
+  const controlsVisible = joined;
+  const connected = joined && !connecting;
+  const elapsed = useCallTimer(connected, startedAt);
   const tabIndex = controlsVisible ? 0 : -1;
+
+  // 発話の切り替え（固定の「話しています」をやめる）。動きを減らす設定では止める。
+  useEffect(() => {
+    if (!connected || sharing || participants.length === 0) {
+      setSpeakerId(null);
+      return;
+    }
+    if (
+      typeof window !== "undefined" &&
+      window.matchMedia?.("(prefers-reduced-motion: reduce)").matches
+    ) {
+      setSpeakerId(null);
+      return;
+    }
+    const others = participants.filter((participant) => participant.id !== selfId);
+    if (others.length === 0) {
+      setSpeakerId(null);
+      return;
+    }
+    let index = 0;
+    setSpeakerId(null);
+    const timer = setInterval(() => {
+      index = (index + 1) % (others.length + 1);
+      setSpeakerId(index === 0 ? null : others[index - 1].id);
+    }, speakingIntervalMs);
+    return () => clearInterval(timer);
+  }, [connected, participants, selfId, sharing, speakingIntervalMs]);
+
+  useEffect(
+    () => () => {
+      if (noteTimer.current) clearTimeout(noteTimer.current);
+    },
+    [],
+  );
+
+  const showNote = useCallback((text: string) => {
+    setNote(text);
+    if (noteTimer.current) clearTimeout(noteTimer.current);
+    noteTimer.current = setTimeout(() => setNote(null), 2000);
+  }, []);
+
+  const copyInvite = useCallback(async () => {
+    const url = inviteUrl ?? (typeof window !== "undefined" ? window.location.href : "");
+    try {
+      await navigator.clipboard?.writeText(url);
+    } catch {
+      // クリップボードが使えなくても、案内だけ出す（モック）
+    }
+    showNote("招待リンクをコピーしました");
+  }, [inviteUrl, showNote]);
+
+  const shown = useMemo(
+    () =>
+      participants.map((participant) => ({
+        ...participant,
+        speaking: participant.id === speakerId,
+      })),
+    [participants, speakerId],
+  );
 
   return (
     <section
       className="call-stage"
       aria-label="通話"
-      data-connected={joined ? "true" : "false"}
-      onPointerEnter={() => setActive(true)}
-      onPointerLeave={() => setActive(false)}
-      onFocus={() => setFocused(true)}
-      onBlur={(event) => {
-        if (!event.currentTarget.contains(event.relatedTarget as Node | null)) {
-          setFocused(false);
-        }
-      }}
+      data-connected={connected ? "true" : "false"}
+      data-connecting={connecting ? "true" : "false"}
+      data-sharing={sharing ? "true" : "false"}
+      data-layout={layout}
     >
-      {/* キーボードでも操作を出せる入口（見た目は出さない）。フォーカスすると操作バーが出る */}
-      {joined ? (
-        <button
-          type="button"
-          className="call-reveal sr-only"
-          onClick={() => setActive(true)}
-          onFocus={() => setFocused(true)}
-        >
-          通話の操作を表示
-        </button>
-      ) : null}
+      {layout === "dm" ? (
+        <div className="call-stage-info call-stage-info-dm">
+          <p className="call-stage-meta">
+            <span className="call-stage-status" data-connected={connected ? "true" : "false"}>
+              {connecting
+                ? STATUS_LABELS.calling
+                : connected
+                  ? STATUS_LABELS.connected
+                  : STATUS_LABELS.idle}
+            </span>
+            <span aria-hidden="true">·</span>
+            <span className="call-stage-count">{shown.length}人</span>
+            <span aria-hidden="true">·</span>
+            <span className="call-stage-timer">
+              <span className="sr-only">通話時間 </span>
+              {elapsed}
+            </span>
+            {muted ? <span className="call-stage-flag">ミュート中</span> : null}
+            {deafened ? <span className="call-stage-flag">スピーカーオフ</span> : null}
+          </p>
+        </div>
+      ) : (
+        <div className="call-stage-info">
+          {title ? <h2 className="call-stage-title">{title}</h2> : null}
+          <p className="call-stage-meta">
+            <span className="call-stage-status" data-connected={connected ? "true" : "false"}>
+              {connecting
+                ? STATUS_LABELS.calling
+                : connected
+                  ? STATUS_LABELS.connected
+                  : STATUS_LABELS.idle}
+            </span>
+            {connected ? (
+              <>
+                <span aria-hidden="true">·</span>
+                <span className="call-stage-timer">
+                  <span className="sr-only">通話時間 </span>
+                  {elapsed}
+                </span>
+              </>
+            ) : null}
+            {joined && muted ? <span className="call-stage-flag">ミュート中</span> : null}
+            {joined && deafened ? <span className="call-stage-flag">スピーカーオフ</span> : null}
+          </p>
+          {subtitle ? <p className="call-stage-subtitle">{subtitle}</p> : null}
+        </div>
+      )}
 
-      <div className="call-stage-info">
-        <h2 className="call-stage-title">{title}</h2>
-        <p className="call-stage-meta">
-          <span className="call-stage-status" data-connected={joined ? "true" : "false"}>
-            {joined ? STATUS_LABELS.connected : "未接続"}
-          </span>
-          {joined ? (
-            <>
-              <span aria-hidden="true">·</span>
-              <span className="call-stage-timer">
-                <span className="sr-only">通話時間 </span>
-                {elapsed}
-              </span>
-            </>
-          ) : null}
-          {joined && muted ? <span className="call-stage-flag">ミュート中</span> : null}
-          {joined && deafened ? <span className="call-stage-flag">スピーカーオフ</span> : null}
-        </p>
-        {subtitle ? <p className="call-stage-subtitle">{subtitle}</p> : null}
-      </div>
+      {sharing ? (
+        <div className="call-share" role="status">
+          {/* 共有中の内容らしく見せる（読み込み失敗に見えないように枠と帯を出す） */}
+          <div className="call-share-window" aria-hidden="true">
+            <span className="call-share-dots">
+              <i />
+              <i />
+              <i />
+            </span>
+            <span className="call-share-bar" />
+            <span className="call-share-canvas" />
+          </div>
+          <p>画面を共有しています</p>
+          <span className="call-share-hint">停止するには操作バーの「共有を停止」</span>
+        </div>
+      ) : null}
 
       <ul
         className="call-tiles"
         aria-label="参加者"
-        data-count={participants.length}
+        data-count={shown.length}
         data-layout={layout}
+        data-sharing={sharing ? "true" : undefined}
       >
-        {participants.map((participant) => (
+        {shown.map((participant) => (
           <Tile key={participant.id} participant={participant} />
         ))}
       </ul>
+
+      {panelOpen ? (
+        <aside className="call-participants" aria-label="参加者一覧">
+          <h3>参加者 — {shown.length}</h3>
+          <ul>
+            {shown.map((participant) => (
+              <li key={participant.id}>
+                <span
+                  aria-hidden="true"
+                  className="call-participants-avatar"
+                  style={{ backgroundColor: participant.avatarColor }}
+                >
+                  {participant.displayName.slice(0, 1)}
+                </span>
+                <span>{participant.displayName}</span>
+                <span
+                  className="call-participants-mic"
+                  data-state={participant.muted ? "muted" : "on"}
+                >
+                  <MicIcon muted={Boolean(participant.muted || participant.deafened)} />
+                </span>
+              </li>
+            ))}
+          </ul>
+        </aside>
+      ) : null}
 
       {joined ? (
         <div className="call-controls" data-visible={controlsVisible ? "true" : "false"}>
@@ -265,12 +414,12 @@ export function CallStage({
             type="button"
             className="voice-button"
             tabIndex={tabIndex}
-            aria-label="画面共有（準備中）"
-            aria-pressed={shareNotice}
-            onClick={() => setShareNotice((value) => !value)}
+            aria-label={sharing ? "共有を停止" : "画面共有"}
+            aria-pressed={sharing}
+            onClick={() => setSharing((value) => !value)}
           >
             <ShareIcon />
-            <span>画面共有</span>
+            <span>{sharing ? "共有を停止" : "画面共有"}</span>
           </button>
           <button
             type="button"
@@ -296,6 +445,27 @@ export function CallStage({
           </button>
           <button
             type="button"
+            className="voice-button"
+            tabIndex={tabIndex}
+            aria-label="参加者一覧"
+            aria-expanded={panelOpen}
+            onClick={() => setPanelOpen((value) => !value)}
+          >
+            <PeopleIcon />
+            <span>参加者</span>
+          </button>
+          <button
+            type="button"
+            className="voice-button"
+            tabIndex={tabIndex}
+            aria-label="招待リンクをコピー"
+            onClick={copyInvite}
+          >
+            <ShareIcon />
+            <span>招待</span>
+          </button>
+          <button
+            type="button"
             className="voice-button voice-button-danger"
             tabIndex={tabIndex}
             aria-label="切断"
@@ -304,12 +474,12 @@ export function CallStage({
             <LeaveIcon />
             <span>切断</span>
           </button>
-          {shareNotice ? (
-            <span className="call-controls-note" role="status">
-              画面共有は準備中です
-            </span>
-          ) : null}
         </div>
+      ) : null}
+      {note ? (
+        <p className="call-controls-note" role="status">
+          {note}
+        </p>
       ) : null}
     </section>
   );

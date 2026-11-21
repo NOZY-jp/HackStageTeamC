@@ -18,6 +18,7 @@ export function DmCallView({
   self,
   other,
   otherHandle,
+  connectDelayMs = 1000,
 }: {
   threadId: string;
   threadUrlId: string;
@@ -25,11 +26,15 @@ export function DmCallView({
   other: { displayName: string; avatarColor: string };
   /** ヘッダーに出す相手のハンドル（例: maimaimaimai） */
   otherHandle?: string;
+  /** 呼び出し中の長さ（テストで 0 にする） */
+  connectDelayMs?: number;
 }) {
   const router = useRouter();
   const pathname = usePathname();
-  const { activeCallThreadId, startCall, endCall } = useLocalMessages();
+  const { activeCallThreadId, activeCallJoinedAt, startCall, endCall } = useLocalMessages();
   const [muted, setMuted] = useState(false);
+  // 入室 → 呼び出し中（0:00）→ 接続、の2段階（直リンクでも「終了しました」を出さない）
+  const [connecting, setConnecting] = useState(true);
   const [deafened, setDeafened] = useState(false);
   // 通話中かどうかは Provider が持つ（ページが再マウントされなくても再入場を拾える）
   const connected = activeCallThreadId === threadId;
@@ -40,10 +45,15 @@ export function DmCallView({
   const onCallPath = normalizedPath.endsWith("/call");
   const [entry, setEntry] = useState(0);
 
-  // 直リンクで開いたときも通話を開始する（同じスレッドで二重開始はしない）
+  // 直リンクで開いたときも、呼び出し中のあとで通話を開始する（同じスレッドで二重開始はしない）
   useEffect(() => {
-    startCall(threadId);
-  }, [startCall, threadId]);
+    setConnecting(true);
+    const timer = setTimeout(() => {
+      startCall(threadId);
+      setConnecting(false);
+    }, connectDelayMs);
+    return () => clearTimeout(timer);
+  }, [connectDelayMs, startCall, threadId]);
 
   useEffect(() => {
     if (!onCallPath) return;
@@ -73,7 +83,7 @@ export function DmCallView({
       <header className="pane-header voice-header">
         <PaneToggles />
         <div className="voice-header-text">
-          <h1 className="voice-header-title">{other.displayName} との通話</h1>
+          <h1 className="voice-header-title">{other.displayName}</h1>
           {otherHandle ? <p className="voice-header-handle">@{otherHandle}</p> : null}
         </div>
         <Link
@@ -100,13 +110,12 @@ export function DmCallView({
 
       <div className="pane-scroll voice-body">
         <CallStage
-          title={`${other.displayName} との通話`}
-          subtitle={connected ? "2人で通話中" : "通話は終了しました"}
           joined={connected}
+          connecting={connecting || !connected}
           muted={muted}
           deafened={deafened}
           participants={
-            connected
+            connected || connecting
               ? [
                   {
                     id: `dm-other-${threadId}`,
@@ -128,6 +137,8 @@ export function DmCallView({
           onToggleDeafen={() => setDeafened((value) => !value)}
           onLeave={hangUp}
           layout="dm"
+          selfId={`dm-self-${threadId}`}
+          startedAt={activeCallJoinedAt ?? undefined}
         />
       </div>
     </main>
