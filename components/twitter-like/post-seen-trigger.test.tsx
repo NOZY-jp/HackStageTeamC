@@ -65,10 +65,18 @@ describe("PostSeenTrigger", () => {
     expect(seen.at(-1)).not.toContain("te04-kanon-stalker-post");
     expect(observers).toHaveLength(1);
 
-    await act(async () => observers[0].callback([{ isIntersecting: false }]));
+    await act(async () => observers[0].callback([{ isIntersecting: false, intersectionRatio: 0 }]));
     expect(seen.at(-1)).not.toContain("te04-kanon-stalker-post");
 
-    await act(async () => observers[0].callback([{ isIntersecting: true }]));
+    await act(async () =>
+      observers[0].callback([{ isIntersecting: true, intersectionRatio: 0.01 }]),
+    );
+    expect(seen.at(-1)).not.toContain("te04-kanon-stalker-post");
+    expect(observers[0].active).toBe(true);
+
+    await act(async () =>
+      observers[0].callback([{ isIntersecting: true, intersectionRatio: 0.5 }]),
+    );
     await waitFor(() => expect(seen.at(-1)).toContain("te04-kanon-stalker-post"));
     expect(observers[0].active).toBe(false);
   });

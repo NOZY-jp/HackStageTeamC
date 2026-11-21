@@ -59,7 +59,9 @@ describe("TwitterProfilePage", () => {
     expect(seen.at(-1)).not.toContain("te04-kanon-stalker-post");
     expect(observers).toHaveLength(1);
 
-    await act(async () => observers[0].callback([{ isIntersecting: true }]));
+    await act(async () =>
+      observers[0].callback([{ isIntersecting: true, intersectionRatio: 0.5 }]),
+    );
     await waitFor(() => expect(seen.at(-1)).toContain("te04-kanon-stalker-post"));
   });
 });

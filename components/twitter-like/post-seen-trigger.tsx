@@ -19,14 +19,15 @@ export function PostSeenTrigger({ flag, children }: { flag: FlagId; children: Re
     if (!ready || !setFlag || !element || typeof IntersectionObserver === "undefined") {
       return;
     }
+    const threshold = 0.5;
     const observer = new IntersectionObserver(
       (entries) => {
-        if (entries.some((entry) => entry.isIntersecting)) {
+        if (entries.some((entry) => entry.isIntersecting && entry.intersectionRatio >= threshold)) {
           observer.disconnect();
           setFlag(flag);
         }
       },
-      { threshold: 0.5 },
+      { threshold },
     );
     observer.observe(element);
     return () => observer.disconnect();

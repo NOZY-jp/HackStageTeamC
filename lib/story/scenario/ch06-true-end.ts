@@ -59,7 +59,7 @@ export const chapter6Branch: Beat[] = [
       {
         id: "go-to-house-first",
         label: "気のせいだ――このまま直接、彼女の家へ向かう",
-        unless: ["reachedBadEnd"],
+        unless: ["reachedBadEnd", "calledByName"],
         sets: ["choseBadEnd"],
       },
       {
@@ -73,9 +73,7 @@ export const chapter6Branch: Beat[] = [
 ];
 
 /**
- * 第六章：True End 本編と、誤選択からのやり直し導線。
- * `ch6-branch-retry` が `after: ["ch6-bad-end"]` を持つため、`scenario/index.ts` では
- * `ch6-bad-end`（`ch06-reality.ts`）の後ろに並べる。
+ * 第六章：True End 本編と、訪問後に判断をやり直す場面。
  */
 export const chapter6TrueEnd: Beat[] = [
   {
@@ -126,7 +124,6 @@ export const chapter6TrueEnd: Beat[] = [
     layout: "overlay",
     when: ["reconsiderBranch"],
     unless: ["choseTrueEnd"],
-    after: ["ch6-bad-end"],
     source: "True End 分岐（やり直し）",
     script: [
       think("……同じ過ちを繰り返すわけにはいかない。"),

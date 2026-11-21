@@ -14,7 +14,15 @@ export const twitterUsers: TwitterUser[] = [
   { id: "tw-hal", displayName: "Hal", handle: HAL_HANDLE, avatarColor: "#3b6fd4" },
   { id: "tw-mai", displayName: "Mai", handle: "mai2mai2", avatarColor: "#c2417c" },
   { id: "tw-sou", displayName: "ソウ", handle: "kaiser018023071", avatarColor: "#b86a1f" },
-  { id: "tw-kanon", displayName: "かのん", handle: "kanon__dayo", avatarColor: "#c2563f" },
+  {
+    id: "tw-kanon",
+    displayName: "かのん",
+    handle: "kanon__dayo",
+    avatarColor: "#c2563f",
+    // ツーショット写真の右（茶髪のロング）と同一人物だと分かる自画像（#169）
+    avatarSrc: "/twitter-like/kanon-avatar.svg",
+    avatarAlt: "自画像。茶髪のロングヘアで、写真の右側に写っている人物と同じ見た目",
+  },
   // まいのリア友とみられる人物（post-102 の返信者）。名前は #76 未確定。表示名・handle は仮決め
   { id: "tw-tomo", displayName: "とも", handle: "tomo-0718", avatarColor: "#4e8a5c" },
   // 古いアカウント。改名して鍵垢になった（旧 @hunter_denden0102 → 現 @maimai_mhw）
@@ -281,7 +289,7 @@ export const twitterPosts: Post[] = [
     media: [
       {
         src: "/twitter-like/photo-01.svg",
-        alt: "制服姿で並ぶ二人。左の子は黒髪のボブ",
+        alt: "制服姿で並ぶ二人。左は黒髪のボブ、右は茶髪のロングが本人",
         width: 800,
         height: 600,
       },
@@ -304,7 +312,7 @@ export const twitterPosts: Post[] = [
     media: [
       {
         src: "/twitter-like/photo-03.svg",
-        alt: "古いアルバムから。並んで笑う二人。左は黒髪のボブ、右は茶髪のロング",
+        alt: "古いアルバムから。並んで笑う二人。左は黒髪のボブ、右は茶髪のロングが本人",
         width: 800,
         height: 600,
       },

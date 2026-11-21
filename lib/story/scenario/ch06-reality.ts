@@ -7,12 +7,42 @@ import type { Beat } from "../types";
  */
 export const chapter6: Beat[] = [
   {
+    id: "ch6-call-name",
+    chapter: 6,
+    layout: "overlay",
+    when: ["s11-address", "kaiToldDenchan"],
+    unless: ["choseTrueEnd", "choseBadEndAgain", "reachedBadEnd"],
+    after: ["ch5-talkup"],
+    source: "Issue #120・#76（カイの助言 → 誤認）",
+    script: [
+      title("第六章　現実"),
+      background("street", { transition: "fade", duration: "slow" }),
+      narrate("ピンポーン"),
+      think("表札は合ってる。ここで間違いない。"),
+      think("なんて呼べばいいんだっけ。カイさんは「でんちゃん」って言ってたけど……"),
+    ],
+    choices: [
+      {
+        id: "denden",
+        label: "「でんちゃん」と呼ぶ",
+        sets: ["usedDenchan"],
+        reply: [say("ryo", "でんちゃん！")],
+      },
+      {
+        id: "name",
+        label: "表示名で呼ぶ",
+        sets: ["calledByName"],
+        reply: [say("ryo", "琥珀さん、いますか")],
+      },
+    ],
+  },
+  {
     id: "ch6-bad-end",
     chapter: 6,
     layout: "fullscreen",
-    when: ["s11-address"],
+    when: ["s11-address", "usedDenchan"],
     unless: ["choseTrueEnd"],
-    after: ["ch5-talkup"],
+    after: ["ch5-talkup", "ch6-call-name"],
     source: "Google Docs 箱書き 第六章（Bad End）",
     memo: "引っかかる違和感がある。Discord・Twixer・Talkupの記録をもう一度確かめよう",
     script: [
@@ -70,6 +100,36 @@ export const chapter6: Beat[] = [
         unless: ["choseBadEnd"],
         sets: ["reachedBadEnd"],
       },
+      {
+        id: "reconsider",
+        label: "もう一度、判断をやり直す",
+        requires: ["choseBadEnd"],
+        sets: ["reconsiderBranch"],
+      },
+    ],
+  },
+  {
+    id: "ch6-wait-end",
+    chapter: 6,
+    layout: "fullscreen",
+    when: ["s11-address", "calledByName"],
+    unless: ["choseTrueEnd"],
+    after: ["ch6-call-name"],
+    source: "Issue #120（呼び名を使わなかった場合の分岐）",
+    script: [
+      title("第六章　現実"),
+      background("street", { transition: "fade", duration: "slow" }),
+      narrate("インターホンの向こうで、少しの沈黙があった。"),
+      say("maimai", "……どちらさまですか"),
+      say("ryo", "琥珀さん、だよね。連絡が取れなくて、心配で"),
+      narrate("名前を聞いて、彼女は少しだけ息をのんだ。"),
+      say("maimai", "今は、会えない"),
+      say("maimai", "連絡も、できない"),
+      narrate("声は震えていたけれど、扉は開かなかった。通報も、されなかった。"),
+      narrate("帰り道、スマホを何度も見た。返事は、来なかった。"),
+      title("……"),
+    ],
+    choices: [
       {
         id: "reconsider",
         label: "もう一度、判断をやり直す",
