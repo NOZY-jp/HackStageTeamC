@@ -1,12 +1,11 @@
 import Link from "next/link";
 import type { ReactNode } from "react";
-import { isProtected } from "@/lib/twitter-like";
+import { isProtected, listFollowingIds, TWITTER_ME_ID } from "@/lib/twitter-like";
 import type { Profile, TwitterUser } from "@/lib/twitter-like/types";
 import { Avatar } from "./avatar";
 import { formatCount, formatJoinedAt } from "./format";
-import { CalendarIcon, LockIcon, VerifiedBadge } from "./icons";
+import { CalendarIcon, LockIcon } from "./icons";
 import { LinkifiedText } from "./linkify";
-import { isVerified } from "./lookup";
 import { PageHeader } from "./page-header";
 
 export type ProfileTab = "posts" | "replies" | "media" | "likes";
@@ -36,20 +35,14 @@ export function ProfileShell({
   children: ReactNode;
 }) {
   const base = `/twitter/profile/${user.handle}`;
-  const verified = isVerified(user);
   const locked = isProtected(user);
+  const following = listFollowingIds(TWITTER_ME_ID).includes(user.id);
+  const action = following ? "フォロー中" : "フォロー";
   return (
     <>
       <PageHeader
         title={user.displayName}
-        titleBadge={
-          verified || locked ? (
-            <>
-              {verified ? <VerifiedBadge /> : null}
-              {locked ? <LockIcon /> : null}
-            </>
-          ) : null
-        }
+        titleBadge={locked ? <LockIcon /> : null}
         subtitle={`${postCount} 件のポスト`}
         backHref="/twitter"
       />
@@ -60,12 +53,16 @@ export function ProfileShell({
           aria-hidden="true"
         />
         <div className="tw-profile-body">
-          <div className="tw-profile-avatar">
-            <Avatar user={user} size="xl" />
+          <div className="tw-profile-heading">
+            <div className="tw-profile-avatar">
+              <Avatar user={user} size="xl" />
+            </div>
+            <button type="button" className="tw-follow-button tw-profile-action" disabled>
+              {user.id === TWITTER_ME_ID ? "プロフィールを編集" : action}
+            </button>
           </div>
           <h2 className="tw-profile-name">
             {user.displayName}
-            {verified ? <VerifiedBadge /> : null}
             {locked ? <LockIcon /> : null}
           </h2>
           <p className="tw-handle">@{user.handle}</p>

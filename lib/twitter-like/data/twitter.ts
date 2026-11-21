@@ -10,23 +10,10 @@ import type { Post, Profile, Trend, TwitterUser } from "../types";
 export const twitterUsers: TwitterUser[] = [
   { id: "tw-hal", displayName: "Hal", handle: HAL_HANDLE, avatarColor: "#3b6fd4" },
   { id: "tw-mai", displayName: "Mai", handle: "mai2mai2", avatarColor: "#c2417c" },
-  { id: "tw-ren", displayName: "れん", handle: "ren", avatarColor: "#2f8f6b" },
-  { id: "tw-yuki", displayName: "ゆき", handle: "yuki", avatarColor: "#8a5cc2" },
   { id: "tw-sou", displayName: "ソウ", handle: "kaiser018023071", avatarColor: "#b86a1f" },
-  { id: "tw-sana", displayName: "さな", handle: "sana", avatarColor: "#1f8a9e" },
-  {
-    id: "tw-gameinfo",
-    displayName: "げーむ通信",
-    handle: "game-info",
-    avatarColor: "#5865f2",
-  },
-  {
-    id: "tw-nagi",
-    displayName: "なぎ",
-    handle: "nagi",
-    avatarColor: "#5c677d",
-    protected: true,
-  },
+  { id: "tw-kanon", displayName: "かのん", handle: "kanon__dayo", avatarColor: "#c2563f" },
+  // まいのリア友とみられる人物（post-102 の返信者）。名前は #76 未確定。表示名・handle は仮決め
+  { id: "tw-tomo", displayName: "とも", handle: "tomo-0718", avatarColor: "#4e8a5c" },
   // 古いアカウント。改名して鍵垢になった（旧 @hunter_denden0102 → 現 @maimai_mhw）
   {
     id: "tw-old-denden",
@@ -35,13 +22,12 @@ export const twitterUsers: TwitterUser[] = [
     avatarColor: "#7a6a3f",
     protected: true,
   },
-  { id: "tw-kanon", displayName: "かのん", handle: "kanon__dayo", avatarColor: "#c2563f" },
 ];
 
 export const twitterProfiles: Profile[] = [
   {
     userId: "tw-hal",
-    bio: "ネトゲで出会った人と半年。今週末、はじめて会いに行く。",
+    bio: "ネトゲで出会った人と1年半。今週末、はじめて会いに行く。",
     joinedAt: "2026-11-01",
     followingCount: 84,
     followersCount: 112,
@@ -55,20 +41,6 @@ export const twitterProfiles: Profile[] = [
     followersCount: 141,
   },
   {
-    userId: "tw-ren",
-    bio: "夜型のギルドメンバー。週末レイドはだいたい参加。",
-    joinedAt: "2026-11-03",
-    followingCount: 45,
-    followersCount: 61,
-  },
-  {
-    userId: "tw-yuki",
-    bio: "ゲーム内で景色を撮るのが趣味。まったり勢。",
-    joinedAt: "2026-11-02",
-    followingCount: 210,
-    followersCount: 233,
-  },
-  {
     userId: "tw-sou",
     bio: "ネトゲ歴は長いほう。相談にはだいたい乗る。",
     joinedAt: "2026-11-02",
@@ -76,31 +48,10 @@ export const twitterProfiles: Profile[] = [
     followersCount: 77,
   },
   {
-    userId: "tw-sana",
-    bio: "季節のカフェメニュー制覇中。ゲームは休日だけ。",
-    joinedAt: "2026-11-04",
-    followingCount: 130,
-    followersCount: 152,
-  },
-  {
-    userId: "tw-gameinfo",
-    bio: "例のゲームの非公式まとめ。メンテ情報とイベント速報。 https://example.com/game-info",
-    joinedAt: "2026-11-01",
-    followingCount: 15,
-    followersCount: 3120,
-  },
-  {
-    userId: "tw-nagi",
-    bio: "鍵垢。フォロバは知り合いのみ。例のゲームは休止中で、オフ会の話題だけ眺めてる。",
-    joinedAt: "2026-11-06",
-    followingCount: 27,
-    followersCount: 34,
-  },
-  {
     // 記事の名前で検索すると見つかる（bio に記事名を残している）。
     // 改名したことと旧ハンドル・旧表示名を bio に残す（今は誰も使っていない）
     userId: "tw-old-denden",
-    bio: "前は @hunter_denden0102（表示名 hunter_denden）で活動していました。「写真コンテストで賞をもらいました！」を書いた頃のアカウントです。BFF: @kanon__dayo",
+    bio: "前は @hunter_denden0102（hunter_denden って名前だった）。「写真コンテストで賞をもらいました！」書いた人。BFF: @kanon__dayo",
     // 旧ブログの最古記事（2018-01-27）より前から使っているアカウント
     joinedAt: "2017-12-01",
     followingCount: 38,
@@ -113,23 +64,33 @@ export const twitterProfiles: Profile[] = [
     followingCount: 120,
     followersCount: 98,
   },
+  {
+    // プロフィール画面が profile を必須にするので最小だけ置く
+    userId: "tw-tomo",
+    bio: "たわごと。",
+    joinedAt: "2019-03-21",
+    followingCount: 42,
+    followersCount: 35,
+  },
 ];
 
+/**
+ * フォロー関係（見る側の user id → フォローしている user id の一覧）。
+ * ホームのタイムラインとおすすめユーザーの母集団に使う。
+ * リョウ（tw-hal）がこの SNS で知っているのはゲーム仲間の Mai とソウだけ。
+ * かのんも、まいのリア友とみられる人物もまだ知らないのでフォローしていない
+ * — かのんは旧アカウントの bio の「BFF: @kanon__dayo」から見つけるのが筋書き。
+ */
+export const twitterFollows: Record<string, string[]> = {
+  "tw-hal": ["tw-mai", "tw-sou"],
+};
+
 export const twitterPosts: Post[] = [
-  {
-    id: "post-001",
-    authorId: "tw-gameinfo",
-    postedAt: "2026-11-01T09:00:00+09:00",
-    body: "【イベント】季節限定フィールド「紅葉の谷」が開放されました。期間は11月末まで。落ち葉の奥に隠し宝箱があるとの噂。",
-    replyCount: 12,
-    repostCount: 148,
-    likeCount: 902,
-  },
   {
     id: "post-002",
     authorId: "tw-hal",
     postedAt: "2026-11-02T10:15:00+09:00",
-    body: "例のゲームを始めて、今日でちょうど半年。最初はフィールドから出られない新規だった。",
+    body: "例のゲームを始めて、今日でちょうど1年半。最初はフィールドから出られない新規だった。",
     replyCount: 4,
     repostCount: 21,
     likeCount: 96,
@@ -164,24 +125,6 @@ export const twitterPosts: Post[] = [
     likeCount: 29,
   },
   {
-    id: "post-006",
-    authorId: "tw-ren",
-    postedAt: "2026-11-04T22:20:00+09:00",
-    body: "週末レイドの募集出しといた。今週こそ討伐いきたい。盾役あと1名。",
-    replyCount: 3,
-    repostCount: 7,
-    likeCount: 18,
-  },
-  {
-    id: "post-007",
-    authorId: "tw-yuki",
-    postedAt: "2026-11-05T21:30:00+09:00",
-    body: "紅葉の谷、夕方の光がきれい。しばらく座って眺めてただけで終わった日。",
-    replyCount: 5,
-    repostCount: 18,
-    likeCount: 87,
-  },
-  {
     id: "post-008",
     authorId: "tw-mai",
     postedAt: "2026-11-06T09:25:00+09:00",
@@ -189,15 +132,6 @@ export const twitterPosts: Post[] = [
     replyCount: 6,
     repostCount: 4,
     likeCount: 38,
-  },
-  {
-    id: "post-009",
-    authorId: "tw-sana",
-    postedAt: "2026-11-07T13:05:00+09:00",
-    body: "駅前のカフェ、栗のラテが始まってた。今年もこの季節。",
-    replyCount: 2,
-    repostCount: 1,
-    likeCount: 16,
   },
   {
     id: "post-010",
@@ -219,15 +153,6 @@ export const twitterPosts: Post[] = [
     likeCount: 33,
   },
   {
-    id: "post-012",
-    authorId: "tw-gameinfo",
-    postedAt: "2026-11-10T09:00:00+09:00",
-    body: "【定期メンテ】11/12(木) 14:00〜17:00。終了後に小さな修正パッチが入ります。詳細→ https://example.com/news/mainte-1112",
-    replyCount: 8,
-    repostCount: 62,
-    likeCount: 410,
-  },
-  {
     id: "post-013",
     authorId: "tw-sou",
     postedAt: "2026-11-11T20:45:00+09:00",
@@ -240,7 +165,7 @@ export const twitterPosts: Post[] = [
     id: "post-014",
     authorId: "tw-hal",
     postedAt: "2026-11-12T21:10:00+09:00",
-    body: "決まった。来週末、半年越しにはじめて会う。顔も名前も知らないままの、半年。",
+    body: "決まった。来週末、1年半越しにはじめて会う。顔も名前も知らないままの、1年半。",
     replyCount: 9,
     repostCount: 25,
     likeCount: 168,
@@ -263,15 +188,6 @@ export const twitterPosts: Post[] = [
     replyCount: 1,
     repostCount: 3,
     likeCount: 52,
-  },
-  {
-    id: "post-017",
-    authorId: "tw-sana",
-    postedAt: "2026-11-14T11:20:00+09:00",
-    body: "週末は紅葉を見に行く予定。リアルの紅葉も、ゲームの紅葉も。",
-    replyCount: 3,
-    repostCount: 6,
-    likeCount: 27,
   },
   {
     id: "post-018",
@@ -324,40 +240,13 @@ export const twitterPosts: Post[] = [
     id: "post-023",
     authorId: "tw-hal",
     postedAt: "2026-11-17T08:05:00+09:00",
-    body: "あと5日。緊張して、夜ちゃんと眠れなくなってきた。",
+    body: "あと4日。緊張して、夜ちゃんと眠れなくなってきた。",
     replyCount: 2,
     repostCount: 6,
     likeCount: 83,
   },
-  {
-    id: "post-024",
-    authorId: "tw-nagi",
-    postedAt: "2026-11-15T07:50:00+09:00",
-    body: "こっちは記録用。TLを眺めるだけの日が続く。",
-    replyCount: 0,
-    repostCount: 0,
-    likeCount: 3,
-  },
-  {
-    id: "post-025",
-    authorId: "tw-nagi",
-    postedAt: "2026-11-17T23:10:00+09:00",
-    body: "週末は人が多いところに出る予定。混むのは苦手だけど。",
-    replyCount: 0,
-    repostCount: 0,
-    likeCount: 5,
-  },
-  {
-    id: "post-026",
-    authorId: "tw-nagi",
-    postedAt: "2026-11-18T09:20:00+09:00",
-    body: "@mai2mai2 私も一度、同じところで迷ったことがある。",
-    replyToId: "post-003",
-    replyCount: 0,
-    repostCount: 0,
-    likeCount: 2,
-  },
-  // 2019年の攻略投稿と、リア友かのんの「ブログにも書いてたよな」リプライ
+  // 2019年の攻略投稿と、リア友とみられる人物の「ブログにも書いてたよな」リプライ。
+  // ブログ名（でんでんの狩猟日記）をそのまま挙げる — 順序3 でその名前が検索語になる
   {
     id: "post-101",
     authorId: "tw-mai",
@@ -369,9 +258,9 @@ export const twitterPosts: Post[] = [
   },
   {
     id: "post-102",
-    authorId: "tw-kanon",
+    authorId: "tw-tomo",
     postedAt: "2019-09-09T21:40:00+09:00",
-    body: "それ、前にブログにも書いてたよな。読んでたよ。",
+    body: "それ、前にブログ『でんでんの狩猟日記』にも書いてたよな。読んでたよ。",
     replyToId: "post-101",
     replyCount: 0,
     repostCount: 0,
@@ -418,45 +307,73 @@ export const twitterPosts: Post[] = [
       },
     ],
   },
+  // 旧アカウント（@maimai_mhw・鍵垢）の残存投稿。ブログを書いていた頃〜閉鎖まで。
+  // 鍵垢なので公開面には出ない（プロフィールの件数表示だけに数が残る）
+  {
+    id: "post-201",
+    authorId: "tw-old-denden",
+    postedAt: "2018-01-27T21:14:00+09:00",
+    body: "モンスターハンターワールド、はじめた。武器は双剣にした。",
+    replyCount: 1,
+    repostCount: 0,
+    likeCount: 4,
+  },
+  {
+    id: "post-202",
+    authorId: "tw-old-denden",
+    postedAt: "2018-01-27T21:20:00+09:00",
+    body: "あわせてブログもはじめてみた。続くといいな。",
+    replyToId: "post-201",
+    replyCount: 0,
+    repostCount: 0,
+    likeCount: 2,
+  },
+  {
+    id: "post-203",
+    authorId: "tw-old-denden",
+    postedAt: "2020-02-14T22:30:00+09:00",
+    body: "ブログは note に移行した。こっちのアカウントはもう更新しないかも。",
+    replyCount: 0,
+    repostCount: 0,
+    likeCount: 1,
+  },
 ];
 
 /** ポストの表示数（インプレッション）のダミー値。Post.id → 件数。 */
 export const twitterViewCounts: Record<string, number> = {
-  "post-001": 48200,
   "post-002": 2400,
   "post-003": 1980,
   "post-004": 1210,
   "post-005": 1150,
-  "post-006": 870,
-  "post-007": 2650,
   "post-008": 1320,
-  "post-009": 780,
   "post-010": 1560,
   "post-011": 1040,
-  "post-012": 21800,
   "post-013": 910,
   "post-014": 3100,
   "post-015": 980,
   "post-016": 1450,
-  "post-017": 720,
   "post-018": 640,
   "post-019": 560,
   "post-020": 430,
   "post-021": 1120,
   "post-022": 460,
   "post-023": 1690,
-  "post-024": 95,
-  "post-025": 61,
   "post-101": 180,
   "post-102": 240,
   "post-103": 96,
   "post-104": 55,
+  "post-201": 40,
+  "post-202": 22,
+  "post-203": 18,
 };
 
+// トレンドを押すと名前のまま検索される。着弾先はリョウのゲーム仲間（Hal・Mai・ソウ）の
+// 雑談だけに絞る — 手がかりの投稿（post-101/102）やかのん・旧アカウントに直行する名前は置かない。
+// ポスト件数は出さない — 実際の検索結果（各1〜2件）と食い違う数字を見せないため。
 export const twitterTrends: Trend[] = [
-  { id: "trend-1", category: "ゲーム · トレンド", name: "#紅葉の谷", postCount: 12400 },
-  { id: "trend-2", category: "ゲーム · トレンド", name: "週末レイド", postCount: 8921 },
-  { id: "trend-3", category: "ゲーム · トレンド", name: "ギルド勧誘", postCount: 3560 },
-  { id: "trend-4", category: "トレンド", name: "オフ会", postCount: 1204 },
-  { id: "trend-5", category: "ゲーム · トレンド", name: "深夜メンテ", postCount: 987 },
+  { id: "trend-1", category: "ゲーム · トレンド", name: "例のゲーム" },
+  { id: "trend-2", category: "ゲーム · トレンド", name: "レイド" },
+  { id: "trend-3", category: "ゲーム · トレンド", name: "迷子" },
+  { id: "trend-4", category: "トレンド", name: "週末" },
+  { id: "trend-5", category: "トレンド", name: "電話" },
 ];
