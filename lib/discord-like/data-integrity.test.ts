@@ -22,6 +22,7 @@ import {
   listMessages,
   listVoiceStates,
 } from "./index";
+import { VOLUME_LIMITS } from "./test-thresholds";
 import type { Message } from "./types";
 import { listMemberViews } from "./view";
 
@@ -30,12 +31,13 @@ const DM_THREAD_ID = "dm-maimai";
 const DISCORD_SCREENSHOT = "screenshot-2026.png";
 const OLD_BLOG_IMAGE = "screenshot-2018.png";
 
+/** 月次の dm:server 比（しきい値は test-thresholds.ts。#130 で新仕様化）。 */
+/** DM/サーバー比を見る期間（後半ほど DM が濃いことを検査する） */
 const PERIODS = [
-  { key: "1期", from: "2025-02-01", to: "2025-05-31", ratio: 1 / 9 },
-  { key: "2期", from: "2025-06-01", to: "2026-05-31", ratio: 1 / 9 },
-  { key: "3期", from: "2026-06-01", to: "2026-07-31", ratio: 4 / 6 },
-  { key: "4期", from: "2026-08-01", to: "2026-08-31", ratio: null },
-  { key: "5期", from: "2026-09-01", to: "2026-11-19", ratio: 7 / 3 },
+  { key: "2025-11〜2026-02", from: "2025-11", to: "2026-02" },
+  { key: "2026-03〜2026-06", from: "2026-03", to: "2026-06" },
+  { key: "2026-07〜2026-08", from: "2026-07", to: "2026-08" },
+  { key: "2026-09〜2026-11", from: "2026-09", to: "2026-11" },
 ];
 
 const inPeriod = (sentAt: string, from: string, to: string): boolean => {
@@ -50,13 +52,31 @@ const serverMessages = (): Message[] =>
   listChannels(GUILD_ID)
     .filter((channel) => channel.kind === "text")
     .flatMap((channel) => listMessages({ channelId: channel.id, limit: 1000 }).messages);
-/** Discord 全体（サーバーの公開チャンネル＋DM すべて）。 */
-const discordMessages = (): Message[] => [...serverMessages(), ...dmMessages(), ...kaiDMMessages()];
+/** DM 全体（全スレッドの合算）。 */
+const allDMMessages = (): Message[] =>
+  listDMThreads().flatMap(
+    (thread) => listDMMessages({ threadId: thread.id, limit: 2000 }).messages,
+  );
+
+/** サーバー全体（現状は mhc のみ。3サーバーになっても合算で数えられる）。 */
+const allServerMessages = (): Message[] =>
+  listGuilds().flatMap((guild) =>
+    listChannels(guild.id)
+      .filter((channel) => channel.kind === "text")
+      .flatMap((channel) => listMessages({ channelId: channel.id, limit: 2000 }).messages),
+  );
+/** Discord 全体（全サーバーの text チャンネル＋全 DM スレッド）。#132 以降のサーバーも含む。 */
+const discordMessages = (): Message[] => [
+  ...allServerMessages(),
+  ...listDMThreads().flatMap(
+    (thread) => listDMMessages({ threadId: thread.id, limit: 3000 }).messages,
+  ),
+];
 
 describe("ダミーデータの整合性", () => {
-  it("サーバーは「モンハンコミュニティ」1つだけで、旧3サーバーは残っていない", () => {
+  it("サーバーは決められた数だけあり、旧3サーバーは残っていない", () => {
     const guilds = listGuilds();
-    expect(guilds).toHaveLength(1);
+    expect(guilds).toHaveLength(VOLUME_LIMITS.guildCount);
     expect(guilds[0].name).toBe("モンハンコミュニティ");
     const names = guilds.map((guild) => guild.name);
     for (const old of ["開発ラボ", "創作サークル", "ゲーム部"]) {
@@ -95,9 +115,19 @@ describe("ダミーデータの整合性", () => {
     expect(new Set(handles).size).toBe(handles.length);
   });
 
-  it("DM スレッドは MaiMai とカイの2件（調査の会話は公開チャンネルに置かない・#121）", () => {
+  it("DM スレッドは9本（恋人・依頼主・友人・先輩・後輩。#133）", () => {
     const threads = listDMThreads();
-    expect(threads.map((thread) => thread.id).sort()).toEqual(["dm-kai", DM_THREAD_ID]);
+    expect(threads.map((thread) => thread.id).sort()).toEqual([
+      "dm-gunlance",
+      "dm-hayashi",
+      "dm-jun",
+      "dm-kai",
+      DM_THREAD_ID,
+      "dm-miyu",
+      "dm-ootsuka",
+      "dm-taku",
+      "dm-yama",
+    ]);
     const mai = threads.find((thread) => thread.id === DM_THREAD_ID);
     expect(mai?.participantIds).toEqual([SELF_USER_ID, "maimai"]);
     const kai = threads.find((thread) => thread.id === "dm-kai");
@@ -169,10 +199,14 @@ describe("ダミーデータの整合性", () => {
     }
   });
 
-  it("通話のシステムメッセージは開始と終了が対で、話者は実在する", () => {
+  it("通話のシステムメッセージは開始と終了が対で、話者は実在する（不在着信は終了扱い）", () => {
     const messages = dmMessages();
     const starts = messages.filter((message) => message.body.includes("通話を開始しました"));
-    const ends = messages.filter((message) => message.body.includes("通話を終了しました"));
+    const ends = [
+      ...messages.filter((message) => message.body.includes("通話を終了しました")),
+      // 応答が無かった通話も「終了」として数える（#130）
+      ...messages.filter((message) => message.body.includes("応答がありませんでした")),
+    ];
     expect(starts.length).toBeGreaterThan(0);
     expect(starts.length).toBe(ends.length);
     for (const message of [...starts, ...ends]) {
@@ -202,48 +236,73 @@ describe("ダミーデータの整合性", () => {
     expect(states.some((state) => state.userId === SELF_USER_ID)).toBe(false);
   });
 
-  it("量は DM 350〜450通、サーバー 700〜900通", () => {
-    expect(dmMessages().length).toBeGreaterThanOrEqual(350);
-    expect(dmMessages().length).toBeLessThanOrEqual(450);
-    expect(serverMessages().length).toBeGreaterThanOrEqual(700);
-    expect(serverMessages().length).toBeLessThanOrEqual(900);
+  it("量はしきい値の範囲にある（#130 で新仕様化・データ増加に合わせて上げる）", () => {
+    const dm = allDMMessages().length;
+    const server = allServerMessages().length;
+    expect(dm).toBeGreaterThanOrEqual(VOLUME_LIMITS.dmMessages.min);
+    expect(dm).toBeLessThanOrEqual(VOLUME_LIMITS.dmMessages.max);
+    expect(server).toBeGreaterThanOrEqual(VOLUME_LIMITS.serverMessages.min);
+    expect(server).toBeLessThanOrEqual(VOLUME_LIMITS.serverMessages.max);
   });
 
-  it("期間ごとの 個人:サーバー 比が仕様の±20%に収まる", () => {
-    const dm = dmMessages();
-    const server = serverMessages();
+  it("後半ほど DM が濃くなる傾向がある（データ量で絶対値は動くため傾向で見る）", () => {
+    const dm = allDMMessages();
+    // 期間比はサーバー全体（3サーバー合算）で見る
+    const server = allServerMessages();
+    // データ量（#131〜#133）で絶対値は動くため、「時間が進むほど DM が濃くなる」傾向を見る。
+    // 最初の期間に対して最後の期間が trendMultiplier 倍以上になっていること。
+    const ratios: number[] = [];
     for (const period of PERIODS) {
-      if (period.ratio === null) continue;
-      const dmCount = dm.filter((message) =>
-        inPeriod(message.sentAt, period.from, period.to),
-      ).length;
-      const serverCount = server.filter((message) =>
-        inPeriod(message.sentAt, period.from, period.to),
-      ).length;
-      expect(dmCount).toBeGreaterThan(0);
-      expect(serverCount).toBeGreaterThan(0);
-      const actual = dmCount / serverCount;
-      expect(actual).toBeGreaterThan(period.ratio * 0.8);
-      expect(actual).toBeLessThan(period.ratio * 1.2);
+      const inRange = (message: { sentAt: string }) =>
+        message.sentAt.slice(0, 7) >= period.from && message.sentAt.slice(0, 7) <= period.to;
+      const dmCount = dm.filter(inRange).length;
+      const serverCount = server.filter(inRange).length;
+      expect(dmCount, period.key).toBeGreaterThan(0);
+      expect(serverCount, period.key).toBeGreaterThan(0);
+      ratios.push(dmCount / serverCount);
     }
+    expect(ratios[ratios.length - 1]).toBeGreaterThanOrEqual(
+      ratios[0] * VOLUME_LIMITS.monthlyRatio.trendMultiplier,
+    );
   });
 
-  it("付き合った後の期間は毎日やり取りがある", () => {
+  it("付き合った後は週5日以上やり取りし、空いても3日まで（#130 で新仕様化）", () => {
+    // 受入条件そのもの（週5日以上・空き3日まで）を固定する。緩めるとここで落ちる
+    expect(VOLUME_LIMITS.datingWeek.minDays).toBe(5);
+    expect(VOLUME_LIMITS.datingWeek.maxGapDays).toBe(3);
     const dm = dmMessages();
-    const days = new Set(
-      dm
-        .filter((message) => inPeriod(message.sentAt, "2026-09-01", "2026-11-19"))
-        .map((message) => message.sentAt.slice(0, 10)),
-    );
-    const cursor = new Date("2026-09-01T00:00:00Z");
-    const end = new Date("2026-11-19T00:00:00Z");
-    const missing: string[] = [];
-    while (cursor <= end) {
-      const day = cursor.toISOString().slice(0, 10);
-      if (!days.has(day)) missing.push(day);
-      cursor.setUTCDate(cursor.getUTCDate() + 1);
+    const days = [
+      ...new Set(
+        dm
+          .filter((message) => inPeriod(message.sentAt, "2026-09-01", "2026-11-19"))
+          .map((message) => message.sentAt.slice(0, 10)),
+      ),
+    ].sort();
+    expect(days.length).toBeGreaterThan(0);
+
+    // 週ごとの日数（日曜始まり）
+    const weeks = new Map<string, Set<string>>();
+    for (const day of days) {
+      const date = new Date(`${day}T00:00:00Z`);
+      const weekStart = new Date(date);
+      weekStart.setUTCDate(date.getUTCDate() - date.getUTCDay());
+      const key = weekStart.toISOString().slice(0, 10);
+      const set = weeks.get(key) ?? new Set<string>();
+      set.add(day);
+      weeks.set(key, set);
     }
-    expect(missing).toEqual([]);
+    // 月の途中で切れる最初と最後の週は除く（データ端の週は日数が少なくて当然）
+    const fullWeeks = [...weeks.entries()].sort(([a], [b]) => a.localeCompare(b)).slice(1, -1);
+    for (const [week, weekDays] of fullWeeks) {
+      expect(weekDays.size, week).toBeGreaterThanOrEqual(VOLUME_LIMITS.datingWeek.minDays);
+    }
+    // 連続して空く日数（日付の差 − 1。隣り合う日は 0 日空き）
+    let maxGap = 0;
+    for (let i = 1; i < days.length; i += 1) {
+      const gap = Math.round((Date.parse(days[i]) - Date.parse(days[i - 1])) / 86_400_000) - 1;
+      maxGap = Math.max(maxGap, gap);
+    }
+    expect(maxGap).toBeLessThanOrEqual(VOLUME_LIMITS.datingWeek.maxGapDays);
   });
 
   it("一言だけの日・通話に移る日・長文の日が混ざっている", () => {
