@@ -1,8 +1,8 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { Avatar } from "@/components/twitter-like/avatar";
-import { LockIcon, SearchIcon, VerifiedBadge } from "@/components/twitter-like/icons";
-import { isVerified, replyTargetAuthor, usersById } from "@/components/twitter-like/lookup";
+import { LockIcon, SearchIcon } from "@/components/twitter-like/icons";
+import { replyTargetAuthor, usersById } from "@/components/twitter-like/lookup";
 import { PageHeader } from "@/components/twitter-like/page-header";
 import { PostCard } from "@/components/twitter-like/post-card";
 import { RightSidebar } from "@/components/twitter-like/right-sidebar";
@@ -57,7 +57,6 @@ export default async function TwitterSearchPage({ searchParams }: Props) {
                         <span className="tw-suggest-text">
                           <span className="tw-name">
                             {user.displayName}
-                            {isVerified(user) ? <VerifiedBadge /> : null}
                             {isProtected(user) ? <LockIcon /> : null}
                           </span>
                           <span className="tw-handle">@{user.handle}</span>

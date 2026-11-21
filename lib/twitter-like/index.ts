@@ -1,4 +1,10 @@
-import { twitterPosts, twitterProfiles, twitterTrends, twitterUsers } from "./data/twitter";
+import {
+  twitterFollows,
+  twitterPosts,
+  twitterProfiles,
+  twitterTrends,
+  twitterUsers,
+} from "./data/twitter";
 import {
   getTwitterConversation,
   lastTwitterMessage,
@@ -39,6 +45,29 @@ const isVisiblePost = (post: Post): boolean => {
 /** 全投稿（返信を含む）を新しい順で返す。鍵アカウントの投稿は除く。 */
 export function listPosts(): Post[] {
   return copyOf([...twitterPosts].filter(isVisiblePost).sort(byPostedAtDesc));
+}
+
+/** viewer がフォローしているアカウントの id を返す（自分自身は含まない）。 */
+export function listFollowingIds(viewerId: string): string[] {
+  return [...(twitterFollows[viewerId] ?? [])];
+}
+
+/**
+ * ホームのタイムライン（おすすめ・フォロー中で共通）。返信を除くトップレベルの
+ * 投稿を新しい順で返す。出るのは「フォロー中のアカウントと自分が、自分の参加
+ * 以降に書いた投稿」だけ — フォローしていない人（かのん）の投稿と、自分が
+ * アカウントを開く前の古い投稿（2019年の攻略投稿など）はホームに出さない。
+ * それらは検索・プロフィール・個別投稿ページから従来どおり辿れる。
+ */
+export function listHomePosts(viewerId: string): Post[] {
+  const follows = new Set([viewerId, ...(twitterFollows[viewerId] ?? [])]);
+  const joinedAt = twitterProfiles.find((profile) => profile.userId === viewerId)?.joinedAt ?? "";
+  return copyOf(
+    twitterPosts
+      .filter(isVisiblePost)
+      .filter((post) => !post.replyToId && follows.has(post.authorId) && post.postedAt >= joinedAt)
+      .sort(byPostedAtDesc),
+  );
 }
 
 export function getPost(id: string): Post | undefined {

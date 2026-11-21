@@ -61,7 +61,7 @@ export const steps: Step[] = [
     order: 2,
     chapter: 3,
     summary: "Twixer で、リア友とみられる人が攻略の投稿に「○○にも書いてたよな」とリプライしている",
-    places: [{ platform: "twixer", label: "かのんのリプライ", href: "/twitter" }],
+    places: [{ platform: "twixer", label: "リア友とみられる人物のリプライ", href: "/twitter" }],
     status: { done: false, issue: "Twixer（#76 の担当表: toki36）" },
   },
   {

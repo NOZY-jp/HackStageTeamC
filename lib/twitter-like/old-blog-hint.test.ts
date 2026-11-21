@@ -7,6 +7,7 @@ import {
   listPosts,
   listReplies,
   listUsers,
+  searchPosts,
   searchUsers,
 } from "./index";
 
@@ -14,6 +15,8 @@ import {
 const RENAMED_HANDLE = "maimai_mhw";
 const OLD_HANDLE = "hunter_denden0102";
 const KANON_HANDLE = "kanon__dayo";
+// 段階2の返信者（まいのリア友とみられる人物。表示名・handle は #76 未確定の仮決め）
+const FRIEND_HANDLE = "tomo-0718";
 const ARTICLE_TITLE = "写真コンテストで賞をもらいました！";
 
 // 検査する語そのものをリポジトリに残さない（文字コードで組み立てる）
@@ -24,6 +27,7 @@ const FAMILY_NAME = word(0x670d, 0x90e8);
 const GIVEN_NAME = word(0x7531, 0x6bd4);
 
 const kanon = getUserByHandle(KANON_HANDLE);
+const friend = getUserByHandle(FRIEND_HANDLE);
 
 /** ユーザーとプロフィール（bio・joinedAt）を合わせた一覧。 */
 const accounts = () =>
@@ -34,7 +38,7 @@ const accounts = () =>
   }));
 
 describe("第三章 Twitter 側（#94）", () => {
-  it("順序2: 攻略の投稿に、かのんの「ブログにも書いてたよな」リプライが読める", () => {
+  it("順序2: 攻略の投稿に、リア友とみられる人物がブログ名を挙げて「にも書いてたよな」とリプライしている", () => {
     const strategyPost = listPosts().find((post) => post.id === "post-101");
     expect(strategyPost).toBeDefined();
     expect(strategyPost?.body).toContain("双剣");
@@ -44,11 +48,17 @@ describe("第三章 Twitter 側（#94）", () => {
     expect(year <= "2020").toBe(true);
 
     const replies = listReplies("post-101");
-    const fromKanon = replies.filter((reply) => reply.authorId === kanon?.id);
-    expect(fromKanon).toHaveLength(1);
-    // 「別の場所にも」の含み（ブログ名そのものは出さない）
-    expect(fromKanon[0].body).toContain("ブログにも書いて");
-    expect(strategyPost?.authorId).not.toBe(kanon?.id);
+    const fromFriend = replies.filter((reply) => reply.authorId === friend?.id);
+    expect(fromFriend).toHaveLength(1);
+    // 「別の場所にも」の含み ＋ ブログ名そのもの（順序3 でそのまま検索語になる）
+    expect(fromFriend[0].body).toContain("ブログ");
+    expect(fromFriend[0].body).toContain("にも書いて");
+    expect(fromFriend[0].body).toContain(BLOG_NAME);
+    // Twixer 内の検索でもブログ名からこのリプライに辿れる
+    expect(searchPosts(BLOG_NAME).map((post) => post.id)).toEqual(["post-102"]);
+    expect(strategyPost?.authorId).not.toBe(friend?.id);
+    // 返信者はかのんではない（かのんは旧アカウントの bio の BFF 行から見つける）
+    expect(replies.some((reply) => reply.authorId === kanon?.id)).toBe(false);
   });
 
   it("8b: 記事名で検索すると、改名して鍵垢になった旧アカウントが出る", () => {
@@ -67,7 +77,9 @@ describe("第三章 Twitter 側（#94）", () => {
     // 旧名は bio から直接読める（handle の先頭一致では通らない形で検査する）
     const profile = accounts().find((candidate) => candidate.handle === RENAMED_HANDLE);
     expect(profile?.bio).toContain(OLD_HANDLE);
-    expect(profile?.bio).toContain("hunter_denden");
+    // 旧表示名は旧ハンドルの部分文字列としてではなく、独立した要素として bio に残す
+    const bioWithoutOldHandle = (profile?.bio ?? "").replaceAll(OLD_HANDLE, "");
+    expect(bioWithoutOldHandle).toContain("hunter_denden");
     // 記事名も bio にあり、記事名検索でこのアカウントに届く
     expect(profile?.bio).toContain(ARTICLE_TITLE);
     expect(old?.handle).not.toBe("maimaimaimai");
@@ -136,13 +148,14 @@ describe("第三章 Twitter 側（#94）", () => {
     expect(new Set(sources).size).toBe(sources.length);
   });
 
-  it("リプライの本文にブログ名・本名・家族内の呼び名を出さない", () => {
+  it("リプライはブログ名を出すが、本名・家族内の呼び名は出さない", () => {
     const replies = listPosts()
       .filter((post) => post.replyToId === "post-101")
       .map((post) => post.body);
     expect(replies.length).toBeGreaterThan(0);
+    // ブログ名は順序3の検索語なのでリプライに必須
+    expect(replies.join("\n")).toContain(BLOG_NAME);
     for (const body of replies) {
-      expect(body).not.toContain(BLOG_NAME);
       expect(body).not.toContain(FAMILY_NAME);
       expect(body).not.toContain(GIVEN_NAME);
       expect(body).not.toContain(DEN);
