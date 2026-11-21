@@ -1,4 +1,5 @@
 import { describe, expect, it } from "vitest";
+import { KANON_STALKER_POST_ID, twitterViewCounts } from "./data/twitter";
 import {
   getPost,
   getProfile,
@@ -161,6 +162,29 @@ describe("第三章 Twitter 側（#94）", () => {
       expect(body).not.toContain(FAMILY_NAME);
       expect(body).not.toContain(GIVEN_NAME);
       expect(body).not.toContain(DEN);
+    }
+  });
+
+  it("かのんのストーカー被害示唆ポスト（post-105）はプロフィール最下部（最古）に配置される", () => {
+    const posts = listPosts().filter((post) => post.authorId === kanon?.id);
+    expect(posts.map((post) => post.id)).toEqual([
+      "post-104",
+      "post-103",
+      "post-109",
+      "post-108",
+      "post-107",
+      "post-106",
+      KANON_STALKER_POST_ID,
+    ]);
+    const stalkerPost = posts.at(-1);
+    expect(stalkerPost?.id).toBe(KANON_STALKER_POST_ID);
+    expect(stalkerPost?.body).toContain("ストーカー");
+    expect(twitterViewCounts[KANON_STALKER_POST_ID]).toBeGreaterThan(0);
+    for (const post of posts) {
+      expect(twitterViewCounts[post.id], post.id).toBeGreaterThan(0);
+      expect(post.body).not.toContain(FAMILY_NAME);
+      expect(post.body).not.toContain(GIVEN_NAME);
+      expect(post.body).not.toContain(DEN);
     }
   });
 });

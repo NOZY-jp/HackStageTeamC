@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
-import { completedChats, unreadChats } from "./engine";
-import { isAtPlace, isWithinPlace, PLACES } from "./places";
+import { dmThreadPath } from "@/lib/platform/app-prefix";
+import { completedChats, openedChatIds, unreadChats } from "./engine";
+import { isAtPlace, isWithinPlace, normalizePathname, PLACES } from "./places";
 import { call, chat, say, voice } from "./stage";
 import { chatsOf, voiceAt } from "./stage/runner";
 import { validateBeat } from "./stage/validate";
@@ -47,6 +48,34 @@ describe("チャットの命令", () => {
 });
 
 describe("場面の起きる画面", () => {
+  it("%40me でも同じDMの画面として扱う（#190）", () => {
+    const plain = dmThreadPath("1187002356428841502");
+    const encoded = plain.replace("@me", "%40me");
+    expect(encoded).toContain("%40me");
+    expect(isAtPlace(encoded, "discord:dm-kai")).toBe(true);
+    expect(isAtPlace(`${encoded}/`, "discord:dm-kai")).toBe(true);
+    expect(normalizePathname(encoded)).toBe(normalizePathname(plain));
+    expect(normalizePathname(plain.toUpperCase())).toBe(normalizePathname(plain));
+  });
+
+  it("開いたDMの新着だけ既読になり、再マウントでは通知が残らない（#190）", () => {
+    const plain = dmThreadPath("1187002356428841502");
+    const encoded = plain.replace("@me", "%40me");
+    const chat = {
+      id: "ch5-kai-contact:0",
+      channel: "discord:dm-kai" as const,
+      from: "kai" as const,
+      text: "今の進捗どう？",
+      at: "2026-11-23T21:11:00+09:00",
+    };
+    expect(openedChatIds([chat], [], encoded)).toEqual([chat.id]);
+    expect(openedChatIds([chat], [], plain)).toEqual([chat.id]);
+
+    const seen = openedChatIds([chat], [], encoded);
+    expect(openedChatIds([chat], seen, encoded)).toEqual([]);
+    expect(openedChatIds([chat], seen, plain)).toEqual([]);
+  });
+
   it("接頭辞で判定し、似た別の URL は含めない", () => {
     const dm = PLACES["discord:dm-maimai"].href;
     expect(isAtPlace(dm, "discord:dm-maimai")).toBe(true);

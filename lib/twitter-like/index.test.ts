@@ -65,6 +65,7 @@ describe("ホームのタイムライン（listHomePosts）", () => {
     expect(ids).not.toContain("post-102");
     expect(ids).not.toContain("post-103");
     expect(ids).not.toContain("post-104");
+    expect(ids).not.toContain("post-105");
     // フォロー中の Mai の投稿でも、リョウの開設（2026-11）前の2019年の投稿は出ない
     expect(ids).not.toContain("post-101");
     // それらは検索・個別ページから従来どおり辿れる（消してはいない）
