@@ -144,7 +144,7 @@ export const steps: Step[] = [
       {
         platform: "google",
         label: "写真コンテスト結果ページ（主催者のサイト）",
-        href: "/soukyuu-photo/2020/result",
+        href: "/soukyuu-photo/2018/result",
       },
     ],
     status: { done: true },

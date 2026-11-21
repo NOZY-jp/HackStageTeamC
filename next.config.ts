@@ -12,7 +12,7 @@ const nextConfig: NextConfig = {
     return [
       {
         source: "/pochiblo/denden0102/contest/soukyuu-photo-award-2020",
-        destination: "/soukyuu-photo/2020/result",
+        destination: "/soukyuu-photo/2018/result",
         permanent: true,
       },
     ];

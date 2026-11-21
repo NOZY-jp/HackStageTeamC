@@ -1,7 +1,7 @@
 import { render, screen, waitFor } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import EntryPage from "@/app/(blog-like)/pochiblo/[blogId]/entry/[entryId]/page";
-import ContestResultPage from "@/app/(contest-like)/soukyuu-photo/2020/result/page";
+import ContestResultPage from "@/app/(contest-like)/soukyuu-photo/2018/result/page";
 import TalkupPage from "@/app/(facebook-like)/talkup/page";
 import { canConfirmTalkup } from "@/app/(facebook-like)/talkup/reveal";
 import { FacebookProvider } from "@/components/facebook-like/facebook-context";

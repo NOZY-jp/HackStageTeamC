@@ -75,12 +75,12 @@ describe("lib/search (Seek 検索エンジン)", () => {
 
   it("写真コンテスト名（空白あり／なし）で結果ページがヒットし、スニペットに本名を出さない", () => {
     const withSpace = searchWeb(PHOTO_CONTEST_NAME);
-    const withoutSpace = searchWeb("蒼穹フォトアワード2020");
+    const withoutSpace = searchWeb("蒼穹フォトアワード2018");
 
     for (const results of [withSpace, withoutSpace]) {
       const contest = results.find((r) => r.url === PHOTO_CONTEST_RESULT_PATH);
       expect(contest).toBeDefined();
-      expect(contest?.displayUrl).toBe("soukyuu-photo.jp/2020/result");
+      expect(contest?.displayUrl).toBe("soukyuu-photo.jp/2018/result");
       for (const word of FORBIDDEN_WORDS) {
         expect(contest?.title).not.toContain(word);
         expect(contest?.snippet).not.toContain(word);
@@ -172,7 +172,7 @@ describe("SearchView (Seek UI)", () => {
     expect(contestLink).not.toHaveAttribute("target");
     const googleLink = screen.getByRole<HTMLAnchorElement>("link", { name: "Googleで検索" });
     expect(new URL(googleLink.href).searchParams.get("q")).toBe(PHOTO_CONTEST_NAME);
-    expect(screen.getByText("soukyuu-photo.jp/2020/result")).toBeInTheDocument();
+    expect(screen.getByText("soukyuu-photo.jp/2018/result")).toBeInTheDocument();
 
     rerender(createElement(SearchView, { query: "見つからない語", results: [] }));
     expect(screen.getByText("約 0 件の結果")).toBeInTheDocument();

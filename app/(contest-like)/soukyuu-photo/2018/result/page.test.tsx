@@ -23,7 +23,7 @@ import ContestResultPage, { metadata } from "./page";
 
 vi.mock("next/navigation", async (importOriginal) => ({
   ...(await importOriginal<typeof import("next/navigation")>()),
-  usePathname: () => "/soukyuu-photo/2020/result",
+  usePathname: () => "/soukyuu-photo/2018/result",
 }));
 
 const BLOG = listBlogs().find((blog) => blog.id === PHOTO_CONTEST_BLOG_ID);
@@ -66,7 +66,7 @@ describe("写真コンテストの結果ページ（#77 手順8）", () => {
   });
 
   it("主催者のサイトとして、でんでんのブログとは別の URL・見た目で出す（#222）", () => {
-    expect(toDisplayUrl(PHOTO_CONTEST_RESULT_PATH)).toBe("soukyuu-photo.jp/2020/result");
+    expect(toDisplayUrl(PHOTO_CONTEST_RESULT_PATH)).toBe("soukyuu-photo.jp/2018/result");
     const { container } = render(
       <ContestSiteLayout>
         <ContestResultPage />

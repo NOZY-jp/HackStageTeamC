@@ -7,11 +7,12 @@ import { PHOTO_CONTEST_NAME, PHOTO_CONTEST_RESULT_PATH } from "@/lib/seo/contest
  * 文章は仮置き（台本・データ担当が書き直してよい）。書き直すときの決まり:
  * - 本名・「ゆい」「ゆっちゃん」をここに書かない（受賞者名は lib/blog-like/data/contest.ts だけ）
  * - コンテスト名は PHOTO_CONTEST_NAME を使い、表記をぶれさせない（#77）
- * - 年や日付は、ブログの受賞記事（2018-11-17）・結果発表（2018-12-01）と食い違わないようにする（#222 で相談中）
+ * - 開催は 2018 年（中3の夏休みに撮った写真。ブログの受賞記事 2018-11-17・結果発表 2018-12-01）。
+ *   ブログは 2020-02 に閉鎖しているので、年を 2019 以降にしない
  */
 
 export const CONTEST_SITE_PATH = "/soukyuu-photo";
-export const CONTEST_GUIDELINES_PATH = "/soukyuu-photo/2020";
+export const CONTEST_GUIDELINES_PATH = "/soukyuu-photo/2018";
 export const CONTEST_CONTACT_PATH = "/soukyuu-photo/contact";
 
 export const CONTEST_SITE_NAME = "蒼穹フォトアワード";
