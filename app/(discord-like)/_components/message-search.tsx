@@ -131,7 +131,7 @@ function SearchUserProfile({
           <p className="members-profile-handle">@{user.handle}</p>
           {user.status === "offline" ? <p className="members-profile-note">オフライン</p> : null}
           <Link className="members-profile-link" href={user.profileUrl} onClick={onNavigate}>
-            {user.profileUrl.replace(/^\//, "")}
+            旧ブログの記事一覧
           </Link>
         </div>
       ) : null}
