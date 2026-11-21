@@ -200,6 +200,13 @@ describe("ゲームでの場面の進行", () => {
     play("ch1-prologue");
     play("ch2-disappearance");
     play("ch3-ask-kai");
+    expect(completedChats(state)).toContainEqual(
+      expect.objectContaining({
+        channel: "discord:dm-kai",
+        from: "kai",
+        text: "え、連絡取れなくなったってほんと？",
+      }),
+    );
     expect(state.flags).toContain("askedKai");
     expect(state.flags).toContain("s01-blog-talk");
     play("ch3-kai-twixer-lead");
@@ -211,6 +218,13 @@ describe("ゲームでの場面の進行", () => {
 
     state = setFlag(state, "s04-old-id-screenshot");
     play("ch4-leaf");
+    expect(completedChats(state)).toContainEqual(
+      expect.objectContaining({
+        channel: "discord:dm-kai",
+        from: "ryo",
+        text: "ありがとう、その線で探してみる",
+      }),
+    );
     expect(nextBeat(state)).toBeUndefined();
 
     state = setFlag(state, "s05-old-discord-user");
@@ -229,17 +243,13 @@ describe("ゲームでの場面の進行", () => {
     expect(kaiContact?.place).toBe("discord:dm-kai");
     play("ch5-kai-contact");
     expect(state.flags).toContain("s09-kai-contact");
+    expect(completedChats(state)).toContainEqual(
+      expect.objectContaining({ channel: "discord:dm-kai", from: "kai", text: "今の進捗どう？" }),
+    );
     expect(nextBeat(state)).toBeUndefined();
 
     state = setFlag(state, "foundBff");
     play("ch4-bff");
-    expect(completedChats(state)).toContainEqual(
-      expect.objectContaining({
-        channel: "discord:dm-kai",
-        from: "kai",
-        text: "今の進捗どう？",
-      }),
-    );
     expect(nextBeat(state)).toBeUndefined();
 
     state = setFlag(state, "s10-talkup-match");
@@ -303,8 +313,12 @@ describe("ゲームでの場面の進行", () => {
       .filter((message) => message.channel === "discord:dm-kai")
       .sort((a, b) => Date.parse(a.at) - Date.parse(b.at));
 
+    const reports = dm.filter((message) => message.id.startsWith("ch4-old-account:"));
+    const checkIns = dm.filter((message) => message.text === "今の進捗どう？");
+    expect(reports.map((message) => message.from)).toEqual(["ryo", "kai"]);
+    expect(checkIns).toHaveLength(1);
     const report = dm.findLastIndex((message) => message.id.startsWith("ch4-old-account:"));
-    const checkIn = dm.findIndex((message) => message.text === "今の進捗どう？");
+    const checkIn = dm.findIndex((message) => message.id === checkIns[0]?.id);
     const reply = dm.findIndex(
       (message) => message.id.startsWith("ch5-kai-contact:") && message.from === "ryo",
     );

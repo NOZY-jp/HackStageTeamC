@@ -1,6 +1,7 @@
 import { characters } from "../characters";
-import { chat, narrate, say, think, title } from "../stage";
+import { chat, hideWindow, narrate, think, title } from "../stage";
 import type { Beat } from "../types";
+import { kaiDm } from "./kai-dm";
 
 /**
  * 第四章：痕跡（Google Docs「HackStageTeamC」の箱書き 第四章。清書ができたら差し替える）。
@@ -12,6 +13,7 @@ export const chapter4: Beat[] = [
     id: "ch4-leaf",
     chapter: 4,
     layout: "overlay",
+    place: "discord:dm-kai",
     when: ["s04-old-id-screenshot"],
     after: ["ch3-blog-found"],
     source: "Google Docs 箱書き 第四章",
@@ -21,16 +23,25 @@ export const chapter4: Beat[] = [
       think("ここでもゲーム攻略メインで投稿されている感じか"),
       think("添付画像にゲーマーIDが写っている"),
       think("今のIDと違うな、前に遊んでいたアカウントってことかな"),
-      say("ryo", "ここまでしか調べられなくて、ここから更に深掘りできないものかと考えてる"),
-      say(
+      hideWindow(),
+      kaiDm(
+        "ryo",
+        "ここまでしか調べられなくて、ここから更に深掘りできないものかと考えてる",
+        "2026-11-25T23:35:00+09:00",
+      ),
+      kaiDm(
         "kai",
         "なるほど……前のアカウントなら、ゲーマーコミュニティーのサーバーでID検索してみるとかはどうだろうね",
+        "2026-11-25T23:36:00+09:00",
       ),
-      say(
+      kaiDm(
         "ryo",
         "確かにコミュニティーで良くパーティー募集しているし、ひょっとしたら見つけれるかも",
+        "2026-11-25T23:37:00+09:00",
       ),
-      say("ryo", "ありがとう、その線で探してみる"),
+      chat("discord:dm-kai", "ryo", "ありがとう、その線で探してみる", "2026-11-25T23:37:30+09:00", {
+        wait: 3000,
+      }),
     ],
   },
   {
@@ -117,7 +128,6 @@ export const chapter4: Beat[] = [
       ),
       think("でんちゃんかどうか確信が持てないけど、めっちゃ仲よさそうな写真がいっぱいある"),
       think("推測するにでんちゃんのリア友ってところかな"),
-      chat("discord:dm-kai", "kai", "今の進捗どう？", "2026-11-25T23:50:00+09:00"),
     ],
   },
 ];

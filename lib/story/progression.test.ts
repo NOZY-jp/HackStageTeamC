@@ -168,7 +168,7 @@ describe("進行チェック（各プラットフォームのデータに手が�
     const hasHintInChats = chatsOf("ch5-kai-contact", beat?.script ?? []).some(
       (message) => message.from === "kai" && message.text.includes("本名で検索"),
     );
-    expect(hasHintInScript).toBe(true);
+    expect(hasHintInScript).toBe(false);
     expect(hasHintInChats).toBe(true);
   });
 
