@@ -10,6 +10,7 @@ import { channelMessages, dmMessages } from "@/lib/discord-like/data/messages";
 import { users } from "@/lib/discord-like/data/users";
 import { characters } from "./characters";
 import { MAIMAI_DM_URL_ID, MHC_GUILD_URL_ID, NIGHT_VC_URL_ID } from "./places";
+import { OLD_BLOG_ID } from "./sites";
 import { VOICE_CHANNELS } from "./stage";
 import { STEP_IDS, steps } from "./steps";
 
@@ -101,5 +102,11 @@ describe("物語のチャットの流し先（lib/story/places.ts）", () => {
       expect(channel?.kind).toBe("voice");
     }
     expect(getChannel("mhc-vc-3")?.urlId).toBe(NIGHT_VC_URL_ID);
+  });
+});
+
+describe("ブックマークのリンク先（lib/story/sites.ts）", () => {
+  it("旧ブログの ID が、ぽちブロのデータと一致する", () => {
+    expect(listPublicEntries(OLD_BLOG_ID).length).toBeGreaterThan(0);
   });
 });
