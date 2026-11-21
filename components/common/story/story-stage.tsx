@@ -2,7 +2,7 @@
 
 import dynamic from "next/dynamic";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useSearchParams } from "next/navigation";
 import { type ComponentType, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import {
   type Beat,
@@ -11,7 +11,6 @@ import {
   CHAT_CHANNELS,
   type ChatMessage,
   characters,
-  currentMemo,
   isAtPlace,
   isWithinPlace,
   type Line,
@@ -21,7 +20,6 @@ import {
 } from "@/lib/story";
 import { usePlaybackSettings } from "./playback-settings";
 import { clearScenePreview, loadScenePreview } from "./scene-preview-request";
-import { SiteBookmarks } from "./site-bookmarks";
 import type { ScenePlayerProps } from "./stage/scene-player";
 import { useStory } from "./story-provider";
 
@@ -94,24 +92,24 @@ const HIDDEN_PREFIXES = ["/story"];
 /**
  * 窓・タブが出ているあいだ、その高さぶんだけ各プラットフォームの画面を縮める。
  * 各画面の外枠は `height: var(--story-viewport, 100dvh)`（app/globals.css）で、
- * 窓の下に入力欄などが隠れて探索できなくなるのを防ぐ。
+ * `--story-dock-height` を更新して上部のブラウザバーと両立させる。
  */
 function useReserveViewport(dock: HTMLElement | null) {
   useLayoutEffect(() => {
     const root = document.documentElement;
     if (!dock) {
-      root.style.removeProperty("--story-viewport");
+      root.style.setProperty("--story-dock-height", "0px");
       return;
     }
     const apply = () => {
-      root.style.setProperty("--story-viewport", `calc(100dvh - ${dock.offsetHeight}px)`);
+      root.style.setProperty("--story-dock-height", `${dock.offsetHeight}px`);
     };
     apply();
     const observer = new ResizeObserver(apply);
     observer.observe(dock);
     return () => {
       observer.disconnect();
-      root.style.removeProperty("--story-viewport");
+      root.style.removeProperty("--story-dock-height");
     };
   }, [dock]);
 }
@@ -212,6 +210,7 @@ export function LogPanel({
 
 export function StoryStage() {
   const pathname = usePathname();
+  const searchParams = useSearchParams();
   const {
     state,
     upcoming,
@@ -253,7 +252,20 @@ export function StoryStage() {
     setVoice([]);
   }, [upcomingId]);
   const hidden = HIDDEN_PREFIXES.some((prefix) => pathname.startsWith(prefix));
-  const memo = useMemo(() => currentMemo(state, upcoming), [state, upcoming]);
+  const startRequested = searchParams.get("start") === "1";
+  useEffect(() => {
+    if (!ready || hidden || !startRequested) {
+      return;
+    }
+    if (!state.flags.includes("started")) {
+      setFlag("started");
+    }
+    const nextParams = new URLSearchParams(searchParams.toString());
+    nextParams.delete("start");
+    const query = nextParams.toString();
+    const nextUrl = `${pathname}${query ? `?${query}` : ""}${window.location.hash}`;
+    window.history.replaceState(null, "", nextUrl);
+  }, [ready, hidden, startRequested, searchParams, state.flags, setFlag, pathname]);
   const hasLog = state.completed.length > 0;
   // 窓・タブの入れ物（高さを測ってページを縮める）。callback ref で受け取る
   const [dock, setDock] = useState<HTMLDivElement | null>(null);
@@ -291,12 +303,10 @@ export function StoryStage() {
 
   const Presenter = playing ? PRESENTERS[playing.presenter ?? "stage"] : undefined;
   const latest = unread.at(-1);
-  const showTab = !inScene && (Boolean(playing) || Boolean(memo) || hasLog);
+  const showTab = !inScene && (Boolean(away) || hasLog || Boolean(preview));
 
   return (
     <div className="sw-stage">
-      {/* 開放したサイトのブックマーク。場面を流しているあいだは出さない */}
-      {inScene ? null : <SiteBookmarks pathname={pathname} flags={state.flags} />}
       {inScene ? (
         // 後ろの画面の操作を止める幕。たたんでいるときは、押すと文章の窓に戻る
         <div
@@ -348,23 +358,13 @@ export function StoryStage() {
           />
         ) : null}
         {showTab ? (
-          <div className="sw-tab" role="status">
+          <div className="sw-tab" role={away ? "status" : undefined}>
             {away ? (
               <Link className="sw-tab-open" href={away.href}>
                 <span className="sw-tab-badge">{preview ? "単体再生" : "新しい場面"}</span>
                 {away.label} を開く
               </Link>
-            ) : playing ? (
-              <button type="button" className="sw-tab-open" onClick={() => setMinimized(false)}>
-                <span className="sw-tab-badge">{preview ? "単体再生" : "新しい場面"}</span>
-                ストーリーを開く
-              </button>
-            ) : (
-              <span className="sw-tab-memo">
-                <span className="sw-tab-label">いまやること</span>
-                {memo ?? "画面を見て回って、手がかりを探そう"}
-              </span>
-            )}
+            ) : null}
             {hasLog ? (
               <button type="button" className="sw-tool" onClick={() => setLogOpen((open) => !open)}>
                 ログ

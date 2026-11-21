@@ -8,6 +8,7 @@ export const EXTRA_FLAGS = {
   started: "ゲームを始めた",
   leftCall: "序章の通話を終えた",
   askedKai: "カイに相談した",
+  foundBff: "BFFのアカウントを見つけた",
 } as const;
 
 export type FlagId = StepId | keyof typeof EXTRA_FLAGS;

@@ -105,6 +105,15 @@ describe("台本の整合性", () => {
       }
     }
   });
+
+  it("第一章〜第六章の場面に未定の行（todo）が無い", () => {
+    for (const beat of beats) {
+      if (beat.previewOnly) continue;
+      for (const line of allLines(beat)) {
+        expect(line.todo, `${beat.id}: ${line.text}`).toBeUndefined();
+      }
+    }
+  });
 });
 
 describe("ゲームでの場面の進行", () => {
@@ -139,5 +148,65 @@ describe("ゲームでの場面の進行", () => {
         text: "こっちはもう着いたけどゆっくり来ていいよ",
       },
     ]);
+  });
+
+  it("第三章〜第六章は、謎解きの段階に着くたびに順に始まり、悪い結末で終わる", () => {
+    let state = setFlag(initialState, "started");
+    const play = (expected: string) => {
+      const beat = nextBeat(state);
+      expect(beat?.id).toBe(expected);
+      if (!beat) throw new Error(`${expected} が始まりません`);
+      state = completeBeat(state, beat, beat.choices?.[0]?.id);
+    };
+    play("ch1-prologue");
+    play("ch2-disappearance");
+    play("ch3-ask-kai");
+    expect(state.flags).toContain("askedKai");
+    expect(state.flags).toContain("s01-blog-talk");
+    expect(nextBeat(state)).toBeUndefined();
+
+    state = setFlag(state, "s03-blog-found");
+    play("ch3-blog-found");
+    expect(nextBeat(state)).toBeUndefined();
+
+    state = setFlag(state, "s04-old-id-screenshot");
+    play("ch4-leaf");
+    expect(nextBeat(state)).toBeUndefined();
+
+    state = setFlag(state, "s05-old-discord-user");
+    play("ch4-old-account");
+    expect(nextBeat(state)).toBeUndefined();
+
+    state = setFlag(state, "s06-old-profile-link");
+    play("ch4-old-blog");
+    expect(nextBeat(state)).toBeUndefined();
+
+    state = setFlag(state, "s08-real-name");
+    play("ch4-real-name");
+    expect(nextBeat(state)).toBeUndefined();
+
+    state = setFlag(state, "foundBff");
+    play("ch4-bff");
+    expect(completedChats(state)).toContainEqual(
+      expect.objectContaining({
+        channel: "discord:dm-kai",
+        from: "kai",
+        text: "今の進捗どう？",
+      }),
+    );
+
+    const kaiContact = nextBeat(state);
+    expect(kaiContact?.id).toBe("ch5-kai-contact");
+    expect(kaiContact?.place).toBe("discord:dm-kai");
+    play("ch5-kai-contact");
+    expect(state.flags).toContain("s09-kai-contact");
+    expect(nextBeat(state)).toBeUndefined();
+
+    state = setFlag(state, "s10-talkup-match");
+    play("ch5-talkup");
+    expect(state.flags).toContain("s11-address");
+
+    play("ch6-bad-end");
+    expect(nextBeat(state)).toBeUndefined();
   });
 });
