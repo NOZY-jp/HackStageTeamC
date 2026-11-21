@@ -563,7 +563,6 @@ export function generateDmExpansion(input: DMExpansionInput): DMExpansionResult 
   }
 
   // #133 追加ラウンド: 写真・リンク付きの話題を150通（既存の行は変更しない）
-  const PHOTO_CLIPS = ["0211-1", "0204-8", "0214-9", "0312-2"];
   const extraDays = [
     ...new Set(
       additions["dm-maimai"]
