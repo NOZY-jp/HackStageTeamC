@@ -1,7 +1,7 @@
 "use client";
 
 import type { MouseEvent } from "react";
-import { readInternalHistoryCount, writeInternalHistoryCount } from "./history-tracker";
+import { goBackInsideApp } from "./history-tracker";
 import { BackIcon } from "./icons";
 
 /** referrer が同じオリジンか。空・壊れた値は外部として扱う（#249 QA）。 */
@@ -15,22 +15,16 @@ export function isSameOriginReferrer(referrer: string, origin: string): boolean 
 }
 
 /**
- * 戻るボタン（#249）。アプリ内で積んだ履歴があれば1つ戻り、無ければ fallback へ。
- * 外部から入っただけでは戻らない（アプリ内遷移が1回でもあれば戻る）。
+ * 戻るボタン（#249）。アプリ内に入ってからの履歴が残っていれば1つ戻り、
+ * 無ければ fallback へ。外部から入っただけでは戻らない。
  */
 export function BackButton({ fallbackHref }: { fallbackHref: string }) {
   const onClick = (event: MouseEvent<HTMLAnchorElement>) => {
-    const internal = readInternalHistoryCount();
-    if (internal > 0) {
+    if (goBackInsideApp()) {
       event.preventDefault();
-      writeInternalHistoryCount(internal - 1);
-      window.history.back();
       return;
     }
-    if (
-      isSameOriginReferrer(window.document.referrer, window.location.origin) &&
-      window.history.length > 1
-    ) {
+    if (isSameOriginReferrer(window.document.referrer, window.location.origin)) {
       event.preventDefault();
       window.history.back();
     }
