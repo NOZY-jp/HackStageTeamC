@@ -21,6 +21,7 @@ import {
 } from "@/lib/story";
 import { usePlaybackSettings } from "./playback-settings";
 import { clearScenePreview, loadScenePreview } from "./scene-preview-request";
+import { SiteBookmarks } from "./site-bookmarks";
 import type { ScenePlayerProps } from "./stage/scene-player";
 import { useStory } from "./story-provider";
 
@@ -294,6 +295,8 @@ export function StoryStage() {
 
   return (
     <div className="sw-stage">
+      {/* 開放したサイトのブックマーク。場面を流しているあいだは出さない */}
+      {inScene ? null : <SiteBookmarks pathname={pathname} flags={state.flags} />}
       {inScene ? (
         // 後ろの画面の操作を止める幕。たたんでいるときは、押すと文章の窓に戻る
         <div
