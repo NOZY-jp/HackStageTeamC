@@ -108,18 +108,18 @@ export function getCharacter(id: CharacterId): Character {
 }
 
 /**
- * 話者ラベル（#208）。リョウは、本名を知る前（s07/s08 より前）だけ「リョウ（琥珀）」と出す。
- * 対面の初出でプレイヤーが誰か分かるようにし、開示後は「リョウ」に戻す。
- * 心の声・通話は対象外（心の声は「リョウ」、通話は Discord の「琥珀」）。
- * 呼び名の切替はここ1か所だけ（台本に名前を直書きしない）。
+ * 話者ラベル（#208）。リョウの本名は s08-real-name で開示される。
+ * 開示前は、対面も心の声も「琥珀」（プレイヤーが知っている名前）で出し、
+ * 開示後は「リョウ」に切り替える。通話（Discord）は「琥珀」のまま。
+ * 切替はここ1か所だけ（台本や alt・title に名前を直書きしない）。
  */
 export function speakerLabel(
   id: CharacterId,
   options: { frame?: string; realNameKnown?: boolean } = {},
 ): string {
   const person = characters[id];
-  if (id === "ryo" && (options.frame ?? "talk") === "talk" && !options.realNameKnown) {
-    return `${person.name}（${HAL_NAME}）`;
+  if (id !== "ryo" || options.frame === "call") {
+    return person.name;
   }
-  return person.name;
+  return options.realNameKnown ? person.name : HAL_NAME;
 }
