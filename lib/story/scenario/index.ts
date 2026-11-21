@@ -1,4 +1,5 @@
 import type { Beat } from "../types";
+import { kaiContact } from "./kai-contact";
 import { samples } from "./sample";
 
 /**
@@ -8,4 +9,4 @@ import { samples } from "./sample";
  * 場面の文章は Google Docs「HackStageTeamC」の箱書きが正本。仕組みの PR には場面を入れない。
  * samples は全命令の見本（確認画面からだけ再生でき、ゲームの進行では始まらない）。
  */
-export const beats: Beat[] = [...samples];
+export const beats: Beat[] = [...kaiContact, ...samples];

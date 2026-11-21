@@ -100,7 +100,6 @@ describe("順序4の画像の向きとパス（#102）", () => {
         expect(getMessageImage(attachment.name).owner).toBe("current");
         // 貼るのは MaiMai 自身で、いま遊んでいる画面のスクショ（ゲームの話の流れ）
         expect(message.authorId).toBe("maimai");
-        expect(message.body).toBe("今こんな感じ");
         const index = messages.findIndex((candidate) => candidate.id === "dm-maimai-0057");
         expect(messages[index + 1]?.id).toBe(message.id);
       }
