@@ -162,7 +162,7 @@ describe("MessageSearch", () => {
     expect(document.activeElement).toBe(result);
   });
 
-  it("該当ユーザーに profileUrl があれば同一タブの内部リンクを出し、クリックで検索を閉じて旧垢フラグを立てる", async () => {
+  it("該当ユーザーのプロフィールを開いてから同じタブでブログへ進める", async () => {
     mockedSearch.mockResolvedValue({
       ok: true,
       hits: [],
@@ -185,8 +185,21 @@ describe("MessageSearch", () => {
     );
     openWithButton();
     fireEvent.change(screen.getByLabelText("メッセージを検索"), {
-      target: { value: "hunter_denden3243" },
+      target: { value: "den" },
     });
+
+    const profile = await screen.findByRole("button", { name: "hunter_denden" });
+    expect(profile).toHaveAttribute("aria-expanded", "false");
+    expect(screen.queryByRole("link", { name: "pochiblo/mylist/k7q2m9d4" })).toBeNull();
+    expect(screen.getByTestId("story-flags").textContent).not.toContain("s05-old-discord-user");
+
+    fireEvent.keyDown(screen.getByLabelText("メッセージを検索"), { key: "ArrowDown" });
+    expect(profile).toHaveFocus();
+    fireEvent.click(profile);
+    expect(profile).toHaveAttribute("aria-expanded", "true");
+    expect(screen.getByText("@hunter_denden3243")).toBeInTheDocument();
+    expect(screen.getByText("オフライン")).toBeInTheDocument();
+    expect(screen.getByTestId("story-flags").textContent).toContain("s05-old-discord-user");
 
     const link = await screen.findByRole("link", { name: "pochiblo/mylist/k7q2m9d4" });
     expect(link).toHaveAttribute("href", "/pochiblo/mylist/k7q2m9d4");
@@ -208,7 +221,7 @@ describe("MessageSearch", () => {
       authorName: "hunter_denden",
       authorHandle: "hunter_denden3243",
       sentAt: "2018-04-20T21:24:00+09:00",
-      body: "ゲーマーIDは hunter_denden3243 です！",
+      body: "フレンド申請送ってくれたらロビー招待します！",
       pinned: false,
     };
     mockedSearch.mockResolvedValue({
@@ -233,7 +246,7 @@ describe("MessageSearch", () => {
       );
       openWithButton();
       fireEvent.change(screen.getByLabelText("メッセージを検索"), {
-        target: { value: "hunter_denden3243" },
+        target: { value: "from:hunter_denden3243" },
       });
 
       const result = await screen.findByRole("button", { name: /hunter_denden/ });

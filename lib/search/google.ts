@@ -1,5 +1,36 @@
 import type { SearchResult } from "./index";
 
+const BOW_PUBLIC_QUERY = "モンハン 弓 属性強化";
+const BOW_REFERENCES: SearchResult[] = [
+  {
+    id: "web:mhw-bow-builds",
+    kind: "web",
+    title: "モンハンワールドの弓装備とおすすめスキル",
+    url: "https://game8.jp/mhw/199253",
+    displayUrl: "game8.jp/mhw/199253",
+    siteName: "ゲームエイト",
+    snippet: "進行段階ごとの弓装備や、属性攻撃強化を組み込んだ装備構成を紹介。",
+  },
+  {
+    id: "web:mhw-bow-tree",
+    kind: "web",
+    title: "モンハンワールドの弓一覧と強化派生",
+    url: "https://monsterhunter.jp/world/weapon/bow/top/",
+    displayUrl: "monsterhunter.jp/world/weapon/bow/top/",
+    siteName: "攻略の虎",
+    snippet: "各弓の攻撃力、属性値、使用できるビンを比較できる武器一覧。",
+  },
+  {
+    id: "web:mhw-bow-introduction",
+    kind: "web",
+    title: "『モンスターハンター：ワールド』弓の武器紹介",
+    url: "https://www.youtube.com/watch?v=HkiPXvwSbW0",
+    displayUrl: "youtube.com/watch?v=HkiPXvwSbW0",
+    siteName: "カプコン",
+    snippet: "弓のアクションを映像で確認できる公式の武器紹介動画。",
+  },
+];
+
 const PUBLIC_SEARCH_TERMS = [
   "写真",
   "写真 コンテスト",
@@ -35,13 +66,19 @@ function toSearchResult(entry: OrganicResult | null): SearchResult | undefined {
   };
 }
 
-/** Fetches Google's organic results from SearchApi on the server. */
-export async function searchGoogle(query: string): Promise<SearchResult[]> {
+export async function searchExternalWeb(query: string): Promise<SearchResult[]> {
   const apiKey = process.env.SEARCHAPI_API_KEY?.trim();
   const normalized = query.normalize("NFKC").trim().replace(/\s+/g, " ");
-  const publicTerm = PUBLIC_SEARCH_TERMS.find((term) => term === normalized);
-  if (!apiKey || !publicTerm) return [];
+  const isBowQuery =
+    normalized === BOW_PUBLIC_QUERY || normalized.replaceAll(" ", "").startsWith("弓属性強化");
+  const publicTerm = isBowQuery
+    ? BOW_PUBLIC_QUERY
+    : PUBLIC_SEARCH_TERMS.find((term) => term === normalized);
+  const results = apiKey && publicTerm ? await searchGoogle(publicTerm, apiKey) : [];
+  return isBowQuery && results.length === 0 ? BOW_REFERENCES : results;
+}
 
+async function searchGoogle(publicTerm: string, apiKey: string): Promise<SearchResult[]> {
   const endpoint = new URL("https://www.searchapi.io/api/v1/search");
   endpoint.search = new URLSearchParams({
     engine: "google",
