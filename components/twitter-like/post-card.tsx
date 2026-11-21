@@ -4,17 +4,8 @@ import { twitterViewCounts } from "@/lib/twitter-like/data/twitter";
 import type { Post, TwitterUser } from "@/lib/twitter-like/types";
 import { Avatar } from "./avatar";
 import { formatCount, formatPostedDate } from "./format";
-import {
-  BookmarkIcon,
-  ChatIcon,
-  HeartIcon,
-  RepostIcon,
-  ShareIcon,
-  VerifiedBadge,
-  ViewsIcon,
-} from "./icons";
+import { BookmarkIcon, ChatIcon, HeartIcon, RepostIcon, ShareIcon, ViewsIcon } from "./icons";
 import { LinkifiedText } from "./linkify";
-import { isVerified } from "./lookup";
 
 /** 投稿の添付写真。2枚以上は2列に並べる（表示のみ）。 */
 export function PostMediaList({ media }: { media: NonNullable<Post["media"]> }) {
@@ -101,7 +92,6 @@ export function PostCard({
           <Link href={profileHref} className="tw-name">
             {author.displayName}
           </Link>
-          {isVerified(author) ? <VerifiedBadge /> : null}
           <Link href={profileHref} className="tw-handle">
             @{author.handle}
           </Link>

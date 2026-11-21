@@ -9,16 +9,7 @@ import {
 import type { TwitterUser } from "@/lib/twitter-like/types";
 import { Avatar } from "./avatar";
 import { formatJoinedAt, formatMessageTime } from "./format";
-import {
-  EmojiIcon,
-  GifIcon,
-  InfoIcon,
-  MediaIcon,
-  SearchIcon,
-  SendIcon,
-  VerifiedBadge,
-} from "./icons";
-import { isVerified } from "./lookup";
+import { EmojiIcon, GifIcon, InfoIcon, MediaIcon, SearchIcon, SendIcon } from "./icons";
 
 /** 左の会話一覧ペイン（/twitter/messages では右は空状態になる）。 */
 export function MessagesListPane({
@@ -63,10 +54,7 @@ export function MessagesListPane({
                 <Avatar user={peer} />
                 <span className="tw-dm-item-text">
                   <span className="tw-dm-item-head">
-                    <span className="tw-name">
-                      {peer.displayName}
-                      {isVerified(peer) ? <VerifiedBadge /> : null}
-                    </span>
+                    <span className="tw-name">{peer.displayName}</span>
                     <span className="tw-handle">@{peer.handle}</span>
                     <span aria-hidden="true" className="tw-dot">
                       ·
@@ -132,10 +120,7 @@ export function ConversationPane({
         <Link href={`/twitter/profile/${peer.handle}`} className="tw-dm-peer">
           <Avatar user={peer} size="sm" />
           <span className="tw-dm-peer-text">
-            <span className="tw-name">
-              {peer.displayName}
-              {isVerified(peer) ? <VerifiedBadge /> : null}
-            </span>
+            <span className="tw-name">{peer.displayName}</span>
             <span className="tw-handle">@{peer.handle}</span>
           </span>
         </Link>
@@ -146,10 +131,7 @@ export function ConversationPane({
       <div className="tw-dm-scroll">
         <div className="tw-dm-peer-intro">
           <Avatar user={peer} size="lg" />
-          <p className="tw-name">
-            {peer.displayName}
-            {isVerified(peer) ? <VerifiedBadge /> : null}
-          </p>
+          <p className="tw-name">{peer.displayName}</p>
           <p className="tw-handle">@{peer.handle}</p>
           {peerProfile ? (
             <p className="tw-dm-intro-meta">{formatJoinedAt(peerProfile.joinedAt)}から利用</p>

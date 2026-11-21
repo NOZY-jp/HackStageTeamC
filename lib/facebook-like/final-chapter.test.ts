@@ -69,12 +69,18 @@ describe("第五章: 本名で見つかる TalkUp アカウント（#95）", () 
     expect(titles).not.toContain("大学の友達と");
   });
 
-  it("本名は空白の有無（半角・全角）どちらでも同じ相手に届く", () => {
+  it("本名は空白の有無（半角・全角）どちらでも本人の投稿だけが返る", () => {
     for (const query of [REAL_NAME, REAL_NAME_NO_SPACE, REAL_NAME_FULL_SPACE]) {
       const result = searchFacebook(query);
       const users = result.users.filter((user) => user.id === "u40");
       expect(users, query).toHaveLength(1);
-      expect(result.posts.length, query).toBe(3);
+      // データが増えても、本名検索に乗るのは本人の投稿だけ
+      expect(result.posts.length, query).toBeGreaterThanOrEqual(3);
+      expect(result.posts.length, query).toBe(listPostsByAuthor("u40").length);
+      expect(
+        result.posts.every((post) => post.authorId === "u40"),
+        query,
+      ).toBe(true);
     }
   });
 
@@ -98,16 +104,23 @@ describe("第五章: 本名で見つかる TalkUp アカウント（#95）", () 
   it("説明から出身地域（都道府県）が分かる", () => {
     const user = getUserById("u40");
     expect(user?.location).toBe(REGION);
-    const text = listPostsByAuthor("u40")
+    const postsText = listPostsByAuthor("u40")
       .map((post) =>
-        [post.body, post.attachment?.title, post.attachment?.subtitle, post.attachment?.alt].join(
-          " ",
-        ),
+        [
+          post.body,
+          post.attachment?.title,
+          post.attachment?.subtitle,
+          post.attachment?.alt,
+          ...post.comments.map((comment) => comment.body),
+        ].join(" "),
       )
       .join("\n");
-    expect(text).toContain(REGION);
+    expect(postsText).toContain(REGION);
+    const fullText = [user?.bio, user?.workplace, user?.location, postsText]
+      .filter(Boolean)
+      .join("\n");
     // 地名は都道府県まで（湘南などの地域名は使わない）
-    expect(text).not.toContain(word(0x6e58, 0x5357));
+    expect(fullText).not.toContain(word(0x6e58, 0x5357));
   });
 
   it("住所（番地・建物名・最寄駅）はデータに存在しない", () => {
