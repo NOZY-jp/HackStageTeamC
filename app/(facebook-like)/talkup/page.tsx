@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import { StoryAction } from "@/components/common/story/story-action";
 import { useStoryOptional } from "@/components/common/story/story-provider";
 import { FbAvatar } from "@/components/facebook-like/avatar";

@@ -7,7 +7,7 @@ export const creators: Creator[] = [
     // 旧ブログ（ぽちブロ）からの引っ越し先。
     id: LEAF_CREATOR_ID,
     displayName: "MaiMai",
-    bio: "夜にゲームをして、朝に後悔する会社員。日記と、好きなものの話。",
+    bio: "夜にゲームをして、朝に後悔する会社員。昔は「でんでん」名義で攻略日記を書いていました。",
     avatar: "/note-like/avatars/mai.svg",
     avatarColor: "#7c9cbf",
   },

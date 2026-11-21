@@ -1,3 +1,5 @@
+import { PLACES } from "./places";
+
 /**
  * 謎解きの順序。正本は GitHub Issue #76「spec: 謎解きの順序と手がかりの配分」。
  * #76 が変わったら、ここを同じ内容に直す（ここはコードから参照するための写し）。
@@ -60,28 +62,41 @@ export const steps: Step[] = [
     id: "s02-bff-reply",
     order: 2,
     chapter: 3,
-    summary: "Twixer で、リア友とみられる人が攻略の投稿に「○○にも書いてたよな」とリプライしている",
-    places: [{ platform: "twixer", label: "リア友とみられる人物のリプライ", href: "/twitter" }],
-    status: { done: false, issue: "Twixer（#76 の担当表: toki36）" },
+    summary:
+      "Twixer で、リア友とみられる人が攻略の投稿に「前のブログで書いてた…」とリプライしている",
+    places: [
+      {
+        platform: "twixer",
+        label: "とも（@tomo-0718）のリプライ（post-102）",
+        href: "/twitter/post/post-101",
+      },
+    ],
+    status: { done: true },
   },
   {
     id: "s03-blog-found",
     order: 3,
     chapter: 3,
     summary:
-      "ブログ名と概要で検索すると、閉鎖済みのブログ（note に移行しましたのお知らせだけ）が見つかる",
+      "ブログ名と概要で検索すると、閉鎖済みのブログ（leaf に移行しましたのお知らせだけ）が見つかる",
     places: [
-      { platform: "google", label: "実在の Google 検索（#77）" },
+      { platform: "google", label: "Seek 検索（または実在の Google 検索）", href: "/search" },
       { platform: "blog", label: "元のブログのトップ", href: "/pochiblo/denden0102" },
     ],
-    status: { done: false, issue: "#77（検索で当たるようにする）" },
+    status: { done: true },
   },
   {
     id: "s04-old-id-screenshot",
     order: 4,
     chapter: 4,
     summary: "スクショに写るゲーマーIDが、今の Discord ID と違う（古いアカウントがある）",
-    places: [{ platform: "discord", label: "DM に添付された当時のスクショ" }],
+    places: [
+      {
+        platform: "leaf",
+        label: "leaf の移行記事に添付された当時のスクショ",
+        href: "/note/maimai/n/maimai-2020-02-screenshot",
+      },
+    ],
     status: { done: true },
   },
   {
@@ -89,7 +104,9 @@ export const steps: Step[] = [
     order: 5,
     chapter: 4,
     summary: "古いIDと完全一致する Discord ユーザーが、ずっとオフラインのままサーバーにいる",
-    places: [{ platform: "discord", label: "モンハンコミュニティのメンバー一覧" }],
+    places: [
+      { platform: "discord", label: "モンハンコミュニティの #パーティー募集・メンバー一覧" },
+    ],
     status: { done: true },
   },
   {
@@ -107,7 +124,7 @@ export const steps: Step[] = [
     id: "s07-contest-entry",
     order: 7,
     chapter: 4,
-    summary: "記事一覧に、note に移されなかった写真コンテスト受賞の記事がある",
+    summary: "記事一覧に、leaf に移されなかった写真コンテスト受賞の記事がある",
     places: [
       {
         platform: "blog",
@@ -115,22 +132,29 @@ export const steps: Step[] = [
         href: "/pochiblo/denden0102/entry/e20181117",
       },
     ],
-    status: { done: false, issue: "#77（コンテスト名を造語「蒼穹フォトアワード 2020」に）" },
+    status: { done: true },
   },
   {
     id: "s08-real-name",
     order: 8,
     chapter: 4,
     summary: "コンテスト名で検索すると本名が分かる",
-    places: [{ platform: "google", label: "実在の Google 検索（#77）" }],
-    status: { done: false, issue: "#77" },
+    places: [
+      { platform: "google", label: "Seek 検索（または実在の Google 検索）", href: "/search" },
+      {
+        platform: "blog",
+        label: "写真コンテスト結果ページ",
+        href: "/pochiblo/denden0102/contest/soukyuu-photo-award-2020",
+      },
+    ],
+    status: { done: true },
   },
   {
     id: "s09-kai-contact",
     order: 9,
     chapter: 5,
     summary: "カイから連絡が来て進捗を聞かれ、「本名で検索したら結構出てくるぞ？」と言われる",
-    places: [{ platform: "discord", label: "カイとの会話" }],
+    places: [{ platform: "discord", label: "χ との DM", href: PLACES["discord:dm-kai"].href }],
     status: { done: true },
   },
   {
@@ -138,15 +162,15 @@ export const steps: Step[] = [
     order: 10,
     chapter: 5,
     summary: "本名で talkup を検索し、BFF の写真と照合。入学式などの写真から出身地域が分かる",
-    places: [{ platform: "talkup", label: "talkup の本人のプロフィール", href: "/talkup" }],
-    status: { done: false, issue: "talkup（#76 の担当表: toki36）" },
+    places: [{ platform: "talkup", label: "talkup の検索・本人のプロフィール", href: "/talkup" }],
+    status: { done: true },
   },
   {
     id: "s11-address",
     order: 11,
     chapter: 6,
-    summary: "「住所を特定しました」で終わる（住所そのものは作らない）",
-    places: [{ platform: "discord", label: "最後のメッセージ" }],
+    summary: "住所を特定し、「現地へ向かう」を選択する（住所そのものは作らない）",
+    places: [{ platform: "talkup", label: "talkup の投稿・現地へ向かう選択", href: "/talkup" }],
     status: { done: true },
   },
 ];

@@ -18,6 +18,7 @@ const KANON_HANDLE = "kanon__dayo";
 // 段階2の返信者（まいのリア友とみられる人物。表示名・handle は #76 未確定の仮決め）
 const FRIEND_HANDLE = "tomo-0718";
 const ARTICLE_TITLE = "写真コンテストで賞をもらいました！";
+const BOW_BUILD_HINT = "弓属性強化ガン積み構成";
 
 // 検査する語そのものをリポジトリに残さない（文字コードで組み立てる）
 const word = (...codePoints: number[]) => String.fromCodePoint(...codePoints);
@@ -38,11 +39,11 @@ const accounts = () =>
   }));
 
 describe("第三章 Twitter 側（#94）", () => {
-  it("順序2: 攻略の投稿に、リア友とみられる人物がブログ名を挙げて「にも書いてたよな」とリプライしている", () => {
+  it("順序2: 攻略の投稿に、リア友とみられる人物がブログ言及と構成ヒントをリプライしている", () => {
     const strategyPost = listPosts().find((post) => post.id === "post-101");
     expect(strategyPost).toBeDefined();
-    expect(strategyPost?.body).toContain("双剣");
-    // 2018〜2020年ごろ（クラッチクローは2019年のアイスボーン）
+    expect(strategyPost?.body).toContain("弓");
+    // 2018〜2020年ごろ
     const year = strategyPost?.postedAt.slice(0, 4) ?? "";
     expect(year >= "2018").toBe(true);
     expect(year <= "2020").toBe(true);
@@ -50,12 +51,13 @@ describe("第三章 Twitter 側（#94）", () => {
     const replies = listReplies("post-101");
     const fromFriend = replies.filter((reply) => reply.authorId === friend?.id);
     expect(fromFriend).toHaveLength(1);
-    // 「別の場所にも」の含み ＋ ブログ名そのもの（順序3 でそのまま検索語になる）
+    // ブログへの言及 ＋ 構成ヒント（ブログ名は直接書かない）
     expect(fromFriend[0].body).toContain("ブログ");
-    expect(fromFriend[0].body).toContain("にも書いて");
-    expect(fromFriend[0].body).toContain(BLOG_NAME);
-    // Twixer 内の検索でもブログ名からこのリプライに辿れる
-    expect(searchPosts(BLOG_NAME).map((post) => post.id)).toEqual(["post-102"]);
+    expect(fromFriend[0].body).toContain(BOW_BUILD_HINT);
+    expect(fromFriend[0].body).not.toContain(BLOG_NAME);
+    // Twixer 内の検索でも「ブログ」「弓属性強化ガン積み構成」からこのリプライに辿れる
+    expect(searchPosts("ブログ").map((post) => post.id)).toEqual(["post-102"]);
+    expect(searchPosts(BOW_BUILD_HINT).map((post) => post.id)).toEqual(["post-102"]);
     expect(strategyPost?.authorId).not.toBe(friend?.id);
     // 返信者はかのんではない（かのんは旧アカウントの bio の BFF 行から見つける）
     expect(replies.some((reply) => reply.authorId === kanon?.id)).toBe(false);
@@ -148,14 +150,14 @@ describe("第三章 Twitter 側（#94）", () => {
     expect(new Set(sources).size).toBe(sources.length);
   });
 
-  it("リプライはブログ名を出すが、本名・家族内の呼び名は出さない", () => {
+  it("リプライは構成ヒントを出すが、ブログ名・本名・家族内の呼び名は出さない", () => {
     const replies = listPosts()
       .filter((post) => post.replyToId === "post-101")
       .map((post) => post.body);
     expect(replies.length).toBeGreaterThan(0);
-    // ブログ名は順序3の検索語なのでリプライに必須
-    expect(replies.join("\n")).toContain(BLOG_NAME);
+    expect(replies.join("\n")).toContain(BOW_BUILD_HINT);
     for (const body of replies) {
+      expect(body).not.toContain(BLOG_NAME);
       expect(body).not.toContain(FAMILY_NAME);
       expect(body).not.toContain(GIVEN_NAME);
       expect(body).not.toContain(DEN);

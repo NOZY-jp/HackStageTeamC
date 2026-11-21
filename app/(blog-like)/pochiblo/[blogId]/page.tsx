@@ -3,6 +3,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { BlogFrame } from "@/components/blog-like/blog-frame";
 import { EntryDate, EntryFooter } from "@/components/blog-like/entry-meta";
+import { StoryTrigger } from "@/components/common/story/story-trigger";
 import { blogPath, entryPath, getBlog, listBlogs, listPublicEntries } from "@/lib/blog-like";
 import { canonicalUrl } from "@/lib/seo/site";
 
@@ -39,6 +40,7 @@ export default async function BlogTopPage({ params }: Props) {
 
   return (
     <BlogFrame blog={blog}>
+      {blog.id === "denden0102" ? <StoryTrigger flag="s03-blog-found" /> : null}
       {listPublicEntries(blog.id).map((entry) => {
         const lead = entry.body.find((block) => block.kind === "paragraph");
         return (

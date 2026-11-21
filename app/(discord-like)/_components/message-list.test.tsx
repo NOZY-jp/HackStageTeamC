@@ -1,8 +1,14 @@
-import { fireEvent, render } from "@testing-library/react";
+import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import { StoryProvider, useStory } from "@/components/common/story/story-provider";
 import { AppShell } from "@/components/discord-like/app-shell";
 import type { MemberView, Message, MessageAuthor } from "@/lib/discord-like/types";
 import { MessageList } from "./message-list";
+
+function FlagProbe() {
+  const { state } = useStory();
+  return <span data-testid="story-flags">{state.flags.join(",")}</span>;
+}
 
 const author: MessageAuthor = { id: "u1", displayName: "テスト", avatarColor: "#5865f2" };
 const authors: Record<string, MessageAuthor> = { u1: author };
@@ -245,7 +251,7 @@ describe("メンバー一覧の絞り込み（#163）", () => {
     expect(memberNames(container)).toEqual(["琥珀", "集会所マスター", "hunter_denden"]);
   });
 
-  it("プロフィールのリンクはリンク先のURLをそのまま見せる", () => {
+  it("プロフィールのリンクはリンク先のURLをそのまま見せ、同一タブで開く", () => {
     const { container } = renderPanel();
     fireEvent.click(
       [...container.querySelectorAll(".members-row")].find((row) =>
@@ -254,6 +260,105 @@ describe("メンバー一覧の絞り込み（#163）", () => {
     );
     const link = container.querySelector(".members-profile-link") as HTMLAnchorElement;
     expect(link.getAttribute("href")).toBe("/pochiblo/mylist/k7q2m9d4");
+    expect(link.getAttribute("target")).toBeNull();
     expect(link.textContent).toBe("pochiblo/mylist/k7q2m9d4");
+  });
+});
+
+describe("旧垢発見のストーリーフラグ連携（順序5）", () => {
+  const originalScrollIntoView = Element.prototype.scrollIntoView;
+
+  beforeEach(() => {
+    localStorage.clear();
+    Element.prototype.scrollIntoView = vi.fn();
+  });
+
+  afterEach(() => {
+    localStorage.clear();
+    if (originalScrollIntoView) {
+      Element.prototype.scrollIntoView = originalScrollIntoView;
+    } else {
+      Reflect.deleteProperty(Element.prototype, "scrollIntoView");
+    }
+  });
+
+  const members: MemberView[] = [
+    {
+      id: "denden",
+      displayName: "hunter_denden",
+      handle: "hunter_denden3243",
+      avatarColor: "#7289da",
+      status: "offline",
+      profileUrl: "/pochiblo/mylist/k7q2m9d4",
+    },
+  ];
+
+  it("メンバー一覧で denden のプロフィールを開くと s05-old-discord-user が立つ", async () => {
+    const { container } = render(
+      <StoryProvider>
+        <FlagProbe />
+        <AppShell rail={<span />}>
+          <MessageList
+            messages={messages}
+            authors={authors}
+            title="マルチ募集"
+            showHash
+            onLoadOlder={() => {}}
+            members={members}
+          />
+        </AppShell>
+      </StoryProvider>,
+    );
+
+    fireEvent.click(container.querySelector('button[aria-label="メンバー"]') as HTMLElement);
+    fireEvent.click(
+      [...container.querySelectorAll(".members-row")].find((row) =>
+        row.textContent?.includes("hunter_denden"),
+      ) as HTMLElement,
+    );
+
+    await waitFor(() => {
+      expect(screen.getByTestId("story-flags").textContent).toContain("s05-old-discord-user");
+    });
+  });
+
+  it("focusMessageId が denden の投稿を指していると s05-old-discord-user が立つ", async () => {
+    const dendenAuthors: Record<string, MessageAuthor> = {
+      denden: {
+        id: "denden",
+        displayName: "hunter_denden",
+        avatarColor: "#7289da",
+        profileUrl: "/pochiblo/mylist/k7q2m9d4",
+      },
+    };
+    const dendenMessages: Message[] = [
+      {
+        id: "mhc-lfg-0901",
+        channelId: "mhc-lfg",
+        authorId: "denden",
+        sentAt: "2018-04-20T21:14:00+09:00",
+        body: "ネルギガンテを周回するパーティー組みたいです！",
+      },
+    ];
+
+    render(
+      <StoryProvider>
+        <FlagProbe />
+        <AppShell rail={<span />}>
+          <MessageList
+            messages={dendenMessages}
+            authors={dendenAuthors}
+            title="マルチ募集"
+            showHash
+            onLoadOlder={() => {}}
+            focusMessageId="mhc-lfg-0901"
+          />
+        </AppShell>
+      </StoryProvider>,
+    );
+
+    await waitFor(() => {
+      expect(screen.getByTestId("story-flags").textContent).toContain("s05-old-discord-user");
+    });
   });
 });
