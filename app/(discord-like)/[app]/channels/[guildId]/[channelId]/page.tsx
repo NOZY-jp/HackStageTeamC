@@ -21,7 +21,7 @@ import {
 import { resolveChannelRoute } from "@/lib/discord-like/route-resolution";
 import { listMemberViews, toMessageView } from "@/lib/discord-like/view";
 import { dmThreadPath } from "@/lib/platform/app-prefix";
-import { BLOG_TALK_MESSAGE_ID } from "@/lib/story/places";
+import { BLOG_TALK_MESSAGE_ID, KAI_NICKNAME_ADVICE_MESSAGE_ID } from "@/lib/story/places";
 
 /**
  * Discord と同じ2セグメント構成。
@@ -97,10 +97,13 @@ async function DmThread({
       showHash={false}
       headerAvatar={{ displayName: otherName, avatarColor: other?.avatarColor ?? "transparent" }}
       // 段階1: MaiMai の「攻略ブログ」の発言が画面に見えたらフラグを立てる（検索ジャンプ・過去ログの閲覧のどちらでも届く）
+      // True End 手がかり1: カイとのDMで「でんちゃん」の助言が画面に見えたら te01-kai-nickname を立てる
       seen={
         thread.id === "dm-maimai"
           ? { messageId: BLOG_TALK_MESSAGE_ID, flag: "s01-blog-talk" }
-          : undefined
+          : thread.id === "dm-kai"
+            ? { messageId: KAI_NICKNAME_ADVICE_MESSAGE_ID, flag: "te01-kai-nickname" }
+            : undefined
       }
       headerAction={
         // DM の通話画面への導線（通話を開始する）
@@ -146,6 +149,23 @@ async function GuildChannel({
   }
 
   const members = listMemberViews(guild.id);
+  // True End 手がかり2: 旧アカウント発見をカイに報告したあと、mhc のメンバー一覧にカイが加わる
+  const kaiUser = guild.id === "mhc" ? getUser("kai") : undefined;
+  const storyMember = kaiUser
+    ? {
+        member: {
+          id: kaiUser.id,
+          displayName: kaiUser.displayName,
+          handle: kaiUser.handle,
+          avatarColor: kaiUser.avatarColor,
+          status: kaiUser.status,
+          profileUrl: kaiUser.profileUrl,
+        },
+        showWhenFlag: "toldKaiOldAccount" as const,
+        onOpenFlag: "te02-kai-joined-mhc" as const,
+        note: "最近このサーバーに参加",
+      }
+    : undefined;
   // 検索からジャンプしてきたときは、そのメッセージを含むところまで遡って表示する
   const focused = focusMessageId
     ? loadUntil({ channelId: channel.id, messageId: focusMessageId })
@@ -170,6 +190,7 @@ async function GuildChannel({
           topic={channel.topic}
           showHash
           members={members}
+          storyMember={storyMember}
           focusMessageId={focused?.found ? focusMessageId : undefined}
         />
       ) : (

@@ -8,6 +8,7 @@ import { PostCard } from "@/components/twitter-like/post-card";
 import { PostDetail } from "@/components/twitter-like/post-detail";
 import { RightSidebar } from "@/components/twitter-like/right-sidebar";
 import { getPost, listPosts, listReplies } from "@/lib/twitter-like";
+import { KANON_STALKER_POST_ID } from "@/lib/twitter-like/data/twitter";
 import type { Post } from "@/lib/twitter-like/types";
 
 type Props = { params: Promise<{ postId: string }> };
@@ -63,6 +64,7 @@ export default async function TwitterPostPage({ params }: Props) {
       {post.id === "post-101" || post.id === "post-102" ? (
         <StoryTrigger flag="s02-bff-reply" />
       ) : null}
+      {post.id === KANON_STALKER_POST_ID ? <StoryTrigger flag="te04-kanon-stalker-post" /> : null}
       <main className="tw-main">
         <PageHeader title="ポスト" backHref="/twitter" />
         {ancestors.map((ancestor, i) => {
