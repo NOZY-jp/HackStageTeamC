@@ -38,31 +38,6 @@ export const articles: Article[] = [
       },
     ],
   },
-  {
-    id: "maimai-2019-08-bow-build",
-    creatorId: LEAF_CREATOR_ID,
-    title: "【MHW】弓属性強化ガン積み構成まとめ",
-    excerpt: "昔のブログから移した属性特化の弓装備メモです。",
-    publishedAt: "2019-08-11T21:15:00+09:00",
-    tags: ["モンハン", "攻略", "弓"],
-    likeCount: 6,
-    body: [
-      {
-        kind: "paragraph",
-        text: "昔のブログ（でんでんの狩猟日記）で書いていた属性特化の弓装備メモをこちらに移しました。",
-      },
-      { kind: "heading", text: "基本の考え方" },
-      {
-        kind: "paragraph",
-        text: "レウス2部位で「会心撃【属性】」を出しつつ、武器に合わせた属性攻撃強化を上限まで積むのがいちばん火力が伸びます。見切りと弱点特効で会心率を上げておくと、剛射のダメージがかなり変わります。",
-      },
-      { kind: "heading", text: "スタミナ管理" },
-      {
-        kind: "paragraph",
-        text: "体術をLv3まで積んでおけば、強走薬やネコの体術と合わせてステップをずっと回せます。枠がかつかつのときは、攻撃系より先に体術を残したほうが立ち回りやすいです。",
-      },
-    ],
-  },
   ...migrationArticles.map<Article>(({ publishedAt, category, title, paragraphs }) => ({
     id: `migration-${publishedAt.slice(0, 10)}`,
     creatorId: LEAF_CREATOR_ID,
