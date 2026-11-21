@@ -1,12 +1,14 @@
 import type { Guild } from "../../types";
+import { MHC_MEMBER_IDS } from "../members";
 
-/** モンハンコミュニティ（唯一のサーバー）。テキスト8・ボイス4（#131 で拡張）。 */
+/** モンハンコミュニティ。テキスト8・ボイス4（#131 で拡張）。メンバー260人（#163）。 */
 export const mhc: Guild = {
   id: "mhc",
   urlId: "1187002356428840961",
   name: "モンハンコミュニティ",
   iconColor: "#3f8f5b",
   initials: "MC",
+  memberIds: MHC_MEMBER_IDS,
   categories: [
     {
       id: "mhc-cat-text",
