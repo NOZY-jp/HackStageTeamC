@@ -5,6 +5,9 @@ import { SELF_USER_ID } from "@/app/(discord-like)/_components/self-user";
 import { getDMThread, getUser } from "@/lib/discord-like";
 import { resolveDmCallRoute } from "@/lib/discord-like/route-resolution";
 
+// params をこの区画で読むため、PPR のブロックを許可する（/call の警告を消す）
+export const instant = false;
+
 export const metadata: Metadata = {
   title: "通話",
   // 通話画面は検索に載せない

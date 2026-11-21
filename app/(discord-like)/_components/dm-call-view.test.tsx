@@ -1,5 +1,5 @@
 import { fireEvent, render, screen, waitFor, within } from "@testing-library/react";
-import { Activity } from "react";
+import { Activity, useEffect } from "react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { AppShell } from "@/components/discord-like/app-shell";
 import { dmThreadPath } from "@/lib/platform/app-prefix";
@@ -34,7 +34,13 @@ function Log() {
 const view = () => (
   <AppShell rail={<span />}>
     <LocalMessagesProvider>
-      <DmCallView threadId="dm-maimai" threadUrlId={threadUrlId} self={self} other={other} />
+      <DmCallView
+        threadId="dm-maimai"
+        threadUrlId={threadUrlId}
+        self={self}
+        other={other}
+        connectDelayMs={0}
+      />
       <Log />
     </LocalMessagesProvider>
   </AppShell>
@@ -49,9 +55,12 @@ describe("DM の通話画面（#137）", () => {
   it("相手と自分の2人を出し、相手を大きく・自分を小窓に置く", async () => {
     const { container } = render(view());
     const main = await screen.findByRole("main", { name: "MaiMai との通話" });
-    expect(within(main).getByText("MaiMai")).toBeInTheDocument();
+    expect(within(main).getAllByText("MaiMai").length).toBeGreaterThan(0);
     expect(within(main).getByText("琥珀（自分）")).toBeInTheDocument();
-    expect(main.querySelector(".call-stage-status")?.textContent).toBe("接続中");
+    // 呼び出し中→接続は非同期（effect）なので、接続まで待つ
+    await waitFor(() =>
+      expect(main.querySelector(".call-stage-status")?.textContent).toBe("接続中"),
+    );
     expect(container.querySelectorAll(".call-tile")).toHaveLength(2);
     // DM 用のレイアウト（相手が大きく、自分は右下の小窓）
     expect(container.querySelector(".call-tiles")?.getAttribute("data-layout")).toBe("dm");
@@ -63,17 +72,21 @@ describe("DM の通話画面（#137）", () => {
     );
   });
 
-  it("操作バーはホバー中だけ出て、外すと消える（#134 と同じ作法）", async () => {
+  it("通話中は操作バーが常に出る（PM決定）", async () => {
     const { container } = render(view());
     await screen.findByRole("main", { name: "MaiMai との通話" });
     const stage = container.querySelector(".call-stage");
+    if (!stage) throw new Error("stage missing");
+    // 接続（呼び出し中のあと）で操作バーが出るまで待つ
+    await waitFor(() => expect(container.querySelector(".call-controls")).toBeTruthy());
     const controls = container.querySelector(".call-controls");
-    if (!stage || !controls) throw new Error("stage missing");
-    expect(controls.getAttribute("data-visible")).toBe("false");
+    if (!controls) throw new Error("controls missing");
+    // 入った時点から常に表示（ホバーで出し入れしない）
+    expect(controls.getAttribute("data-visible")).toBe("true");
     fireEvent.pointerEnter(stage);
     expect(controls.getAttribute("data-visible")).toBe("true");
     fireEvent.pointerLeave(stage);
-    expect(controls.getAttribute("data-visible")).toBe("false");
+    expect(controls.getAttribute("data-visible")).toBe("true");
   });
 
   it("開始でログに残り、終了でDMチャットへ戻る", async () => {
@@ -109,6 +122,7 @@ describe("通話の終了と重複防止（#140）", () => {
     await waitFor(() => {
       expect(screen.getByTestId("log").textContent).toContain("通話を終了しました");
     });
+    console.log("LOG", screen.getByTestId("log").textContent);
     expect(screen.getByTestId("log-system").textContent).toBe("true / true");
     unmount();
   });
@@ -139,16 +153,18 @@ function Harness({ showCall }: { showCall: boolean }) {
     <AppShell rail={<span />}>
       <LocalMessagesProvider>
         <Activity mode={showCall ? "hidden" : "visible"}>
-          <StartCallLink
-            href={`${dmThreadPath(threadUrlId)}/call`}
-            threadId="dm-maimai"
-            ariaLabel="通話を開始"
-          >
+          <StartCallLink href={`${dmThreadPath(threadUrlId)}/call`} ariaLabel="通話を開始">
             <span>通話を開始</span>
           </StartCallLink>
         </Activity>
         <Activity mode={showCall ? "visible" : "hidden"}>
-          <DmCallView threadId="dm-maimai" threadUrlId={threadUrlId} self={self} other={other} />
+          <DmCallView
+            threadId="dm-maimai"
+            threadUrlId={threadUrlId}
+            self={self}
+            other={other}
+            connectDelayMs={0}
+          />
         </Activity>
         <Log />
       </LocalMessagesProvider>
@@ -198,5 +214,49 @@ describe("入場→退出→再入場（#140）", () => {
     });
     expect(screen.getByTestId("log").textContent?.match(/通話を開始しました/g)).toHaveLength(1);
     expect(container.querySelector(".call-stage")?.getAttribute("data-connected")).toBe("true");
+  });
+
+  it("直リンクでも「通話は終了しました」を出さず、タイトルはヘッダーの1か所だけ", async () => {
+    const { container } = render(view());
+    await screen.findByRole("main", { name: "MaiMai との通話" });
+    expect(screen.queryByText("通話は終了しました")).toBeNull();
+    // ヘッダーの h1 以外にタイトルを出さない（ステージ内の h2 が無い）
+    expect(container.querySelectorAll("h1")).toHaveLength(1);
+    expect(container.querySelector(".call-stage h2")).toBeNull();
+    // 相手の名前と経過時間はステージに出す
+    expect(container.querySelector(".call-stage-timer")).toBeTruthy();
+  });
+});
+
+function SeedActiveCall({ threadId }: { threadId: string }) {
+  const { activeCallThreadId, startCall } = useLocalMessages();
+  useEffect(() => {
+    if (activeCallThreadId !== threadId) startCall(threadId);
+  }, [activeCallThreadId, startCall, threadId]);
+  return null;
+}
+
+describe("接続中に戻ったときのDM通話", () => {
+  it("すでに接続中なら呼び出し中に戻さず、経過時間の起点も変えない", async () => {
+    mockPathname = "/discord.com/channels/@me/1187002356428841501/call";
+    const { container } = render(
+      <AppShell rail={<span />}>
+        <LocalMessagesProvider>
+          <SeedActiveCall threadId="dm-maimai" />
+          <DmCallView
+            threadId="dm-maimai"
+            threadUrlId={threadUrlId}
+            self={self}
+            other={other}
+            connectDelayMs={1000}
+          />
+        </LocalMessagesProvider>
+      </AppShell>,
+    );
+    await waitFor(() =>
+      expect(container.querySelector(".call-stage-status")?.textContent).toBe("接続中"),
+    );
+    // 呼び出し中を経由しない（0:00 に戻さない）
+    expect(container.querySelector(".call-stage")?.getAttribute("data-connecting")).toBe("false");
   });
 });
