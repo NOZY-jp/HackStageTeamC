@@ -7598,3 +7598,272 @@ a.tw-dm-item:focus-visible {
   color: var(--color-text);
   font-size: 12px;
 }
+
+/* ---- 見た目の仕上げ（#145）。SNS として自然に見えるよう、余白・階層・操作の手応えだけを整える ---- */
+
+/* 共通: 押せるものの手応え（色は各プラットフォームの変数に従う） */
+.fb-shell button,
+.tw-shell button {
+  -webkit-tap-highlight-color: transparent;
+}
+
+.fb-shell button:active,
+.tw-shell button:active {
+  transform: translateY(0.5px);
+}
+
+/* --- talkup --- */
+
+.fb-shell {
+  --fb-shadow: 0 1px 2px rgba(16, 24, 40, 0.06), 0 4px 12px rgba(16, 24, 40, 0.04);
+  --fb-radius-card: 14px;
+  background-image: radial-gradient(1200px 400px at 50% -160px, #eef1f7 0%, var(--fb-bg) 70%);
+}
+
+.fb-header {
+  border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+  background-color: rgba(255, 255, 255, 0.92);
+  backdrop-filter: saturate(180%) blur(12px);
+  box-shadow: 0 1px 2px rgba(16, 24, 40, 0.06);
+}
+
+.fb-logo-link {
+  width: 40px;
+  height: 40px;
+  background: linear-gradient(135deg, #8b5cf6, #6d28d9);
+  color: #ffffff;
+  font-weight: 800;
+  font-size: 20px;
+}
+
+.fb-search-box {
+  border: 1px solid transparent;
+  transition:
+    border-color 120ms ease,
+    background-color 120ms ease,
+    box-shadow 120ms ease;
+}
+
+.fb-search-box:focus-within {
+  border-color: rgba(124, 58, 237, 0.45);
+  background-color: #ffffff;
+  box-shadow: 0 0 0 4px rgba(124, 58, 237, 0.12);
+}
+
+.fb-card {
+  border-radius: var(--fb-radius-card);
+  border: 1px solid rgba(0, 0, 0, 0.045);
+}
+
+/* 投稿カード: 本文の行間と、写真の角丸をそろえる */
+.fb-card article,
+article.fb-card {
+  border-radius: var(--fb-radius-card);
+}
+
+.fb-feed-center > .fb-card,
+.fb-feed-center > article {
+  overflow: hidden;
+}
+
+/* プロフィール: カバーの上にアイコンが載る位置でも切れないように */
+.fb-profile-cover,
+.fb-cover {
+  background-image: linear-gradient(120deg, #a78bfa 0%, #7c3aed 45%, #4c1d95 100%);
+}
+
+.fb-profile-avatar,
+.fb-avatar[data-size="xl"] {
+  box-shadow:
+    0 0 0 4px var(--fb-card),
+    0 6px 16px rgba(16, 24, 40, 0.16);
+}
+
+/* --- Twixer --- */
+
+.tw-shell {
+  --tw-card: #16181c;
+  --tw-radius-card: 16px;
+  background-image: radial-gradient(
+    900px 360px at 70% -120px,
+    rgba(29, 155, 240, 0.1),
+    transparent 70%
+  );
+}
+
+.tw-main {
+  border-left: 1px solid var(--tw-border);
+  border-right: 1px solid var(--tw-border);
+}
+
+.tw-post {
+  border-bottom: 1px solid var(--tw-border);
+  transition: background-color 120ms ease;
+}
+
+.tw-post:hover {
+  background-color: var(--tw-hover-soft);
+}
+
+.tw-post-body {
+  font-size: 15.5px;
+  line-height: 1.65;
+}
+
+.tw-post-avatar .tw-avatar {
+  box-shadow: 0 0 0 1px var(--tw-border);
+}
+
+.tw-profile .tw-banner {
+  background-image: linear-gradient(120deg, #1d9bf0 0%, #185a8f 55%, #0f2f4a 100%);
+}
+
+.tw-profile-avatar .tw-avatar[data-size="xl"] {
+  box-shadow:
+    0 0 0 4px var(--tw-bg),
+    0 8px 24px rgba(0, 0, 0, 0.45);
+}
+
+.tw-avatar[data-kind="image"] img {
+  border-radius: inherit;
+}
+
+/* プロフィールの数値は、押せないことが分かる見た目にする（リンクにしない） */
+.tw-profile-stats {
+  color: var(--tw-muted);
+}
+
+/* 文言は折り返さない（1〜2文字だけ次の行に落ちるのを防ぐ）。収まらないときは余白と字間で詰める */
+.fb-primary-btn,
+.fb-action-btn,
+.fb-chip,
+.fb-person-action,
+.tw-post-button,
+.tw-tab,
+.tw-profile-actions button,
+.tw-follow-button {
+  white-space: nowrap;
+}
+
+.fb-primary-btn,
+.tw-post-button,
+.tw-button {
+  flex: none;
+}
+
+.tw-button {
+  white-space: nowrap;
+}
+
+/* リアクションの内訳（絵文字の並びと件数、コメント/シェア）は、単位ごと折り返す */
+article div[class~="justify-between"][class~="text-xs"] {
+  flex-wrap: wrap;
+  gap: 2px 8px;
+}
+
+article div[class~="justify-between"][class~="text-xs"] > div {
+  flex: none;
+  white-space: nowrap;
+}
+
+.fb-action-btn > span,
+.fb-action-btn .tw-icon,
+.fb-chip > span {
+  white-space: nowrap;
+}
+
+/* モバイル: 余白を詰めて、横スクロールを出さない */
+@media (max-width: 639.98px) {
+  .fb-feed-grid {
+    padding: 8px;
+    gap: 10px;
+  }
+
+  .fb-header {
+    padding: 0 10px;
+    gap: 8px;
+  }
+
+  .fb-search-box {
+    max-width: none;
+    height: 38px;
+  }
+
+  .fb-card {
+    border-radius: 12px;
+  }
+
+  /* 操作列（いいね・コメント・シェア）は3等分のまま、各操作を1行に収める */
+  /* 投稿カードの操作列（grid-cols-3 の行）は隙間を詰めて1行を確保する */
+  article [class~="grid-cols-3"] {
+    gap: 2px;
+  }
+
+  .fb-action-btn {
+    gap: 4px;
+    padding: 7px 2px;
+    font-size: 13px;
+  }
+
+  .fb-action-btn .tw-icon,
+  .fb-action-btn svg {
+    width: 15px;
+    height: 15px;
+    flex: none;
+  }
+
+  .fb-primary-btn {
+    padding: 7px 12px;
+  }
+
+  .tw-button {
+    padding: 0 12px;
+    font-size: 14px;
+  }
+
+  .tw-shell {
+    --tw-main-width: 100%;
+  }
+
+  .tw-main {
+    border-left: 0;
+    border-right: 0;
+  }
+
+  .tw-post {
+    padding-left: 12px;
+    padding-right: 12px;
+  }
+
+  /* プロフィールの数値・タブは1行のまま */
+  .tw-profile-stats,
+  .tw-profile-stats span,
+  .tw-tab,
+  .tw-follow-button,
+  .tw-post-button {
+    white-space: nowrap;
+  }
+
+  .tw-follow-button {
+    padding-left: 14px;
+    padding-right: 14px;
+  }
+
+  .tw-profile .tw-profile-body {
+    padding-left: 12px;
+    padding-right: 12px;
+  }
+}
+
+/* 動きを減らす設定では、押したときの移動もしない */
+@media (prefers-reduced-motion: reduce) {
+  .fb-shell button:active,
+  .tw-shell button:active {
+    transform: none;
+  }
+
+  .fb-search-box,
+  .tw-post {
+    transition: none;
+  }
+}
