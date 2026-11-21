@@ -95,9 +95,9 @@ describe("進行チェック（各プラットフォームのデータに手が�
     expect(visible.map((entry) => entry.title)).toEqual(["ブログ閉鎖のお知らせ"]);
   });
 
-  it("段階4: leaf に旧IDが写る記事があり、弓構成の記事は移行されていない", () => {
+  it("段階4: leaf に旧IDが写る記事（maimai-2020-02-screenshot）と弓構成の移行記事がある", () => {
     expect(getNoteArticle(LEAF_CREATOR_ID, "maimai-2020-02-screenshot")).toBeDefined();
-    expect(getNoteArticle(LEAF_CREATOR_ID, "maimai-2019-08-bow-build")).toBeUndefined();
+    expect(getNoteArticle(LEAF_CREATOR_ID, "maimai-2019-08-bow-build")).toBeDefined();
   });
 
   it("段階5: 古いIDと完全一致する Discord ユーザーがオフラインでおり、#パーティー募集 に過去投稿（mhc-lfg-0901..0904）がある", () => {
