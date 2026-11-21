@@ -6799,7 +6799,8 @@ a.tw-dm-item:focus-visible {
   font-size: clamp(11px, 1.4vh, 13px);
 }
 
-.call-stage[data-sharing="true"] .call-tiles {
+/* 共有中に右へ寄せるのはサーバーVCのタイルだけ（DMは中央の相手を潰さない） */
+.call-stage[data-sharing="true"] .call-tiles[data-layout="grid"] {
   position: absolute;
   top: 12px;
   right: 12px;
@@ -6813,6 +6814,11 @@ a.tw-dm-item:focus-visible {
 .call-stage[data-sharing="true"] .call-tile {
   min-height: 84px;
   flex: 0 0 auto;
+}
+
+/* DMの共有中: 相手の大タイルは隠し、共有画面と自分の小窓だけにする（レイアウトの跳ねを防ぐ） */
+.call-stage[data-sharing="true"] .call-tiles[data-layout="dm"] .call-tile:first-child {
+  display: none;
 }
 
 /* 参加者一覧（右パネル） */

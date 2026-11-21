@@ -137,3 +137,17 @@ describe("レイアウトのリグレッション防止", () => {
     expect(list?.querySelectorAll(".call-tile")).toHaveLength(3);
   });
 });
+
+describe("画面共有中のレイアウト", () => {
+  it("共有中に右へ寄せるのはVCだけで、DMの相手タイルは縮めない", async () => {
+    const css = await import("node:fs/promises").then((fs) =>
+      fs.readFile("app/globals.css", "utf8"),
+    );
+    expect(css).toMatch(
+      /\.call-stage\[data-sharing="true"\] \.call-tiles\[data-layout="grid"\] \{[^}]*flex-direction: column/,
+    );
+    expect(css).toMatch(
+      /\.call-stage\[data-sharing="true"\] \.call-tiles\[data-layout="dm"\] \.call-tile:first-child \{\s*display: none/,
+    );
+  });
+});
