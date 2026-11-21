@@ -1,8 +1,10 @@
 import type { Metadata } from "next";
+import Image from "next/image";
 import { notFound } from "next/navigation";
 import { BlogFrame } from "@/components/blog-like/blog-frame";
 import { ContestResultReveal } from "@/components/common/story/contest-result-reveal";
 import { getBlog } from "@/lib/blog-like";
+import { photoContestWork } from "@/lib/blog-like/data/contest";
 import {
   PHOTO_CONTEST_BLOG_ID,
   PHOTO_CONTEST_NAME,
@@ -37,23 +39,35 @@ export default async function ContestResultPage({ params }: Props) {
       <article className="pb-entry">
         <p className="pb-entry-date">2018年12月01日（土） 10:20</p>
         <h1 className="pb-entry-title">{PHOTO_CONTEST_NAME} 結果</h1>
+        <div className="pb-entry-body">
+          <p>
+            「{PHOTO_CONTEST_NAME}
+            」の結果が発表されました。たくさんのご応募、ありがとうございました。
+          </p>
 
-        <p>
-          「{PHOTO_CONTEST_NAME}」の結果が発表されました。たくさんのご応募、ありがとうございました。
-        </p>
+          <h2>優秀賞</h2>
+          <p>
+            受賞者: <ContestResultReveal />
+            <br />
+            受賞作品: 「{photoContestWork.title}」
+          </p>
+          <figure>
+            <Image
+              src={photoContestWork.src}
+              alt={photoContestWork.alt}
+              width={photoContestWork.width}
+              height={photoContestWork.height}
+              unoptimized
+            />
+            <figcaption>優秀賞「{photoContestWork.title}」</figcaption>
+          </figure>
+          <p>
+            夕方のビル街で、縁石にとまる鳩と、ビルのあいだに沈む夕日を低い位置から撮った一枚です。
+            足もとの小さな草花と、帰り道の静けさが選ばれました。
+          </p>
 
-        <h2>優秀賞</h2>
-        <p>
-          受賞者: <ContestResultReveal />
-          <br />
-          受賞作品: 「帰り道」
-        </p>
-        <p>
-          夕方のビル街で、縁石にとまる鳩と、ビルのあいだに沈む夕日を低い位置から撮った一枚です。
-          足もとの小さな草花と、帰り道の静けさが選ばれました。
-        </p>
-
-        <p>受賞者のみなさま、おめでとうございます。作品は当時のブログでも紹介しています。</p>
+          <p>受賞者のみなさま、おめでとうございます。作品は当時のブログでも紹介しています。</p>
+        </div>
       </article>
     </BlogFrame>
   );

@@ -34,6 +34,16 @@ describe("写真コンテストの結果ページ（#77 手順8）", () => {
     expect(container.querySelector('meta[name="robots"]')).toBeNull();
   });
 
+  it("受賞作の写真を載せ、まだ分からない名前は黒く塗って伏せる", async () => {
+    const { container } = render(await ContestResultPage({ params, searchParams: emptySearch }));
+    expect(
+      container.querySelector('img[src="/blog-like/photos/contest-photo.webp"]'),
+    ).not.toBeNull();
+    const winner = container.querySelector("[data-contest-winner]");
+    expect(winner?.getAttribute("aria-label")).toBe("伏せられた名前");
+    expect(container.textContent).not.toContain("まだ見つけていない");
+  });
+
   it("metadata は結果ページ用の title・description・canonical", () => {
     expect(metadata.title).toEqual({ absolute: `${PHOTO_CONTEST_NAME} 結果` });
     expect(metadata.description).toContain(PHOTO_CONTEST_NAME);

@@ -21,5 +21,13 @@ export function ContestResultReveal() {
     if (known && !found && setFlag) setFlag("s08-real-name");
   }, [known, found, setFlag]);
 
-  return <span data-contest-winner>{known ? WINNER_NAME : "（まだ見つけていない）"}</span>;
+  if (known) {
+    return <span data-contest-winner>{WINNER_NAME}</span>;
+  }
+  // まだ名前にたどり着いていないあいだは、黒く塗って伏せる（作中のページとして自然な見た目にする）
+  return (
+    <span data-contest-winner className="contest-redacted" role="img" aria-label="伏せられた名前">
+      <span aria-hidden="true">■■■■■</span>
+    </span>
+  );
 }
