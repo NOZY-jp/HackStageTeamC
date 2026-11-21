@@ -83,7 +83,7 @@ export function DmCallView({
       <header className="pane-header voice-header">
         <PaneToggles />
         <div className="voice-header-text">
-          <h1 className="voice-header-title">{other.displayName} との通話</h1>
+          <h1 className="voice-header-title">{other.displayName}</h1>
           {otherHandle ? <p className="voice-header-handle">@{otherHandle}</p> : null}
         </div>
         <Link

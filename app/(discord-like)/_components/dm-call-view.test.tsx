@@ -55,7 +55,7 @@ describe("DM の通話画面（#137）", () => {
   it("相手と自分の2人を出し、相手を大きく・自分を小窓に置く", async () => {
     const { container } = render(view());
     const main = await screen.findByRole("main", { name: "MaiMai との通話" });
-    expect(within(main).getByText("MaiMai")).toBeInTheDocument();
+    expect(within(main).getAllByText("MaiMai").length).toBeGreaterThan(0);
     expect(within(main).getByText("琥珀（自分）")).toBeInTheDocument();
     // 呼び出し中→接続は非同期（effect）なので、接続まで待つ
     await waitFor(() =>

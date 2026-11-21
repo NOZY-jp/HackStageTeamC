@@ -511,10 +511,15 @@
   padding: 2px 0 4px 24px;
 }
 
+.voice-member-mic {
+  flex: none;
+  color: var(--color-text-muted);
+}
+
 .voice-member {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 6px;
   /* 行の高さで間隔を作る（アバター24px + 上下4px）。行間 gap は 2px のまま */
   min-height: 32px;
   color: var(--color-text-muted);
@@ -1185,10 +1190,6 @@
   grid-template-columns: repeat(2, minmax(0, 1fr));
 }
 
-.call-tiles[data-count="3"] .call-tile:first-child {
-  grid-row: span 2;
-}
-
 .call-tile {
   display: flex;
   flex-direction: column;
@@ -1218,7 +1219,20 @@
 
 .call-tiles[data-layout="dm"] .call-tile:first-child {
   width: 100%;
-  min-height: 180px;
+  min-height: 0;
+  padding: 8px;
+  border: 0;
+  background-color: transparent;
+}
+
+.call-tiles[data-layout="dm"] .call-tile:first-child .call-tile-avatar {
+  width: clamp(160px, 26vh, 260px);
+  height: clamp(160px, 26vh, 260px);
+  font-size: clamp(56px, 10vh, 92px);
+}
+
+.call-tiles[data-layout="dm"] .call-tile:first-child .call-tile-name {
+  font-size: clamp(18px, 2.6vh, 26px);
 }
 
 .call-tiles[data-layout="dm"] .call-tile:nth-child(2) {
@@ -6727,6 +6741,9 @@ a.tw-dm-item:focus-visible {
 .call-tiles[data-layout="grid"] {
   grid-template-columns: repeat(2, minmax(0, 1fr));
 }
+.call-tiles[data-layout="grid"][data-count="3"] {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
 .call-tiles[data-layout="grid"][data-count="1"] {
   grid-template-columns: minmax(0, 1fr);
 }
@@ -6738,17 +6755,17 @@ a.tw-dm-item:focus-visible {
 /* 発話: 緑の枠＋控えめなパルス（動きを減らす設定では止める） */
 .call-tile[data-speaking="true"] {
   border-color: var(--color-status-online);
-  box-shadow: 0 0 0 3px color-mix(in srgb, var(--color-status-online) 30%, transparent);
+  box-shadow: 0 0 0 2px color-mix(in srgb, var(--color-status-online) 45%, transparent);
   animation: call-pulse 1.8s ease-in-out infinite;
 }
 
 @keyframes call-pulse {
   0%,
   100% {
-    box-shadow: 0 0 0 3px color-mix(in srgb, var(--color-status-online) 22%, transparent);
+    box-shadow: 0 0 0 2px color-mix(in srgb, var(--color-status-online) 35%, transparent);
   }
   50% {
-    box-shadow: 0 0 0 6px color-mix(in srgb, var(--color-status-online) 14%, transparent);
+    box-shadow: 0 0 0 2px color-mix(in srgb, var(--color-status-online) 60%, transparent);
   }
 }
 

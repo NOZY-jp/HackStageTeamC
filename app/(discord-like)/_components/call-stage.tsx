@@ -336,6 +336,8 @@ export function CallStage({
                   : STATUS_LABELS.idle}
             </span>
             <span aria-hidden="true">·</span>
+            <span className="call-stage-count">{shown.length}人</span>
+            <span aria-hidden="true">·</span>
             <span className="call-stage-timer">
               <span className="sr-only">通話時間 </span>
               {elapsed}
