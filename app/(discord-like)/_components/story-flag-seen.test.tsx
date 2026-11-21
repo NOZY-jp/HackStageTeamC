@@ -7,7 +7,12 @@ import { listDMMessages, loadUntil } from "@/lib/discord-like";
 import type { SearchHit } from "@/lib/discord-like/search";
 import { toMessageView } from "@/lib/discord-like/view";
 import { availableBeats, type FlagId } from "@/lib/story";
-import { BLOG_TALK_MESSAGE_ID, MAIMAI_DM_URL_ID } from "@/lib/story/places";
+import {
+  BLOG_TALK_MESSAGE_ID,
+  KAI_DM_URL_ID,
+  KAI_NICKNAME_ADVICE_MESSAGE_ID,
+  MAIMAI_DM_URL_ID,
+} from "@/lib/story/places";
 import { LocalMessagesProvider } from "./local-messages-context";
 import { MessagePane } from "./message-pane";
 import { MessageSearch } from "./message-search";
@@ -181,5 +186,96 @@ describe("段階1: MaiMai の「攻略ブログ」の発言を確認すると s0
     await screen.findByText("全1件中 1件を表示");
     await waitFor(() => expect(seen.length).toBeGreaterThan(0));
     expect(seen.at(-1)).not.toContain("s01-blog-talk");
+  });
+});
+
+describe("True End 手がかり1: dm-kai の「でんちゃん」助言で te01-kai-nickname が立つ", () => {
+  const kaiAdviceHit: SearchHit = {
+    id: KAI_NICKNAME_ADVICE_MESSAGE_ID,
+    mode: "dm",
+    threadUrlId: KAI_DM_URL_ID,
+    channelLabel: "χ",
+    authorId: "kai",
+    authorName: "χ",
+    authorHandle: "imperial_chi",
+    sentAt: "2026-11-13T18:19:00+09:00",
+    body: "距離を縮めたいなら、ちょっとしたあだ名で呼んでみるのもいいですよ。まいまいってカタツムリみたいだから、でんでんむしで「でんちゃん」って呼んでみたら？",
+    pinned: false,
+  };
+
+  it("dm-kai を開いただけ（非交差）では立たず、助言メッセージが見えた時点で立つ", async () => {
+    const view = toMessageView(listDMMessages({ threadId: "dm-kai" }));
+    // 最新ページの下端にあるのではなく、上に18通以上の通常会話が積まれている
+    const adviceIndex = view.messages.findIndex((m) => m.id === KAI_NICKNAME_ADVICE_MESSAGE_ID);
+    expect(adviceIndex).toBeGreaterThanOrEqual(0);
+    expect(view.messages.length - 1 - adviceIndex).toBeGreaterThanOrEqual(18);
+
+    const seen: FlagId[][] = [];
+    render(
+      <StoryProvider>
+        <AppShell rail={<span />}>
+          <LocalMessagesProvider>
+            <MessagePane
+              channelKey="dm-kai"
+              mode="dm"
+              initialView={view}
+              title="χ"
+              seen={{ messageId: KAI_NICKNAME_ADVICE_MESSAGE_ID, flag: "te01-kai-nickname" }}
+            />
+          </LocalMessagesProvider>
+        </AppShell>
+        <Probe onState={(flags) => seen.push(flags)} />
+      </StoryProvider>,
+    );
+
+    await waitFor(() => expect(seen.length).toBeGreaterThan(0));
+    expect(seen.at(-1)).not.toContain("te01-kai-nickname");
+
+    const watcher = observers.find(
+      (observer) =>
+        observer.active &&
+        observer.targets.some(
+          (target) => target.getAttribute("data-message-id") === KAI_NICKNAME_ADVICE_MESSAGE_ID,
+        ),
+    );
+    expect(watcher).toBeDefined();
+    await act(async () => watcher?.callback([{ isIntersecting: true }]));
+    await waitFor(() => expect(seen.at(-1)).toContain("te01-kai-nickname"));
+  });
+
+  it("検索結果に並んだだけでは立たず、クリックしてジャンプしたときだけ立つ", async () => {
+    mockedSearch.mockResolvedValue({ ok: true, hits: [kaiAdviceHit], total: 1, matchedUsers: [] });
+    const assignMock = vi.fn();
+    const originalLocation = window.location;
+    Object.defineProperty(window, "location", {
+      configurable: true,
+      value: { ...originalLocation, assign: assignMock },
+    });
+
+    try {
+      const seen: FlagId[][] = [];
+      render(
+        <StoryProvider>
+          <MessageSearch />
+          <Probe onState={(flags) => seen.push(flags)} />
+        </StoryProvider>,
+      );
+
+      fireEvent.click(screen.getByRole("button", { name: "検索" }));
+      fireEvent.change(screen.getByLabelText("メッセージを検索"), {
+        target: { value: "from:χ" },
+      });
+
+      const result = await screen.findByRole("button", { name: /でんちゃん/ });
+      expect(seen.at(-1)).not.toContain("te01-kai-nickname");
+
+      fireEvent.click(result);
+      await waitFor(() => expect(seen.at(-1)).toContain("te01-kai-nickname"));
+      expect(assignMock).toHaveBeenCalledWith(
+        expect.stringContaining(`m=${KAI_NICKNAME_ADVICE_MESSAGE_ID}`),
+      );
+    } finally {
+      Object.defineProperty(window, "location", { configurable: true, value: originalLocation });
+    }
   });
 });

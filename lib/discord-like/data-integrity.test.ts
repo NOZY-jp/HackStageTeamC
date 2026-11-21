@@ -8,6 +8,7 @@ import {
   initialState,
   setFlag,
 } from "@/lib/story";
+import { KAI_NICKNAME_ADVICE_MESSAGE_ID } from "@/lib/story/places";
 import { getMessageImage, OLD_GAMER_ID } from "./data/message-images";
 import {
   channelMessages as staticChannelMessages,
@@ -530,14 +531,31 @@ describe("量と会話の構造（#154・#119）", () => {
     }
   });
 
-  it("静的ログ・検索に、カイの進捗助言と結末が無い", () => {
-    const plot = /本名で検索|でんちゃん|住所を特定しました|例の件、どこまで進んだ|使い回してる/;
+  it("静的ログ・検索に、カイの進捗助言と結末が無い（dm-kai の「でんちゃん」助言を除く）", () => {
+    const plot = /本名で検索|住所を特定しました|例の件、どこまで進んだ|使い回してる/;
     const staticMessages = [
       ...Object.values(staticDmMessages).flat(),
       ...Object.values(staticChannelMessages).flat(),
     ];
     expect(staticMessages.filter((message) => plot.test(message.body))).toEqual([]);
     expect(buildSearchIndex().documents.filter((doc) => plot.test(doc.body))).toEqual([]);
+
+    // 「でんちゃん」は True End 手がかり1（dm-kai の 2026-11-13 の会話）以外には置かない
+    const advice = staticDmMessages["dm-kai"]?.find(
+      (message) => message.id === KAI_NICKNAME_ADVICE_MESSAGE_ID,
+    );
+    expect(advice?.body).toContain("でんちゃん");
+    const allowedDenIds = new Set([KAI_NICKNAME_ADVICE_MESSAGE_ID, "dm-kai-clue-05"]);
+    expect(
+      staticMessages.filter(
+        (message) => message.body.includes("でんちゃん") && !allowedDenIds.has(message.id),
+      ),
+    ).toEqual([]);
+    expect(
+      buildSearchIndex().documents.filter(
+        (doc) => doc.body.includes("でんちゃん") && !allowedDenIds.has(doc.id),
+      ),
+    ).toEqual([]);
   });
 
   it("静的ログはすべてゲームの現在より前", () => {
@@ -582,7 +600,11 @@ describe("カイの進捗は進行のときだけ読める（#119）", () => {
     if (!report?.choices) throw new Error("結末の選択肢がない");
     const ended = choose(atMatch, report, "visit-house");
     expect(ended.flags).toContain("s11-address");
-    expect(availableBeats(ended).some((beat) => beat.id === "ch6-bad-end")).toBe(true);
+    // カイの助言経由で「でんちゃん」と呼んだときだけ誤認結末へ（#120）
+    const door = availableBeats(ended).find((beat) => beat.id === "ch6-call-name");
+    if (!door?.choices) throw new Error("玄関の呼び名の選択肢がない");
+    const used = choose(ended, door, "denden");
+    expect(availableBeats(used).some((beat) => beat.id === "ch6-bad-end")).toBe(true);
   });
 });
 
@@ -658,6 +680,8 @@ describe("会話の多様性と文章（main から戻した検査）", () => {
   it("同じ本文が3通続かない（募集文のコピー防止）", () => {
     for (const [channelId, list] of Object.entries(staticChannelMessages)) {
       for (let i = 2; i < list.length; i += 1) {
+        // 写真だけの投稿（本文が空）は同じ本文の連続に数えない
+        if (list[i].body.trim() === "" && (list[i].attachments?.length ?? 0) > 0) continue;
         const same = list[i].body === list[i - 1].body && list[i].body === list[i - 2].body;
         expect(same, `${channelId} ${list[i].id}`).toBe(false);
       }

@@ -84,11 +84,12 @@ describe("第五章: 本名で見つかる TalkUp アカウント（#95）", () 
     }
   });
 
-  it("検索前の「連絡先」に本名のアカウントは出さない", () => {
+  it("検索前の「連絡先」に本名のアカウントや隠しアカウントは出さない", () => {
     const contacts = listContactUsers();
     expect(contacts.some((user) => user.id === "u40")).toBe(false);
-    // 他の人物は残す
-    expect(contacts.length).toBe(listUsers().length - 1);
+    const hiddenCount = listUsers().filter((user) => user.hiddenFromDirectory).length;
+    // 他の人物は残す（u40 と hiddenFromDirectory のユーザーは除く）
+    expect(contacts.length).toBe(listUsers().length - 1 - hiddenCount);
     expect(contacts.length).toBeGreaterThan(0);
   });
 

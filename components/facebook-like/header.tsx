@@ -28,8 +28,8 @@ export function FacebookHeader() {
     <header className="fb-header">
       <div className="fb-header-left">
         <Link href="/talkup" className="fb-logo-link" aria-label="talkup ホーム">
-          <TalkupLogoIcon className="w-10 h-10 text-[#7c3aed]" />
-          <span className="text-lg font-bold text-[#7c3aed]">talkup</span>
+          <TalkupLogoIcon className="size-8 shrink-0 text-[#7c3aed] sm:size-10" />
+          <span className="text-base font-bold text-[#7c3aed] sm:text-lg">talkup</span>
         </Link>
         <div className="fb-search-box">
           <SearchIcon className="w-4 h-4 text-[var(--fb-muted)] shrink-0" />
