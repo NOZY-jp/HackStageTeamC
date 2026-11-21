@@ -15,12 +15,12 @@ npm run data:check
 | `forbidden-word`            | 「ゆい」「ゆっちゃん」を作中のどこにも出さない                                                                                                     | #76                                |
 | `real-name-outside-allowed` | 彼女の本名は talkup にだけ置く。ほかの人物の本名はどこにも置かない                                                                                 | #76（本名に届くのは段階8・10だけ） |
 | `story-only-phrase`         | 物語の進み具合で届く文言（「住所を特定しました」「本名で検索したら」）を、静的な過去のデータに置かない。物語の場面（`lib/story/scenario`）から流す | #119                               |
-| `invalid-time`              | 日時は ISO 8601。時刻つきはタイムゾーン必須（`+09:00` か `Z`）。登録日のような日付だけの値は `YYYY-MM-DD`                                          | ―                                  |
-| `after-game-now`            | 静的なデータの日時は、ゲームの「いま」（`lib/data-check/rules.ts` の `GAME_NOW`）より前                                                            | #119                               |
-| `duplicate-id`              | 同じデータの中で ID を重複させない                                                                                                                 | ―                                  |
+| `invalid-time`              | 実在する日付・時刻を ISO 8601 で書く。時刻つきはタイムゾーン必須（`+09:00` か `Z`）。登録日のような日付だけの値は `YYYY-MM-DD`                     | ―                                  |
+| `after-game-now`            | 静的なデータの日時は、ゲームの「いま」（`lib/data-check/rules.ts` の `GAME_NOW`）以前                                                              | #119                               |
+| `duplicate-id`              | 同一データセット内、および同じ入れ子の配列内で ID を重複させない                                                                                   | ―                                  |
 | 主要人物の名前              | Discord の表示名・ハンドルが名前の定数（`lib/discord-like/data/names.ts`）と同じ。Twixer に主要人物のハンドルがある。leaf に彼女の作者ページがある | #76（名前は1か所）                 |
 
-検査は、データのレコードの中の文字列を全部集めて調べます（`lib/data-check/corpus.ts`）。新しいデータのファイルを作ったら、`collectCorpus()` に1行足してください。
+検査は、登録済みデータセットのレコードから、日時・URL・色コードなどを除いた文字列を集めて調べます（`lib/data-check/corpus.ts`）。新しいデータのファイルを作ったら、`collectCorpus()` に1行足してください。
 
 ## 失敗したとき
 
@@ -31,7 +31,7 @@ story-only-phrase discord/dmMessages/dm-kai-0005 … 物語で届くはずの「
 ```
 
 - まず直す。名前は名前の定数を使い、物語で届く文言は物語の場面に移す
-- すぐに直せず、直す Issue があるときだけ、`lib/data-check/known-issues.ts` に Issue 番号つきで足す
+- すぐに直せず、直す Issue があるときだけ、`lib/data-check/known-issues.ts` に Issue 番号つきで足す。キーは、決まりの ID から違反内容まで含めて、失敗の表示をそのまま写す
 - 直ったものが `known-issues.ts` に残っていても失敗する。そのときは一覧から消す（一覧は減らしていく）
 
 ## 決まりを足すとき

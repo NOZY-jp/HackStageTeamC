@@ -1,11 +1,21 @@
 import { blogs, entries, mylists } from "@/lib/blog-like/data/blog";
+import { dmThreads } from "@/lib/discord-like/data/dm-threads";
+import { guilds } from "@/lib/discord-like/data/guilds";
+import { MESSAGE_IMAGES } from "@/lib/discord-like/data/message-images";
 import { channelMessages, dmMessages } from "@/lib/discord-like/data/messages";
 import { users as discordUsers } from "@/lib/discord-like/data/users";
+import { voiceSessions } from "@/lib/discord-like/data/voice-sessions";
+import { voiceStates } from "@/lib/discord-like/data/voice-states";
 import { fbPosts } from "@/lib/facebook-like/data/posts";
 import { fbUsers } from "@/lib/facebook-like/data/users";
 import { articles } from "@/lib/note-like/data/articles";
 import { creators } from "@/lib/note-like/data/creators";
-import { twitterPosts, twitterProfiles, twitterUsers } from "@/lib/twitter-like/data/twitter";
+import {
+  twitterPosts,
+  twitterProfiles,
+  twitterTrends,
+  twitterUsers,
+} from "@/lib/twitter-like/data/twitter";
 import { twitterConversations } from "@/lib/twitter-like/data/twitter-messages";
 
 /**
@@ -24,52 +34,67 @@ export type DataItem = {
   id: string;
   /** レコードに含まれる文字列（入れ子も含めて全部。URL や色は除く） */
   texts: string[];
-  /** レコードに含まれる日時（キーが At / Date で終わる ISO 8601 の値） */
+  /** 日時フィールドの値。形式が不正でも検査対象に含める */
   times: { key: string; value: string }[];
+  /** 同じ入れ子の配列に複数回現れた ID と、その配列の場所 */
+  duplicateNestedIds: { path: string; id: string }[];
 };
 
-const isTimeKey = (key: string) => /(At|Date|date)$/.test(key);
+const isTimeKey = (key: string) => key === "date" || /(?:At|Date)$/.test(key);
 const looksLikeNoise = (value: string) =>
-  /^(#|https?:|\/)/.test(value) || /^[0-9a-f]{6}$/i.test(value);
+  /^(?:https?:|\/)\S+$/.test(value) ||
+  /^(?:#(?:[0-9a-f]{3,4}|[0-9a-f]{6}|[0-9a-f]{8})|[0-9a-f]{6})$/i.test(value);
 
-function walk(
-  value: unknown,
-  key: string,
-  texts: string[],
-  times: { key: string; value: string }[],
-) {
+function walk(value: unknown, key: string, path: string, item: DataItem) {
   if (typeof value === "string") {
-    if (isTimeKey(key)) times.push({ key, value });
-    else if (!looksLikeNoise(value)) texts.push(value);
+    if (isTimeKey(key)) item.times.push({ key, value });
+    else if (!looksLikeNoise(value)) item.texts.push(value);
     return;
   }
   if (Array.isArray(value)) {
-    for (const item of value) walk(item, key, texts, times);
+    const seen = new Set<string>();
+    for (const [index, child] of value.entries()) {
+      if (child && typeof child === "object" && "id" in child) {
+        const { id } = child;
+        if (typeof id === "string" || typeof id === "number") {
+          const idString = String(id);
+          if (seen.has(idString)) item.duplicateNestedIds.push({ path, id: idString });
+          seen.add(idString);
+        }
+      }
+      walk(child, key, `${path}[${index}]`, item);
+    }
     return;
   }
   if (value && typeof value === "object") {
-    for (const [childKey, child] of Object.entries(value)) walk(child, childKey, texts, times);
+    for (const [childKey, child] of Object.entries(value)) {
+      walk(child, childKey, path ? `${path}.${childKey}` : childKey, item);
+    }
   }
 }
 
-function itemsOf(
+export function itemsOf<RecordType extends object>(
   platform: Platform,
   dataset: string,
-  records: readonly unknown[],
-  idOf: (record: Record<string, unknown>, index: number) => string = (record, index) =>
-    String(record.id ?? record.userId ?? index),
+  records: readonly RecordType[],
+  idOf: (record: RecordType, index: number) => string = (record, index) =>
+    String(
+      ("id" in record ? record.id : undefined) ??
+        ("userId" in record ? record.userId : index) ??
+        index,
+    ),
 ): DataItem[] {
   return records.map((record, index) => {
-    const texts: string[] = [];
-    const times: { key: string; value: string }[] = [];
-    walk(record, "", texts, times);
-    return {
+    const item: DataItem = {
       platform,
       dataset,
-      id: idOf(record as Record<string, unknown>, index),
-      texts,
-      times,
+      id: idOf(record, index),
+      texts: [],
+      times: [],
+      duplicateNestedIds: [],
     };
+    walk(record, "", "", item);
+    return item;
   });
 }
 
@@ -77,11 +102,17 @@ function itemsOf(
 export function collectCorpus(): DataItem[] {
   return [
     ...itemsOf("discord", "users", discordUsers),
+    ...itemsOf("discord", "guilds", guilds),
+    ...itemsOf("discord", "dmThreads", dmThreads),
     ...itemsOf("discord", "channelMessages", Object.values(channelMessages).flat()),
     ...itemsOf("discord", "dmMessages", Object.values(dmMessages).flat()),
+    ...itemsOf("discord", "voiceStates", voiceStates),
+    ...itemsOf("discord", "voiceSessions", voiceSessions),
+    ...itemsOf("discord", "messageImages", Object.values(MESSAGE_IMAGES), (image) => image.name),
     ...itemsOf("twixer", "users", twitterUsers),
     ...itemsOf("twixer", "profiles", twitterProfiles),
     ...itemsOf("twixer", "posts", twitterPosts),
+    ...itemsOf("twixer", "trends", twitterTrends),
     ...itemsOf("twixer", "conversations", twitterConversations),
     ...itemsOf("leaf", "creators", creators),
     ...itemsOf("leaf", "articles", articles),

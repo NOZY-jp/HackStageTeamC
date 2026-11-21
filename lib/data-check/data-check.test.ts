@@ -26,7 +26,7 @@ describe("仮データの検査", () => {
   it("新しい違反がない（決まり: forbidden-word・本名の置き場所・物語で届く文言・日時・ゲームのいま・ID の重複）", () => {
     const fresh = violations
       .filter((violation) => !known.has(violationKey(violation)))
-      .map((violation) => `${violationKey(violation)} … ${violation.detail}`);
+      .map(violationKey);
     expect(fresh, "新しい違反（直すか、直す Issue があれば known-issues.ts に足す）").toEqual([]);
   });
 
@@ -43,9 +43,18 @@ describe("仮データの検査", () => {
 describe("主要人物の名前", () => {
   it("Discord の表示名・ハンドルが、名前の定数と同じ", () => {
     const byId = new Map(discordUsers.map((user) => [user.id, user]));
-    expect(byId.get("hal")).toMatchObject({ displayName: HAL_NAME, handle: HAL_HANDLE });
-    expect(byId.get("maimai")).toMatchObject({ displayName: MAIMAI_NAME, handle: MAIMAI_HANDLE });
-    expect(byId.get("kai")).toMatchObject({ displayName: KAI_DISPLAY_NAME, handle: KAI_HANDLE });
+    expect(byId.get("hal")).toMatchObject({
+      displayName: HAL_NAME,
+      handle: HAL_HANDLE,
+    });
+    expect(byId.get("maimai")).toMatchObject({
+      displayName: MAIMAI_NAME,
+      handle: MAIMAI_HANDLE,
+    });
+    expect(byId.get("kai")).toMatchObject({
+      displayName: KAI_DISPLAY_NAME,
+      handle: KAI_HANDLE,
+    });
   });
 
   it("Twixer に、#76 で決めた主要人物のハンドルがある", () => {

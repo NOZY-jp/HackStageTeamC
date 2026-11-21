@@ -42,7 +42,7 @@ export const REAL_NAMES: { words: string[]; allowedOn: Platform[] }[] = [
 export const STORY_ONLY_PHRASES = ["住所を特定しました", "本名で検索したら"];
 
 /**
- * ゲームの「いま」。静的な過去のデータは、すべてこれより前に置く（#119）。
+ * ゲームの「いま」。静的な過去のデータは、すべてこれ以前に置く（#119）。
  * #159 の STORY_NOW と同じ値。#159 がマージされたら、そちらを import する
  */
 export const GAME_NOW = "2026-11-25T23:30:00+09:00";
@@ -51,11 +51,32 @@ export const GAME_NOW = "2026-11-25T23:30:00+09:00";
 const DATE_TIME = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}(:\d{2}(\.\d+)?)?(Z|[+-]\d{2}:\d{2})$/;
 const DATE_ONLY = /^\d{4}-\d{2}-\d{2}$/;
 
+function parseValidTime(value: string): number {
+  if (value !== value.trim() || (!DATE_TIME.test(value) && !DATE_ONLY.test(value))) {
+    return NaN;
+  }
+
+  const timestamp = Date.parse(value);
+  if (Number.isNaN(timestamp)) return NaN;
+
+  // Date.parse は存在しない月日を翌月に繰り上げることがある。
+  // タイムゾーンで前後する前の、入力にある日付そのものを検証する。
+  const date = value.slice(0, 10);
+  const parsedDate = new Date(date);
+  return parsedDate.getUTCDate() === Number(date.slice(-2)) ? timestamp : NaN;
+}
+
 export function forbiddenWords(items: DataItem[]): Violation[] {
   return items.flatMap((item) =>
     FORBIDDEN_WORDS.flatMap((word) =>
       item.texts.some((text) => text.includes(word))
-        ? [{ rule: "forbidden-word" as const, ref: refOf(item), detail: `「${word}」がある` }]
+        ? [
+            {
+              rule: "forbidden-word" as const,
+              ref: refOf(item),
+              detail: `「${word}」がある`,
+            },
+          ]
         : [],
     ),
   );
@@ -100,24 +121,24 @@ export function storyOnlyPhrases(items: DataItem[]): Violation[] {
 export function invalidTimes(items: DataItem[]): Violation[] {
   return items.flatMap((item) =>
     item.times.flatMap(({ key, value }) =>
-      DATE_TIME.test(value) || DATE_ONLY.test(value)
-        ? []
-        : [
+      Number.isNaN(parseValidTime(value))
+        ? [
             {
               rule: "invalid-time" as const,
               ref: refOf(item),
-              detail: `${key} の「${value}」は ISO 8601（タイムゾーンつき、または YYYY-MM-DD）ではない`,
+              detail: `${key} の「${value}」は有効な ISO 8601 の日時（タイムゾーンつき、または YYYY-MM-DD）ではない`,
             },
-          ],
+          ]
+        : [],
     ),
   );
 }
 
 export function afterGameNow(items: DataItem[], now = GAME_NOW): Violation[] {
-  const limit = Date.parse(now);
+  const limit = parseValidTime(now);
   return items.flatMap((item) =>
     item.times.flatMap(({ key, value }) =>
-      Date.parse(value) > limit
+      parseValidTime(value) > limit
         ? [
             {
               rule: "after-game-now" as const,
@@ -134,18 +155,39 @@ export function duplicateIds(items: DataItem[]): Violation[] {
   const seen = new Set<string>();
   return items.flatMap((item) => {
     const ref = refOf(item);
-    if (!seen.has(ref)) {
-      seen.add(ref);
-      return [];
+    const nested = item.duplicateNestedIds.map(({ path, id }) => ({
+      rule: "duplicate-id" as const,
+      ref,
+      detail: `${path} に ID「${id}」が重複している`,
+    }));
+    if (seen.has(ref)) {
+      nested.push({
+        rule: "duplicate-id",
+        ref,
+        detail: "同じデータの中で ID が重複している",
+      });
     }
-    return [{ rule: "duplicate-id" as const, ref, detail: "同じデータの中で ID が重複している" }];
+    seen.add(ref);
+    return nested;
   });
 }
 
-export const RULES: { id: RuleId; summary: string; check: (items: DataItem[]) => Violation[] }[] = [
+export const RULES: {
+  id: RuleId;
+  summary: string;
+  check: (items: DataItem[]) => Violation[];
+}[] = [
   { id: "forbidden-word", summary: "作中に出さない語", check: forbiddenWords },
-  { id: "real-name-outside-allowed", summary: "本名の置き場所", check: realNames },
-  { id: "story-only-phrase", summary: "物語で届く文言の先出し", check: storyOnlyPhrases },
+  {
+    id: "real-name-outside-allowed",
+    summary: "本名の置き場所",
+    check: realNames,
+  },
+  {
+    id: "story-only-phrase",
+    summary: "物語で届く文言の先出し",
+    check: storyOnlyPhrases,
+  },
   { id: "invalid-time", summary: "日時の形", check: invalidTimes },
   {
     id: "after-game-now",
@@ -161,5 +203,5 @@ export function checkAll(items: DataItem[]): Violation[] {
 }
 
 /** 違反を識別するキー（既知の問題の一覧と突き合わせる） */
-export const violationKey = (violation: Pick<Violation, "rule" | "ref">) =>
-  `${violation.rule} ${violation.ref}`;
+export const violationKey = (violation: Violation) =>
+  `${violation.rule} ${violation.ref} … ${violation.detail}`;
