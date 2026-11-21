@@ -30,17 +30,19 @@ export type SidebarSection = {
  * 選択中のチャンネルは pathname から決める（layout に置いても追従する。#70）。
  */
 export function ChannelTree({
+  guildId,
   guildUrlId,
   sections,
   currentUser,
 }: {
+  guildId: string;
   /** URL に出す guild の数値ID */
   guildUrlId: string;
   sections: SidebarSection[];
   currentUser: { id: string; displayName: string; avatarColor: string };
 }) {
   const [collapsed, setCollapsed] = useState<Record<string, boolean>>({});
-  const { connection } = useVoice();
+  const { connection, join } = useVoice();
   const pathname = usePathname();
 
   return (
@@ -95,6 +97,11 @@ export function ChannelTree({
                         href={href}
                         channel={shown}
                         active={isActiveHref(pathname, href)}
+                        onNavigate={() => {
+                          if (channel.kind === "voice" && pathname === href) {
+                            join({ guildId, channelId: channel.id, channelName: channel.name });
+                          }
+                        }}
                       />
                       {shown.kind === "voice" && shown.participants.length > 0 ? (
                         <ul className="voice-members" aria-label={`${channel.name} の参加者`}>
@@ -146,10 +153,12 @@ function ChannelLink({
   href,
   channel,
   active,
+  onNavigate,
 }: {
   href: string;
   channel: SidebarChannel;
   active: boolean;
+  onNavigate: () => void;
 }) {
   const label = [
     channel.kind === "text"
@@ -164,6 +173,7 @@ function ChannelLink({
   return (
     <Link
       href={href}
+      onNavigate={onNavigate}
       className="sidebar-item"
       aria-label={label}
       aria-current={active ? "page" : undefined}

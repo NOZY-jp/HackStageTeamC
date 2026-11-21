@@ -69,7 +69,12 @@ export function ChannelSidebar({ guildId }: { guildId: string }) {
           </div>
         }
       >
-        <ChannelTree guildUrlId={guild.urlId} sections={sections} currentUser={currentUser} />
+        <ChannelTree
+          guildId={guild.id}
+          guildUrlId={guild.urlId}
+          sections={sections}
+          currentUser={currentUser}
+        />
       </Suspense>
     </SidebarPane>
   );

@@ -1,7 +1,7 @@
 import { fireEvent, render } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { AppShell } from "@/components/discord-like/app-shell";
-import type { Message, MessageAuthor } from "@/lib/discord-like/types";
+import type { MemberView, Message, MessageAuthor } from "@/lib/discord-like/types";
 import { MessageList } from "./message-list";
 
 const author: MessageAuthor = { id: "u1", displayName: "テスト", avatarColor: "#5865f2" };
@@ -143,5 +143,117 @@ describe("MessageList の検索ジャンプ（中央寄せ）", () => {
     rerender(list(messages, "m-2"));
     expect(scrollIntoView).toHaveBeenCalledTimes(2);
     expect((scrollIntoView.mock.contexts[1] as HTMLElement).dataset.messageId).toBe("m-2");
+  });
+});
+
+describe("メンバー一覧の絞り込み（#163）", () => {
+  const members: MemberView[] = [
+    {
+      id: "hal",
+      displayName: "琥珀",
+      handle: "kohakunchos0117",
+      avatarColor: "#5865f2",
+      status: "online",
+    },
+    {
+      id: "master",
+      displayName: "集会所マスター",
+      handle: "shuukai_master",
+      avatarColor: "#95a5a6",
+      status: "online",
+    },
+    {
+      id: "denden",
+      displayName: "hunter_denden",
+      handle: "hunter_denden3243",
+      avatarColor: "#7289da",
+      status: "offline",
+      profileUrl: "/pochiblo/mylist/k7q2m9d4",
+    },
+  ];
+
+  const renderPanel = (resetKey = "mhc-chat") => {
+    const view = render(
+      <AppShell rail={<span />}>
+        <MessageList
+          messages={messages}
+          authors={authors}
+          title="雑談"
+          showHash
+          onLoadOlder={() => {}}
+          members={members}
+          resetKey={resetKey}
+        />
+      </AppShell>,
+    );
+    fireEvent.click(view.container.querySelector('button[aria-label="メンバー"]') as HTMLElement);
+    return view;
+  };
+
+  const memberNames = (container: HTMLElement) =>
+    [...container.querySelectorAll(".members-name")].map((node) => node.textContent);
+
+  it("表示名・ハンドルの部分一致でメンバーを絞れる（オフラインの人も探せる）", () => {
+    const { container } = renderPanel();
+    expect(memberNames(container)).toEqual(["琥珀", "集会所マスター", "hunter_denden"]);
+
+    const input = container.querySelector("#members-filter-input") as HTMLInputElement;
+    fireEvent.change(input, { target: { value: "denden" } });
+    expect(memberNames(container)).toEqual(["hunter_denden"]);
+
+    fireEvent.change(input, { target: { value: "hunter_denden3243" } });
+    expect(memberNames(container)).toEqual(["hunter_denden"]);
+
+    // 大文字小文字を区別しない
+    fireEvent.change(input, { target: { value: "HUNTER" } });
+    expect(memberNames(container)).toEqual(["hunter_denden"]);
+
+    fireEvent.change(input, { target: { value: "shuukai" } });
+    expect(memberNames(container)).toEqual(["集会所マスター"]);
+  });
+
+  it("一致するメンバーがいなければ「見つかりません」を出す", () => {
+    const { container } = renderPanel();
+    const input = container.querySelector("#members-filter-input") as HTMLInputElement;
+    fireEvent.change(input, { target: { value: "そんな人はいない" } });
+    expect(memberNames(container)).toEqual([]);
+    expect(container.querySelector(".members-panel-empty")?.textContent).toBe(
+      "メンバーが見つかりません",
+    );
+  });
+
+  it("チャンネルが変わったら絞り込みを戻す", () => {
+    const { container, rerender } = renderPanel("mhc-chat");
+    const input = container.querySelector("#members-filter-input") as HTMLInputElement;
+    fireEvent.change(input, { target: { value: "denden" } });
+    expect(memberNames(container)).toEqual(["hunter_denden"]);
+
+    rerender(
+      <AppShell rail={<span />}>
+        <MessageList
+          messages={messages}
+          authors={authors}
+          title="雑談"
+          showHash
+          onLoadOlder={() => {}}
+          members={members}
+          resetKey="mhc-questions"
+        />
+      </AppShell>,
+    );
+    expect((container.querySelector("#members-filter-input") as HTMLInputElement).value).toBe("");
+    expect(memberNames(container)).toEqual(["琥珀", "集会所マスター", "hunter_denden"]);
+  });
+
+  it("プロフィールのリンクはリンク先のURLをそのまま見せる", () => {
+    const { container } = renderPanel();
+    fireEvent.click(
+      [...container.querySelectorAll(".members-row")].find((row) =>
+        row.textContent?.includes("hunter_denden"),
+      ) as HTMLElement,
+    );
+    const link = container.querySelector(".members-profile-link") as HTMLAnchorElement;
+    expect(link.getAttribute("href")).toBe("/pochiblo/mylist/k7q2m9d4");
+    expect(link.textContent).toBe("pochiblo/mylist/k7q2m9d4");
   });
 });
