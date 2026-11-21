@@ -100,6 +100,8 @@ export function SearchView({ query, results, loading = false }: SearchViewProps)
     );
   }
 
+  const googleUrl = `https://www.google.com/search?${new URLSearchParams({ q: query })}`;
+
   return (
     <div className="seek-shell">
       <header className="seek-header">
@@ -144,7 +146,18 @@ export function SearchView({ query, results, loading = false }: SearchViewProps)
         ) : (
           <>
             <h1 className="seek-sr-only">「{query}」の検索結果</h1>
-            <p className="seek-count">約 {results.length} 件の結果</p>
+            <p className="seek-count">
+              <span>約 {results.length} 件の結果</span>
+              <span aria-hidden="true">{" · "}</span>
+              <a
+                className="seek-result-link"
+                href={googleUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                Googleで検索
+              </a>
+            </p>
             {results.length === 0 ? (
               <section className="seek-empty" aria-label="一致する結果なし">
                 <p className="seek-empty-title">
