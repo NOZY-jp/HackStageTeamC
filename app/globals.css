@@ -2360,6 +2360,18 @@ button.tw-tab:focus-visible {
   user-select: none;
 }
 
+.tw-avatar[data-kind="image"] {
+  overflow: hidden;
+  background-color: #e9eef2;
+}
+
+.tw-avatar[data-kind="image"] img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
 .tw-avatar[data-size="sm"] {
   width: 32px;
   height: 32px;
@@ -6746,6 +6758,538 @@ a.tw-dm-item:focus-visible {
 @media (prefers-reduced-motion: reduce) {
   .sb-notice {
     animation: none;
+  }
+}
+
+/* ---- タイトル画面（/）。背景に3つの SNS を流し、ぼかして重ねる。components/common/title ---- */
+
+.tt-screen {
+  position: relative;
+  height: 100dvh;
+  overflow: hidden;
+  background-color: #07080d;
+  color: #f4f1ea;
+}
+
+/* 背景：3つの SNS を横に並べ、それぞれ縦に流し続ける */
+.tt-feeds {
+  position: absolute;
+  inset: 0;
+  /* 列どうしの重なり順（z-index）を背景の中で閉じる。外に出るとぼかしやタイトルより上に来てしまう */
+  isolation: isolate;
+  z-index: 0;
+  /* マウスに合わせてわずかに動く（視差） */
+  transform: translate(calc(var(--tt-mx, 0) * -28px), calc(var(--tt-my, 0) * -18px));
+  transition: transform 0.8s cubic-bezier(0.2, 0.7, 0.2, 1);
+  /* 3枚を宙に浮いたモニターのように、少し斜めに向ける */
+  perspective: 1800px;
+}
+
+/* 3つの SNS の画面を、少しずつ重ねて並べる（右端の Discord をいちばん手前に） */
+.tt-feed {
+  position: absolute;
+  top: -25vh;
+  bottom: -25vh;
+  display: flex;
+  flex-direction: column;
+  width: min(46vw, 620px);
+  overflow: hidden;
+  border-radius: 16px;
+  box-shadow:
+    0 0 0 1px rgb(255 255 255 / 0.08),
+    0 24px 60px rgb(0 0 0 / 0.5);
+  font-family: system-ui, sans-serif;
+}
+
+/*
+ * 左から talkup・Twixer・Discord。いちばん手前は Discord（右端に置いて、文字の少ない右側の空きを画面の外に逃がす）。
+ * 奥の2枚は少し小さく暗くして、奥行きを出す
+ */
+.tt-feed[data-platform="talkup"] {
+  left: max(-6vw, -90px);
+  z-index: 1;
+  transform: rotateY(22deg) rotateZ(-8deg) scale(0.92);
+}
+
+.tt-feed[data-platform="twixer"] {
+  left: calc(50% - min(23vw, 310px));
+  z-index: 2;
+  transform: rotateY(6deg) rotateZ(-5deg) scale(0.94);
+}
+
+.tt-feed[data-platform="discord"] {
+  right: max(-10vw, -150px);
+  z-index: 3;
+  transform: rotateY(-18deg) rotateZ(-6deg);
+}
+
+/* 奥の2枚は少し暗くして、奥行きを出す */
+.tt-feed[data-platform="twixer"]::after,
+.tt-feed[data-platform="talkup"]::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background-color: rgb(0 0 0 / 0.22);
+  pointer-events: none;
+}
+
+/* talkup は白い画面なので、ほかより少し暗くして目を引きすぎないようにする */
+.tt-feed[data-platform="talkup"]::after {
+  background-color: rgb(6 8 16 / 0.48);
+}
+
+.tt-feed-head {
+  flex: none;
+  padding: 18px 18px 10px;
+  font-size: 18px;
+  font-weight: 800;
+}
+
+.tt-feed-track {
+  display: flex;
+  flex-direction: column;
+  animation: tt-scroll 70s linear infinite;
+}
+
+.tt-feed[data-platform="twixer"] .tt-feed-track {
+  animation-duration: 58s;
+  animation-direction: reverse;
+}
+
+.tt-feed[data-platform="talkup"] .tt-feed-track {
+  animation-duration: 82s;
+}
+
+.tt-feed-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin: 0;
+  padding: 0 14px 12px;
+  list-style: none;
+}
+
+.tt-feed-item {
+  display: flex;
+  gap: 10px;
+  padding: 12px;
+  border-radius: 10px;
+}
+
+.tt-feed-avatar {
+  flex: none;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+.tt-feed-body {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.tt-feed-name {
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.tt-feed-text {
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+/* 各 SNS の色味（本物の配色に寄せる） */
+.tt-feed[data-platform="discord"] {
+  background-color: #313338;
+  color: #dbdee1;
+}
+
+.tt-feed[data-platform="discord"] .tt-feed-item {
+  background-color: #2b2d31;
+}
+
+.tt-feed[data-platform="twixer"] {
+  background-color: #000;
+  color: #e7e9ea;
+  border: 1px solid #2f3336;
+}
+
+.tt-feed[data-platform="twixer"] .tt-feed-item {
+  border-bottom: 1px solid #2f3336;
+  border-radius: 0;
+}
+
+.tt-feed[data-platform="talkup"] {
+  background-color: #f0f2f5;
+  color: #050505;
+}
+
+.tt-feed[data-platform="talkup"] .tt-feed-head {
+  color: #7c3aed;
+}
+
+.tt-feed[data-platform="talkup"] .tt-feed-item {
+  background-color: #fff;
+  box-shadow: 0 1px 2px rgb(0 0 0 / 0.1);
+}
+
+@keyframes tt-scroll {
+  to {
+    transform: translateY(-50%);
+  }
+}
+
+/* 色をそろえる：3枚の画面に紺を重ね、夜の海の色味に統一する */
+.tt-grade {
+  position: absolute;
+  z-index: 1;
+  inset: 0;
+  background: linear-gradient(170deg, #12305f, #0a1838 55%, #1d1240);
+  mix-blend-mode: color;
+  opacity: 0.6;
+  pointer-events: none;
+}
+
+/* 「電子の海」の泡：小さな光の粒が、ゆっくり昇って消える */
+.tt-bubbles {
+  position: absolute;
+  z-index: 1;
+  inset: 0;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.tt-bubble {
+  position: absolute;
+  bottom: -12px;
+  border-radius: 50%;
+  background-color: rgb(170 210 255 / 0.55);
+  box-shadow: 0 0 8px rgb(140 190 255 / 0.6);
+  opacity: 0;
+  animation: tt-rise linear infinite;
+}
+
+@keyframes tt-rise {
+  10% {
+    opacity: 0.8;
+  }
+  80% {
+    opacity: 0.5;
+  }
+  100% {
+    transform: translate(18px, -110vh);
+    opacity: 0;
+  }
+}
+
+/* ぼかしと暗幕。真ん中を暗くして文字を読ませ、周りは画面の光のように青く残す。上に薄い粒子 */
+.tt-veil {
+  position: absolute;
+  z-index: 1;
+  inset: 0;
+  backdrop-filter: blur(2px);
+  background:
+    radial-gradient(
+      ellipse 55% 42% at 50% 50%,
+      rgb(6 7 12 / 0.86),
+      rgb(6 7 12 / 0.55) 60%,
+      transparent 100%
+    ),
+    radial-gradient(ellipse 120% 90% at 50% 50%, transparent 40%, rgb(3 4 8 / 0.9) 100%),
+    linear-gradient(160deg, rgb(40 70 140 / 0.18), rgb(10 12 30 / 0.1) 50%, rgb(120 40 90 / 0.12));
+}
+
+.tt-veil::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  opacity: 0.07;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  pointer-events: none;
+}
+
+/* タイトル・サブタイトル・はじめる */
+.tt-content {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  padding: 24px;
+  text-align: center;
+  animation: tt-fade-in 1.6s ease-out;
+}
+
+/* タイトルの上の英字。小さく、広い字間で */
+.tt-kicker {
+  margin-bottom: 18px;
+  color: rgb(190 210 240 / 0.55);
+  font-family: system-ui, sans-serif;
+  font-size: clamp(10px, 1vw, 12px);
+  letter-spacing: 0.55em;
+  text-indent: 0.55em;
+  text-transform: uppercase;
+}
+
+@media (max-width: 560px) {
+  .tt-kicker {
+    font-size: 9px;
+    letter-spacing: 0.3em;
+    text-indent: 0.3em;
+  }
+}
+
+.tt-title {
+  display: inline-grid;
+  font-family:
+    "Hiragino Mincho ProN", "Yu Mincho", "YuMincho", "Noto Serif JP", "Noto Serif CJK JP", serif;
+  font-size: clamp(34px, 6.6vw, 84px);
+  font-weight: 500;
+  letter-spacing: 0.12em;
+  text-shadow: 0 2px 24px rgb(0 0 0 / 0.7);
+}
+
+/* 打ち終わった幅（見えない）と、打っている文字を同じ場所に重ねる */
+.tt-title-ghost,
+.tt-title-typed {
+  grid-area: 1 / 1;
+  text-align: left;
+  white-space: nowrap;
+}
+
+.tt-title-ghost {
+  visibility: hidden;
+}
+
+/* 文字入力の棒。打ち終わっても点滅を続ける */
+.tt-caret {
+  display: inline-block;
+  width: 0.05em;
+  height: 0.9em;
+  margin-left: 0.06em;
+  vertical-align: -0.08em;
+  background-color: rgb(244 241 234 / 0.85);
+  animation: tt-blink 1.05s steps(1, end) infinite;
+}
+
+.tt-subtitle {
+  margin-top: 30px;
+  color: rgb(244 241 234 / 0.78);
+  font-family:
+    "Hiragino Mincho ProN", "Yu Mincho", "YuMincho", "Noto Serif JP", "Noto Serif CJK JP", serif;
+  font-size: clamp(15px, 1.7vw, 19px);
+  letter-spacing: 0.2em;
+  text-indent: 0.2em;
+}
+
+.tt-actions {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+  margin-top: clamp(44px, 9vh, 80px);
+}
+
+/* サブタイトルとボタンは、タイトルを打ち終えてから現れる */
+.tt-subtitle,
+.tt-actions {
+  opacity: 0;
+  translate: 0 8px;
+  transition:
+    opacity 1s ease-out,
+    translate 1s ease-out;
+}
+
+.tt-content[data-typed] .tt-subtitle {
+  opacity: 1;
+  translate: 0 0;
+}
+
+.tt-content[data-typed] .tt-actions {
+  opacity: 1;
+  translate: 0 0;
+  transition-delay: 0.5s;
+}
+
+/* はじめる：枠のない文字と矢印。かざすと下線が伸び、矢印が少し進む */
+.tt-start {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: 18px;
+  padding: 10px 6px;
+  background: none;
+  border: 0;
+  color: #f4f1ea;
+  font-family:
+    "Hiragino Mincho ProN", "Yu Mincho", "YuMincho", "Noto Serif JP", "Noto Serif CJK JP", serif;
+  font-size: 19px;
+  letter-spacing: 0.42em;
+  cursor: pointer;
+}
+
+.tt-start::after {
+  content: "";
+  position: absolute;
+  left: 6px;
+  right: 6px;
+  bottom: 2px;
+  height: 1px;
+  background-color: rgb(244 241 234 / 0.35);
+  transform-origin: left;
+  transition:
+    background-color 0.3s,
+    transform 0.4s ease-out;
+}
+
+.tt-start-arrow {
+  font-family: system-ui, sans-serif;
+  letter-spacing: 0;
+  transition: translate 0.3s ease-out;
+}
+
+.tt-start:hover::after,
+.tt-start:focus-visible::after {
+  background-color: #f4f1ea;
+}
+
+.tt-start:hover .tt-start-arrow,
+.tt-start:focus-visible .tt-start-arrow {
+  translate: 6px 0;
+}
+
+.tt-start:focus-visible {
+  outline: none;
+}
+
+.tt-start:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+
+.tt-restart {
+  padding: 4px 10px;
+  background: none;
+  border: 0;
+  color: rgb(244 241 234 / 0.5);
+  font-size: 12px;
+  letter-spacing: 0.2em;
+  cursor: pointer;
+}
+
+.tt-restart:hover {
+  color: #f4f1ea;
+}
+
+/* 下の段：左に制作、右に GitHub */
+.tt-footer {
+  position: absolute;
+  left: 26px;
+  right: 22px;
+  bottom: 18px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-family: system-ui, sans-serif;
+  font-size: 12px;
+}
+
+.tt-credit {
+  color: rgb(244 241 234 / 0.4);
+  letter-spacing: 0.12em;
+}
+
+/* 右下の GitHub */
+.tt-github {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 10px;
+  border-radius: 6px;
+  color: rgb(244 241 234 / 0.7);
+  font-family: system-ui, sans-serif;
+  font-size: 13px;
+  text-decoration: none;
+}
+
+.tt-github:hover,
+.tt-github:focus-visible {
+  color: #f4f1ea;
+  background-color: rgb(255 255 255 / 0.08);
+}
+
+/* 制作のロゴ（フェードイン → フェードアウト）。押すかキーでとばせる */
+.tt-splash {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  border: 0;
+  background-color: #000;
+  cursor: pointer;
+}
+
+.tt-splash-name {
+  color: #f4f1ea;
+  font-family: system-ui, sans-serif;
+  font-size: clamp(28px, 4vw, 44px);
+  font-weight: 300;
+  letter-spacing: 0.5em;
+  text-indent: 0.5em;
+  opacity: 0;
+  animation: tt-splash 3.2s ease-in-out forwards;
+}
+
+@keyframes tt-splash {
+  30%,
+  65% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+  }
+}
+
+@keyframes tt-blink {
+  50% {
+    opacity: 0;
+  }
+}
+
+@keyframes tt-fade-in {
+  from {
+    opacity: 0;
+  }
+}
+
+@media (max-width: 720px) {
+  .tt-feed {
+    width: 70vw;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .tt-feed-track,
+  .tt-content,
+  .tt-caret,
+  .tt-bubble {
+    animation: none;
+  }
+
+  .tt-feeds {
+    transform: none;
+  }
+
+  .tt-splash-name {
+    animation-duration: 1.2s;
   }
 }
 
