@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import {
   type KeyboardEvent as ReactKeyboardEvent,
   useCallback,
@@ -9,12 +10,14 @@ import {
   useState,
 } from "react";
 import { searchMessages } from "@/app/(discord-like)/_actions/message-search";
+import { useOptionalStory } from "@/components/common/story/story-provider";
 import type { SearchHit, SearchResponse } from "@/lib/discord-like/search";
 import {
   parseQuery,
   type SearchOrder,
   type SearchParseError,
 } from "@/lib/discord-like/search-query";
+import { BLOG_TALK_MESSAGE_ID } from "@/lib/story/places";
 
 /**
  * メッセージ検索（#69）。ブラウザ版 Discord と同じく、ヘッダの検索バーを押すと
@@ -102,6 +105,7 @@ export function MessageSearch() {
   const [query, setQuery] = useState("");
   const [order, setOrder] = useState<SearchOrder>("new");
   const [state, setState] = useState<SearchState>({ kind: "idle" });
+  const story = useOptionalStory();
 
   const openerRef = useRef<HTMLButtonElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
@@ -196,12 +200,27 @@ export function MessageSearch() {
     };
   }, [open, query, order, parsed.error]);
 
-  const jump = useCallback((hit: SearchHit) => {
-    const href = hrefFor(hit);
-    setOpen(false);
-    // ジャンプ先はサーバー側で「そのメッセージを含むページ」を返す（?m=）
-    window.location.assign(href);
-  }, []);
+  // 段階1: MaiMai の「攻略ブログ」の発言が検索結果に出た時点で、その事実を確認したとみなす
+  // （検索はグローバルでも、手がかりのメッセージは dm-maimai のこの1件だけ）。
+  useEffect(() => {
+    if (state.kind !== "results") return;
+    if (state.response.hits.some((hit) => hit.id === BLOG_TALK_MESSAGE_ID)) {
+      story?.setFlag("s01-blog-talk");
+    }
+  }, [state, story]);
+
+  const jump = useCallback(
+    (hit: SearchHit) => {
+      if (hit.authorId === "denden") {
+        story?.setFlag("s05-old-discord-user");
+      }
+      const href = hrefFor(hit);
+      setOpen(false);
+      // ジャンプ先はサーバー側で「そのメッセージを含むページ」を返す（?m=）
+      window.location.assign(href);
+    },
+    [story],
+  );
 
   // 結果内の移動（↑↓）。先頭で↑を押したら入力へ戻る
   const handleResultsKeyDown = useCallback((event: ReactKeyboardEvent<HTMLDivElement>) => {
@@ -412,9 +431,29 @@ export function MessageSearch() {
                   {response.matchedUsers.length > 0 ? (
                     <p className="search-users">
                       該当ユーザー:{" "}
-                      {response.matchedUsers
-                        .map((user) => `${user.displayName}（@${user.handle}）`)
-                        .join("、")}
+                      {response.matchedUsers.map((user, index) => (
+                        <span key={user.id}>
+                          {index > 0 ? "、" : null}
+                          {user.displayName}（@{user.handle}）
+                          {user.profileUrl ? (
+                            <>
+                              {" "}
+                              <Link
+                                href={user.profileUrl}
+                                className="text-(--color-accent-fg) underline"
+                                onClick={() => {
+                                  if (user.id === "denden") {
+                                    story?.setFlag("s05-old-discord-user");
+                                  }
+                                  close();
+                                }}
+                              >
+                                {user.profileUrl.replace(/^\//, "")}
+                              </Link>
+                            </>
+                          ) : null}
+                        </span>
+                      ))}
                     </p>
                   ) : null}
                   {response.hits.length > 0 ? (

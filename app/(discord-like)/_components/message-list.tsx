@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import {
   type ReactNode,
   type RefObject,
@@ -9,6 +10,7 @@ import {
   useRef,
   useState,
 } from "react";
+import { useOptionalStory } from "@/components/common/story/story-provider";
 import { PaneToggles } from "@/components/discord-like/pane-toggles";
 import type { MemberView, Message, MessageAuthor, VoiceSession } from "@/lib/discord-like/types";
 import { callHistoryByMessage, callHistoryLabel } from "./call-history";
@@ -72,6 +74,8 @@ export function MessageList({
   onJumpToLatest,
   members = [],
   focusMessageId,
+  seenMessageId,
+  onMessageSeen,
 }: {
   messages: Message[];
   /** 書き手情報（サーバーから渡される）。 */
@@ -106,6 +110,12 @@ export function MessageList({
   members?: MemberView[];
   /** 検索結果からジャンプしてきたメッセージ（強調して表示する）。 */
   focusMessageId?: string;
+  /**
+   * このメッセージが画面に見えたら onMessageSeen を1回呼ぶ（手がかりを「見つけた」合図）。
+   * まだ読み込んでいなければ、追加読み込みで現れた時点から監視する。
+   */
+  seenMessageId?: string;
+  onMessageSeen?: () => void;
 }) {
   const fallbackScrollRef = useRef<HTMLDivElement>(null);
   const scrollElement = scrollRef ?? fallbackScrollRef;
@@ -114,6 +124,24 @@ export function MessageList({
   const [showMembers, setShowMembers] = useState(false);
   const [openProfileId, setOpenProfileId] = useState<string | null>(null);
   const [memberQuery, setMemberQuery] = useState("");
+  const story = useOptionalStory();
+  const focusedIsDenden = Boolean(
+    focusMessageId &&
+      messages.some((message) => message.id === focusMessageId && message.authorId === "denden"),
+  );
+
+  // 旧垢のプロフィールを開いたか、旧垢の投稿へ検索ジャンプした時点で順序5のフラグを立てる
+  useEffect(() => {
+    if (!story?.ready) {
+      return;
+    }
+    if (
+      (openProfileId === "denden" || focusedIsDenden) &&
+      !story.state.flags.includes("s05-old-discord-user")
+    ) {
+      story.setFlag("s05-old-discord-user");
+    }
+  }, [story, openProfileId, focusedIsDenden]);
 
   // 名簿が無い画面（DM など）ではトグルもパネルも出さない
   const hasMembers = members.length > 0;
@@ -172,6 +200,30 @@ export function MessageList({
     target.scrollIntoView({ block: "center" });
     appliedFocusRef.current = focusKey;
   }, [focusMessageId, resetKey, messages.length]);
+
+  // 手がかりのメッセージが画面に半分以上見えたら「見つけた」とみなす。
+  // メッセージは後から読み込まれることがあるので、件数が変わるたびに探し直す。
+  // biome-ignore lint/correctness/useExhaustiveDependencies: messages.length は対象行が現れた合図
+  useEffect(() => {
+    const root = scrollElement.current;
+    const target = seenMessageId
+      ? root?.querySelector<HTMLElement>(`[data-message-id="${seenMessageId}"]`)
+      : undefined;
+    if (!root || !target || !onMessageSeen || typeof IntersectionObserver === "undefined") {
+      return;
+    }
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries.some((entry) => entry.isIntersecting)) {
+          observer.disconnect();
+          onMessageSeen();
+        }
+      },
+      { root, threshold: 0.5 },
+    );
+    observer.observe(target);
+    return () => observer.disconnect();
+  }, [seenMessageId, onMessageSeen, messages.length]);
 
   // 上端の sentinel を監視して、古いメッセージを追加で読み込む
   // biome-ignore lint/correctness/useExhaustiveDependencies: スクロール要素の ref はマウント後も同一
@@ -465,14 +517,9 @@ export function MessageList({
                           <div className="members-profile">
                             <p className="members-profile-handle">{member.handle}</p>
                             {member.profileUrl ? (
-                              <a
-                                className="members-profile-link"
-                                href={member.profileUrl}
-                                target="_blank"
-                                rel="noreferrer noopener"
-                              >
+                              <Link className="members-profile-link" href={member.profileUrl}>
                                 {profileLinkLabel(member.profileUrl)}
-                              </a>
+                              </Link>
                             ) : null}
                           </div>
                         ) : null}

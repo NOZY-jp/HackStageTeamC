@@ -1,12 +1,13 @@
 import { describe, expect, it } from "vitest";
-import { acquaintances } from "./data/people/acquaintances";
+import { FORBIDDEN_WORDS } from "../story/characters";
 import {
   FRIEND_MEMBERS,
   UNIV_JUNIORS,
   UNIV_MEMBERS,
   UNIV_PEERS,
   UNIV_SENIORS,
-} from "./generators/servers";
+} from "./data/guilds/members";
+import { acquaintances } from "./data/people/acquaintances";
 import { getGuild, getUser, listChannels, listGuilds, listMessages } from "./index";
 import { listMemberViews } from "./view";
 
@@ -113,6 +114,48 @@ describe("サーバーごとのメンバー（#163）", () => {
       ...UNIV_ACQUAINTANCE_IDS,
     ]) {
       expect(ids.has(id), id).toBe(false);
+    }
+  });
+
+  it("学科・リア友の背景メンバーはサーバーに合った名前（ハンター名は mhc だけ）", () => {
+    const hunterName = (id: string) => {
+      const user = getUser(id);
+      return (
+        /^ハンター\d{4}$/.test(user?.displayName ?? "") || /^hunter_\d{4}$/.test(user?.handle ?? "")
+      );
+    };
+    const backgroundOf = (guildId: string) =>
+      (getGuild(guildId)?.memberIds ?? []).filter((id) => id.startsWith("bg-"));
+    // mhc の背景はハンター名のまま（モンハン鯖では自然）
+    for (const id of backgroundOf("mhc")) {
+      expect(hunterName(id), `mhc:${id}`).toBe(true);
+    }
+    // 学科・リア友ではハンター名を使わない
+    for (const id of [...backgroundOf("univ"), ...backgroundOf("friend")]) {
+      expect(hunterName(id), id).toBe(false);
+    }
+  });
+
+  it("メンバーの表示名・ハンドルに禁止語（本名の読みのカタカナ・ローマ字含む）が入らない", () => {
+    for (const guild of listGuilds()) {
+      for (const id of guild.memberIds) {
+        const user = getUser(id);
+        for (const word of FORBIDDEN_WORDS) {
+          const lowered = word.toLowerCase();
+          expect(
+            user?.displayName?.toLowerCase().includes(lowered) ?? false,
+            `${guild.id}:${id} displayName「${word}」`,
+          ).toBe(false);
+          expect(
+            user?.handle?.toLowerCase().includes(lowered) ?? false,
+            `${guild.id}:${id} handle「${word}」`,
+          ).toBe(false);
+        }
+      }
+    }
+    // 大小文字混在の反例（"Hattori"・"HATTORI_0408" 系）もこの比較で検出できる
+    for (const mixed of ["Hattori", "HATTORI_0408", "hattori_1231"]) {
+      expect(mixed.toLowerCase().includes("hattori"), mixed).toBe(true);
     }
   });
 

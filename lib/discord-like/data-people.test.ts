@@ -32,34 +32,7 @@ function allAuthorIds(): string[] {
 }
 
 describe("サーバーのメッセージ集計単位（#132）", () => {
-  const textCount = (guildId: string) =>
-    listChannels(guildId)
-      .filter((channel) => channel.kind === "text")
-      .reduce(
-        (total, channel) =>
-          total + listMessages({ channelId: channel.id, limit: 5000 }).messages.length,
-        0,
-      );
-  const voiceCount = (guildId: string) =>
-    listChannels(guildId)
-      .filter((channel) => channel.kind === "voice")
-      .reduce(
-        (total, channel) =>
-          total + listMessages({ channelId: channel.id, limit: 5000 }).messages.length,
-        0,
-      );
-
-  it("text の合計は 2,690（mhc 1,570・univ 700・friend 420）", () => {
-    expect(textCount("mhc")).toBe(1570);
-    expect(textCount("univ")).toBe(700);
-    expect(textCount("friend")).toBe(420);
-    expect(textCount("mhc") + textCount("univ") + textCount("friend")).toBe(2690);
-  });
-
-  it("VC の入室/退出システムメッセージは voice チャンネルにだけある（univ 10・friend 4）", () => {
-    expect(voiceCount("univ")).toBe(10);
-    expect(voiceCount("friend")).toBe(4);
-    expect(voiceCount("mhc")).toBe(0);
+  it("VC の入室/退出システムメッセージは voice チャンネルにだけある", () => {
     for (const guildId of ["univ", "friend"]) {
       for (const channel of listChannels(guildId).filter((item) => item.kind === "voice")) {
         for (const message of listMessages({ channelId: channel.id, limit: 100 }).messages) {

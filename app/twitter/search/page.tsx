@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { StoryTrigger } from "@/components/common/story/story-trigger";
 import { Avatar } from "@/components/twitter-like/avatar";
 import { LockIcon, SearchIcon } from "@/components/twitter-like/icons";
 import { replyTargetAuthor, usersById } from "@/components/twitter-like/lookup";
@@ -46,6 +47,7 @@ export default async function TwitterSearchPage({ searchParams }: Props) {
 
   return (
     <>
+      {matchedPosts.some((p) => p.id === "post-102") ? <StoryTrigger flag="s02-bff-reply" /> : null}
       <main className="tw-main">
         <PageHeader title="検索" backHref="/twitter" />
         <form className="tw-search" action="/twitter/search">
@@ -122,7 +124,7 @@ export default async function TwitterSearchPage({ searchParams }: Props) {
               </section>
             ) : (
               <div className="tw-empty">
-                <p className="tw-empty-sub">「{query}」の検索結果はありません</p>
+                <p className="tw-empty-sub">「{query}」に一致するポストはありません</p>
               </div>
             )}
           </>

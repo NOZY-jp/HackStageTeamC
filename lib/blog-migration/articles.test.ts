@@ -1,15 +1,15 @@
 import assert from "node:assert/strict";
 import { describe, expect, it } from "vitest";
 import { externalHref, getMylist, listMylistEntries, listPublicEntries } from "../blog-like";
-import { creatorHref, getCreator, listArticlesByCreator } from "../note-like";
+import { getCreator, listArticlesByCreator } from "../note-like";
 
 describe("ぽちブロから leaf への記事移行", () => {
-  it("閉鎖のお知らせのリンクから、同じタイトルと本文の移行記事50本を読める", () => {
+  it("閉鎖のお知らせのリンクは leaf トップを指し、同じタイトルと本文の移行記事50本を読める", () => {
     const [announcement] = listPublicEntries("denden0102");
     const migrationLink = announcement.body.find((block) => block.kind === "link");
     const creator = getCreator("maimai");
     assert(creator);
-    expect(migrationLink && externalHref(migrationLink.url)).toBe(creatorHref(creator.id));
+    expect(migrationLink && externalHref(migrationLink.url)).toBe("/note");
 
     const mylist = getMylist("k7q2m9d4");
     assert(mylist);

@@ -4,14 +4,33 @@
  * 段階の status を done にしたら、ここに確認を足す。
  */
 import { describe, expect, it } from "vitest";
+import sitemap from "@/app/sitemap";
 import { getEntry, getMylist, listMylistEntries, listPublicEntries } from "@/lib/blog-like";
+import { LEAF_CREATOR_ID } from "@/lib/blog-like/data/names";
 import { getChannel, getDMThread, getGuild } from "@/lib/discord-like";
 import { channelMessages, dmMessages } from "@/lib/discord-like/data/messages";
 import { users } from "@/lib/discord-like/data/users";
-import { characters } from "./characters";
-import { MAIMAI_DM_URL_ID, MHC_GUILD_URL_ID, NIGHT_VC_URL_ID } from "./places";
+import {
+  filterFeedPosts,
+  getPostById as getTalkupPostById,
+  getUserByHandle as getTalkupUserByHandle,
+  listPosts as listTalkupPosts,
+  searchFacebook,
+} from "@/lib/facebook-like";
+import { getArticle as getNoteArticle } from "@/lib/note-like";
+import { PHOTO_CONTEST_NAME, PHOTO_CONTEST_RESULT_PATH } from "@/lib/seo/contest";
+import { getPost as getTwitterPost } from "@/lib/twitter-like";
+import { characters, FORBIDDEN_WORDS } from "./characters";
+import {
+  KAI_DM_URL_ID,
+  MAIMAI_DM_URL_ID,
+  MHC_GUILD_URL_ID,
+  NIGHT_VC_URL_ID,
+  PLACES,
+} from "./places";
+import { beats } from "./scenario";
 import { OLD_BLOG_ID } from "./sites";
-import { VOICE_CHANNELS } from "./stage";
+import { CHAT_CHANNELS, chatsOf, textsOf, VOICE_CHANNELS } from "./stage";
 import { STEP_IDS, steps } from "./steps";
 
 const OLD_DISCORD_ID = characters.maimai.accounts.discordOldId;
@@ -31,6 +50,12 @@ describe("謎解きの段階の定義", () => {
       }
     }
   });
+
+  it("11段階すべての手がかりが実装済み（done: true）になっている", () => {
+    for (const step of steps) {
+      expect(step.status, step.id).toEqual({ done: true });
+    }
+  });
 });
 
 /** Discord の過去の会話（DM とサーバーのチャンネル）を全部 */
@@ -47,15 +72,17 @@ describe("進行チェック（各プラットフォームのデータに手が�
     expect(talk.length).toBeGreaterThan(0);
   });
 
-  it("段階9: カイが、本名で検索すれば出てくると言う", () => {
-    const hint = allDiscordMessages.filter(
-      (message) => message.authorId === "kai" && message.body.includes("本名で検索"),
-    );
-    expect(hint.length).toBeGreaterThan(0);
-  });
-
-  it("段階11: 「住所を特定しました」で終わる", () => {
-    expect(allDiscordMessages.some((message) => message.body === "住所を特定しました")).toBe(true);
+  it("段階2: Twixer のリプライ（post-102）に「ブログ」と構成ヒントがあり、ブログ名や禁止語を出さない", () => {
+    const post101 = getTwitterPost("post-101");
+    const post102 = getTwitterPost("post-102");
+    expect(post101).toBeDefined();
+    expect(post102?.replyToId).toBe("post-101");
+    expect(post102?.body).toContain("ブログ");
+    expect(post102?.body).toContain("弓属性強化ガン積み構成");
+    expect(post102?.body).not.toContain("でんでんの狩猟日記");
+    for (const word of FORBIDDEN_WORDS) {
+      expect(post102?.body).not.toContain(word);
+    }
   });
 
   it("段階3: 元のブログのトップは、閉鎖のお知らせだけが公開されている", () => {
@@ -63,10 +90,29 @@ describe("進行チェック（各プラットフォームのデータに手が�
     expect(visible.map((entry) => entry.title)).toEqual(["ブログ閉鎖のお知らせ"]);
   });
 
-  it("段階5: 古いIDと完全一致する Discord ユーザーが、オフラインでいる", () => {
+  it("段階4: leaf に旧IDが写る記事（maimai-2020-02-screenshot）と弓構成の移行記事がある", () => {
+    expect(getNoteArticle(LEAF_CREATOR_ID, "maimai-2020-02-screenshot")).toBeDefined();
+    expect(getNoteArticle(LEAF_CREATOR_ID, "maimai-2019-08-bow-build")).toBeDefined();
+  });
+
+  it("段階5: 古いIDと完全一致する Discord ユーザーがオフラインでおり、#パーティー募集 に過去投稿（mhc-lfg-0901..0904）がある", () => {
     const old = users.find((user) => user.handle === OLD_DISCORD_ID);
     expect(old, OLD_DISCORD_ID).toBeDefined();
     expect(old?.status).toBe("offline");
+
+    const mhcLfg = channelMessages["mhc-lfg"] ?? [];
+    const oldPosts = mhcLfg.filter((message) =>
+      ["mhc-lfg-0901", "mhc-lfg-0902", "mhc-lfg-0903", "mhc-lfg-0904"].includes(message.id),
+    );
+    expect(oldPosts).toHaveLength(4);
+    expect(
+      oldPosts.some(
+        (message) =>
+          message.authorId === "denden" &&
+          OLD_DISCORD_ID !== undefined &&
+          message.body.includes(OLD_DISCORD_ID),
+      ),
+    ).toBe(true);
   });
 
   it("段階6: そのプロフィールのリンクは、ブログのトップではなく記事一覧（マイリスト）で、実在する", () => {
@@ -85,14 +131,75 @@ describe("進行チェック（各プラットフォームのデータに手が�
     expect(listMylistEntries(mylist).map((item) => item.id)).toContain("e20181117");
   });
 
-  it.todo("段階7・8: コンテスト名が造語「蒼穹フォトアワード 2020」になっている（#77）");
-  it.todo("段階2: Twixer にリア友とみられる人物の「○○にも書いてたよな」リプライがある");
-  it.todo("段階10: talkup に本人のプロフィールと写真がある");
+  it("段階7・8: コンテスト名が造語「蒼穹フォトアワード 2020」で、記事 e20181117 と sitemap に結果ページがある", () => {
+    expect(PHOTO_CONTEST_NAME).toBe("蒼穹フォトアワード 2020");
+    const entry = getEntry("denden0102", "e20181117");
+    expect(entry).toBeDefined();
+    const bodyText = (entry?.body ?? [])
+      .map((block) => ("text" in block ? block.text : ""))
+      .join("\n");
+    expect(bodyText).toContain(PHOTO_CONTEST_NAME);
+    const urls = sitemap().map((item) => item.url);
+    expect(urls.some((url) => url.endsWith(PHOTO_CONTEST_RESULT_PATH))).toBe(true);
+  });
+
+  it("段階9・11: Discord の静的な会話ログには、本名検索の助言や結末が先出しされない", () => {
+    expect(
+      allDiscordMessages.some(
+        (message) =>
+          message.body.includes("本名で検索") || message.body.includes("住所を特定しました"),
+      ),
+    ).toBe(false);
+  });
+
+  it("段階9: ch5-kai-contact でカイが「本名で検索」を助言し、s09-kai-contact を立てる", () => {
+    const beat = beats.find((candidate) => candidate.id === "ch5-kai-contact");
+    expect(beat).toBeDefined();
+    expect(beat?.sets).toContain("s09-kai-contact");
+    expect(beat?.place).toBe("discord:dm-kai");
+    const hasHintInScript = textsOf(beat?.script ?? []).some(
+      (line) => line.from === "kai" && line.text.includes("本名で検索"),
+    );
+    const hasHintInChats = chatsOf("ch5-kai-contact", beat?.script ?? []).some(
+      (message) => message.from === "kai" && message.text.includes("本名で検索"),
+    );
+    expect(hasHintInScript).toBe(true);
+    expect(hasHintInChats).toBe(true);
+  });
+
+  it("段階10: talkup に u40（yui__photo）と入学式の投稿（fbp-201）があり、通常フィードから隠れ、本名検索で見つかる", () => {
+    const targetUser = getTalkupUserByHandle("yui__photo");
+    expect(targetUser?.id).toBe("u40");
+    const entrancePost = getTalkupPostById("fbp-201");
+    expect(entrancePost?.authorId).toBe("u40");
+    expect(entrancePost?.body).toContain("入学式");
+    expect(filterFeedPosts(listTalkupPosts()).some((post) => post.authorId === "u40")).toBe(false);
+    const found = searchFacebook(targetUser?.displayName ?? "");
+    expect(found.users.map((user) => user.id)).toContain("u40");
+    expect(found.posts.map((post) => post.id)).toContain("fbp-201");
+  });
+
+  it("段階11: ch5-talkup の「現地へ向かう」で s11-address が立ち、ch6-bad-end へ進む", () => {
+    const talkupBeat = beats.find((candidate) => candidate.id === "ch5-talkup");
+    const visitChoice = talkupBeat?.choices?.find((choice) => choice.id === "visit-house");
+    expect(visitChoice?.label).toBe("現地へ向かう");
+    expect(visitChoice?.sets).toContain("s11-address");
+
+    const badEnd = beats.find((candidate) => candidate.id === "ch6-bad-end");
+    expect(badEnd?.when).toContain("s11-address");
+    expect(badEnd?.after).toContain("ch5-talkup");
+  });
 });
 
 describe("物語のチャットの流し先（lib/story/places.ts）", () => {
   it("MaiMai との DM の URL が Discord のデータと一致する", () => {
     expect(getDMThread("dm-maimai")?.urlId).toBe(MAIMAI_DM_URL_ID);
+  });
+
+  it("χ（カイ）との DM の URL が Discord のデータと一致し、チャット定義がある", () => {
+    expect(getDMThread("dm-kai")?.urlId).toBe(KAI_DM_URL_ID);
+    expect(PLACES["discord:dm-kai"].href).toContain(KAI_DM_URL_ID);
+    expect(CHAT_CHANNELS["discord:dm-kai"].place).toBe("discord:dm-kai");
   });
 
   it("通話の場所が Discord のボイスチャンネルで、URL も一致する", () => {

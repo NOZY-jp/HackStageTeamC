@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { BlogFrame } from "@/components/blog-like/blog-frame";
+import { ContestResultReveal } from "@/components/common/story/contest-result-reveal";
 import { getBlog } from "@/lib/blog-like";
 import {
   PHOTO_CONTEST_BLOG_ID,
@@ -43,7 +44,7 @@ export default async function ContestResultPage({ params }: Props) {
 
         <h2>優秀賞</h2>
         <p>
-          受賞者: 服部 由比
+          受賞者: <ContestResultReveal />
           <br />
           受賞作品: 「帰り道」
         </p>
