@@ -14,9 +14,11 @@ const run = (query: string, order?: "new" | "old") => {
 };
 
 describe("インデックス", () => {
-  it("#68 の全メッセージ（サーバー775・DM431）を対象にする", () => {
-    expect(index.documents.filter((doc) => doc.mode === "channel")).toHaveLength(775);
-    expect(index.documents.filter((doc) => doc.mode === "dm")).toHaveLength(431);
+  it("#68 の全メッセージ（テキスト2,690・DM1,500）を対象にする", () => {
+    // サーバーのインデックスは **text チャンネルだけ**（voice の入室/退出は対象外）。
+    // #131 で mhc に 800通、#132 で univ/friend に 1,120通（text）を追加した
+    expect(index.documents.filter((doc) => doc.mode === "channel")).toHaveLength(2690);
+    expect(index.documents.filter((doc) => doc.mode === "dm")).toHaveLength(1500);
   });
 });
 
@@ -63,7 +65,8 @@ describe("フィルタの組み合わせ", () => {
   it("has: は添付・リンクの種類で絞る", () => {
     const images = run("has:image");
     expect(images.total).toBeGreaterThan(0);
-    expect(images.hits.every((hit) => hit.body !== "")).toBe(true);
+    // 画像だけの投稿（本文なし）もある（#131）
+    expect(images.hits.some((hit) => hit.body === "")).toBe(true);
 
     const links = run("has:link");
     expect(links.total).toBeGreaterThan(0);
