@@ -86,4 +86,19 @@ describe("写真コンテストの結果ページ（#77 手順8）", () => {
     const blogMeta = await blogMetadata({ params, searchParams: emptySearch });
     expect(JSON.stringify(blogMeta)).not.toContain("服部");
   });
+
+  it("主催者ページとして独立し、個人ブログの枠・探索の文言を出さない（#222）", async () => {
+    const { container } = render(await ContestResultPage({ params, searchParams: emptySearch }));
+    // 個人ブログのヘッダー・プロフィール・カウンターを出さない
+    expect(container.querySelector(".pb-header")).toBeNull();
+    expect(container.querySelector(".pb-profile")).toBeNull();
+    expect(container.querySelector(".pb-counter")).toBeNull();
+    // 「まだ見つけていない」は段階8の仕組みなので出さない
+    expect(container.textContent).not.toContain("まだ見つけていない");
+    // 受賞作を写真・題名・講評で並べる
+    expect(container.querySelector(".contest-award-figure img")).not.toBeNull();
+    expect(container.textContent).toContain("帰り道");
+    expect(container.querySelectorAll(".contest-award-comment").length).toBeGreaterThanOrEqual(3);
+    expect(container.querySelectorAll(".contest-award").length).toBeGreaterThanOrEqual(3);
+  });
 });

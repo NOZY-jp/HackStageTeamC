@@ -1,6 +1,5 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
-import { BlogFrame } from "@/components/blog-like/blog-frame";
 import { ContestResultReveal } from "@/components/common/story/contest-result-reveal";
 import { getBlog } from "@/lib/blog-like";
 import {
@@ -10,7 +9,6 @@ import {
 } from "@/lib/seo/contest";
 import { canonicalUrl } from "@/lib/seo/site";
 
-// params から引くため、ブログの他ルートと同じくこの区画はブロックを許可する（#86 と同じ扱い）。
 export const instant = false;
 
 type Props = PageProps<"/pochiblo/[blogId]/contest/soukyuu-photo-award-2020">;
@@ -22,8 +20,9 @@ export const metadata: Metadata = {
 };
 
 /**
- * 写真コンテストの結果告知（2018年12月・当時のブログに載せたページの再現）。
- * 受賞者の本名が載る唯一のページ。サイト内のどこからもリンクしない。
+ * 写真コンテストの結果告知（2018年12月）。主催者側のページとして独立させ、
+ * 個人ブログのヘッダー・プロフィール・カウンターは出さない（#222）。
+ * 受賞者の本名は、段階7の後だけクライアント側で表示する（#76 順序7〜8）。
  */
 export default async function ContestResultPage({ params }: Props) {
   const { blogId } = await params;
@@ -33,28 +32,62 @@ export default async function ContestResultPage({ params }: Props) {
   }
 
   return (
-    <BlogFrame blog={blog}>
-      <article className="pb-entry">
-        <p className="pb-entry-date">2018年12月01日（土） 10:20</p>
-        <h1 className="pb-entry-title">{PHOTO_CONTEST_NAME} 結果</h1>
+    <main className="contest-result">
+      <header className="contest-result-head">
+        <p className="contest-result-kicker">主催</p>
+        <h1 className="contest-result-title">{PHOTO_CONTEST_NAME} 結果</h1>
+        <p className="contest-result-date">2018年12月1日（土）</p>
+      </header>
 
-        <p>
-          「{PHOTO_CONTEST_NAME}」の結果が発表されました。たくさんのご応募、ありがとうございました。
-        </p>
+      <p className="contest-result-lead">
+        「{PHOTO_CONTEST_NAME}」の結果を発表します。たくさんのご応募、ありがとうございました。
+      </p>
 
-        <h2>優秀賞</h2>
-        <p>
-          受賞者: <ContestResultReveal />
-          <br />
-          受賞作品: 「帰り道」
-        </p>
-        <p>
-          夕方のビル街で、縁石にとまる鳩と、ビルのあいだに沈む夕日を低い位置から撮った一枚です。
-          足もとの小さな草花と、帰り道の静けさが選ばれました。
-        </p>
+      <section className="contest-result-awards" aria-labelledby="contest-awards">
+        <h2 id="contest-awards">受賞作品</h2>
+        <ol className="contest-result-list">
+          <li className="contest-award">
+            <figure className="contest-award-figure">
+              {/* biome-ignore lint/performance/noImgElement: 固定サイズの記録写真なので素の img で出す */}
+              <img
+                src="/blog-like/photos/contest-photo.svg"
+                alt="夕方のビル街。縁石にとまる鳩と、ビルのあいだに沈む夕日"
+                width={800}
+                height={600}
+              />
+            </figure>
+            <div className="contest-award-body">
+              <p className="contest-award-rank">優秀賞</p>
+              <h3 className="contest-award-title">「帰り道」</h3>
+              <p className="contest-award-comment">
+                夕方のビル街で、縁石にとまる鳩と、ビルのあいだに沈む夕日を低い位置から撮った一枚です。
+                足もとの小さな草花と、帰り道の静けさが選ばれました。
+              </p>
+              <ContestResultReveal />
+            </div>
+          </li>
+          <li className="contest-award">
+            <div className="contest-award-body">
+              <p className="contest-award-rank">佳作</p>
+              <h3 className="contest-award-title">「雨上がりの商店街」</h3>
+              <p className="contest-award-comment">
+                濡れたアスファルトに映る看板の明かりを、低い位置からまとめた一枚。
+              </p>
+            </div>
+          </li>
+          <li className="contest-award">
+            <div className="contest-award-body">
+              <p className="contest-award-rank">佳作</p>
+              <h3 className="contest-award-title">「窓辺の朝」</h3>
+              <p className="contest-award-comment">
+                朝の光がカーテン越しに落ちるまでを、同じ位置から三枚撮って選んだ作品。
+              </p>
+            </div>
+          </li>
+        </ol>
+      </section>
 
-        <p>受賞者のみなさま、おめでとうございます。作品は当時のブログでも紹介しています。</p>
-      </article>
-    </BlogFrame>
+      <p className="contest-result-foot">受賞者のみなさま、おめでとうございます。</p>
+    </main>
   );
 }
