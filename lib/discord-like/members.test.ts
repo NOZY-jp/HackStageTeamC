@@ -26,19 +26,18 @@ describe("サーバーごとのメンバー（#163）", () => {
     }
   });
 
-  it("人数は docs/discord/03-people.md §5 の表どおり（mhc 260・univ 120・friend 20）", () => {
-    expect(getGuild("mhc")?.memberIds).toHaveLength(260);
+  it("人数は docs/discord/03-people.md §5 の表どおり（初期 mhc 259・univ 120・friend 20）", () => {
+    expect(getGuild("mhc")?.memberIds).toHaveLength(259);
     expect(getGuild("univ")?.memberIds).toHaveLength(120);
     expect(getGuild("friend")?.memberIds).toHaveLength(20);
   });
 
-  it("mhc はモンハンコミュニティの人だけ（旧垢・常連・背景ハンター）", () => {
+  it("mhc はモンハンコミュニティの人だけ（旧垢・常連・背景ハンター、kai は初期除外）", () => {
     const ids = new Set(getGuild("mhc")?.memberIds);
     // 必須: 発言する常連＋オフラインの旧垢
     for (const id of [
       "hal",
       "maimai",
-      "kai",
       "gunlance",
       "mina",
       "haruka",
@@ -49,27 +48,16 @@ describe("サーバーごとのメンバー（#163）", () => {
     ]) {
       expect(ids.has(id), id).toBe(true);
     }
-    // 学科の人・リア友は mhc に出ない
-    for (const id of [...UNIV_ACQUAINTANCE_IDS, ...FRIEND_ONLY_IDS]) {
+    // 学科の人・リア友・初期の kai は mhc に出ない
+    for (const id of [...UNIV_ACQUAINTANCE_IDS, ...FRIEND_ONLY_IDS, "kai"]) {
       expect(ids.has(id), id).toBe(false);
     }
     // かのんはどのサーバーにも入れない
     expect(ids.has("kanon")).toBe(false);
-    // 残りは背景アカウントだけ（ネームドは上の10人ちょうど）
+    // 残りは背景アカウントだけ（ネームドは上の9人ちょうど）
     const namedIds = (getGuild("mhc")?.memberIds ?? []).filter((id) => !id.startsWith("bg-"));
     expect([...namedIds].sort()).toEqual(
-      [
-        "hal",
-        "maimai",
-        "kai",
-        "gunlance",
-        "mina",
-        "haruka",
-        "slime",
-        "jijii",
-        "master",
-        "denden",
-      ].sort(),
+      ["hal", "maimai", "gunlance", "mina", "haruka", "slime", "jijii", "master", "denden"].sort(),
     );
   });
 

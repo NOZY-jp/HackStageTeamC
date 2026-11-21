@@ -201,6 +201,7 @@ describe("でんちゃん誤認の分岐（#120・実プレイ経由）", () => 
     await waitFor(() =>
       expect(screen.getAllByTestId("available").at(-1)?.textContent).toContain("ch6-bad-end"),
     );
+    await playScene(user, "違和感を調べ直す");
     const shown = await finishScene(user, "ch6-bad-end");
     expect(shown).toContain("その呼び方");
     expect(shown).toContain("主人公ストーカーEND");

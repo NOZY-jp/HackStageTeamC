@@ -24,15 +24,15 @@ export const chapter3: Beat[] = [
     source: "Issue #76 順序1・#172",
     memo: "カイさんが送ってくれたTwixerの投稿を見てみよう",
     script: [
-      chat(channel, "kai", "まいまいのこと、何か分かった？", sameDay("21:12:00")),
+      chat(channel, "kai", "まいまいのこと、何か分かった？", sameDay("23:31:00")),
       chat(
         channel,
         "kai",
         "Discord だけじゃなくて他のとこも見てみたら？Twixer の公開アカウントに昔の投稿が残ってたぞ",
-        sameDay("21:12:40"),
+        sameDay("23:31:40"),
         { wait: "slower" },
       ),
-      chat(channel, "kai", "https://twixer.com/mai2mai2/status/post-101", sameDay("21:13:00"), {
+      chat(channel, "kai", "https://twixer.com/mai2mai2/status/post-101", sameDay("23:32:00"), {
         wait: "slower",
       }),
       think("Twixer の投稿か。開いてみよう。"),
