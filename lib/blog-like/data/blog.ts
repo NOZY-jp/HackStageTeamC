@@ -1,5 +1,6 @@
 import { migrationArticles } from "../../blog-migration/articles";
 import type { Blog, Entry, Mylist } from "../types";
+import { photoContestWork } from "./contest";
 import { LEAF_HOST, OLD_TWIXER_HANDLE } from "./names";
 
 /**
@@ -436,7 +437,7 @@ export const entries: Entry[] = [
     body: [
       {
         kind: "paragraph",
-        text: "今日はモンハンの話じゃないです。夏休みに撮った写真を「蒼穹フォトアワード 2020」に出したら、優秀賞をもらいました！！",
+        text: "今日はモンハンの話じゃないです。夏休みに撮った写真を「蒼穹フォトアワード 2018」に出したら、優秀賞をもらいました！！",
       },
       {
         kind: "paragraph",
@@ -444,10 +445,10 @@ export const entries: Entry[] = [
       },
       {
         kind: "image",
-        src: "/blog-like/photos/contest-photo.webp",
-        alt: "夕方のビル街。ビルのあいだに沈む夕日と、歩道の縁石にとまる一羽の鳩",
-        width: 1200,
-        height: 800,
+        src: photoContestWork.src,
+        alt: photoContestWork.alt,
+        width: photoContestWork.width,
+        height: photoContestWork.height,
         caption: "賞をもらった写真です。タイトルは「帰り道」",
       },
       {

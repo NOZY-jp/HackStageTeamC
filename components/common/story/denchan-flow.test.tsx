@@ -2,8 +2,8 @@ import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { useState } from "react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import ContestResultPage from "@/app/(blog-like)/pochiblo/[blogId]/contest/soukyuu-photo-award-2020/page";
 import EntryPage from "@/app/(blog-like)/pochiblo/[blogId]/entry/[entryId]/page";
+import ContestResultPage from "@/app/(contest-like)/soukyuu-photo/2018/result/page";
 import TalkupPage from "@/app/(facebook-like)/talkup/page";
 import { FacebookProvider } from "@/components/facebook-like/facebook-context";
 import { PHOTO_CONTEST_BLOG_ID } from "@/lib/seo/contest";
@@ -125,10 +125,7 @@ async function playToDoor() {
     params: Promise.resolve({ blogId: PHOTO_CONTEST_BLOG_ID, entryId: "e20181117" }),
     searchParams: Promise.resolve({}),
   });
-  const result = await ContestResultPage({
-    params: Promise.resolve({ blogId: PHOTO_CONTEST_BLOG_ID }),
-    searchParams: Promise.resolve({}),
-  });
+  const result = ContestResultPage();
   // s08 はコンテストの結果ページで本名に触れて立てる（実ページ）
   nav.query = new URLSearchParams({ q: BFF_QUERY });
   render(
@@ -143,9 +140,7 @@ async function playToDoor() {
     </StoryProvider>,
   );
   const user = userEvent.setup();
-  await user.click(screen.getByRole("button", { name: "コンテスト名を控える" }));
-  // 結果ページで受賞者を確認して s08 を立てる（#239）
-  await user.click(await screen.findByRole("button", { name: "受賞者を確認する" }));
+  // 受賞記事を開くと s07、そのあと結果ページで受賞者名が出て s08 が立つ（#222）
   await waitFor(() =>
     expect(screen.getAllByTestId("flags").at(-1)?.textContent).toContain("s08-real-name"),
   );
@@ -206,7 +201,7 @@ describe("でんちゃん誤認の分岐（#120・実プレイ経由）", () => 
     await playScene(user, "違和感を調べ直す");
     const shown = await finishScene(user, "ch6-bad-end");
     expect(shown).toContain("その呼び方");
-    expect(shown).toContain("主人公ストーカーEND");
+    expect(shown).toContain("BAD END");
   }, 180_000);
 
   it("表示名で呼べば、誤認の結末は出ない", async () => {
@@ -226,7 +221,7 @@ describe("でんちゃん誤認の分岐（#120・実プレイ経由）", () => 
     const shown = await finishScene(user, "ch6-wait-end");
     expect(shown).toContain("今は、会えない");
     expect(shown).not.toContain("その呼び方");
-    expect(shown).not.toContain("主人公ストーカーEND");
+    expect(shown).not.toContain("BAD END");
   }, 180_000);
 
   it("住所を特定していなければ、呼び名の選択は出ない", async () => {

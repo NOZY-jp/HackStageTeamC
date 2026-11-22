@@ -78,7 +78,9 @@ describe("SEO 基盤（#77）", () => {
       0,
     );
     const noteCount = 1 + listCreators().length + listArticles().length;
-    expect(urls).toHaveLength(blogCount + publicEntryCount + noteCount + 1);
+    // 写真コンテストの主催者サイト：トップ・募集要項・結果発表・お問い合わせ（#222）
+    const contestCount = 4;
+    expect(urls).toHaveLength(blogCount + publicEntryCount + noteCount + contestCount);
   });
 
   it("metadataBase は本番URLで、他の metadata は変えていない", () => {
