@@ -26,7 +26,7 @@ describe("写真コンテストの結果ページ（#77 手順8）", () => {
     const html = container.innerHTML;
 
     expect(html).toContain(PHOTO_CONTEST_NAME);
-    // 受賞者名は「受賞者を確認する」（s07）まで伏せる（#76 順序7）
+    // 受賞者名は受賞記事を開く（s07）まで出さない（#76 順序7）
     expect(html).not.toContain("服部 由比");
     expect(html).toContain("帰り道");
     expect(html).toContain("優秀賞");

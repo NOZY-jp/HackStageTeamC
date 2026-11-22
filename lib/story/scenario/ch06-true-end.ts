@@ -108,7 +108,7 @@ export const chapter6TrueEnd: Beat[] = [
       narrate("うつむいた僕の耳に、閉ざされたドアの向こうから震える声が届いた。"),
       narrate("「もう、つきまとわないで」"),
       effect("fade-to-black", { wait: true }),
-      title("主人公ストーカーEND"),
+      title("BAD END"),
     ],
     choices: [
       {
