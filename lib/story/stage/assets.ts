@@ -46,8 +46,26 @@ export const BACKGROUNDS = {
     color: "#7d6a78",
     fit: "contain",
   },
-  cafe: { label: "喫茶店", color: "#a9825f" },
-  street: { label: "住宅街", color: "#7d8a74" },
+  cafe: {
+    label: "駅前の喫茶店（窓際の席）",
+    src: "/story/backgrounds/cafe-window.webp",
+    color: "#a9825f",
+  },
+  door: {
+    label: "彼女の家の玄関（閉まったドア）",
+    src: "/story/backgrounds/apartment-door.webp",
+    color: "#6b5a4e",
+  },
+  "door-chain": {
+    label: "彼女の家の玄関（チェーンをかけたまま数センチ開いたドア）",
+    src: "/story/backgrounds/apartment-door-chain.webp",
+    color: "#6b5a4e",
+  },
+  arrest: {
+    label: "玄関前の廊下（警察に取り押さえられる）",
+    src: "/story/backgrounds/arrest-hallway.webp",
+    color: "#3a2430",
+  },
   black: { label: "暗転", color: "#000000", solid: true },
 } as const satisfies Record<string, Asset>;
 export type BackgroundId = keyof typeof BACKGROUNDS;
