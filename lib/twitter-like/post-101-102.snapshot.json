@@ -1,0 +1,21 @@
+[
+  {
+    "id": "post-101",
+    "authorId": "tw-mai",
+    "postedAt": "2019-09-08T22:10:00+09:00",
+    "body": "弓の属性装備、スキル枠がかつかつでどれ削るか悩む…",
+    "replyCount": 1,
+    "repostCount": 0,
+    "likeCount": 12
+  },
+  {
+    "id": "post-102",
+    "authorId": "tw-tomo",
+    "postedAt": "2019-09-09T21:40:00+09:00",
+    "body": "この立ち回り、まいまいが前のブログで書いてた弓属性強化ガン積み構成のやつより楽じゃない？",
+    "replyToId": "post-101",
+    "replyCount": 0,
+    "repostCount": 0,
+    "likeCount": 3
+  }
+]

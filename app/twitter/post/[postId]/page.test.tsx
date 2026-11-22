@@ -18,6 +18,33 @@ describe("TwitterPostPage", () => {
     window.localStorage.clear();
   });
 
+  it("親の post-101 を開いただけでは s02-bff-reply が立たない", async () => {
+    const seen: FlagId[][] = [];
+    const ui = await TwitterPostPage({ params: Promise.resolve({ postId: "post-101" }) });
+    render(
+      <StoryProvider>
+        {ui}
+        <FlagProbe onFlags={(flags) => seen.push(flags)} />
+      </StoryProvider>,
+    );
+
+    await waitFor(() => expect(seen.length).toBeGreaterThan(0));
+    expect(seen.at(-1)).not.toContain("s02-bff-reply");
+  });
+
+  it("返信の post-102 を開くと s02-bff-reply が立つ", async () => {
+    const seen: FlagId[][] = [];
+    const ui = await TwitterPostPage({ params: Promise.resolve({ postId: "post-102" }) });
+    render(
+      <StoryProvider>
+        {ui}
+        <FlagProbe onFlags={(flags) => seen.push(flags)} />
+      </StoryProvider>,
+    );
+
+    await waitFor(() => expect(seen.at(-1)).toContain("s02-bff-reply"));
+  });
+
   it("post-105 の個別ページを開くと te04-kanon-stalker-post が立つ", async () => {
     const seen: FlagId[][] = [];
     const ui = await TwitterPostPage({

@@ -61,9 +61,8 @@ export default async function TwitterPostPage({ params }: Props) {
 
   return (
     <>
-      {post.id === "post-101" || post.id === "post-102" ? (
-        <StoryTrigger flag="s02-bff-reply" />
-      ) : null}
+      {/* 段階2は返信（post-102）を開いた時点で立てる。親の post-101 を開いただけでは立てない（#213） */}
+      {post.id === "post-102" ? <StoryTrigger flag="s02-bff-reply" /> : null}
       {post.id === KANON_STALKER_POST_ID ? <StoryTrigger flag="te04-kanon-stalker-post" /> : null}
       <main className="tw-main">
         <PageHeader title="ポスト" backHref={`/twitter/profile/${author.handle}`} />
