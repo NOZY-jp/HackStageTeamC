@@ -2,7 +2,7 @@ import type { FlagId } from "./flags";
 import { isAtPlace } from "./places";
 import { beats as allBeats } from "./scenario";
 import { CHAT_CHANNELS, type Cue, say } from "./stage/cues";
-import { type ChatMessage, chatsOf, textsOf, visibleCues } from "./stage/runner";
+import { type ChatMessage, chatsOf, textsOf } from "./stage/runner";
 import type { Beat, Choice, Line, StoryState } from "./types";
 
 /**
@@ -112,28 +112,19 @@ export function completeBeat(state: StoryState, beat: Beat, choiceId?: string): 
 }
 
 /** 場面の命令を、選んだ選択肢（寄り道も、選んだ順に。リョウの発言と、その後の命令）まで含めて1列にする */
-export function cuesOf(
-  beat: Beat,
-  chosen: readonly string[] = [],
-  flags?: readonly FlagId[],
-): Cue[] {
-  const cues = [
+export function cuesOf(beat: Beat, chosen: readonly string[] = []): Cue[] {
+  return [
     ...beat.script,
     ...chosen.flatMap((choiceId) => {
       const choice = beat.choices?.find((candidate) => candidate.id === choiceId);
       return choice ? [say("ryo", choice.label), ...(choice.reply ?? [])] : [];
     }),
   ];
-  return visibleCues(cues, flags);
 }
 
 /** 場面の文章（ログに残る行）。選んだ選択肢まで含める */
-export function linesOf(
-  beat: Beat,
-  chosen: readonly string[] = [],
-  flags?: readonly FlagId[],
-): Line[] {
-  return textsOf(cuesOf(beat, chosen, flags));
+export function linesOf(beat: Beat, chosen: readonly string[] = []): Line[] {
+  return textsOf(cuesOf(beat, chosen));
 }
 
 /** 終わった場面から会話の履歴を組み立て直す（保存しているのは状態だけ） */
@@ -143,7 +134,7 @@ export function transcript(
 ): { beat: Beat; lines: Line[] }[] {
   return state.completed.flatMap((beatId) => {
     const beat = beats.find((candidate) => candidate.id === beatId);
-    return beat ? [{ beat, lines: linesOf(beat, chosenIn(state, beatId), state.flags) }] : [];
+    return beat ? [{ beat, lines: linesOf(beat, chosenIn(state, beatId)) }] : [];
   });
 }
 
@@ -157,7 +148,7 @@ export function currentChapter(state: StoryState, beats: Beat[] = allBeats): num
 export function completedChats(state: StoryState, beats: Beat[] = allBeats): ChatMessage[] {
   return state.completed.flatMap((beatId) => {
     const beat = beats.find((candidate) => candidate.id === beatId);
-    return beat ? chatsOf(beat.id, cuesOf(beat, chosenIn(state, beatId), state.flags)) : [];
+    return beat ? chatsOf(beat.id, cuesOf(beat, chosenIn(state, beatId))) : [];
   });
 }
 

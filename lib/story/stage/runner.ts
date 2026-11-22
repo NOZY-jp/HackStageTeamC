@@ -1,4 +1,3 @@
-import type { FlagId } from "../flags";
 import type { CharacterId } from "../types";
 import type { BackgroundId, ImageRef } from "./assets";
 import type { ChatCue, Cue, StageCue, TextCue, VoiceChannel } from "./cues";
@@ -135,20 +134,6 @@ export function nextStop(cues: Cue[], from: number): { actions: StageCue[]; text
 /** 文章だけを取り出す（ログ用） */
 export function textsOf(cues: Cue[]): TextCue[] {
   return cues.filter((cue): cue is TextCue => cue.type === "text");
-}
-
-/**
- * 立っているフラグで出し分ける文章を除く（文章の when / unless）。
- * flags を渡さなければ全部返す（確認画面の単体再生など、状態を見せないとき）。
- */
-export function visibleCues(cues: Cue[], flags?: readonly FlagId[]): Cue[] {
-  if (!flags) return cues;
-  return cues.filter(
-    (cue) =>
-      cue.type !== "text" ||
-      ((cue.when ?? []).every((flag) => flags.includes(flag)) &&
-        !(cue.unless ?? []).some((flag) => flags.includes(flag))),
-  );
 }
 
 /** チャットに流すメッセージ（id は場面と命令の位置から作るので、何度組み立て直しても同じ） */

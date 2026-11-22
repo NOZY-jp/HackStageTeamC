@@ -130,7 +130,7 @@ export function ScenePlayer({
   const [resume] = useState(() => (rememberPosition ? loadReading(beat.id) : undefined));
   // この場面で選んだ選択肢（寄り道も、選んだ順）
   const [chosen, setChosen] = useState<string[]>(resume?.chosen ?? []);
-  const cues = useMemo(() => cuesOf(beat, chosen, flags), [beat, chosen, flags]);
+  const cues = useMemo(() => cuesOf(beat, chosen), [beat, chosen]);
   // いま出す選択肢（寄り道で立ったフラグも足して requires を見る）
   const left = useMemo(() => {
     if (!flags) return (beat.choices ?? []).filter((choice) => !chosen.includes(choice.id));

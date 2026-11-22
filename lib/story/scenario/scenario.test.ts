@@ -484,18 +484,16 @@ describe("第五章の写真の描写（#244）", () => {
     completed: ["ch5-kai-contact"],
     choices: {},
   };
-  const texts = (flags: StoryState["flags"]) => linesOf(talkup, [], flags).map((line) => line.text);
+  const texts = () => textsOf(talkup.script).map((line) => line.text);
 
-  it("BFF の写真を見ていなくても場面は始まり、写真を見た前提の文を出さない", () => {
+  it("BFF の写真を見ていなくても場面は始まり、TalkUp の写真だけを指す", () => {
     expect(availableBeats(before).map((beat) => beat.id)).toContain("ch5-talkup");
-    expect(texts(before.flags)).not.toContain("前に見た写真と、同じ二人が写っている。");
-    expect(texts(before.flags).join("\n")).not.toMatch(/前に見た写真|同じ二人/);
-    expect(texts(before.flags)).toContain("知らない人の近況が、名前もわからないまま並んでいる。");
+    expect(texts()).toContain("自己紹介の写真から、この人の日常がそのまま伝わってくる。");
+    expect(texts().join("\n")).not.toMatch(/前に見た写真|同じ二人/);
   });
 
-  it("BFF の写真を見ていれば、同じ二人だと気づく文を出す", () => {
-    const seen: StoryState["flags"] = [...before.flags, "foundBff"];
-    expect(texts(seen)).toContain("前に見た写真と、同じ二人が写っている。");
-    expect(texts(seen)).not.toContain("知らない人の近況が、名前もわからないまま並んでいる。");
+  it("BFF の写真を見ていても、前に見た写真の話にはしない", () => {
+    expect(texts().join("\n")).not.toMatch(/前に見た写真|同じ二人/);
+    expect(texts()).toContain("自己紹介の写真から、この人の日常がそのまま伝わってくる。");
   });
 });

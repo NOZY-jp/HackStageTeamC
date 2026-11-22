@@ -65,7 +65,6 @@ describe("寄り道の選択が履歴に残る（#111）", () => {
   it("第五章の観察とカイの呼び名の助言は保存後も履歴に残る（#182 の伏線）", () => {
     const talkup = findBeat("ch5-talkup");
     const ready = state({
-      // BFF の写真を見た導線（#244）
       flags: ["s08-real-name", "s09-kai-contact", "s10-talkup-match", "foundBff"],
       completed: ["ch5-kai-contact"],
     });
@@ -73,13 +72,14 @@ describe("寄り道の選択が履歴に残る（#111）", () => {
     expect(done.flags).toContain("s11-address");
     const loaded = reload(done);
     expect(loaded.choices[talkup.id]).toEqual(["visit-house"]);
-    expect(texts(loaded)).toContain("前に見た写真と、同じ二人が写っている。");
+    expect(texts(loaded)).toContain("自己紹介の写真から、この人の日常がそのまま伝わってくる。");
+    expect(texts(loaded).join("\n")).not.toMatch(/前に見た写真|同じ二人/);
     expect(completedChats(loaded)).toContainEqual(
       expect.objectContaining({ from: "kai", text: "そういえば、でんちゃんって呼ぶと喜ぶぞ" }),
     );
   });
 
-  it("BFF の写真を見ていなければ、第五章で「前に見た写真」を語らない（#244）", () => {
+  it("BFF の写真を見ていなくても、第五章は TalkUp の写真を指すだけで進む（#244）", () => {
     const talkup = findBeat("ch5-talkup");
     const ready = state({
       flags: ["s08-real-name", "s09-kai-contact", "s10-talkup-match"],
@@ -88,10 +88,9 @@ describe("寄り道の選択が履歴に残る（#111）", () => {
     const done = choose(ready, talkup, "visit-house");
     const loaded = reload(done);
     const all = texts(loaded).join("\n");
-    expect(all).not.toContain("前に見た写真");
-    expect(all).not.toContain("同じ二人");
-    expect(all).toContain("知らない人の近況が、名前もわからないまま並んでいる。");
-    // 場面自体は写真を見ていなくても進む（foundBff は前提にしない）
+    expect(all).not.toMatch(/前に見た写真|同じ二人/);
+    expect(all).toContain("自己紹介の写真から、この人の日常がそのまま伝わってくる。");
+    // 場面自体は BFF の写真を見ていなくても進む（foundBff は前提にしない）
     expect(done.flags).toContain("s11-address");
   });
 
