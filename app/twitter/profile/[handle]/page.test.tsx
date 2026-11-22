@@ -5,6 +5,8 @@ import { HAL_HANDLE } from "@/lib/discord-like/data/names";
 import type { FlagId } from "@/lib/story";
 import TwitterProfilePage from "./page";
 
+vi.mock("next/navigation", () => ({ useRouter: () => ({ replace: vi.fn() }) }));
+
 type ObserverCallback = (entries: Partial<IntersectionObserverEntry>[]) => void;
 const observers: { callback: ObserverCallback }[] = [];
 

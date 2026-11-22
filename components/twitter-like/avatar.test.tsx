@@ -1,4 +1,4 @@
-import { existsSync } from "node:fs";
+import { existsSync, readFileSync } from "node:fs";
 import { join } from "node:path";
 import { render, screen } from "@testing-library/react";
 import { describe, expect, it } from "vitest";
@@ -24,13 +24,30 @@ describe("Twixerのアイコンと照合（#169）", () => {
     }
   });
 
-  it("アイコンの見た目がツーショット写真の本人と一致する（茶髪のロング）", () => {
+  it("自画像とアルバムの特徴を維持し、写真の alt を匿名にする", () => {
     const user = kanon();
-    expect(user.avatarAlt).toContain("茶髪");
-    expect(user.avatarAlt).toContain("ロング");
+    expect(user.avatarAlt).toMatch(/橙髪.*卒業式の写真では左側/);
+    const graduation = getPost("post-103")?.media?.[0];
+    expect(graduation?.src).toBe("/blog-like/photos/graduation.webp");
+    expect(graduation?.alt).toMatch(/左は橙髪.*右は黒髪のボブ/);
+    expect(getPost("post-103")?.media?.[1]?.alt).toMatch(/左は黒髪のボブ、右は橙髪/);
+    expect(getPost("post-104")?.media?.[0]?.alt).toMatch(/左は黒髪のボブ、右は橙髪が本人/);
+
+    for (const file of [
+      "twitter-like/kanon-avatar.svg",
+      "twitter-like/photo-02.svg",
+      "twitter-like/photo-03.svg",
+      "talkup/entrance-ceremony.svg",
+      "talkup/cafe-two.svg",
+    ]) {
+      const svg = readFileSync(join(process.cwd(), "public", file), "utf8");
+      expect(svg, file).toContain('fill="#c45625"');
+      expect(svg, file).not.toContain('fill="#7a4a2c"');
+      expect(svg, file).toMatch(/aria-label="[^"]*橙髪/);
+    }
     for (const postId of ["post-103", "post-104"]) {
       const alt = getPost(postId)?.media?.[0]?.alt ?? "";
-      expect(alt, postId).toContain("茶髪のロングが本人");
+      expect(alt, postId).toBeTruthy();
       for (const word of FORBIDDEN) expect(alt, postId).not.toContain(word);
     }
   });

@@ -433,6 +433,7 @@ export function ScenePlayer({
       {!minimized && (windowVisible || needsChoice) ? (
         <TextWindow
           cue={shownCue}
+          flags={flags}
           choices={needsChoice ? left : undefined}
           busy={busy || Boolean(custom)}
           isLast={isLast}

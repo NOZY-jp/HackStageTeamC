@@ -66,7 +66,7 @@ export default async function TwitterPostPage({ params }: Props) {
       ) : null}
       {post.id === KANON_STALKER_POST_ID ? <StoryTrigger flag="te04-kanon-stalker-post" /> : null}
       <main className="tw-main">
-        <PageHeader title="ポスト" backHref="/twitter" />
+        <PageHeader title="ポスト" backHref={`/twitter/profile/${author.handle}`} />
         {ancestors.map((ancestor, i) => {
           const ancestorAuthor = users.get(ancestor.authorId);
           return ancestorAuthor ? (

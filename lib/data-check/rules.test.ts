@@ -33,7 +33,7 @@ describe("検査の決まり", () => {
     const contest = item({
       platform: "pochiblo",
       dataset: "contestResults",
-      id: "soukyuu-photo-award-2020",
+      id: "soukyuu-photo-award-2018",
       texts,
     });
     const profile = item({ platform: "talkup", dataset: "users", id: "u40", texts });
@@ -48,7 +48,7 @@ describe("検査の決まり", () => {
       ]).map(({ ref }) => ref),
     ).toEqual(
       expect.arrayContaining([
-        "pochiblo/entries/soukyuu-photo-award-2020",
+        "pochiblo/entries/soukyuu-photo-award-2018",
         "pochiblo/contestResults/other-contest",
         "talkup/users/u1",
         "talkup/posts/fbp-001",
