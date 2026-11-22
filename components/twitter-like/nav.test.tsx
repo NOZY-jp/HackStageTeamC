@@ -10,7 +10,7 @@ vi.mock("next/navigation", () => ({
 
 describe("TwitterNav", () => {
   it("Left nav profile link points at a real user", () => {
-    render(<TwitterNav />);
+    render(<TwitterNav me={getUserByHandle(HAL_HANDLE)} />);
     const href = `/twitter/profile/${HAL_HANDLE}`;
     const profileLinks = screen
       .getAllByRole("link")

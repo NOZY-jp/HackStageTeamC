@@ -1,11 +1,12 @@
 import type { Metadata } from "next";
+import { cookies } from "next/headers";
 import Link from "next/link";
 import { StoryTrigger } from "@/components/common/story/story-trigger";
 import { SearchIcon } from "@/components/twitter-like/icons";
 import { PageHeader } from "@/components/twitter-like/page-header";
 import { RightSidebar } from "@/components/twitter-like/right-sidebar";
-import { SearchProgressResults } from "@/components/twitter-like/search-progress-results";
 import { SearchResults } from "@/components/twitter-like/search-results";
+import { FOUND_BFF_COOKIE } from "@/lib/story/discovery-cookie";
 import { searchPosts, searchUsers } from "@/lib/twitter-like";
 
 export const metadata: Metadata = { title: "検索" };
@@ -33,8 +34,11 @@ export default async function TwitterSearchPage({ searchParams }: Props) {
   const { q, f } = await searchParams;
   const query = (Array.isArray(q) ? q[0] : (q ?? "")).trim();
   const tab = tabOf(f);
-  const allUsers = query ? searchUsers(query) : [];
-  const allPosts = query ? searchPosts(query) : [];
+  // 未発見のデータを初期配信物（HTML/RSC/JS）に載せないため、サーバー側で出し分ける（#248）
+  const foundBff = (await cookies()).get(FOUND_BFF_COOKIE)?.value === "1";
+  const options = { foundBff };
+  const allUsers = query ? searchUsers(query, options) : [];
+  const allPosts = query ? searchPosts(query, options) : [];
   const matchedUsers = tab === "top" || tab === "user" ? allUsers : [];
   const matchedPosts =
     tab === "user"
@@ -75,14 +79,12 @@ export default async function TwitterSearchPage({ searchParams }: Props) {
             ))}
           </nav>
         ) : null}
-        <SearchProgressResults query={query} tab={tab}>
-          <SearchResults
-            query={query}
-            tab={tab}
-            matchedUsers={matchedUsers}
-            matchedPosts={matchedPosts}
-          />
-        </SearchProgressResults>
+        <SearchResults
+          query={query}
+          tab={tab}
+          matchedUsers={matchedUsers}
+          matchedPosts={matchedPosts}
+        />
       </main>
       <RightSidebar hideSearch />
     </>
