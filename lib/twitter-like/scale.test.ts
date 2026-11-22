@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { twitterPosts, twitterUsers } from "./data/twitter";
+import { twitterPosts, twitterProfiles, twitterUsers } from "./data/twitter";
 
 /**
  * #248（ターンA）: 検索で絞れるだけのアカウントと投稿がある。
@@ -64,5 +64,55 @@ describe("Twixer のデータ規模（#248）", () => {
         twitterPosts.filter((candidate) => candidate.replyToId === post.id).length,
       );
     }
+  });
+});
+
+describe("返信の質と物語データの不変（#248）", () => {
+  const nounsOf = (body: string): string[] => body.match(/[ァ-ー]{3,}|[一-鿿]{2,6}/g) ?? [];
+  const generatedReplies = replies.filter((reply) => reply.id.startsWith("reply-"));
+  const parentBody = new Map(twitterPosts.map((post) => [post.id, post.body]));
+
+  it("生成した返信は親の本文の語を受けて書かれている", () => {
+    const withNouns = generatedReplies.filter(
+      (reply) => nounsOf(parentBody.get(reply.replyToId ?? "") ?? "").length > 0,
+    );
+    const responsive = withNouns.filter((reply) => {
+      const words = nounsOf(parentBody.get(reply.replyToId ?? "") ?? "");
+      return words.some((word) => reply.body.includes(word));
+    });
+    expect(generatedReplies.length).toBeGreaterThanOrEqual(150);
+    expect(responsive.length / withNouns.length).toBeGreaterThanOrEqual(0.95);
+  });
+
+  it("鍵垢の投稿を返信の親にせず、本文の語も返信に出さない", () => {
+    const protectedIds = new Set(
+      twitterUsers.filter((user) => user.protected).map((user) => user.id),
+    );
+    const protectedPosts = twitterPosts.filter((post) => protectedIds.has(post.authorId));
+    // 生成した返信の親だけを見る（物語側の返信 post-202 などは元からある）
+    const parentIds = new Set(generatedReplies.map((reply) => reply.replyToId));
+    for (const post of protectedPosts) {
+      expect(parentIds.has(post.id), post.id).toBe(false);
+    }
+    const replyText = replies.map((reply) => reply.body).join(String.fromCharCode(10));
+    expect(replyText).not.toContain("モンスターハンターワールド");
+  });
+
+  it("物語の投稿と旧垢の bio は変えない", () => {
+    const byId = new Map(twitterPosts.map((post) => [post.id, post]));
+    expect(byId.get("post-101")?.body).toMatchInlineSnapshot(
+      `"弓の属性装備、スキル枠がかつかつでどれ削るか悩む…"`,
+    );
+    expect(byId.get("post-102")?.body).toMatchInlineSnapshot(
+      `"この立ち回り、まいまいが前のブログで書いてた弓属性強化ガン積み構成のやつより楽じゃない？"`,
+    );
+    expect(byId.get("post-105")?.body).toMatchInlineSnapshot(
+      `"友達がストーカーされてるっぽくてガチやばいー、最近物騒ー。昔のアカウントまで掘られてたとか怖すぎるし、みんなも気をつけよ……"`,
+    );
+    expect(
+      twitterProfiles.find((profile) => profile.userId === "tw-old-denden")?.bio,
+    ).toMatchInlineSnapshot(
+      `"前は @hunter_denden0102（hunter_denden って名前だった）。「写真コンテストで賞をもらいました！」書いた人。BFF: @kanon__dayo"`,
+    );
   });
 });

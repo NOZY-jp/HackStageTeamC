@@ -1352,7 +1352,9 @@ const usedReplyBodies = new Set<string>();
 replyParents.forEach((parent, pIndex) => {
   const fragments = fragmentsOf(parent.body);
   for (let n = 0; n < 4; n += 1) {
-    const fragment = fragments.length > 0 ? fragments[(pIndex + n) % fragments.length] : "その話";
+    // 語が拾えない本文だけは最初の一文を引く（「その話」だけの返信を作らない）
+    const fallback = parent.body.split(/[。！？]/)[0]?.trim() || "その話";
+    const fragment = fragments.length > 0 ? fragments[(pIndex + n) % fragments.length] : fallback;
     const frame = REPLY_FRAMES[(pIndex + n) % REPLY_FRAMES.length];
     let body = "";
     // 文節の重なりで同じ本文になった場合だけ、言い回しをずらして一意にする
