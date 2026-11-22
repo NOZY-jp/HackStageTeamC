@@ -156,7 +156,8 @@ const seedPosts: FbPost[] = [
       subtitle: "神奈川県 / 夕方",
       accentColor: "#8fa3b0",
       src: "/talkup/seaside-sunset.svg",
-      alt: "夕方の海沿いを二人で歩く後ろ姿",
+      // 人物の照合に使う写真ではないので、二人の説明は書かない（#228）
+      alt: "夕方の海沿いの景色。空と海が同じ色に沈んでいる",
       width: 800,
       height: 600,
     },
