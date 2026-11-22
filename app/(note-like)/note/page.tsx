@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { ArticleCard } from "@/components/note-like/article-card";
-import { getCreator, listArticles, SERVICE_NAME } from "@/lib/note-like";
+import { getCreator, listTopArticles, SERVICE_NAME } from "@/lib/note-like";
 import { canonicalUrl } from "@/lib/seo/site";
 
 export const metadata: Metadata = {
@@ -11,7 +11,7 @@ export const metadata: Metadata = {
 };
 
 export default function NoteTopPage() {
-  const articles = listArticles();
+  const articles = listTopArticles();
 
   return (
     <div className="note-page">

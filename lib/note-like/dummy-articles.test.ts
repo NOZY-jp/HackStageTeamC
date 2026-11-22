@@ -18,11 +18,12 @@ const SNAPSHOT: { id: string; creatorId: string }[] = JSON.parse(
 const FORBIDDEN = ["でんちゃん", "服部", "由比", "神奈川", "住所"];
 
 describe("Leaf のダミー記事（#211）", () => {
-  it("書き手が2人以上いて、MaiMai以外の記事が3件以上ある", () => {
+  it("MaiMai以外の記事が30件以上あり、書き手と記事IDが有効", () => {
     const others = articles.filter((article) => article.creatorId !== LEAF_CREATOR_ID);
-    expect(articles.length).toBeGreaterThanOrEqual(8);
-    expect(new Set(others.map((article) => article.creatorId)).size).toBeGreaterThanOrEqual(2);
-    expect(others.length).toBeGreaterThanOrEqual(3);
+    expect(articles.length).toBeGreaterThanOrEqual(81);
+    expect(new Set(others.map((article) => article.creatorId)).size).toBeGreaterThanOrEqual(10);
+    expect(others.length).toBeGreaterThanOrEqual(30);
+    expect(new Set(articles.map(({ id }) => id)).size).toBe(articles.length);
     for (const article of others) {
       expect(
         creators.some((creator) => creator.id === article.creatorId),
@@ -31,10 +32,10 @@ describe("Leaf のダミー記事（#211）", () => {
     }
   });
 
-  it("追加記事は200字以上で、禁止語を含まない", () => {
+  it("追加記事は700字以上で、禁止語を含まない", () => {
     for (const article of articles.filter((item) => item.creatorId !== LEAF_CREATOR_ID)) {
       const body = article.body.map((block) => ("text" in block ? block.text : "")).join("");
-      expect([...body].length, article.id).toBeGreaterThanOrEqual(200);
+      expect([...body].length, article.id).toBeGreaterThanOrEqual(700);
       for (const word of FORBIDDEN) {
         expect(`${article.title}${article.excerpt}${body}`, article.id).not.toContain(word);
       }
