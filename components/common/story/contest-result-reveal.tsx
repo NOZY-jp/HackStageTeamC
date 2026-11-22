@@ -1,14 +1,15 @@
 "use client";
 
+import { useEffect } from "react";
 import { photoContestResult } from "@/lib/blog-like/data/contest";
 import { useStoryOptional } from "./story-provider";
 
 /**
  * コンテスト結果の受賞者名（#76 順序7〜8）。
- * 本名を出してよいのは段階8（s08-real-name）以降だけ（#239）。
- * 段階7（コンテスト名を知る）の間は伏せた表記にし、「受賞者を確認する」で段階8を記録する。
+ * 段階7（受賞記事を開いてコンテスト名を知る）の後でこのページを見たら、ふつうの結果ページと同じく名前を出し、
+ * そのまま段階8を記録する。「受賞者を確認する」のような、作中のページに無いボタンは置かない（#222）。
+ * 段階7の前は受賞者の行ごと出さない（伏せ字や探索の文言も出さない）。
  * 名前はクライアント側のコードだけに持ち、HTML と RSC の復元データには含めない。
- * 主催者ページなので「まだ見つけていない」のような探索の文言は出さない（#222）。
  */
 const WINNER_NAME = photoContestResult.winnerName;
 
@@ -16,21 +17,12 @@ export function ContestResultReveal() {
   const story = useStoryOptional();
   const known = story?.state.flags.includes("s07-contest-entry") ?? false;
   const found = story?.state.flags.includes("s08-real-name") ?? false;
+  const setFlag = story?.setFlag;
 
-  // s08 が成立したら、同じマウントのまま氏名に切り替わる（#239）
-  if (found) return <p data-contest-winner>受賞者: {WINNER_NAME}</p>;
+  useEffect(() => {
+    if (known && !found && setFlag) setFlag("s08-real-name");
+  }, [known, found, setFlag]);
+
   if (!known) return null;
-
-  return (
-    <p data-contest-winner>
-      受賞者: 該当アカウント（記事内で確認）
-      <button
-        type="button"
-        className="contest-award-confirm"
-        onClick={() => story?.setFlag("s08-real-name")}
-      >
-        受賞者を確認する
-      </button>
-    </p>
-  );
+  return <p data-contest-winner>受賞者　{WINNER_NAME}</p>;
 }

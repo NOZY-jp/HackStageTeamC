@@ -143,9 +143,7 @@ async function playToDoor() {
     </StoryProvider>,
   );
   const user = userEvent.setup();
-  await user.click(screen.getByRole("button", { name: "コンテスト名を控える" }));
-  // 結果ページで受賞者を確認して s08 を立てる（#239）
-  await user.click(await screen.findByRole("button", { name: "受賞者を確認する" }));
+  // 受賞記事を開くと s07、そのあと結果ページで受賞者名が出て s08 が立つ（#222）
   await waitFor(() =>
     expect(screen.getAllByTestId("flags").at(-1)?.textContent).toContain("s08-real-name"),
   );
