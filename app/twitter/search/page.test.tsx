@@ -1,9 +1,11 @@
-import { fireEvent, render, screen, within } from "@testing-library/react";
+import { act, fireEvent, render, screen, waitFor, within } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { StoryProvider, useStory } from "@/components/common/story/story-provider";
 import * as twitter from "@/lib/twitter-like";
 import type { Post } from "@/lib/twitter-like/types";
 import TwitterSearchPage from "./page";
+
+type ObserverCallback = (entries: Partial<IntersectionObserverEntry>[]) => void;
 
 vi.mock("next/navigation", () => ({ useRouter: () => ({ replace: vi.fn() }) }));
 
@@ -161,7 +163,8 @@ describe("TwitterSearchPage", () => {
     window.localStorage.clear();
   });
 
-  it("「ブログ」でリプライ(post-102)がヒットすると s02-bff-reply フラグが立つ", async () => {
+  it("検索結果にリプライ(post-102)が出ただけでは s02-bff-reply を立てない", async () => {
+    window.localStorage.clear();
     const view = await TwitterSearchPage(params("ブログ"));
     render(
       <StoryProvider>
@@ -170,6 +173,48 @@ describe("TwitterSearchPage", () => {
       </StoryProvider>,
     );
     expect(screen.getByText(/弓属性強化ガン積み構成/)).toBeInTheDocument();
-    expect(screen.getByTestId("story-flags")).toHaveTextContent("s02-bff-reply");
+    expect(screen.getByTestId("story-flags")).not.toHaveTextContent("s02-bff-reply");
+  });
+
+  it("検索結果で post-102 が画面内に見えたら s02-bff-reply を立てる", async () => {
+    window.localStorage.clear();
+    const observers: { callback: ObserverCallback; active: boolean }[] = [];
+    class MockIntersectionObserver {
+      private record: { callback: ObserverCallback; active: boolean };
+      constructor(callback: ObserverCallback) {
+        this.record = { callback, active: true };
+        observers.push(this.record);
+      }
+      observe() {}
+      unobserve() {}
+      disconnect() {
+        this.record.active = false;
+      }
+      takeRecords() {
+        return [];
+      }
+    }
+    vi.stubGlobal("IntersectionObserver", MockIntersectionObserver);
+
+    const view = await TwitterSearchPage(params("ブログ"));
+    render(
+      <StoryProvider>
+        <StoryFlagProbe />
+        {view}
+      </StoryProvider>,
+    );
+    // post-102 のカードだけが監視対象（他の検索結果は監視しない）
+    await waitFor(() => expect(observers).toHaveLength(1));
+    expect(screen.getByTestId("story-flags")).not.toHaveTextContent("s02-bff-reply");
+
+    await act(async () =>
+      observers[0].callback([{ isIntersecting: true, intersectionRatio: 0.5 }]),
+    );
+    await waitFor(() =>
+      expect(screen.getByTestId("story-flags")).toHaveTextContent("s02-bff-reply"),
+    );
+    expect(observers[0].active).toBe(false);
+    vi.unstubAllGlobals();
+    window.localStorage.clear();
   });
 });
