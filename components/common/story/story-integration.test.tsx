@@ -1,8 +1,7 @@
 import { render, screen, waitFor } from "@testing-library/react";
-import userEvent from "@testing-library/user-event";
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import ContestResultPage from "@/app/(blog-like)/pochiblo/[blogId]/contest/soukyuu-photo-award-2020/page";
 import EntryPage from "@/app/(blog-like)/pochiblo/[blogId]/entry/[entryId]/page";
+import ContestResultPage from "@/app/(contest-like)/soukyuu-photo/2018/result/page";
 import TalkupPage from "@/app/(facebook-like)/talkup/page";
 import { canConfirmTalkup } from "@/app/(facebook-like)/talkup/reveal";
 import { FacebookProvider } from "@/components/facebook-like/facebook-context";
@@ -31,11 +30,7 @@ const entryPage = () =>
     params: Promise.resolve({ blogId: PHOTO_CONTEST_BLOG_ID, entryId: "e20181117" }),
     searchParams: Promise.resolve({}),
   });
-const resultPage = () =>
-  ContestResultPage({
-    params: Promise.resolve({ blogId: PHOTO_CONTEST_BLOG_ID }),
-    searchParams: Promise.resolve({}),
-  });
+const resultPage = () => ContestResultPage();
 
 const seed = (flags: string[]) =>
   window.localStorage.setItem(
@@ -49,7 +44,7 @@ describe("段階7・8・10・結末（実ページ経由・本名は結果ペー
     nav.query = new URLSearchParams();
   });
 
-  it("受賞記事でコンテスト名を控えると段階7が立ち、結果ページへのリンクは無い", async () => {
+  it("受賞記事を開くと段階7が立ち、作中にゲーム用のボタンも結果ページへのリンクも無い", async () => {
     const seen: FlagId[][] = [];
     render(
       <StoryProvider>
@@ -59,22 +54,30 @@ describe("段階7・8・10・結末（実ページ経由・本名は結果ペー
     );
     // 結果ページへの直リンクは置かない（順序8は検索で発見する）
     expect(screen.queryByRole("button", { name: "結果ページを見る" })).toBeNull();
-
-    await userEvent.setup().click(screen.getByRole("button", { name: "コンテスト名を控える" }));
+    expect(screen.queryByRole("button", { name: "コンテスト名を控える" })).toBeNull();
     await waitFor(() => expect(seen.at(-1)).toContain("s07-contest-entry"));
   });
 
-  it("段階7の後に結果ページを見ると本名が出て段階8が立つ", async () => {
+  it("段階7の後に結果ページを見ると、ボタン無しで本名が出て段階8が立つ（#222）", async () => {
     seed(["started", "s07-contest-entry"]);
     const seen: FlagId[][] = [];
-    render(
+    const { container } = render(
       <StoryProvider>
         {await resultPage()}
         <Probe onState={(flags) => seen.push(flags)} />
       </StoryProvider>,
     );
-    expect(await screen.findByText("服部 由比")).toBeTruthy();
+    expect(await screen.findByText(/服部 由比/)).toBeTruthy();
+    expect(screen.queryByRole("button", { name: "受賞者を確認する" })).toBeNull();
+    expect(container.textContent).not.toContain("該当アカウント");
     await waitFor(() => expect(seen.at(-1)).toContain("s08-real-name"));
+  });
+
+  it("段階8の後に結果ページを見ると本名が出る（#239）", async () => {
+    seed(["started", "s07-contest-entry", "s08-real-name"]);
+    const { container } = render(<StoryProvider>{await resultPage()}</StoryProvider>);
+    expect(await screen.findByText(/服部 由比/)).toBeTruthy();
+    expect(container.textContent).toContain("受賞者");
   });
 
   it("段階7の前に結果ページを開いても、本名を出さず段階8も立てない", async () => {
@@ -114,7 +117,6 @@ describe("段階7・8・10・結末（実ページ経由・本名は結果ペー
       </StoryProvider>,
     );
     expect(screen.queryByRole("button", { name: "着いた" })).toBeNull();
-    await userEvent.setup().click(screen.getByRole("button", { name: "コンテスト名を控える" }));
     await waitFor(() => expect(seen.at(-1)).toContain("s07-contest-entry"));
 
     // 検索で結果ページに着いた想定で、結果ページを開く（同じ進行状態）

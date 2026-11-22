@@ -1,10 +1,12 @@
 import { describe, expect, it } from "vitest";
 import { characters, FORBIDDEN_WORDS, nicknames } from "../characters";
 import {
+  availableBeats,
   choose,
   completeBeat,
   completedChats,
   initialState,
+  linesOf,
   nextBeat,
   remainingChoices,
   setFlag,
@@ -222,7 +224,7 @@ describe("ゲームでの場面の進行", () => {
       expect.objectContaining({
         channel: "discord:dm-kai",
         from: "ryo",
-        text: "ありがとう、その線で探してみる",
+        text: "話せて少し落ち着いた。ありがとう。",
       }),
     );
     expect(nextBeat(state)).toBeUndefined();
@@ -471,5 +473,27 @@ describe("ゲームでの場面の進行", () => {
     if (!branch) throw new Error("ch6-branch missing");
     expect(remainingChoices(state, branch).map((choice) => choice.id)).toEqual(["confront-kai"]);
     expect(nextBeat(choose(state, branch, "confront-kai"))?.id).toBe("ch6-confront-kai");
+  });
+});
+
+describe("第五章の写真の描写（#244）", () => {
+  const talkup = beats.find((beat) => beat.id === "ch5-talkup");
+  if (!talkup) throw new Error("ch5-talkup がありません");
+  const before: StoryState = {
+    flags: ["s08-real-name", "s09-kai-contact", "s10-talkup-match"],
+    completed: ["ch5-kai-contact"],
+    choices: {},
+  };
+  const texts = () => textsOf(talkup.script).map((line) => line.text);
+
+  it("BFF の写真を見ていなくても場面は始まり、TalkUp の写真だけを指す", () => {
+    expect(availableBeats(before).map((beat) => beat.id)).toContain("ch5-talkup");
+    expect(texts()).toContain("自己紹介の写真から、この人の日常がそのまま伝わってくる。");
+    expect(texts().join("\n")).not.toMatch(/前に見た写真|同じ二人/);
+  });
+
+  it("BFF の写真を見ていても、前に見た写真の話にはしない", () => {
+    expect(texts().join("\n")).not.toMatch(/前に見た写真|同じ二人/);
+    expect(texts()).toContain("自己紹介の写真から、この人の日常がそのまま伝わってくる。");
   });
 });

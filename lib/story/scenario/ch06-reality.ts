@@ -44,7 +44,7 @@ export const chapter6: Beat[] = [
     unless: ["choseTrueEnd"],
     after: ["ch5-talkup", "ch6-call-name"],
     source: "Google Docs 箱書き 第六章（Bad End）",
-    memo: "引っかかる違和感がある。Discord・Twixer・Talkupの記録をもう一度確かめよう",
+    memo: "何かが、まだ引っかかっている。",
     script: [
       background("black", { transition: "cut" }),
       title("第六章　現実"),
@@ -91,7 +91,7 @@ export const chapter6: Beat[] = [
       narrate("その時、ドアの隙間から声が聞こえた。"),
       narrate("「もう、つきまとわないで」"),
       effect("fade-to-black", { wait: true }),
-      title("主人公ストーカーEND"),
+      title("BAD END"),
     ],
     choices: [
       {

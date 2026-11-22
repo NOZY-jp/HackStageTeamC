@@ -108,7 +108,7 @@ export const chapter6TrueEnd: Beat[] = [
       narrate("うつむいた僕の耳に、閉ざされたドアの向こうから震える声が届いた。"),
       narrate("「もう、つきまとわないで」"),
       effect("fade-to-black", { wait: true }),
-      title("主人公ストーカーEND"),
+      title("BAD END"),
     ],
     choices: [
       {
@@ -156,7 +156,7 @@ export const chapter6TrueEnd: Beat[] = [
     when: ["choseTrueEnd"],
     after: ["ch5-talkup"],
     source: "True End：カイとの対峙",
-    memo: "まいまいとのDMを開いて、正直にすべてを伝えよう",
+    memo: "話したいことがある。",
     script: [
       title("第六章　真相"),
       think("深呼吸して、カイさんとのDMを開く。感情的にならず、確かめた事実だけを並べるんだ。"),
