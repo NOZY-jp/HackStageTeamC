@@ -39,6 +39,13 @@ describe("Twixer のタイムライン（#212）", () => {
     expect(twitterFollows["tw-hal"]).toEqual(["tw-mai", "tw-sou"]);
   });
 
+  it("UTC の生成投稿と JST の既存投稿を実時刻順に並べる", () => {
+    const posts = ids(RECOMMENDED);
+    expect(posts).toContain("post-g1874");
+    expect(posts).toContain("post-400");
+    expect(posts.indexOf("post-g1874")).toBeLessThan(posts.indexOf("post-400"));
+  });
+
   it("かのんと旧アカウントは「おすすめ」にも出さない", () => {
     const hidden = new Set(["tw-kanon", "tw-old-denden"]);
     for (const post of RECOMMENDED) {

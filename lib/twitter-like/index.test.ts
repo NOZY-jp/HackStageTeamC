@@ -18,8 +18,8 @@ import {
 
 describe("lib/twitter-like のアクセサ", () => {
   it("listPosts は postedAt 降順で返す", () => {
-    const times = listPosts().map((post) => post.postedAt);
-    expect(times).toEqual([...times].sort().reverse());
+    const times = listPosts().map((post) => Date.parse(post.postedAt));
+    expect(times).toEqual([...times].sort((a, b) => b - a));
   });
 
   it("listPostsByAuthor は authorId の投稿だけを返す", () => {

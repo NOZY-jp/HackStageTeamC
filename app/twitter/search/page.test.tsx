@@ -144,6 +144,32 @@ describe("TwitterSearchPage", () => {
     expect(screen.getByText(/一致する結果はありません/)).toBeInTheDocument();
   });
 
+  it("発見後のポストを公開結果の途中に同じ検索順で表示する", async () => {
+    window.localStorage.clear();
+    const query = "写真";
+    const body = twitter.getPost("post-107")?.body ?? "";
+    expect(body).not.toBe("");
+    render(
+      <StoryProvider>
+        <DiscoverKanon />
+        {await TwitterSearchPage(params(query, "live"))}
+      </StoryProvider>,
+    );
+    expect(screen.queryByText(body)).not.toBeInTheDocument();
+
+    fireEvent.click(screen.getByRole("button", { name: "発見" }));
+
+    const discovered = await screen.findByText(body);
+    const region = screen.getByRole("region", { name: "ポスト" });
+    const results = within(region).getAllByRole("article");
+    const expected = twitter.searchPosts(query, { foundBff: true });
+    expect(results).toHaveLength(expected.length);
+    expect(results.indexOf(discovered.closest("article") as HTMLElement)).toBe(
+      expected.findIndex((post) => post.id === "post-107"),
+    );
+    window.localStorage.clear();
+  });
+
   it("「ブログ」でリプライ(post-102)がヒットすると s02-bff-reply フラグが立つ", async () => {
     const view = await TwitterSearchPage(params("ブログ"));
     render(

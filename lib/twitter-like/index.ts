@@ -22,7 +22,8 @@ import type { Post, Profile, Trend, TwitterUser } from "./types";
  */
 const copyOf = <T>(value: T): T => structuredClone(value);
 
-const byPostedAtDesc = (a: Post, b: Post): number => b.postedAt.localeCompare(a.postedAt);
+const byPostedAtDesc = (a: Post, b: Post): number =>
+  Date.parse(b.postedAt) - Date.parse(a.postedAt);
 
 /**
  * 鍵アカウントの判定。プロフィール情報は公開のまま、投稿一覧だけを隠す。
@@ -61,11 +62,15 @@ export function listFollowingIds(viewerId: string): string[] {
  */
 export function listHomePosts(viewerId: string): Post[] {
   const follows = new Set([viewerId, ...(twitterFollows[viewerId] ?? [])]);
-  const joinedAt = twitterProfiles.find((profile) => profile.userId === viewerId)?.joinedAt ?? "";
+  const joinedOn = twitterProfiles.find((profile) => profile.userId === viewerId)?.joinedAt;
+  const joinedAt = joinedOn ? Date.parse(`${joinedOn}T00:00:00+09:00`) : -Infinity;
   return copyOf(
     twitterPosts
       .filter(isVisiblePost)
-      .filter((post) => !post.replyToId && follows.has(post.authorId) && post.postedAt >= joinedAt)
+      .filter(
+        (post) =>
+          !post.replyToId && follows.has(post.authorId) && Date.parse(post.postedAt) >= joinedAt,
+      )
       .sort(byPostedAtDesc),
   );
 }
@@ -77,11 +82,14 @@ export function listHomePosts(viewerId: string): Post[] {
  */
 export function listRecommendedPosts(viewerId: string): Post[] {
   const hidden = new Set(["tw-kanon", "tw-old-denden"]);
-  const since = "2026-08-01T00:00:00+09:00";
+  const since = Date.parse("2026-08-01T00:00:00+09:00");
   return copyOf(
     twitterPosts
       .filter(isVisiblePost)
-      .filter((post) => !post.replyToId && !hidden.has(post.authorId) && post.postedAt >= since)
+      .filter(
+        (post) =>
+          !post.replyToId && !hidden.has(post.authorId) && Date.parse(post.postedAt) >= since,
+      )
       .sort(byPostedAtDesc),
   );
 }
