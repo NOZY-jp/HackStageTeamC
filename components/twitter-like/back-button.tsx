@@ -46,8 +46,10 @@ export function BackButton({ fallbackHref }: { fallbackHref: string }) {
       current && current.index >= 1 ? navigation?.entries()[current.index - 1] : undefined;
     if (window.history.length <= 1) return;
     if (navigation) {
-      // entries() は同一オリジンの履歴だけを返す。Referrer-Policy により URL 自体が隠れることがある。
-      if (!previous || (previous.url !== null && !isSameOrigin(previous.url))) return;
+      // 戻り先の origin を確認できないときは戻らない（外部の履歴へ抜けないようにする）。
+      // entries() は同一オリジンの履歴だけを返すはずだが、URL が隠れる（null）ことがあるので、
+      // その場合は判断材料が無いものとして既定のリンクへ進む。
+      if (!previous || previous.url === null || !isSameOrigin(previous.url)) return;
     } else if (!canGoBackWithinDocument()) {
       return;
     }

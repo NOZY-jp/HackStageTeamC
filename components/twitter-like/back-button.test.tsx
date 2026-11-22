@@ -60,6 +60,10 @@ describe("Twixer の戻る（#249）", () => {
     ["外部流入", 3, "https://example.com/", "https://example.com/"],
     ["偽装ドメイン", 3, origin, `${origin}.evil.com/`],
     ["偽装userinfo", 3, origin, `${origin}@evil.com/`],
+    ["別オリジン", 3, origin, "https://evil.com/twitter"],
+    ["プロトコル相対の別オリジン", 3, origin, "//evil.com/twitter"],
+    ["javascript スキーム", 3, origin, "javascript:alert(1)"],
+    ["URL が隠れた履歴", 3, origin, null],
   ])(
     "%s では canGoBack が true でも既定のリンクへ進む",
     (_label, length, referrer, previousUrl) => {
@@ -99,18 +103,32 @@ describe("Twixer の戻る（#249）", () => {
     expect(clickBack()).toBe(false);
   });
 
-  it("referrer と URL が隠れた同一オリジンの履歴に戻り、遅い応答を置き換えない", () => {
+  it("戻り先の URL が隠れていて origin を確認できないときは、戻らず既定のリンクへ進む", () => {
     const traverseTo = setHistory(2, "", {
       url: null,
       sameDocument: false,
     });
-    const pending = new Promise<never>(() => {});
-    traverseTo.mockReturnValue({ committed: pending, finished: pending });
+    const back = vi.spyOn(window.history, "back").mockImplementation(() => {});
+    try {
+      render(<BackButton fallbackHref="/twitter" />);
+      expect(clickBack()).toBe(false);
+      expect(traverseTo).not.toHaveBeenCalled();
+      expect(back).not.toHaveBeenCalled();
+      act(() => vi.advanceTimersByTime(1000));
+      expect(router.replace).not.toHaveBeenCalled();
+    } finally {
+      back.mockRestore();
+    }
+  });
+
+  it("戻り先が同一オリジンなら Navigation API で戻る", () => {
+    const traverseTo = setHistory(2, origin, {
+      url: origin + search,
+      sameDocument: false,
+    });
     render(<BackButton fallbackHref="/twitter" />);
     expect(clickBack()).toBe(true);
     expect(traverseTo).toHaveBeenCalledExactlyOnceWith("previous");
-    act(() => vi.advanceTimersByTime(1000));
-    expect(router.replace).not.toHaveBeenCalled();
   });
 
   it("Navigation API が戻りを拒否したら既定の行き先へ移る", async () => {
