@@ -129,13 +129,30 @@ function extractContentTerms(body: string): { nouns: string[]; verbStems: string
   };
 }
 
+/**
+ * 発話中に語が「その語として」現れるか。
+ * 1字の漢字名詞は「猫」が「猫背」に含まれるような別語との部分一致を数えない
+ * （前後が漢字なら同じ語の一部とみなす）。
+ */
+function termOccursIn(body: string, term: string): boolean {
+  if (term.length !== 1 || !/[一-龠]/.test(term)) return body.includes(term);
+  let index = body.indexOf(term);
+  while (index !== -1) {
+    const left = index > 0 ? body[index - 1] : "";
+    const right = index + 1 < body.length ? body[index + 1] : "";
+    if (!/[一-龠]/.test(left) && !/[一-龠]/.test(right)) return true;
+    index = body.indexOf(term, index + 1);
+  }
+  return false;
+}
+
 /** 2つの連続発話が名詞・ドメイン語または動詞語幹を引き継いでいるか判定する。 */
 function echoesPrecedingTurn(prevBody: string, currBody: string): boolean {
   const prev = extractContentTerms(prevBody);
   const curr = extractContentTerms(currBody);
   return (
-    prev.nouns.some((term) => currBody.includes(term)) ||
-    curr.nouns.some((term) => prevBody.includes(term)) ||
+    prev.nouns.some((term) => termOccursIn(currBody, term)) ||
+    curr.nouns.some((term) => termOccursIn(prevBody, term)) ||
     prev.verbStems.some((stem) => curr.verbStems.includes(stem))
   );
 }
@@ -338,6 +355,10 @@ describe("Round 6 精度指標（#252）", () => {
       expect(echoesPrecedingTurn("今日すごく暑いですね", "了解です")).toBe(false);
       expect(echoesPrecedingTurn("ESの添削をお願いします", "修正したES送ります")).toBe(true);
       expect(echoesPrecedingTurn("一次、通った？", "一次通りました")).toBe(true);
+      // 同じ字を含む別の語（猫 / 猫背）や、1字漢字の部分一致は引き継ぎに数えない
+      expect(echoesPrecedingTurn("猫が寝ている", "新しい猫背矯正の広告を見た")).toBe(false);
+      expect(echoesPrecedingTurn("犬を散歩した", "犬種の話になった")).toBe(false);
+      expect(echoesPrecedingTurn("猫が寝ている", "猫が起きた")).toBe(true);
     });
   });
 
@@ -368,8 +389,9 @@ describe("Round 6 精度指標（#252）", () => {
       /電話|通話|声聞きたい|声だけ聞きたい|話せますか|話したい|かけます|かけるよ|つなご/;
     const POST_CALL_IMPRESSION =
       /話[すせし]|声|長電話|電話|通話|おつかれ|楽しか|安心|ありがと|聞け|聞こえ|落ち着|眠く|切れ|震えて/;
+    // 謝罪・言い訳だけでは折り返しとみなさない。かけ直しの実行か申し出を要求する。
     const MISSED_CALLBACK =
-      /ごめん|すみません|寝て|風呂|気づか|出られ|ドライヤー|離せ|また|つながら|かけ直|折り返し|電話|通話|着信/;
+      /かけ直|かけなお|電話し直|つなぎ直|折り返|今からかけ|すぐかけ|あとでかけ|後でかけ|またかけ|明日かけ/;
 
     it("通話前2通以内の誘い・通話後2通以内の感想・不在着信100%折り返しを満たす", () => {
       const messages = listDMMessages({ threadId: "dm-maimai", limit: 6000 }).messages;
@@ -448,6 +470,11 @@ describe("Round 6 精度指標（#252）", () => {
       expect(missedCallbackOk / missedCalls).toBeGreaterThanOrEqual(
         T.callContext.missedCallbackRateMin,
       );
+      // 反例: 謝罪だけ・「また今度」だけでは折り返しにならない
+      expect(MISSED_CALLBACK.test("ごめん、ドライヤーしてて着信気づかなかった〜")).toBe(false);
+      expect(MISSED_CALLBACK.test("ごめん、寝てた")).toBe(false);
+      expect(MISSED_CALLBACK.test("大丈夫です。また今度")).toBe(false);
+      expect(MISSED_CALLBACK.test("ごめん、寝てた。今からかけ直してもいい？")).toBe(true);
     });
   });
 
