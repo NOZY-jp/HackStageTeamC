@@ -2,6 +2,7 @@
 
 import { useRouter } from "next/navigation";
 import { type MouseEvent, useEffect, useRef } from "react";
+import { canGoBackWithinDocument } from "./document-history";
 import { BackIcon } from "./icons";
 
 type HistoryEntry = {
@@ -29,11 +30,12 @@ export function BackButton({ fallbackHref }: { fallbackHref: string }) {
   const router = useRouter();
   const pendingBack = useRef<number | undefined>(undefined);
 
-  useEffect(() => () => window.clearTimeout(pendingBack.current), []);
+  const clearPendingBack = useRef<(() => void) | undefined>(undefined);
+
+  useEffect(() => () => clearPendingBack.current?.(), []);
 
   const onClick = (event: MouseEvent<HTMLAnchorElement>) => {
     if (event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
-
     if (pendingBack.current !== undefined) {
       event.preventDefault();
       return;
@@ -41,24 +43,46 @@ export function BackButton({ fallbackHref }: { fallbackHref: string }) {
 
     const { navigation } = window as Window & { navigation?: BrowserNavigation };
     const current = navigation?.currentEntry;
-    if (!navigation || !current || current.index < 1 || window.history.length <= 1) return;
-    const previous = navigation.entries()[current.index - 1];
-    if (!previous || !isSameOrigin(previous.url)) return;
-    // An external document referrer does not change during same-document moves.
-    if (!previous.sameDocument && !isSameOrigin(document.referrer)) return;
+    const previous =
+      current && current.index >= 1 ? navigation?.entries()[current.index - 1] : undefined;
+    if (window.history.length <= 1) return;
+    if (navigation) {
+      if (!previous || !isSameOrigin(previous.url)) return;
+      // A document referrer does not change during SPA moves.
+      if (!previous.sameDocument && !isSameOrigin(document.referrer)) return;
+    } else if (!canGoBackWithinDocument()) {
+      return;
+    }
 
     event.preventDefault();
     const url = window.location.href;
-    pendingBack.current = window.setTimeout(() => {
+    const complete = () => {
+      if (clearPendingBack.current !== complete) return;
+      window.clearTimeout(pendingBack.current);
       pendingBack.current = undefined;
+      window.removeEventListener("popstate", complete);
+      clearPendingBack.current = undefined;
+    };
+    clearPendingBack.current = complete;
+    window.addEventListener("popstate", complete, { once: true });
+    pendingBack.current = window.setTimeout(() => {
+      complete();
       if (window.location.href === url) router.replace(fallbackHref);
     }, 300);
 
-    // Target the verified entry rather than traversing an unchecked offset.
-    const { committed, finished } = navigation.traverseTo(previous.key);
-    void Promise.all([committed, finished]).catch(() => {
-      // A failed traversal is handled by the same timeout as a stalled one.
-    });
+    if (navigation && previous) {
+      const { committed, finished } = navigation.traverseTo(previous.key);
+      void Promise.all([committed, finished]).then(
+        () => {
+          if (window.location.href !== url) complete();
+        },
+        () => {
+          // The timeout also covers a failed traversal.
+        },
+      );
+    } else {
+      window.history.back();
+    }
   };
 
   return (

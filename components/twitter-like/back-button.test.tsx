@@ -1,6 +1,7 @@
 import { act, fireEvent, render, screen } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { BackButton } from "./back-button";
+import { trackDocumentHistory } from "./document-history";
 
 const router = vi.hoisted(() => ({ replace: vi.fn() }));
 vi.mock("next/navigation", () => ({ useRouter: () => router }));
@@ -121,5 +122,54 @@ describe("Twixer の戻る（#249）", () => {
     unmount();
     act(() => vi.advanceTimersByTime(300));
     expect(router.replace).not.toHaveBeenCalled();
+  });
+
+  it("Navigation APIなしでも同じ文書内のpushから戻り、外部へは抜けない", async () => {
+    vi.useRealTimers();
+    vi.stubGlobal("navigation", undefined);
+    Object.defineProperty(document, "referrer", {
+      value: "https://example.com/",
+      configurable: true,
+    });
+    Reflect.deleteProperty(history, "length");
+    const stopTracking = trackDocumentHistory();
+    const back = vi.spyOn(history, "back");
+    try {
+      render(<BackButton fallbackHref="/twitter" />);
+      expect(clickBack()).toBe(false);
+      history.pushState({ custom: 1 }, "", search);
+      history.replaceState({ custom: 2 }, "", `${search}&more=1`);
+      expect(history.state.custom).toBe(2);
+      const returned = new Promise<void>((resolve) => {
+        window.addEventListener("popstate", () => resolve(), { once: true });
+      });
+      expect(clickBack()).toBe(true);
+      expect(back).toHaveBeenCalledOnce();
+      await returned;
+      expect(window.location.pathname).toBe(post);
+      expect(clickBack()).toBe(false);
+      expect(back).toHaveBeenCalledOnce();
+    } finally {
+      back.mockRestore();
+      stopTracking();
+    }
+  });
+
+  it("同じ検索ルートで戻りが完了したら300msを待たず次の履歴へ戻る", () => {
+    const first = "/twitter/search?q=mai&f=user";
+    const second = "/twitter/search?q=kanon&f=user";
+    window.history.replaceState(null, "", second);
+    const traverseTo = setHistory(3, "", { url: origin + first, sameDocument: true });
+    traverseTo.mockImplementationOnce(() => {
+      window.history.replaceState(null, "", first);
+      window.dispatchEvent(new PopStateEvent("popstate"));
+      return { committed: Promise.resolve(), finished: Promise.resolve() };
+    });
+    render(<BackButton fallbackHref="/twitter" />);
+    expect(clickBack()).toBe(true);
+    expect(location.pathname).toBe("/twitter/search");
+    expect(location.search).toBe("?q=mai&f=user");
+    expect(clickBack()).toBe(true);
+    expect(traverseTo).toHaveBeenCalledTimes(2);
   });
 });
