@@ -3,3 +3,12 @@ export const photoContestResult = {
   id: "soukyuu-photo-award-2020",
   winnerName: "服部 由比",
 } as const;
+
+/** 優秀賞の作品（主催者サイトの結果発表と、当時のブログの記事で同じ写真を使う） */
+export const photoContestWork = {
+  title: "帰り道",
+  src: "/blog-like/photos/contest-photo.webp",
+  alt: "夕方のビル街。ビルのあいだに沈む夕日と、歩道の縁石にとまる一羽の鳩",
+  width: 1200,
+  height: 800,
+} as const;

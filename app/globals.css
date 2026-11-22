@@ -8028,6 +8028,13 @@ article div[class~="justify-between"][class~="text-xs"] > div {
   letter-spacing: 0.28em;
 }
 
+.contest-site-side {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 10px;
+}
+
 .contest-site-organizer {
   margin: 0;
   color: var(--cs-sub);
@@ -8035,7 +8042,35 @@ article div[class~="justify-between"][class~="text-xs"] > div {
   letter-spacing: 0.06em;
 }
 
-.contest-result {
+/* サイト内ナビ（トップ・募集要項・結果発表・お問い合わせ。丸いピル型のリンク） */
+.contest-site-nav {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 2px 4px;
+}
+
+.contest-site-nav-item {
+  padding: 6px 14px;
+  border-radius: 999px;
+  color: var(--cs-sub);
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-decoration: none;
+}
+
+.contest-site-nav-item:hover {
+  background-color: #eef3f9;
+  color: var(--cs-ink);
+}
+
+.contest-site-nav-item[aria-current="page"] {
+  background-color: var(--cs-sky-deep);
+  color: #fff;
+}
+
+.contest-site-main {
   flex: 1;
 }
 
@@ -8230,14 +8265,196 @@ article div[class~="justify-between"][class~="text-xs"] > div {
   text-align: center;
 }
 
+/* トップのヒーロー：受賞作の写真を敷いた帯（#265） */
+.contest-hero {
+  position: relative;
+  display: grid;
+  align-items: center;
+  min-height: 340px;
+  overflow: hidden;
+  background-color: var(--cs-sky-deep);
+}
+
+.contest-hero-image {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  opacity: 0.45;
+}
+
+.contest-hero-text {
+  position: relative;
+  padding-top: 64px;
+  padding-bottom: 64px;
+  color: #fff;
+}
+
+.contest-hero-kicker {
+  margin: 0 0 12px;
+  color: rgb(255 255 255 / 0.75);
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.3em;
+}
+
+.contest-hero-copy {
+  margin: 0 0 16px;
+  font-size: clamp(24px, 4vw, 38px);
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  line-height: 1.35;
+  text-shadow: 0 1px 8px rgb(15 39 68 / 0.45);
+}
+
+.contest-hero-lead {
+  max-width: 36em;
+  margin: 0 0 28px;
+  color: rgb(255 255 255 / 0.85);
+  font-size: 15px;
+  line-height: 1.9;
+}
+
+.contest-hero-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.contest-button {
+  display: inline-block;
+  padding: 10px 22px;
+  border: 1px solid rgb(255 255 255 / 0.7);
+  border-radius: 999px;
+  color: #fff;
+  font-size: 14px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-decoration: none;
+}
+
+.contest-button[data-primary] {
+  border-color: var(--cs-gold);
+  background-color: var(--cs-gold);
+}
+
+.contest-button:hover {
+  background-color: rgb(255 255 255 / 0.15);
+}
+
+.contest-button[data-primary]:hover {
+  background-color: #a67c2a;
+}
+
+/* トップのお知らせ */
+.contest-news {
+  display: grid;
+  gap: 0;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.contest-news-item {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 4px 16px;
+  padding: 14px 0;
+  border-bottom: 1px solid var(--cs-line);
+  font-size: 14px;
+}
+
+.contest-news-date {
+  flex: 0 0 auto;
+  color: var(--cs-sub);
+  font-size: 13px;
+  letter-spacing: 0.04em;
+}
+
+.contest-news-link {
+  color: var(--cs-sky);
+}
+
+/* 募集要項・お問い合わせの記事ページ */
+.contest-article {
+  padding-top: 48px;
+  padding-bottom: 64px;
+}
+
+.contest-article-kicker {
+  margin: 0 0 12px;
+  color: var(--cs-sub);
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.2em;
+}
+
+.contest-article-title {
+  margin: 0 0 24px;
+  font-size: clamp(22px, 3vw, 30px);
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  line-height: 1.4;
+}
+
+.contest-article-lead {
+  max-width: 44em;
+  margin: 0 0 16px;
+  font-size: 15px;
+  line-height: 1.9;
+}
+
+.contest-guidelines {
+  display: grid;
+  margin: 0;
+  border-top: 1px solid var(--cs-line);
+}
+
+.contest-guidelines-row {
+  display: grid;
+  grid-template-columns: 160px minmax(0, 1fr);
+  gap: 8px 24px;
+  padding: 16px 0;
+  border-bottom: 1px solid var(--cs-line);
+  font-size: 14px;
+  line-height: 1.8;
+}
+
+.contest-guidelines-row dt {
+  color: var(--cs-sub);
+  font-weight: 700;
+  letter-spacing: 0.1em;
+}
+
+.contest-guidelines-row dd {
+  margin: 0;
+}
+
+/* ロゴはリンクなので下線・色を打ち消す */
+a.contest-site-logo {
+  color: inherit;
+  text-decoration: none;
+}
+
 @media (max-width: 720px) {
   .contest-result-list,
-  .contest-award[data-rank="excellent"] {
+  .contest-award[data-rank="excellent"],
+  .contest-guidelines-row {
     grid-template-columns: 1fr;
   }
 
   .contest-award[data-rank="excellent"] .contest-award-body {
     padding: 24px;
+  }
+
+  .contest-site-side {
+    align-items: flex-start;
+  }
+
+  .contest-site-nav {
+    justify-content: flex-start;
   }
 }
 

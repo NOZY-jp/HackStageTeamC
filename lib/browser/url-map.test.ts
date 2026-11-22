@@ -55,6 +55,10 @@ describe("lib/browser/url-map", () => {
 
       expect(toDisplayUrl("/search")).toBe("seek.jp");
       expect(toDisplayUrl("/search", "q=%E8%92%BC%E7%A9%B9")).toBe("seek.jp/?q=蒼穹");
+
+      expect(toDisplayUrl("/soukyuu-photo")).toBe("soukyuu-photo.jp");
+      expect(toDisplayUrl("/soukyuu-photo/2020/result")).toBe("soukyuu-photo.jp/2020/result");
+      expect(toDisplayUrl("/soukyuu-photo/contact")).toBe("soukyuu-photo.jp/contact");
     });
 
     it("検索語の予約文字を表示 URL に残し、再送信しても同じ検索語になる", () => {
@@ -95,6 +99,13 @@ describe("lib/browser/url-map", () => {
       );
       expect(resolveOmniboxInput("seek.jp")).toBe("/search");
       expect(resolveOmniboxInput("seek.jp/?q=蒼穹")).toBe("/search?q=%E8%92%BC%E7%A9%B9");
+      expect(resolveOmniboxInput("soukyuu-photo.jp")).toBe("/soukyuu-photo");
+      expect(resolveOmniboxInput("soukyuu-photo.jp/2020/result")).toBe(
+        "/soukyuu-photo/2020/result",
+      );
+      expect(resolveOmniboxInput("https://soukyuu-photo.jp/contact")).toBe(
+        "/soukyuu-photo/contact",
+      );
     });
 
     it("先頭 / の内部パスはそのまま返す（// の外部スキーム相対パスは検索扱い）", () => {

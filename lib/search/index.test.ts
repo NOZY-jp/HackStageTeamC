@@ -80,7 +80,7 @@ describe("lib/search (Seek 検索エンジン)", () => {
     for (const results of [withSpace, withoutSpace]) {
       const contest = results.find((r) => r.url === PHOTO_CONTEST_RESULT_PATH);
       expect(contest).toBeDefined();
-      expect(contest?.displayUrl).toBe("pochiblo.jp/denden0102/contest/soukyuu-photo-award-2020");
+      expect(contest?.displayUrl).toBe("soukyuu-photo.jp/2020/result");
       for (const word of FORBIDDEN_WORDS) {
         expect(contest?.title).not.toContain(word);
         expect(contest?.snippet).not.toContain(word);
@@ -172,9 +172,7 @@ describe("SearchView (Seek UI)", () => {
     expect(contestLink).not.toHaveAttribute("target");
     const googleLink = screen.getByRole<HTMLAnchorElement>("link", { name: "Googleで検索" });
     expect(new URL(googleLink.href).searchParams.get("q")).toBe(PHOTO_CONTEST_NAME);
-    expect(
-      screen.getByText("pochiblo.jp/denden0102/contest/soukyuu-photo-award-2020"),
-    ).toBeInTheDocument();
+    expect(screen.getByText("soukyuu-photo.jp/2020/result")).toBeInTheDocument();
 
     rerender(createElement(SearchView, { query: "見つからない語", results: [] }));
     expect(screen.getByText("約 0 件の結果")).toBeInTheDocument();

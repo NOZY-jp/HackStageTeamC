@@ -78,7 +78,8 @@ describe("SEO 基盤（#77）", () => {
       0,
     );
     const noteCount = 1 + listCreators().length + listArticles().length;
-    expect(urls).toHaveLength(blogCount + publicEntryCount + noteCount + 1);
+    // コンテストの主催者サイトは4ページ（トップ・募集要項・結果発表・お問い合わせ）
+    expect(urls).toHaveLength(blogCount + publicEntryCount + noteCount + 4);
   });
 
   it("metadataBase は本番URLで、他の metadata は変えていない", () => {

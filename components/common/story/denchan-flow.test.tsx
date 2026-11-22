@@ -2,8 +2,8 @@ import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { useState } from "react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import ContestResultPage from "@/app/(blog-like)/pochiblo/[blogId]/contest/soukyuu-photo-award-2020/page";
 import EntryPage from "@/app/(blog-like)/pochiblo/[blogId]/entry/[entryId]/page";
+import ContestResultPage from "@/app/(contest-like)/soukyuu-photo/2020/result/page";
 import TalkupPage from "@/app/(facebook-like)/talkup/page";
 import { FacebookProvider } from "@/components/facebook-like/facebook-context";
 import { PHOTO_CONTEST_BLOG_ID } from "@/lib/seo/contest";
@@ -125,10 +125,7 @@ async function playToDoor() {
     params: Promise.resolve({ blogId: PHOTO_CONTEST_BLOG_ID, entryId: "e20181117" }),
     searchParams: Promise.resolve({}),
   });
-  const result = await ContestResultPage({
-    params: Promise.resolve({ blogId: PHOTO_CONTEST_BLOG_ID }),
-    searchParams: Promise.resolve({}),
-  });
+  const result = ContestResultPage();
   // s08 はコンテストの結果ページで本名に触れて立てる（実ページ）
   nav.query = new URLSearchParams({ q: BFF_QUERY });
   render(

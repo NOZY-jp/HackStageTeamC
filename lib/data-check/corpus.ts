@@ -1,5 +1,6 @@
 import { blogs, entries, mylists } from "@/lib/blog-like/data/blog";
 import { photoContestResult } from "@/lib/blog-like/data/contest";
+import { contestSite } from "@/lib/contest-like/site";
 import { dmThreads } from "@/lib/discord-like/data/dm-threads";
 import { guilds } from "@/lib/discord-like/data/guilds";
 import { MESSAGE_IMAGES } from "@/lib/discord-like/data/message-images";
@@ -26,7 +27,7 @@ import { twitterConversations } from "@/lib/twitter-like/data/twitter-messages";
  * ここだけは、すべてのプラットフォームの lib を読む（検査のための例外。画面のコードからは import しない）。
  */
 
-export type Platform = "discord" | "twixer" | "leaf" | "talkup" | "pochiblo";
+export type Platform = "discord" | "twixer" | "leaf" | "talkup" | "pochiblo" | "contest";
 
 export type DataItem = {
   platform: Platform;
@@ -137,5 +138,6 @@ export function collectCorpus(): DataItem[] {
     ...itemsOf("pochiblo", "entries", entries),
     ...itemsOf("pochiblo", "mylists", mylists),
     ...itemsOf("pochiblo", "contestResults", [photoContestResult]),
+    ...itemsOf("contest", "site", [contestSite]),
   ];
 }
