@@ -28,7 +28,7 @@ export const MHC_NAMES = {
     ["しゅん", "shun"],
     ["みなと", "minato"],
     ["いおり", "iori"],
-    ["かいと", "kaito"],
+    ["しゅんぺい", "shunpei"],
     ["そうた", "sota"],
     ["ゆうま", "yuma"],
     ["とうま", "toma"],
@@ -161,7 +161,7 @@ export const MHC_NAMES = {
     ["貫通係", "piercecrew"],
     ["狩猟笛のみ", "hornonly"],
     ["ガード前進", "shieldstep"],
-    ["斧のビン瓶", "axecharge"],
+    ["斧のビン", "axecharge"],
     ["曲射は棚に", "arrowrain"],
     ["納刀中", "resheathe"],
     ["弱特を積む", "weakspot"],
@@ -402,7 +402,7 @@ const handleSuffix = (index: number): string =>
   `${String(1 + ((index * 5 + 3) % 12)).padStart(2, "0")}${String(1 + ((index * 11 + 7) % 28)).padStart(2, "0")}`;
 
 /** 背景の人の表示名とハンドル。所属サーバーの名簿から選ぶ。 */
-const backgroundName = (index: number, n: string): Pick<User, "displayName" | "handle"> => {
+const backgroundName = (index: number): Pick<User, "displayName" | "handle"> => {
   if (index < UNIV_FROM) {
     // 73 と250は互いに素なので、全員を一度ずつ選びながら4種類を交ぜられる。
     const [displayName, stem] = mhcNamePool[(index * 73) % BACKGROUND_SPLIT.mhc];
@@ -418,7 +418,8 @@ const backgroundName = (index: number, n: string): Pick<User, "displayName" | "h
     const [displayName, stem] = FRIEND_NAMES[local];
     return { displayName, handle: `${stem}_${handleSuffix(local)}` };
   }
-  return { displayName: `ハンター${n}`, handle: `hunter_${n}` };
+  // サーバー未所属でもユーザー検索に含まれる。
+  return { displayName: "銀のウロコ", handle: "gin_uroko" };
 };
 
 /** 背景のうちオンライン12・離席中9・取り込み中3（ネームドと合わせて全体で 30/10/4）。残りはオフライン。 */
@@ -437,7 +438,7 @@ export function buildBackgroundUsers(): User[] {
     const n = String(index + 1).padStart(4, "0");
     return {
       id: `bg-${n}`,
-      ...backgroundName(index, n),
+      ...backgroundName(index),
       avatarColor: PALETTE[index % PALETTE.length],
       status: STATUS_BY_INDEX.get(index) ?? OFFLINE,
     };
