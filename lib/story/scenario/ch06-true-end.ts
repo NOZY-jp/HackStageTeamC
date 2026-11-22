@@ -156,7 +156,7 @@ export const chapter6TrueEnd: Beat[] = [
     when: ["choseTrueEnd"],
     after: ["ch5-talkup"],
     source: "True End：カイとの対峙",
-    memo: "まいまいとのDMを開いて、正直にすべてを伝えよう",
+    memo: "話したいことがある。",
     script: [
       title("第六章　真相"),
       think("深呼吸して、カイさんとのDMを開く。感情的にならず、確かめた事実だけを並べるんだ。"),
