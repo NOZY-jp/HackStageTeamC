@@ -1,10 +1,12 @@
 import { describe, expect, it } from "vitest";
 import { characters, FORBIDDEN_WORDS, nicknames } from "../characters";
 import {
+  availableBeats,
   choose,
   completeBeat,
   completedChats,
   initialState,
+  linesOf,
   nextBeat,
   remainingChoices,
   setFlag,
@@ -471,5 +473,29 @@ describe("ゲームでの場面の進行", () => {
     if (!branch) throw new Error("ch6-branch missing");
     expect(remainingChoices(state, branch).map((choice) => choice.id)).toEqual(["confront-kai"]);
     expect(nextBeat(choose(state, branch, "confront-kai"))?.id).toBe("ch6-confront-kai");
+  });
+});
+
+describe("第五章の写真の描写（#244）", () => {
+  const talkup = beats.find((beat) => beat.id === "ch5-talkup");
+  if (!talkup) throw new Error("ch5-talkup がありません");
+  const before: StoryState = {
+    flags: ["s08-real-name", "s09-kai-contact", "s10-talkup-match"],
+    completed: ["ch5-kai-contact"],
+    choices: {},
+  };
+  const texts = (flags: StoryState["flags"]) => linesOf(talkup, [], flags).map((line) => line.text);
+
+  it("BFF の写真を見ていなくても場面は始まり、写真を見た前提の文を出さない", () => {
+    expect(availableBeats(before).map((beat) => beat.id)).toContain("ch5-talkup");
+    expect(texts(before.flags)).not.toContain("前に見た写真と、同じ二人が写っている。");
+    expect(texts(before.flags).join("\n")).not.toMatch(/前に見た写真|同じ二人/);
+    expect(texts(before.flags)).toContain("知らない人の近況が、名前もわからないまま並んでいる。");
+  });
+
+  it("BFF の写真を見ていれば、同じ二人だと気づく文を出す", () => {
+    const seen: StoryState["flags"] = [...before.flags, "foundBff"];
+    expect(texts(seen)).toContain("前に見た写真と、同じ二人が写っている。");
+    expect(texts(seen)).not.toContain("知らない人の近況が、名前もわからないまま並んでいる。");
   });
 });

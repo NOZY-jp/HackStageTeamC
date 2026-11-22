@@ -4,6 +4,7 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 import {
   type Beat,
   chat,
+  type FlagId,
   flag,
   narrate,
   type PlaybackSettings,
@@ -189,5 +190,43 @@ describe("ScenePlayer", () => {
     fireEvent.click(screen.getByText("検索する", { selector: ".sw-text" }));
     await flush();
     expect(onComplete).toHaveBeenCalledWith(detour, ["ask", "go"]);
+  });
+
+  it("フラグで文章を出し分け、渡したフラグに合わせて読む（#244）", async () => {
+    vi.useFakeTimers({ toFake: ["setTimeout", "requestAnimationFrame", "setInterval"] });
+    const scene: Beat = {
+      id: "test-conditional",
+      chapter: 1,
+      when: [],
+      script: [
+        think("写真を見た人向け", "ryo", { when: ["foundBff"] }),
+        think("写真を見ていない人向け", "ryo", { unless: ["foundBff"] }),
+      ],
+    };
+    const renderScene = (flags: FlagId[]) =>
+      render(
+        <ScenePlayer
+          beat={scene}
+          settings={settings}
+          flags={flags}
+          onSettingsChange={vi.fn()}
+          onComplete={vi.fn()}
+          onFlag={vi.fn()}
+          onMinimize={vi.fn()}
+          onOpenLog={vi.fn()}
+          rememberPosition={false}
+        />,
+      );
+    const unseen = renderScene([]);
+    await flush();
+    expect(
+      screen.getByText("写真を見ていない人向け", { selector: ".sw-text" }),
+    ).toBeInTheDocument();
+    expect(screen.queryByText("写真を見た人向け")).toBeNull();
+    unseen.unmount();
+    renderScene(["foundBff"]);
+    await flush();
+    expect(screen.getByText("写真を見た人向け", { selector: ".sw-text" })).toBeInTheDocument();
+    expect(screen.queryByText("写真を見ていない人向け")).toBeNull();
   });
 });

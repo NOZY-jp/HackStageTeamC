@@ -44,7 +44,11 @@ export const chapter5: Beat[] = [
     after: ["ch5-kai-contact"],
     source: "Google Docs 箱書き 第五章",
     script: [
-      think("前に見た写真と、同じ二人が写っている。"),
+      // BFF の写真を見た人だけ、前に見た写真と結びつける。見ていない人には写真を見た前提の文を出さない（#244）
+      think("前に見た写真と、同じ二人が写っている。", "ryo", { when: ["foundBff"] }),
+      think("知らない人の近況が、名前もわからないまま並んでいる。", "ryo", {
+        unless: ["foundBff"],
+      }),
       narrate("ゲームの画面でしか知らない人の写真が並んでいる。不思議な感じがする。"),
       think("入学式の写真も、ふだんの写真もある。"),
       narrate("入学式の写真の端に、校名が写っている。"),

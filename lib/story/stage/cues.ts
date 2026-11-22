@@ -29,6 +29,10 @@ export type TextCue = {
   expression?: Expression;
   /** 文面が未定であることの印（確認画面で目立たせる） */
   todo?: true;
+  /** このフラグがそろっているときだけ出す（省略時は常に出す） */
+  when?: FlagId[];
+  /** いずれかのフラグが立っていたら出さない */
+  unless?: FlagId[];
 };
 
 /** 背景を変える。画像の一覧の名前か、色 */
@@ -172,7 +176,13 @@ export type Cue = TextCue | StageCue;
 
 // ---- 書くための短い書き方（場面ファイルではこれを使う） ----
 
-type TextOptions = { expression?: Expression };
+type TextOptions = {
+  expression?: Expression;
+  /** このフラグがそろっているときだけ出す */
+  when?: FlagId[];
+  /** いずれかのフラグが立っていたら出さない */
+  unless?: FlagId[];
+};
 
 /** 対面の会話 */
 export const say = (from: CharacterId, text = "", options: TextOptions = {}): TextCue => ({
@@ -190,16 +200,31 @@ export const call = (from: CharacterId, text = ""): TextCue => ({
   text,
 });
 /** 心の声（独り言）。基本はリョウ */
-export const think = (text = "", from: CharacterId = "ryo"): TextCue => ({
+export const think = (
+  text = "",
+  from: CharacterId = "ryo",
+  options: TextOptions = {},
+): TextCue => ({
   type: "text",
   frame: "think",
   from,
   text,
+  ...options,
 });
 /** 地の文 */
-export const narrate = (text = ""): TextCue => ({ type: "text", frame: "narration", text });
+export const narrate = (text = "", options: TextOptions = {}): TextCue => ({
+  type: "text",
+  frame: "narration",
+  text,
+  ...options,
+});
 /** 場面転換（「翌日」「第二章：失踪」など） */
-export const title = (text = ""): TextCue => ({ type: "text", frame: "title", text });
+export const title = (text = "", options: TextOptions = {}): TextCue => ({
+  type: "text",
+  frame: "title",
+  text,
+  ...options,
+});
 /** システム表示（「通話を開始しました」など） */
 export const system = (text = ""): TextCue => ({ type: "text", frame: "system", text });
 /** 文面が未定の行の仮置き。frame と話す人を決めておき、文面はあとで入れる */
