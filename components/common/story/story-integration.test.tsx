@@ -1,4 +1,4 @@
-import { render, screen, waitFor } from "@testing-library/react";
+import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import ContestResultPage from "@/app/(blog-like)/pochiblo/[blogId]/contest/soukyuu-photo-award-2020/page";
@@ -64,17 +64,29 @@ describe("段階7・8・10・結末（実ページ経由・本名は結果ペー
     await waitFor(() => expect(seen.at(-1)).toContain("s07-contest-entry"));
   });
 
-  it("段階7の後に結果ページを見ると本名が出て段階8が立つ", async () => {
+  it("段階7だけでは本名を出さず、確認すると同じマウントで段階8と本名が出る（#239）", async () => {
     seed(["started", "s07-contest-entry"]);
     const seen: FlagId[][] = [];
-    render(
+    const { container } = render(
       <StoryProvider>
         {await resultPage()}
         <Probe onState={(flags) => seen.push(flags)} />
       </StoryProvider>,
     );
-    expect(await screen.findByText("服部 由比")).toBeTruthy();
-    await waitFor(() => expect(seen.at(-1)).toContain("s08-real-name"));
+    expect(container.innerHTML).not.toContain("服部 由比");
+    expect(container.textContent).toContain("該当アカウント");
+    expect(seen.at(-1)).not.toContain("s08-real-name");
+
+    fireEvent.click(await screen.findByRole("button", { name: "受賞者を確認する" }));
+    expect(await screen.findByText(/服部 由比/)).toBeTruthy();
+    expect(seen.at(-1)).toContain("s08-real-name");
+  });
+
+  it("段階8の後に結果ページを見ると本名が出る（#239）", async () => {
+    seed(["started", "s07-contest-entry", "s08-real-name"]);
+    const { container } = render(<StoryProvider>{await resultPage()}</StoryProvider>);
+    expect(await screen.findByText(/服部 由比/)).toBeTruthy();
+    expect(container.textContent).toContain("受賞者");
   });
 
   it("段階7の前に結果ページを開いても、本名を出さず段階8も立てない", async () => {
@@ -124,6 +136,7 @@ describe("段階7・8・10・結末（実ページ経由・本名は結果ペー
         <Probe onState={(flags) => seen.push(flags)} />
       </StoryProvider>,
     );
+    fireEvent.click(await screen.findByRole("button", { name: "受賞者を確認する" }));
     await waitFor(() => expect(seen.at(-1)).toContain("s08-real-name"));
 
     const skipped = {

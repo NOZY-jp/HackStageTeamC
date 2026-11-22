@@ -16,6 +16,7 @@ import {
   type Line,
   openedChatIds,
   PLACES,
+  speakerLabel,
   unreadChats,
   windowLog,
 } from "@/lib/story";
@@ -192,9 +193,10 @@ export function LogPanel({
                   line.frame !== "title" &&
                   line.frame !== "system" ? (
                     <span className="sw-log-speaker">
-                      {line.frame === "call"
-                        ? (characters[line.from].accounts.discordName ?? characters[line.from].name)
-                        : characters[line.from].name}
+                      {speakerLabel(line.from, {
+                        frame: line.frame,
+                        realNameKnown: state.flags.includes("s08-real-name"),
+                      })}
                     </span>
                   ) : null}
                   {line.text}

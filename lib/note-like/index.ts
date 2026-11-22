@@ -1,3 +1,4 @@
+import { LEAF_CREATOR_ID } from "../blog-migration/articles";
 import { articles } from "./data/articles";
 import { creators } from "./data/creators";
 import type { Article, Creator } from "./types";
@@ -28,6 +29,20 @@ export function getCreator(id: string): Creator | undefined {
 /** 全記事（新しい順） */
 export function listArticles(): Article[] {
   return copyOf([...articles].sort(byPublishedAtDesc));
+}
+
+/** トップでは新着順を基本に、同じ書き手の3本目を次の書き手の後ろに回す。 */
+export function listTopArticles(): Article[] {
+  const pending = listArticles().filter(({ creatorId }) => creatorId !== LEAF_CREATOR_ID);
+  const ranked: Article[] = [];
+  while (pending.length > 0) {
+    const previous = ranked.at(-1)?.creatorId;
+    const avoid = previous === ranked.at(-2)?.creatorId ? previous : undefined;
+    const next = pending.findIndex(({ creatorId }) => creatorId !== avoid);
+    // 他の書き手の記事が残っていない場合も、記事は落とさない。
+    ranked.push(...pending.splice(Math.max(0, next), 1));
+  }
+  return ranked;
 }
 
 /** 書き手の記事（新しい順） */
