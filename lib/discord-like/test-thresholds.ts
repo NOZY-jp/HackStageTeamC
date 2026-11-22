@@ -7,12 +7,12 @@
 export const VOLUME_LIMITS = {
   guildCount: 3,
   dmThreads: 9,
-  /** dm-maimai の通数（#181 実測 1,743） */
-  dmMaimai: { min: 1900, max: 2100 },
-  /** DM 全体の通数（#181 実測 2,057） */
-  dmTotal: { min: 2290, max: 2400 },
-  /** サーバーの通数（#181 実測 2,114。VC の入退室を含む） */
-  serverTotal: { min: 2330, max: 2400 },
+  /** dm-maimai の通数（#252 実測 1,960） */
+  dmMaimai: { min: 1950, max: 2100 },
+  /** DM 全体の通数（#252 実測 2,395） */
+  dmTotal: { min: 2370, max: 2400 },
+  /** サーバーの通数（#252 実測 2,395。VC の入退室を含む） */
+  serverTotal: { min: 2370, max: 2400 },
   /** 付き合った後の週あたりの日数と、空けてよい日数 */
   datingWeek: { minDays: 5, maxGapDays: 3 },
   /** dm-maimai の通話と不在着信の下限（#181 実測 18・5） */
@@ -78,4 +78,59 @@ export const QUALITY_LIMITS = {
     "denden",
   ],
   kaiInMhc: 0,
+} as const;
+
+/** 第6ラウンド精度指標（#252: 返信の温度差・話題の引き継ぎ・未読の現実味・通話の文脈・会話長の分布）。 */
+export const TEMPERATURE_LIMITS = {
+  tone: {
+    chi2Min: 30,
+    minExpectedCount: 5,
+    loverSoftCountMin: 14,
+    academicKeigoShareMin: 0.5,
+    regularTameShareMin: 0.7,
+    friendsOnlyTameShareMin: 0.65,
+  },
+  continuity: {
+    dmGroupMin: {
+      lover: 0.1,
+      kai: 0.14,
+      academicDm: 0.2,
+      friendsDm: 0.12,
+    },
+    serverChannelMin: {
+      "mhc-lfg": 0.18,
+      "mhc-chat": 0.11,
+      "mhc-questions": 0.18,
+      "mhc-clips": 0.14,
+      "mhc-notice": 0.2,
+      "mhc-gear": 0.18,
+      "mhc-intro": 0.2,
+      "univ-contact": 0.16,
+      "univ-class": 0.12,
+      "univ-chat": 0.08,
+      "univ-job": 0.12,
+      "univ-report": 0.2,
+      "univ-any": 0.07,
+      "friend-chat": 0.07,
+      "friend-plan": 0.08,
+      "friend-memory": 0.08,
+    },
+  },
+  unread: {
+    threadsMin: 2,
+    threadsMax: 4,
+    staleHoursMin: 24,
+    staleThreadsMin: 1,
+  },
+  callContext: {
+    preInviteRateMin: 0.9,
+    postImpressionRateMin: 0.9,
+    missedCallbackRateMin: 1.0,
+  },
+  burstDistribution: {
+    lover: { median: { min: 6, max: 11 }, p90: { min: 10, max: 18 } },
+    kai: { median: { min: 4, max: 7 }, p90: { min: 6, max: 10 } },
+    friendsUnivDm: { median: { min: 3, max: 6 }, p90: { min: 5, max: 9 } },
+    serverChannels: { median: { min: 3, max: 6 }, p90: { min: 6, max: 10 } },
+  },
 } as const;
