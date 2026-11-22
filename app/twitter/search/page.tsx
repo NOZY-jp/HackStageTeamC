@@ -46,27 +46,13 @@ export default async function TwitterSearchPage({ searchParams }: Props) {
         ? allPosts.filter((post) => (post.media?.length ?? 0) > 0)
         : allPosts;
 
-  const options = { foundBff: true };
-  const usersAfterDiscovery =
-    query && (tab === "top" || tab === "user") ? searchUsers(query, options) : [];
-  const postsAfterDiscovery =
-    !query || tab === "user"
-      ? []
-      : searchPosts(query, options).filter(
-          (post) => tab !== "media" || (post.media?.length ?? 0) > 0,
-        );
+  // 発見後（foundBff）にだけ出る差分はクライアントの遅延チャンクで描画する。
+  // 未開放のデータを RSC ペイロードに載せないため、サーバーでは発見前の結果だけを作る（#248 人レビュー）。
   const renderResults = (
     matchedUsers: ReturnType<typeof searchUsers>,
     matchedPosts: ReturnType<typeof searchPosts>,
   ) =>
-    query === "" ? (
-      <div className="tw-empty">キーワードを入力して検索してください。</div>
-    ) : matchedUsers.length === 0 && matchedPosts.length === 0 ? (
-      <div className="tw-empty">
-        <p className="tw-empty-title">「{query}」に一致する結果はありません</p>
-        <p className="tw-empty-sub">別のキーワードで検索してみてください。</p>
-      </div>
-    ) : (
+    query === "" ? null : (
       <>
         {matchedUsers.length > 0 ? (
           <section aria-label="ユーザー">
@@ -104,11 +90,7 @@ export default async function TwitterSearchPage({ searchParams }: Props) {
               ) : null;
             })}
           </section>
-        ) : (
-          <div className="tw-empty">
-            <p className="tw-empty-sub">「{query}」に一致するポストはありません</p>
-          </div>
-        )}
+        ) : null}
       </>
     );
 
@@ -145,9 +127,13 @@ export default async function TwitterSearchPage({ searchParams }: Props) {
           </nav>
         ) : null}
         <SearchProgressResults
-          beforeDiscovery={renderResults(matchedUsers, matchedPosts)}
-          afterDiscovery={renderResults(usersAfterDiscovery, postsAfterDiscovery)}
-        />
+          query={query}
+          tab={tab}
+          userCount={matchedUsers.length}
+          postCount={matchedPosts.length}
+        >
+          {renderResults(matchedUsers, matchedPosts)}
+        </SearchProgressResults>
       </main>
       <RightSidebar hideSearch />
     </>

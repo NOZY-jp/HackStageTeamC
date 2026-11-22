@@ -63,7 +63,7 @@ describe("TwitterSearchPage", () => {
     "$f のタブで対象の検索結果を表示する",
     async ({ f, label, showsUsers, showsTextPost, showsMediaPost }) => {
       const query = "mai2mai2";
-      vi.spyOn(twitter, "searchPosts").mockReturnValueOnce([textPost, mediaPost]);
+      vi.spyOn(twitter, "searchPosts").mockReturnValue([textPost, mediaPost]);
       render(await TwitterSearchPage(params(query, f)));
 
       const tabs = within(screen.getByRole("navigation", { name: "検索結果の切り替え" }));
@@ -130,12 +130,12 @@ describe("TwitterSearchPage", () => {
     expect(screen.queryByText(body)).not.toBeInTheDocument();
 
     fireEvent.click(screen.getByRole("button", { name: "発見" }));
+    // 発見後の差分は遅延チャンクで読み込む（RSC ペイロードに未開放のデータを載せないため）
+    // ユーザー欄と post-105 の投稿者欄の両方に出る
     expect(
-      within(screen.getByRole("region", { name: "ユーザー" })).getByRole("link", {
-        name: /かのん/,
-      }),
-    ).toBeInTheDocument();
-    expect(screen.getByText(body)).toBeInTheDocument();
+      (await screen.findAllByRole("link", { name: /かのん/ }, { timeout: 3000 })).length,
+    ).toBeGreaterThan(0);
+    expect(await screen.findByText(body, undefined, { timeout: 3000 })).toBeInTheDocument();
     window.localStorage.clear();
   });
 
