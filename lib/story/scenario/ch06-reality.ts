@@ -16,7 +16,7 @@ export const chapter6: Beat[] = [
     source: "Issue #120・#76（カイの助言 → 誤認）",
     script: [
       title("第六章　現実"),
-      background("street", { transition: "fade", duration: "slow" }),
+      background("door", { transition: "fade", duration: "slow" }),
       narrate("ピンポーン"),
       think("表札は合ってる。ここで間違いない。"),
       think("なんて呼べばいいんだっけ。カイさんは「でんちゃん」って言ってたけど……"),
@@ -48,7 +48,7 @@ export const chapter6: Beat[] = [
     script: [
       background("black", { transition: "cut" }),
       title("第六章　現実"),
-      background("street", { transition: "fade", duration: "slow" }),
+      background("door", { transition: "fade", duration: "slow" }),
       narrate("ピンポーン"),
       think("もし合っていたらこれが初対面になるな。"),
       narrate("指が妙に震えているし、心臓がバクバク鼓動している。"),
@@ -66,6 +66,7 @@ export const chapter6: Beat[] = [
       narrate(
         "返事の代わりに聞こえたのは、チェーンを外す音ではなく、チェーンをかけたままドアが数センチ開く",
       ),
+      background("door-chain", { transition: "cut" }),
       say("maimai", "……なんで"),
       say("ryo", "え？"),
       say("maimai", "なんで、ここ、分かったの"),
@@ -76,6 +77,7 @@ export const chapter6: Beat[] = [
       say("maimai", "その呼び方、どこで――"),
       say("ryo", "ど、どういうこと？"),
       effect("shake"),
+      background("door", { transition: "cut" }),
       narrate("ドアが閉まる。鍵の音が二回。チェーンじゃない、本鍵が、二回。"),
       say("maimai", "もしもし、警察ですか?あの、家の前に、男の人が……"),
       think("なんで？"),
@@ -84,6 +86,7 @@ export const chapter6: Beat[] = [
       title("……"),
       effect("tint", { tint: "danger", duration: "slow" }),
       narrate("サイレンはそれから十分ほどで来た。"),
+      background("arrest", { transition: "fade" }),
       say("ryo", "あの、僕は、その、彼女の"),
       narrate("警察「手、見えるところに出してください」"),
       say("ryo", "待ってください、僕は、ただ、連絡が取れなくて"),
@@ -118,7 +121,7 @@ export const chapter6: Beat[] = [
     source: "Issue #120（呼び名を使わなかった場合の分岐）",
     script: [
       title("第六章　現実"),
-      background("street", { transition: "fade", duration: "slow" }),
+      background("door", { transition: "fade", duration: "slow" }),
       narrate("インターホンの向こうで、少しの沈黙があった。"),
       say("maimai", "……どちらさまですか"),
       say("ryo", "琥珀さん、だよね。連絡が取れなくて、心配で"),
