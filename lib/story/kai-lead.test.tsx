@@ -2,7 +2,7 @@ import { render, screen, waitFor, within } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
 import TwitterPostPage from "@/app/twitter/post/[postId]/page";
 import TwitterProfilePage from "@/app/twitter/profile/[handle]/page";
-import { StoryProvider } from "@/components/common/story/story-provider";
+import { StoryProvider, useStory } from "@/components/common/story/story-provider";
 import { resolveLinkEmbeds } from "@/lib/link-embed";
 import { getPost } from "@/lib/twitter-like";
 import snapshot from "@/lib/twitter-like/post-101-102.snapshot.json";
@@ -26,6 +26,13 @@ const texts = (beat: Beat | undefined) => (beat ? linesOf(beat).map((line) => li
 /** チャットとして送られる本文 */
 const chats = (beat: Beat | undefined) =>
   (beat?.script ?? []).flatMap((cue) => (cue.type === "chat" ? [cue.text] : []));
+
+/** 物語の状態が読み込まれた時点のフラグ（画面に返信が出たかを見るための準備待ち） */
+function FlagProbe({ onFlags }: { onFlags: (flags: string[]) => void }) {
+  const { state, ready } = useStory();
+  if (ready) onFlags(state.flags);
+  return null;
+}
 
 vi.mock("next/navigation", () => ({ useRouter: () => ({}) }));
 
@@ -73,7 +80,7 @@ describe("カイの第三章の誘導（#213）", () => {
     expect(availableBeats(afterAdvice).map(({ id }) => id)).not.toContain("ch3-blog-found");
   });
 
-  it("DMのアカウントリンクから投稿と返信を開き、段階2だけが成立する", async () => {
+  it("アカウント → 投稿 → 返信 の順で開き、返信を開いた時点で段階2が成立する", async () => {
     if (!advice || !lead) throw new Error("カイの場面が見つからない");
     const progress = completeBeat(completeBeat(initialState, advice), lead);
     saveState(localStorage, progress);
@@ -92,26 +99,37 @@ describe("カイの第三章の誘導（#213）", () => {
     expect(loadState(localStorage).flags).not.toContain("s02-bff-reply");
     profile.unmount();
 
+    // 親の投稿を開いただけでは段階2は立たない（返信へのリンクは見えている）
     const postId = postLink?.getAttribute("href")?.split("/").at(-1) ?? "";
+    const parentSeen: string[][] = [];
     const thread = render(
       <StoryProvider>
         {await TwitterPostPage({ params: Promise.resolve({ postId }) })}
+        <FlagProbe onFlags={(flags) => parentSeen.push(flags)} />
       </StoryProvider>,
     );
     const replyLink = within(screen.getByRole("region", { name: "返信" }))
       .getAllByRole("link")
       .find((link) => link.getAttribute("href") === "/twitter/post/post-102");
     expect(replyLink).toBeDefined();
-    await waitFor(() => expect(loadState(localStorage).flags).toContain("s02-bff-reply"));
+    await waitFor(() => expect(parentSeen.length).toBeGreaterThan(0));
+    expect(parentSeen.at(-1)).not.toContain("s02-bff-reply");
+    expect(loadState(localStorage).flags).not.toContain("s02-bff-reply");
     expect(loadState(localStorage).flags).not.toContain("s03-blog-found");
-    const replyId = replyLink?.getAttribute("href")?.split("/").at(-1) ?? "";
     thread.unmount();
+
+    // 返信（post-102）を開くと、その本文が表示され、段階2が立つ
+    const replyId = replyLink?.getAttribute("href")?.split("/").at(-1) ?? "";
+    const replySeen: string[][] = [];
     render(
       <StoryProvider>
         {await TwitterPostPage({ params: Promise.resolve({ postId: replyId }) })}
+        <FlagProbe onFlags={(flags) => replySeen.push(flags)} />
       </StoryProvider>,
     );
     expect(screen.getByText(SNAPSHOT[1].body)).toBeInTheDocument();
+    await waitFor(() => expect(replySeen.at(-1)).toContain("s02-bff-reply"));
+    expect(loadState(localStorage).flags).toContain("s02-bff-reply");
     expect(loadState(localStorage).flags).not.toContain("s03-blog-found");
   });
 });
