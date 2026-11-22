@@ -21,11 +21,11 @@ export const chapter3: Beat[] = [
     chapter: 3,
     place: channel,
     when: ["s01-blog-talk"],
-    source: "Issue #76 順序1・#172",
+    source: "Issue #76 順序1・#172・#213",
     memo: "カイさんが送ってくれたTwixerのアカウントを見てみよう",
     script: [
       chat(channel, "kai", "まいまいのこと、何か分かった？", sameDay("23:31:00")),
-      chat(channel, "ryo", "ブログを書いてたのは分かった。でも閉鎖されてた", sameDay("23:31:20")),
+      chat(channel, "ryo", "ブログを書いてたことしか、まだ分かってない", sameDay("23:31:20")),
       chat(channel, "kai", "そういえば、まいまい Twixer やってた気がする", sameDay("23:31:40"), {
         wait: "slower",
       }),
