@@ -68,20 +68,30 @@ describe("Twixer のデータ規模（#248）", () => {
 });
 
 describe("返信の質と物語データの不変（#248）", () => {
-  const nounsOf = (body: string): string[] => body.match(/[ァ-ー]{3,}|[一-鿿]{2,6}/g) ?? [];
   const generatedReplies = replies.filter((reply) => reply.id.startsWith("reply-"));
   const parentBody = new Map(twitterPosts.map((post) => [post.id, post.body]));
 
+  /**
+   * 親の本文の語を拾う。漢字・カタカナは語のまとまりで、ひらがなは4文字の窓で見る
+   * （「でんでん」のようにひらがなだけの語も拾うため）。
+   */
+  const wordsOf = (text: string): string[] => {
+    const words: string[] = Array.from(text.match(/[ァ-ー]{2,}|[一-鿿]{1,}/g) ?? []);
+    for (let i = 0; i + 4 <= text.length; i += 1) {
+      const window = text.slice(i, i + 4);
+      if (/^[ぁ-ん]{4}$/.test(window)) words.push(window);
+    }
+    return words;
+  };
+  const quotesParent = (parentBodyText: string, replyBody: string): boolean =>
+    wordsOf(parentBodyText).some((word) => replyBody.includes(word));
+
   it("生成した返信は親の本文の語を受けて書かれている", () => {
-    const withNouns = generatedReplies.filter(
-      (reply) => nounsOf(parentBody.get(reply.replyToId ?? "") ?? "").length > 0,
+    const responsive = generatedReplies.filter((reply) =>
+      quotesParent(parentBody.get(reply.replyToId ?? "") ?? "", reply.body),
     );
-    const responsive = withNouns.filter((reply) => {
-      const words = nounsOf(parentBody.get(reply.replyToId ?? "") ?? "");
-      return words.some((word) => reply.body.includes(word));
-    });
     expect(generatedReplies.length).toBeGreaterThanOrEqual(150);
-    expect(responsive.length / withNouns.length).toBeGreaterThanOrEqual(0.95);
+    expect(responsive.length / generatedReplies.length).toBeGreaterThanOrEqual(0.95);
   });
 
   it("鍵垢の投稿を返信の親にせず、本文の語も返信に出さない", () => {
@@ -114,5 +124,48 @@ describe("返信の質と物語データの不変（#248）", () => {
     ).toMatchInlineSnapshot(
       `"前は @hunter_denden0102（hunter_denden って名前だった）。「写真コンテストで賞をもらいました！」書いた人。BFF: @kanon__dayo"`,
     );
+  });
+
+  it("返信は親と別の人が、親より後に書いている", () => {
+    const byId = new Map(twitterPosts.map((post) => [post.id, post]));
+    for (const reply of generatedReplies) {
+      const parent = byId.get(reply.replyToId ?? "");
+      expect(parent, reply.id).toBeDefined();
+      expect(reply.authorId, reply.id).not.toBe(parent?.authorId);
+      expect(Date.parse(reply.postedAt), reply.id).toBeGreaterThanOrEqual(
+        Date.parse(parent?.postedAt ?? ""),
+      );
+    }
+  });
+
+  it("物語の投稿と、かのんの投稿には返信を付けない（先取りを避ける）", () => {
+    const storyIds = new Set([
+      ...Array.from({ length: 22 }, (_, i) => `post-0${String(i + 2).padStart(2, "0")}`),
+      ...Array.from({ length: 9 }, (_, i) => `post-1${String(i + 1).padStart(2, "0")}`).map((id) =>
+        id.replace("post-1", "post-1"),
+      ),
+    ]);
+    const byId = new Map(twitterPosts.map((post) => [post.id, post]));
+    for (const reply of generatedReplies) {
+      const parentId = reply.replyToId ?? "";
+      const parent = byId.get(parentId);
+      expect(storyIds.has(parentId), parentId).toBe(false);
+      expect(parent?.authorId, parentId).not.toBe("tw-kanon");
+      expect(parent?.authorId.startsWith("tw-gen"), parentId).toBe(true);
+    }
+  });
+
+  it("生成投稿の日時は投稿者の登録日より後で、「〜の話の話」を作らない", () => {
+    const joinedAt = new Map(
+      twitterProfiles.map((profile) => [profile.userId, profile.joinedAt] as const),
+    );
+    for (const post of twitterPosts) {
+      if (post.authorId.startsWith("tw-gen")) {
+        expect(post.postedAt.slice(0, 10) >= (joinedAt.get(post.authorId) ?? ""), post.id).toBe(
+          true,
+        );
+      }
+      expect(post.body.includes("の話の話"), post.id).toBe(false);
+    }
   });
 });

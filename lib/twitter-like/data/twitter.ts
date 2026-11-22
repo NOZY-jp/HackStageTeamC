@@ -314,7 +314,7 @@ export const twitterPosts: Post[] = [
   {
     id: "post-022",
     authorId: "tw-mai",
-    postedAt: "2026-08-28T20:02:00+09:00",
+    postedAt: "2026-11-16T20:02:00+09:00",
     body: "@kohakunchos0117 ……うん。楽しみだね。",
     replyToId: "post-021",
     replyCount: 0,
@@ -1313,62 +1313,81 @@ const REPLY_AUTHORS = [
   "tw-nagi",
   "tw-yuu",
 ];
+/** 返信で引用してよい語。本文に含まれるものだけを使い、語幹の途中で切らない。 */
+const REPLY_QUOTE_WORDS = [
+  "モンハン",
+  "クエスト",
+  "弓",
+  "装備",
+  "写真コンテスト",
+  "ブログ",
+  "でんでん",
+  "ストーカー",
+  "集会所",
+  "狩猟",
+  "レイド",
+  "双剣",
+  "大剣",
+  "太刀",
+  "カメラ",
+  "喫茶店",
+  "コーヒー",
+  "ゲーム",
+  "散歩",
+  "本屋",
+  "料理",
+  "洗濯物",
+  "レポート",
+  "就活",
+  "バイト",
+  "シフト",
+  "メニュー",
+  "コンテスト",
+  "アップデート",
+  "面接",
+  "ゼミ",
+  "発表",
+  "締切",
+  "設定",
+  "募集",
+  "対策",
+  "更新",
+  "棚",
+  "失敗",
+  "コース",
+];
+const quoteOf = (body: string): string | undefined =>
+  REPLY_QUOTE_WORDS.find((word) => body.includes(word));
+
 /**
- * 親の本文から、返信で引ける名詞句（カタカナ語・漢字2〜6字）を拾う。
- * 文節の途中で切ると不自然になるため、語単位だけを使う。
- * 時刻や順序を表す語は引用すると意味が伝わらないので除く。
+ * 一般アカウントの投稿だけを返信の親にする。
+ * 物語の投稿（post-002〜023・post-101〜109）を親にすると、返信が筋を先取りしたり、
+ * 不安を吐露した投稿に軽い相槌が付いたりして文脈が崩れる（人レビュー #248）。
  */
-const REPLY_WORD_STOPWORDS = new Set([
-  "今日",
-  "最初",
-  "今週",
-  "平日",
-  "昨日",
-  "明日",
-  "今年",
-  "去年",
-  "自分",
-  "最近",
-]);
-const fragmentsOf = (body: string): string[] => {
-  const words = body.match(/[\u30a1-\u30fc]{3,}|[\u4e00-\u9fff]{2,6}/g) ?? [];
-  const unique = [...new Set(words)].filter(
-    (word) => !REPLY_WORD_STOPWORDS.has(word) && !/^[一二三四五六七八九十百千万何数]/.test(word),
-  );
-  return unique.sort((a, b) => b.length - a.length || a.localeCompare(b));
-};
 const replyParents = twitterPosts
-  .filter(
-    (post) =>
-      !post.replyToId &&
-      !post.authorId.startsWith("tw-gen") &&
-      // 鍵垢の本文を公開の返信で引用すると内容が漏れる（#248 PM指摘）
-      !twitterUsers.find((user) => user.id === post.authorId)?.protected &&
-      post.id !== "post-101" &&
-      post.id !== "post-105",
-  )
-  .slice(0, 42);
+  .filter((post) => !post.replyToId && post.authorId.startsWith("tw-gen"))
+  .filter((_, index) => index % 40 === 0)
+  .slice(0, 50);
 const usedReplyBodies = new Set<string>();
 replyParents.forEach((parent, pIndex) => {
-  const fragments = fragmentsOf(parent.body);
   for (let n = 0; n < 4; n += 1) {
-    // 語が拾えない本文だけは最初の一文を引く（「その話」だけの返信を作らない）
-    const fallback = parent.body.split(/[。！？]/)[0]?.trim() || "その話";
-    const fragment = fragments.length > 0 ? fragments[(pIndex + n) % fragments.length] : fallback;
+    const quote = quoteOf(parent.body);
     const frame = REPLY_FRAMES[(pIndex + n) % REPLY_FRAMES.length];
     let body = "";
-    // 文節の重なりで同じ本文になった場合だけ、言い回しをずらして一意にする
+    // 同じ本文が出た場合だけ、言い回しをずらして一意にする
     for (let attempt = 0; attempt < REPLY_PERSONAL.length; attempt += 1) {
       const reaction = REPLY_REACTIONS[(pIndex + n + attempt) % REPLY_REACTIONS.length];
       const personal = REPLY_PERSONAL[(pIndex * 3 + n + attempt) % REPLY_PERSONAL.length];
-      body = frame(fragment, reaction, personal);
+      body = quote ? frame(quote, reaction, personal) : `${reaction}。${personal}。`;
       if (!usedReplyBodies.has(body)) break;
     }
     usedReplyBodies.add(body);
-    const start = Date.parse(parent.postedAt) + (n + 1) * 9 * 60 * 1000;
+    // 親と同じ人が自分の投稿に返信しないように、親の作者を候補から外す
+    const authors = REPLY_AUTHORS.filter((id) => id !== parent.authorId);
+    const start = Date.parse(parent.postedAt) + (n + 1) * 37 * 60 * 1000;
     replyStore.push({
       id: `reply-${parent.id}-${n + 1}`,
-      authorId: REPLY_AUTHORS[(pIndex + n) % REPLY_AUTHORS.length],
+      authorId: authors[(pIndex + n) % authors.length],
       postedAt: new Date(start).toISOString().replace(".000Z", "+00:00"),
       body,
       replyToId: parent.id,

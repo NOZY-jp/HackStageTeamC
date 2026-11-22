@@ -93,7 +93,7 @@ const TOPICS = [
   "ブログの更新",
   "弓の装備",
   "写真コンテスト",
-  "でんでんの話",
+  "でんでん",
   "ストーカー対策",
   "集会所の募集",
   "新しい装備",
@@ -104,34 +104,38 @@ const TOPICS = [
   "就活の面接",
   "バイトのシフト",
   "ゲームのアップデート",
-  "古いゲームの話",
+  "古いゲーム",
   "散歩のコース",
   "本屋の棚",
   "料理の失敗",
-  "洗濯物の話",
+  "洗濯物",
 ];
 
-const DETAILS = [
-  "三十枚",
-  "二時間",
-  "一駅分",
-  "五人",
-  "三回目",
-  "半年ぶり",
-  "四年ぶり",
-  "一昨日の夜",
+/** メモの枚数・件数（整理の話に使う） */
+const AMOUNTS = ["十枚", "二十枚", "三十枚", "五件", "十二件", "二十件"];
+/** 人・回数（集まりや挑戦の話に使う） */
+const COUNTS = ["五人で集まって", "三回目で", "半年ぶりに", "四年ぶりに", "二度目で"];
+/** 歩いた場所（散歩の話に使う） */
+const SPOTS = [
   "駅前の店",
   "川沿いの道",
   "商店街の端",
   "図書館の席",
   "公園のベンチ",
   "改札の前",
-  "七時すぎ",
-  "九時まえ",
-  "昼の一時",
-  "夜の十一時",
-  "雨の翌日",
-  "雪の次の日",
+  "河川敷",
+  "商店街",
+  "坂の上",
+  "海までの道",
+];
+/** 整理が進んだ具合（メモを片づけた話の結び） */
+const PROGRESS = [
+  "少し進んだ",
+  "まだ終わらない",
+  "先が見えた",
+  "案外まとまった",
+  "手が止まった",
+  "ようやく片づいた",
 ];
 
 const FEELINGS = [
@@ -168,7 +172,7 @@ const CLUES = [
   "太刀",
 ];
 
-const DATE_START = Date.UTC(2024, 0, 1, 12, 0, 0);
+const DATE_START = Date.UTC(2024, 9, 1, 9, 0, 0);
 
 export const generatedUsers: TwitterUser[] = Array.from({ length: 200 }, (_, index) => {
   const family = FAMILY[index % FAMILY.length];
@@ -191,33 +195,58 @@ export const generatedProfiles: Profile[] = generatedUsers.map((user, index) => 
   followersCount: 10 + ((index * 11) % 200),
 }));
 
-const bodyFor = (index: number): string => {
-  const opener = OPENERS[index % OPENERS.length];
-  const topic = TOPICS[Math.floor(index / OPENERS.length) % TOPICS.length];
-  const detail = DETAILS[Math.floor(index / (OPENERS.length * TOPICS.length)) % DETAILS.length];
-  const feeling =
-    FEELINGS[
-      Math.floor(index / (OPENERS.length * TOPICS.length * DETAILS.length)) % FEELINGS.length
-    ];
-  const clue = CLUES[index % CLUES.length];
+/** 添字から決まる擬似乱数（同じ入力なら常に同じ値。乱数APIは使わない）。 */
+const hash = (index: number, salt: number): number => {
+  let x = Math.imul(index + salt * 7919, 0x9e3779b1);
+  x ^= x >>> 16;
+  x = Math.imul(x, 0x85ebca6b);
+  x ^= x >>> 13;
+  x = Math.imul(x, 0xc2b2ae35);
+  return (x ^ (x >>> 16)) >>> 0;
+};
+/** 語の一覧から、添字と役割（salt）で決まる1つを選ぶ。 */
+const pick = <T>(list: readonly T[], index: number, salt: number): T =>
+  list[hash(index, salt) % list.length];
+
+const bodyFor = (index: number, attempt = 0): string => {
+  const salt = attempt * 100 + 1;
+  const opener = pick(OPENERS, index, salt);
+  const topic = pick(TOPICS, index, salt + 1);
+  const clue = pick(CLUES, index, salt + 2);
+  const amount = pick(AMOUNTS, index, salt + 3);
+  const count = pick(COUNTS, index, salt + 4);
+  const spot = pick(SPOTS, index, salt + 5);
+  const progress = pick(PROGRESS, index, salt + 6);
+  const feeling = pick(FEELINGS, index, salt + 7);
   const variant = index % 3;
-  if (variant === 0)
-    return `${opener}${topic}の話をした。${detail}で、${feeling}。${clue}の話題も少し。`;
-  if (variant === 1)
-    return `${opener}${detail}まで歩いた。${topic}のことを考えながら、${feeling}。`;
-  return `${opener}${topic}を整理していた。${clue}のメモが${detail}分たまっていて、${feeling}。`;
+  if (variant === 0) return `${opener}${topic}の話をした。${count}、${feeling}。`;
+  if (variant === 1) return `${opener}${spot}まで歩いた。${topic}のことを考えながら、${feeling}。`;
+  return `${opener}${topic}を整理していた。${clue}のメモが${amount}分たまっていて、${progress}。`;
 };
 
 const at = (index: number): string => {
-  const day = new Date(DATE_START + index * 5 * 60 * 60 * 1000);
+  const day = new Date(DATE_START + index * 9 * 60 * 60 * 1000);
   return day.toISOString().replace(".000Z", "+00:00");
+};
+
+/** 一度使った本文を避けて、全投稿を一意にする */
+const usedBodies = new Set<string>();
+const uniqueBodyFor = (index: number): string => {
+  for (let attempt = 0; attempt < 50; attempt += 1) {
+    const body = bodyFor(index, attempt);
+    if (!usedBodies.has(body)) {
+      usedBodies.add(body);
+      return body;
+    }
+  }
+  return `${bodyFor(index, 0)}（${index + 1}）`;
 };
 
 export const generatedPosts: Post[] = Array.from({ length: 2000 }, (_, index) => ({
   id: `post-g${String(index + 1).padStart(4, "0")}`,
   authorId: generatedUsers[index % generatedUsers.length].id,
   postedAt: at(index),
-  body: bodyFor(index),
+  body: uniqueBodyFor(index),
   replyCount: 0,
   repostCount: index % 9,
   likeCount: index % 41,
