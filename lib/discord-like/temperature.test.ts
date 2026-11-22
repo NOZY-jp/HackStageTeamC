@@ -12,13 +12,13 @@ import type { Message } from "./types";
 type ToneForm = "softEmoji" | "keigo" | "tameguchi";
 
 const GRAT_BASE =
-  /ありがと|あざ|サンキュ|さんきゅ|助か|了解|りょ(?:うかい)?(?:\s|$|！|!)|おけ|\bok\b|わかりまし|おつかれ|お疲れ|すみません|ごめん|おやすみ|お願いしま/i;
+  /ありがと|あざ|サンキュ|さんきゅ|助か|了解|りょ(?:うかい)?(?:\s|$|！|!)|おけ|\bok\b|わかりまし|わかった|おつかれ|お疲れ|すみません|ごめん|おやすみ|お願い|よろしく|大丈夫|いいよ|もちろん|待って/i;
 const SOFT_MARKER =
-  /[😊😂👍🙏💕✨🎉🙌]|(?<![0-9一二三四五六七八九十時分日月])[〜～]|(?:ありがと|おやすみ|おつかれ|ごめん|助かる)ね(?:\s|$|[！!])/u;
+  /[😊😂👍🙏💕✨🎉🙌]|(?<![0-9一二三四五六七八九十時分日月])[〜～]|(?:ありがと|おやすみ|おつかれ|ごめん|助かる|よろしく|いいよ|待ってる|直す)ね(?:\s|$|[、,！!。])/u;
 const KEIGO_GRAT =
-  /ありがとうございま|ありがとうございました|助かります|助かりました|了解です|わかりました|おつかれさまです|おつかれさまでした|お疲れ様です|お疲れ様でした|承知しました|お願いします|すみません/;
+  /ありがとうございま|ありがとうございました|助かります|助かりました|了解です|わかりました|おつかれさまです|おつかれさまでした|お疲れ様です|お疲れ様でした|承知しました|お願いします|よろしくお願いします|すみません|大丈夫です|待ってます|もちろん、|\bokです/i;
 const TAME_GRAT =
-  /ありがと(?![う]*ございま)|サンキュー|さんきゅ|あざ(?:す|ーっす)|助かる(?!ま)|助かった|了解(?!です)|りょ(?:うかい)?(?:\s|$|！|!)|おけ|\bok\b|おつかれ(?!さま)|ごめん(?!なさい)/i;
+  /ありがと(?![う]*ございま)|サンキュー|さんきゅ|あざ(?:す|ーっす)|助かる(?!ま)|助かった|了解(?!です)|りょ(?:うかい)?(?:\s|$|！|!)|おけ|\bok\b(?!です)|おつかれ(?!さま)|ごめん(?!なさい)|よろしく(?!お願)|わかった(?!り)|大丈夫(?!です)|いいよ(?!ね)|待ってる(?!ね)/i;
 
 /** 感謝・相槌・挨拶の語形を 恋人寄り(softEmoji) / 敬語(keigo) / タメ口(tameguchi) に分類する。 */
 function classifyReplyTone(body: string): ToneForm | null {
@@ -27,6 +27,16 @@ function classifyReplyTone(body: string): ToneForm | null {
   if (KEIGO_GRAT.test(body)) return "keigo";
   if (TAME_GRAT.test(body)) return "tameguchi";
   return null;
+}
+
+const POLITE_ENDING =
+  /(?:です|ます|ました|ません|でした|ください|ございます|でしょうか)[。！!？?\s]*$/;
+
+/** 文末・表現全体で 柔らかめ(softEmoji) / 敬語(keigo) / 常体(tameguchi) に分類する。 */
+function classifyMessageStyle(body: string): ToneForm {
+  if (SOFT_MARKER.test(body)) return "softEmoji";
+  if (POLITE_ENDING.test(body)) return "keigo";
+  return "tameguchi";
 }
 
 /** 分割表のピアソン χ² 統計量と最小期待度数を計算する。 */
@@ -212,12 +222,13 @@ describe("Round 6 精度指標（#252）", () => {
     const countForms = (
       channelIds: string[],
       filterFn: (message: Message) => boolean = () => true,
+      classifier: (body: string) => ToneForm | null = classifyReplyTone,
     ) => {
       const counts: Record<ToneForm, number> = { softEmoji: 0, keigo: 0, tameguchi: 0 };
       for (const id of channelIds) {
         for (const message of allContainers[id] ?? []) {
           if (message.system === true || !filterFn(message)) continue;
-          const form = classifyReplyTone(message.body);
+          const form = classifier(message.body);
           if (form) counts[form] += 1;
         }
       }
@@ -229,40 +240,61 @@ describe("Round 6 精度指標（#252）", () => {
       return total > 0 ? counts[form] / total : 0;
     };
 
-    it("恋人・学科・リア友＆mhc常連で感謝/応答語形の分布が統計的に分離する", () => {
-      const lover = countForms(["dm-maimai"]);
-      const academic = countForms([
-        "dm-ootsuka",
-        "dm-hayashi",
-        "dm-yama",
-        "univ-contact",
-        "univ-class",
-        "univ-chat",
-        "univ-job",
-        "univ-report",
-        "univ-any",
-      ]);
-      const friendsOnly = countForms([
-        "dm-taku",
-        "dm-jun",
-        "dm-miyu",
-        "dm-gunlance",
-        "friend-chat",
-        "friend-plan",
-        "friend-memory",
-      ]);
-      const mhcRegularIds = new Set(["gunlance", "mina", "jijii", "maimai"]);
-      const mhcRegulars = countForms(
-        [
-          "mhc-lfg",
-          "mhc-chat",
-          "mhc-questions",
-          "mhc-clips",
-          "mhc-notice",
-          "mhc-gear",
-          "mhc-intro",
-        ],
-        (message) => mhcRegularIds.has(message.authorId),
+    const univFormalIds = new Set([
+      "hal",
+      "hayashi",
+      "hasegawa",
+      "ishikawa",
+      "hashimoto",
+      "mori",
+      "ueda",
+      "kondo",
+      "yoshida",
+      "maeda",
+    ]);
+    const univChannelIds = [
+      "univ-contact",
+      "univ-class",
+      "univ-chat",
+      "univ-job",
+      "univ-report",
+      "univ-any",
+    ];
+    const mhcChannelIds = [
+      "mhc-lfg",
+      "mhc-chat",
+      "mhc-questions",
+      "mhc-clips",
+      "mhc-notice",
+      "mhc-gear",
+      "mhc-intro",
+    ];
+    const mhcRegularIds = new Set(["gunlance", "mina", "jijii"]);
+    const friendIds = [
+      "dm-taku",
+      "dm-jun",
+      "dm-miyu",
+      "dm-yama",
+      "dm-gunlance",
+      "friend-chat",
+      "friend-plan",
+      "friend-memory",
+    ];
+
+    it("恋人・敬語関係（先輩後輩/カイ/学科敬語組）・リア友＆mhc常連で応答語形と文体が分離する", () => {
+      const lover = countForms(["dm-maimai"], (message) => message.authorId === "maimai");
+      const academicDms = countForms(["dm-ootsuka", "dm-hayashi", "dm-kai"]);
+      const academicUniv = countForms(univChannelIds, (message) =>
+        univFormalIds.has(message.authorId),
+      );
+      const academic: Record<ToneForm, number> = {
+        softEmoji: academicDms.softEmoji + academicUniv.softEmoji,
+        keigo: academicDms.keigo + academicUniv.keigo,
+        tameguchi: academicDms.tameguchi + academicUniv.tameguchi,
+      };
+      const friendsOnly = countForms(friendIds);
+      const mhcRegulars = countForms(mhcChannelIds, (message) =>
+        mhcRegularIds.has(message.authorId),
       );
       const regularCombined: Record<ToneForm, number> = {
         softEmoji: friendsOnly.softEmoji + mhcRegulars.softEmoji,
@@ -294,12 +326,56 @@ describe("Round 6 精度指標（#252）", () => {
         T.tone.friendsOnlyTameShareMin,
       );
       expect(regularCombined.tameguchi).toBeGreaterThan(regularCombined.keigo);
+
+      // 発話全体の文末・文体クロス集計でも同じ関係性の分離が成立する
+      const styleLover = countForms(
+        ["dm-maimai"],
+        (message) => message.authorId === "maimai",
+        classifyMessageStyle,
+      );
+      const styleAcadDms = countForms(
+        ["dm-ootsuka", "dm-hayashi", "dm-kai"],
+        () => true,
+        classifyMessageStyle,
+      );
+      const styleAcadUniv = countForms(
+        univChannelIds,
+        (message) => univFormalIds.has(message.authorId),
+        classifyMessageStyle,
+      );
+      const styleAcad: Record<ToneForm, number> = {
+        softEmoji: styleAcadDms.softEmoji + styleAcadUniv.softEmoji,
+        keigo: styleAcadDms.keigo + styleAcadUniv.keigo,
+        tameguchi: styleAcadDms.tameguchi + styleAcadUniv.tameguchi,
+      };
+      const styleFriends = countForms(friendIds, () => true, classifyMessageStyle);
+      const styleMhc = countForms(
+        mhcChannelIds,
+        (message) => mhcRegularIds.has(message.authorId),
+        classifyMessageStyle,
+      );
+      const styleRegular: Record<ToneForm, number> = {
+        softEmoji: styleFriends.softEmoji + styleMhc.softEmoji,
+        keigo: styleFriends.keigo + styleMhc.keigo,
+        tameguchi: styleFriends.tameguchi + styleMhc.tameguchi,
+      };
+      const styleChi = chiSquared([
+        [styleLover.softEmoji, styleLover.keigo, styleLover.tameguchi],
+        [styleAcad.softEmoji, styleAcad.keigo, styleAcad.tameguchi],
+        [styleRegular.softEmoji, styleRegular.keigo, styleRegular.tameguchi],
+      ]);
+      expect(styleChi.stat).toBeGreaterThanOrEqual(T.tone.styleChi2Min);
+      expect(share(styleAcad, "keigo")).toBeGreaterThan(share(styleRegular, "keigo"));
+      expect(share(styleRegular, "keigo")).toBeGreaterThan(share(styleLover, "keigo"));
+      expect(share(styleLover, "softEmoji")).toBeGreaterThan(share(styleRegular, "softEmoji"));
     });
 
     it("反例検査: 同じ分類器でも語形・分布を崩すと分離しない", () => {
       expect(classifyReplyTone("ありがと😊")).toBe("softEmoji");
       expect(classifyReplyTone("ありがとうございます")).toBe("keigo");
+      expect(classifyReplyTone("OKです")).toBe("keigo");
       expect(classifyReplyTone("サンキュー")).toBe("tameguchi");
+      expect(classifyReplyTone("いいよ")).toBe("tameguchi");
       expect(classifyReplyTone("お願いします！ざっくり14時〜17時で！")).toBe("keigo");
       const uniform = chiSquared([
         [10, 10, 10],
@@ -388,7 +464,7 @@ describe("Round 6 精度指標（#252）", () => {
     const PRE_CALL_INVITE =
       /電話|通話|声聞きたい|声だけ聞きたい|話せますか|話したい|かけます|かけるよ|つなご/;
     const POST_CALL_IMPRESSION =
-      /話[すせし]|声|長電話|電話|通話|おつかれ|楽しか|安心|ありがと|聞け|聞こえ|落ち着|眠く|切れ|震えて/;
+      /話[すせし]|喋[っりる]|声|長電話|電話|通話|おつかれ|楽しか|安心|ありがと|聞け|聞こえ|落ち着|眠く|切れ|震えて/;
     // 謝罪・言い訳だけでは折り返しとみなさない。かけ直しの実行か申し出を要求する。
     const MISSED_CALLBACK =
       /かけ直|かけなお|電話し直|つなぎ直|折り返|今からかけ|すぐかけ|あとでかけ|後でかけ|またかけ|明日かけ/;
@@ -470,11 +546,13 @@ describe("Round 6 精度指標（#252）", () => {
       expect(missedCallbackOk / missedCalls).toBeGreaterThanOrEqual(
         T.callContext.missedCallbackRateMin,
       );
-      // 反例: 謝罪だけ・「また今度」だけでは折り返しにならない
+      // 反例: 謝罪だけ・「また今度」だけでは折り返しにならない、無関係な一文は通話感想にならない
       expect(MISSED_CALLBACK.test("ごめん、ドライヤーしてて着信気づかなかった〜")).toBe(false);
       expect(MISSED_CALLBACK.test("ごめん、寝てた")).toBe(false);
       expect(MISSED_CALLBACK.test("大丈夫です。また今度")).toBe(false);
       expect(MISSED_CALLBACK.test("ごめん、寝てた。今からかけ直してもいい？")).toBe(true);
+      expect(POST_CALL_IMPRESSION.test("明日は9時から講義です")).toBe(false);
+      expect(POST_CALL_IMPRESSION.test("気づいたら一時間ちかく喋ってたね")).toBe(true);
     });
   });
 
