@@ -2,7 +2,8 @@ import { describe, expect, it } from "vitest";
 import { searchPosts, searchUsers } from ".";
 
 describe("Twixer の検索候補（#248）", () => {
-  it.each(["モンハン", "ブログ", "弓", "写真コンテスト", "ストーカー", "でんでん"])(
+  it.each(["モンハン", "ブログ", "弓", "写真コンテスト"])(
+    // 「でんでん」「ストーカー」は一意な手がかり語なので量産せず、候補の多さは求めない（#248 レビュー）
     "%s には10人以上の公開候補があり、旧アカウントは上位3人に出ない",
     (query) => {
       const matches = searchUsers(query);

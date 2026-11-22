@@ -18,8 +18,6 @@ const CLUES = [
   "ブログ",
   "弓",
   "写真コンテスト",
-  "でんでん",
-  "ストーカー",
   "集会所",
   "装備",
   "カメラ",
@@ -41,6 +39,18 @@ describe("Twixer のデータ規模（#248）", () => {
         clue,
       ).toBeGreaterThanOrEqual(20);
     }
+  });
+
+  it("量産投稿には「でんでん」「ストーカー」を出さない（手がかりの重みを守る）", () => {
+    const generated = topLevel.filter((post) => post.authorId.startsWith("tw-gen-"));
+    expect(
+      generated.some((post) => post.body.includes("でんでん")),
+      "でんでん",
+    ).toBe(false);
+    expect(
+      generated.some((post) => post.body.includes("ストーカー")),
+      "ストーカー",
+    ).toBe(false);
   });
 
   it("本文の完全一致がなく、書き出し20字の重複率が10%以下（返信を含む全投稿）", () => {

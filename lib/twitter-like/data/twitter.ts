@@ -277,7 +277,7 @@ export const twitterPosts: Post[] = [
   {
     id: "post-018",
     authorId: "tw-mai",
-    postedAt: "2026-11-14T08:40:00+09:00",
+    postedAt: "2026-08-12T08:40:00+09:00",
     body: "朝までみんなとレイドしてしまった。今日は眠い。",
     replyCount: 2,
     repostCount: 1,
@@ -286,7 +286,7 @@ export const twitterPosts: Post[] = [
   {
     id: "post-019",
     authorId: "tw-mai",
-    postedAt: "2026-11-15T23:12:00+09:00",
+    postedAt: "2026-11-06T23:12:00+09:00",
     body: "きのうから、知ってるはずのない言い回しを目にする。たぶん偶然。そう思うことにする。",
     replyCount: 0,
     repostCount: 4,
@@ -1246,7 +1246,7 @@ export const twitterPosts: Post[] = [
   {
     id: "post-652",
     authorId: "tw-mai",
-    postedAt: "2026-11-21T19:25:00+09:00",
+    postedAt: "2026-08-20T19:25:00+09:00",
     body: "冬のコートを出した。ポケットから去年のレシートが出てきた。",
     replyCount: 0,
     repostCount: 0,

@@ -35,6 +35,12 @@ describe("Mai の投稿（#241）", () => {
     expect(listHomePosts("tw-hal").some((post) => post.authorId === "tw-mai")).toBe(true);
   });
 
+  it("失踪後（11/19 21:47）に投稿せず、トップレベルは11月上旬まで", () => {
+    const latest = [...mai].sort((a, b) => b.postedAt.localeCompare(a.postedAt))[0];
+    expect(latest.postedAt <= "2026-11-08T23:59:59+09:00").toBe(true);
+    expect(mai.some((post) => post.postedAt >= "2026-11-19T21:47:00+09:00")).toBe(false);
+  });
+
   it("同じ本文がない（8文字以上）", () => {
     const long = bodies.filter((body) => [...body].length >= 8);
     expect(new Set(long).size).toBe(long.length);
