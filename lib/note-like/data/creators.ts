@@ -25,4 +25,22 @@ export const creators: Creator[] = [
     avatar: "/note-like/avatars/kado-coffee.svg",
     avatarColor: "#8a6a55",
   },
+  {
+    id: "silver_frame",
+    displayName: "銀枠",
+    bio: "フィルムの残りと、写ると思っていなかったもの。",
+    avatarColor: "#546d83",
+  },
+  {
+    id: "workbench_38",
+    displayName: "作業台38",
+    bio: "家の家具を直す。切り落としたほうの木も取っておく。",
+    avatarColor: "#756146",
+  },
+  {
+    id: "late_supper",
+    displayName: "遅い晩ごはん",
+    bio: "晩の台所と、翌朝の取り分。",
+    avatarColor: "#85584c",
+  },
 ];
