@@ -1318,7 +1318,6 @@ const REPLY_QUOTE_WORDS = [
   "モンハン",
   "クエスト",
   "写真コンテスト",
-  "ストーカー",
   "集会所",
   "喫茶店",
   "コーヒー",
@@ -1333,7 +1332,6 @@ const REPLY_QUOTE_WORDS = [
   "面接",
   "装備",
   "ブログ",
-  "でんでん",
   "狩猟",
   "レイド",
   "双剣",
@@ -1391,7 +1389,8 @@ replyParents.forEach((parent, pIndex) => {
     replyStore.push({
       id: `reply-${parent.id}-${n + 1}`,
       authorId: authors[(pIndex + n) % authors.length],
-      postedAt: new Date(start).toISOString().replace(".000Z", "+00:00"),
+      // 親と同じく日本時間で書く（UTC 表記だと日付が前日にずれる。#273）
+      postedAt: new Date(start + 9 * 60 * 60 * 1000).toISOString().replace(".000Z", "+09:00"),
       body,
       replyToId: parent.id,
       replyCount: 0,
