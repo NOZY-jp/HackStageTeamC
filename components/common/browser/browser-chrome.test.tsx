@@ -195,9 +195,9 @@ describe("BrowserChrome", () => {
 
     await user.click(omnibox);
     await user.clear(omnibox);
-    await user.type(omnibox, "蒼穹フォトアワード 2020{Enter}");
+    await user.type(omnibox, "蒼穹フォトアワード 2018{Enter}");
     expect(nav.push).toHaveBeenCalledWith(
-      "/search?q=%E8%92%BC%E7%A9%B9%E3%83%95%E3%82%A9%E3%83%88%E3%82%A2%E3%83%AF%E3%83%BC%E3%83%89%202020",
+      "/search?q=%E8%92%BC%E7%A9%B9%E3%83%95%E3%82%A9%E3%83%88%E3%82%A2%E3%83%AF%E3%83%BC%E3%83%89%202018",
     );
   });
 
@@ -324,7 +324,7 @@ describe("BrowserChrome", () => {
       );
     });
     expect(
-      within(panel).getByRole("link", { name: /蒼穹フォトアワード 2020 結果/ }),
+      within(panel).getByRole("link", { name: /蒼穹フォトアワード 2018 結果/ }),
     ).toHaveAttribute("href", PHOTO_CONTEST_RESULT_PATH);
 
     // Esc で閉じる
