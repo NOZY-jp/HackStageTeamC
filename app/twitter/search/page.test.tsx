@@ -5,6 +5,8 @@ import * as twitter from "@/lib/twitter-like";
 import type { Post } from "@/lib/twitter-like/types";
 import TwitterSearchPage from "./page";
 
+vi.mock("next/navigation", () => ({ useRouter: () => ({ replace: vi.fn() }) }));
+
 function StoryFlagProbe() {
   const { state } = useStory();
   return <output data-testid="story-flags">{state.flags.join(",")}</output>;

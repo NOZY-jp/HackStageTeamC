@@ -7958,113 +7958,287 @@ article div[class~="justify-between"][class~="text-xs"] > div {
   }
 }
 
-/* 写真コンテスト結果（主催者ページ・#222）。個人ブログの枠を出さない */
-.contest-result {
-  max-width: 880px;
-  margin: 0 auto;
-  padding: 40px 20px 64px;
-  color: #241f1a;
-  background-color: #fbf8f3;
-  min-height: 100dvh;
+/* 写真コンテスト結果（主催者ページ・#222）。個人ブログの枠を出さず、主催者の公式サイトとして見せる */
+.contest-site {
+  --cs-ink: #172231;
+  --cs-sub: #5d6b7c;
+  --cs-line: #dbe3ec;
+  --cs-sky: #2c6cb0;
+  --cs-sky-deep: #0f2744;
+  --cs-gold: #b88a2e;
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  background-color: #f4f6f9;
+  color: var(--cs-ink);
+  font-family: "Hiragino Sans", "Noto Sans JP", system-ui, sans-serif;
 }
 
-.contest-result-head {
-  border-bottom: 2px solid #241f1a;
+.contest-site-inner {
+  width: 100%;
+  max-width: 1040px;
+  margin: 0 auto;
+  padding: 0 24px;
+}
+
+.contest-site-header {
+  border-bottom: 1px solid var(--cs-line);
+  background-color: #fff;
+}
+
+.contest-site-header .contest-site-inner {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px 24px;
+  padding-top: 16px;
   padding-bottom: 16px;
 }
 
-.contest-result-kicker {
+.contest-site-logo {
+  display: flex;
+  align-items: center;
+  gap: 12px;
   margin: 0;
+}
+
+/* 空のグラデーションに、白い地平線を1本 */
+.contest-site-mark {
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  background: linear-gradient(180deg, #8cc0ee 0%, var(--cs-sky) 70%);
+  box-shadow: inset 0 -13px 0 -11px #fff;
+}
+
+.contest-site-name {
+  display: flex;
+  flex-direction: column;
+  font-size: 19px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  line-height: 1.25;
+}
+
+.contest-site-name-en {
+  color: var(--cs-sub);
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.28em;
+}
+
+.contest-site-organizer {
+  margin: 0;
+  color: var(--cs-sub);
   font-size: 12px;
-  letter-spacing: 0.2em;
-  color: #8a6a55;
+  letter-spacing: 0.06em;
+}
+
+.contest-result {
+  flex: 1;
+}
+
+/* 結果発表の帯：夕暮れから夜へ向かう空の色 */
+.contest-result-hero {
+  padding: 56px 0 48px;
+  background:
+    radial-gradient(120% 140% at 85% 0%, rgb(236 160 98 / 0.35), transparent 55%),
+    linear-gradient(160deg, #1c3f6e 0%, var(--cs-sky-deep) 70%);
+  color: #fff;
+}
+
+.contest-result-kicker {
+  margin: 0 0 10px;
+  color: rgb(255 255 255 / 0.7);
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.4em;
 }
 
 .contest-result-title {
-  margin: 6px 0 8px;
-  font-size: clamp(22px, 3.4vw, 34px);
+  margin: 0 0 10px;
+  font-size: clamp(26px, 4vw, 40px);
+  font-weight: 700;
+  letter-spacing: 0.06em;
   line-height: 1.3;
 }
 
 .contest-result-date {
-  margin: 0;
-  color: #6b5a46;
-  font-size: 13px;
+  margin: 0 0 20px;
+  color: rgb(255 255 255 / 0.75);
+  font-size: 14px;
 }
 
 .contest-result-lead {
-  margin: 22px 0;
+  max-width: 40em;
+  margin: 0;
+  font-size: 15px;
   line-height: 1.9;
 }
 
-.contest-result-awards h2 {
-  font-size: 18px;
-  margin: 28px 0 12px;
+.contest-result-body {
+  padding-top: 48px;
+  padding-bottom: 64px;
 }
 
+.contest-result-heading {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin: 0 0 24px;
+  font-size: 20px;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+}
+
+.contest-result-heading::after {
+  content: "";
+  flex: 1;
+  height: 1px;
+  background-color: var(--cs-line);
+}
+
+/* 優秀賞は大きく、佳作は2列のカードで並べる */
 .contest-result-list {
-  list-style: none;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 24px;
   margin: 0;
   padding: 0;
-  display: grid;
-  gap: 20px;
+  list-style: none;
 }
 
 .contest-award {
-  background-color: #ffffff;
-  border: 1px solid #e5dccd;
-  border-radius: 10px;
   overflow: hidden;
+  border: 1px solid var(--cs-line);
+  border-radius: 10px;
+  background-color: #fff;
+  box-shadow: 0 1px 2px rgb(15 39 68 / 0.04);
+}
+
+.contest-award[data-rank="excellent"] {
+  display: grid;
+  grid-column: 1 / -1;
+  grid-template-columns: minmax(0, 1.6fr) minmax(0, 1fr);
+  box-shadow: 0 12px 32px rgb(15 39 68 / 0.1);
 }
 
 .contest-award-figure {
   margin: 0;
-  background-color: #eee6d8;
+  background-color: #0d1a2b;
 }
 
-.contest-award-figure img {
+.contest-award-image {
   display: block;
   width: 100%;
-  height: auto;
+  height: 100%;
+  object-fit: cover;
+  aspect-ratio: 3 / 2;
 }
 
 .contest-award-body {
-  padding: 14px 16px 18px;
+  padding: 24px 26px 26px;
+}
+
+.contest-award[data-rank="excellent"] .contest-award-body {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding: 32px;
 }
 
 .contest-award-rank {
-  margin: 0;
-  font-size: 12px;
-  letter-spacing: 0.12em;
-  color: #8a6a55;
+  display: inline-block;
+  margin: 0 0 12px;
+  padding: 4px 14px;
+  border: 1px solid var(--cs-line);
+  border-radius: 999px;
+  color: var(--cs-sub);
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.2em;
+}
+
+.contest-award[data-rank="excellent"] .contest-award-rank {
+  align-self: flex-start;
+  border-color: var(--cs-gold);
+  background-color: var(--cs-gold);
+  color: #fff;
 }
 
 .contest-award-title {
-  margin: 4px 0 8px;
+  margin: 0 0 16px;
   font-size: 20px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+}
+
+.contest-award[data-rank="excellent"] .contest-award-title {
+  font-size: 26px;
+}
+
+/* 受賞者（段階7の後だけ中身が出る。#239） */
+.contest-award-winner {
+  margin: 0 0 20px;
+  padding: 12px 16px;
+  border-radius: 8px;
+  background-color: #f1f5fa;
+  font-size: 14px;
+}
+
+.contest-award-winner:empty {
+  display: none;
+}
+
+.contest-award-winner p {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px 12px;
+  margin: 0;
+}
+
+.contest-award-label {
+  margin: 0 0 6px;
+  color: var(--cs-sub);
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.2em;
 }
 
 .contest-award-comment {
   margin: 0;
-  line-height: 1.8;
   font-size: 14px;
+  line-height: 1.9;
 }
 
 .contest-result-foot {
-  margin-top: 28px;
-  color: #6b5a46;
+  margin: 40px 0 0;
+  color: var(--cs-sub);
   font-size: 14px;
+  text-align: center;
 }
 
-/* コンテスト結果の「受賞者を確認する」（#239） */
-.contest-award-confirm {
-  margin-left: 10px;
-  padding: 4px 10px;
-  border: 1px solid #b9a58b;
-  border-radius: 999px;
-  background-color: #fffaf2;
-  color: #5c4a36;
-  font-size: 13px;
+.contest-site-footer {
+  padding: 24px;
+  border-top: 1px solid var(--cs-line);
+  background-color: #fff;
+  color: var(--cs-sub);
+  font-size: 12px;
+  letter-spacing: 0.06em;
+  text-align: center;
+}
+
+@media (max-width: 720px) {
+  .contest-result-list,
+  .contest-award[data-rank="excellent"] {
+    grid-template-columns: 1fr;
+  }
+
+  .contest-award[data-rank="excellent"] .contest-award-body {
+    padding: 24px;
+  }
 }
 
 /* 写真を見せる場面（#226）。画面を覆わず、縦横比を保って中央に収める */
@@ -8081,4 +8255,347 @@ article div[class~="justify-between"][class~="text-xs"] > div {
   max-width: min(70%, 960px);
   max-height: 70%;
   object-fit: contain;
+}
+
+/* 結果ページで、まだたどり着いていない名前を黒く塗って伏せる */
+.contest-redacted {
+  display: inline-block;
+  padding: 0 2px;
+  background-color: #1d1d1d;
+  color: #1d1d1d;
+  letter-spacing: 0.05em;
+  line-height: 1.3;
+  user-select: none;
+}
+
+/* ---- 写真コンテストの主催者サイト（/soukyuu-photo・#222）。でんでんのブログとは別の、すっきりした公式サイトの見た目 ---- */
+
+.sk-site {
+  --sk-ink: #1f2a37;
+  --sk-sub: #5b6b7d;
+  --sk-sky: #2f6fb3;
+  --sk-sky-pale: #eaf3fb;
+  --sk-line: #d7e3ee;
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  background-color: #f7fafc;
+  color: var(--sk-ink);
+  font-family: "Hiragino Sans", "Noto Sans JP", system-ui, sans-serif;
+}
+
+.sk-header {
+  border-bottom: 1px solid var(--sk-line);
+  background: linear-gradient(180deg, #ffffff, var(--sk-sky-pale));
+}
+
+.sk-header-inner {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px 24px;
+  max-width: 960px;
+  margin: 0 auto;
+  padding: 18px 20px;
+}
+
+.sk-logo {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin: 0;
+  color: inherit;
+  text-decoration: none;
+}
+
+/* 空の色のグラデーションに、白い地平線を1本 */
+.sk-logo-mark {
+  position: relative;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: linear-gradient(180deg, #7fb6e8, var(--sk-sky));
+  box-shadow: inset 0 -12px 0 -10px #fff;
+}
+
+.sk-logo-text {
+  display: flex;
+  flex-direction: column;
+  font-size: 18px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  line-height: 1.2;
+}
+
+.sk-logo-en {
+  color: var(--sk-sub);
+  font-size: 10px;
+  font-weight: 500;
+  letter-spacing: 0.24em;
+}
+
+.sk-nav {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 20px;
+  font-size: 13px;
+}
+
+.sk-nav-item {
+  padding: 4px 0;
+  border-bottom: 2px solid transparent;
+  color: var(--sk-sub);
+  text-decoration: none;
+}
+
+.sk-nav-item:hover {
+  color: var(--sk-ink);
+}
+
+.sk-nav-item[aria-current="page"] {
+  border-bottom-color: var(--sk-sky);
+  color: var(--sk-ink);
+  font-weight: 700;
+}
+
+.sk-main {
+  flex: 1;
+  width: 100%;
+  max-width: 960px;
+  margin: 0 auto;
+  padding: 40px 20px 64px;
+}
+
+.sk-article {
+  padding: 36px clamp(20px, 5vw, 48px);
+  border: 1px solid var(--sk-line);
+  border-radius: 8px;
+  background-color: #fff;
+}
+
+.sk-date {
+  margin: 0 0 8px;
+  color: var(--sk-sub);
+  font-size: 13px;
+  letter-spacing: 0.04em;
+}
+
+.sk-title {
+  margin: 0 0 20px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid var(--sk-line);
+  font-size: clamp(22px, 3vw, 28px);
+  font-weight: 700;
+  letter-spacing: 0.04em;
+}
+
+.sk-lead,
+.sk-review,
+.sk-closing {
+  margin: 0 0 16px;
+  font-size: 15px;
+  line-height: 1.9;
+}
+
+.sk-prize {
+  margin: 32px 0;
+}
+
+.sk-prize-name {
+  display: inline-block;
+  margin: 0 0 16px;
+  padding: 4px 14px;
+  border-radius: 999px;
+  background-color: var(--sk-sky);
+  color: #fff;
+  font-size: 14px;
+  font-weight: 700;
+  letter-spacing: 0.2em;
+}
+
+.sk-work {
+  margin: 0 0 16px;
+}
+
+.sk-work-image {
+  display: block;
+  width: 100%;
+  height: auto;
+  border-radius: 4px;
+}
+
+.sk-meta {
+  display: grid;
+  gap: 8px;
+  margin: 0 0 16px;
+  padding: 14px 18px;
+  border-radius: 6px;
+  background-color: var(--sk-sky-pale);
+  font-size: 15px;
+}
+
+.sk-meta-row {
+  display: flex;
+  gap: 16px;
+}
+
+.sk-meta dt {
+  flex: none;
+  width: 4em;
+  color: var(--sk-sub);
+}
+
+.sk-meta dd {
+  margin: 0;
+  font-weight: 700;
+}
+
+.sk-footer {
+  padding: 20px;
+  border-top: 1px solid var(--sk-line);
+  color: var(--sk-sub);
+  font-size: 12px;
+  text-align: center;
+}
+
+/* トップ：受賞作を背景に、キャッチコピーと入口 */
+.sk-hero {
+  position: relative;
+  display: grid;
+  overflow: hidden;
+  margin-bottom: 32px;
+  border-radius: 8px;
+  background-color: #10223a;
+}
+
+.sk-hero-image {
+  grid-area: 1 / 1;
+  width: 100%;
+  height: 100%;
+  min-height: 360px;
+  object-fit: cover;
+  opacity: 0.55;
+}
+
+/* 写真は半透明（重なりの順が上がる）なので、文字は position で写真より手前に置く */
+.sk-hero-text {
+  position: relative;
+  grid-area: 1 / 1;
+  align-self: end;
+  background: linear-gradient(0deg, rgb(10 22 40 / 0.75), rgb(10 22 40 / 0));
+  padding: clamp(24px, 5vw, 48px);
+  color: #fff;
+  text-shadow: 0 1px 12px rgb(0 0 0 / 0.45);
+}
+
+.sk-hero-name {
+  margin: 0 0 8px;
+  font-size: 13px;
+  letter-spacing: 0.2em;
+  opacity: 0.85;
+}
+
+.sk-hero-copy {
+  margin: 0 0 12px;
+  font-size: clamp(26px, 4.4vw, 42px);
+  font-weight: 700;
+  letter-spacing: 0.08em;
+}
+
+.sk-hero-lead {
+  max-width: 34em;
+  margin: 0 0 20px;
+  font-size: 15px;
+  line-height: 1.8;
+}
+
+.sk-hero-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.sk-button {
+  display: inline-block;
+  padding: 10px 22px;
+  border: 1px solid rgb(255 255 255 / 0.7);
+  border-radius: 999px;
+  color: #fff;
+  font-size: 14px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-decoration: none;
+  text-shadow: none;
+}
+
+.sk-button[data-primary] {
+  border-color: var(--sk-sky);
+  background-color: var(--sk-sky);
+}
+
+.sk-button:hover {
+  filter: brightness(1.1);
+}
+
+.sk-section-title {
+  margin: 0 0 16px;
+  font-size: 18px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+}
+
+.sk-news {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.sk-news-item {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 20px;
+  padding: 14px 0;
+  border-top: 1px solid var(--sk-line);
+  font-size: 15px;
+}
+
+.sk-news-date {
+  flex: none;
+  width: 6em;
+  color: var(--sk-sub);
+}
+
+.sk-news-link {
+  color: var(--sk-sky);
+}
+
+/* 募集要項：見出しと中身の2列（狭い画面では縦に積む） */
+.sk-guidelines {
+  margin: 0;
+}
+
+.sk-guidelines-row {
+  display: grid;
+  grid-template-columns: 8em 1fr;
+  gap: 8px 20px;
+  padding: 14px 0;
+  border-top: 1px solid var(--sk-line);
+  font-size: 15px;
+  line-height: 1.8;
+}
+
+.sk-guidelines-row dt {
+  color: var(--sk-sub);
+  font-weight: 700;
+}
+
+.sk-guidelines-row dd {
+  margin: 0;
+}
+
+@media (max-width: 560px) {
+  .sk-guidelines-row {
+    grid-template-columns: 1fr;
+  }
 }

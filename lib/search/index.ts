@@ -162,7 +162,7 @@ function buildBlogDocuments(): SearchDocument[] {
 function buildContestDocuments(): SearchDocument[] {
   return [
     {
-      id: "contest:soukyuu-photo-award-2020",
+      id: "contest:soukyuu-photo-award-2018",
       kind: "contest",
       title: `${PHOTO_CONTEST_NAME} 結果`,
       primaryTitle: `${PHOTO_CONTEST_NAME} 結果`,

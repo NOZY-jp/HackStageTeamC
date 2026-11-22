@@ -1,4 +1,10 @@
-export { characters, FORBIDDEN_WORDS, getCharacter, nicknames } from "./characters";
+export {
+  characters,
+  FORBIDDEN_WORDS,
+  getCharacter,
+  nicknames,
+  speakerLabel,
+} from "./characters";
 export * from "./engine";
 export { EXTRA_FLAGS, FLAG_IDS, type FlagId } from "./flags";
 export { isAtPlace, isWithinPlace, PLACES, type Place, type PlaceId } from "./places";

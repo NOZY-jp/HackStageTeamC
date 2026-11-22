@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { choose, linesOf, transcript } from "./engine";
+import { choose, completedChats, transcript } from "./engine";
 import { beats } from "./scenario";
 import { loadState, saveState } from "./storage";
 import type { Beat, StoryState } from "./types";
@@ -62,19 +62,36 @@ describe("寄り道の選択が履歴に残る（#111）", () => {
     expect(texts(loaded)).toContain(detourText);
   });
 
-  it("実 ch5-talkup の助言も、保存して読み直した履歴に残る（#182 の伏線）", () => {
+  it("第五章の観察とカイの呼び名の助言は保存後も履歴に残る（#182 の伏線）", () => {
     const talkup = findBeat("ch5-talkup");
-    const advice = linesOf(talkup).find((line) => line.text.includes("でんちゃん"));
-    expect(advice).toBeDefined();
     const ready = state({
-      flags: ["s08-real-name", "s09-kai-contact", "s10-talkup-match"],
+      flags: ["s08-real-name", "s09-kai-contact", "s10-talkup-match", "foundBff"],
       completed: ["ch5-kai-contact"],
     });
     const done = choose(ready, talkup, "visit-house");
     expect(done.flags).toContain("s11-address");
     const loaded = reload(done);
     expect(loaded.choices[talkup.id]).toEqual(["visit-house"]);
-    expect(texts(loaded)).toContain(advice?.text);
+    expect(texts(loaded)).toContain("自己紹介の写真から、この人の日常がそのまま伝わってくる。");
+    expect(texts(loaded).join("\n")).not.toMatch(/前に見た写真|同じ二人/);
+    expect(completedChats(loaded)).toContainEqual(
+      expect.objectContaining({ from: "kai", text: "そういえば、でんちゃんって呼ぶと喜ぶぞ" }),
+    );
+  });
+
+  it("BFF の写真を見ていなくても、第五章は TalkUp の写真を指すだけで進む（#244）", () => {
+    const talkup = findBeat("ch5-talkup");
+    const ready = state({
+      flags: ["s08-real-name", "s09-kai-contact", "s10-talkup-match"],
+      completed: ["ch5-kai-contact"],
+    });
+    const done = choose(ready, talkup, "visit-house");
+    const loaded = reload(done);
+    const all = texts(loaded).join("\n");
+    expect(all).not.toMatch(/前に見た写真|同じ二人/);
+    expect(all).toContain("自己紹介の写真から、この人の日常がそのまま伝わってくる。");
+    // 場面自体は BFF の写真を見ていなくても進む（foundBff は前提にしない）
+    expect(done.flags).toContain("s11-address");
   });
 
   it("旧セーブ（場面ごとに1つの文字列）は、実 save の読込で1件の選択として読み替える", () => {
