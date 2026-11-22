@@ -27,12 +27,15 @@ describe("Mai の投稿（#241）", () => {
     expect(Math.max(...months.values())).toBeLessThanOrEqual(10);
   });
 
-  it("ホーム（おすすめ）に Mai が30件以上出る", () => {
+  it("フォロー中・おすすめの両方に Mai が30件以上出る", () => {
+    const following = listHomePosts("tw-hal").filter(
+      (post) => post.authorId === "tw-mai" && !post.replyToId,
+    );
     const recommended = listRecommendedPosts("tw-hal").filter(
       (post) => post.authorId === "tw-mai" && !post.replyToId,
     );
+    expect(following.length).toBeGreaterThanOrEqual(30);
     expect(recommended.length).toBeGreaterThanOrEqual(30);
-    expect(listHomePosts("tw-hal").some((post) => post.authorId === "tw-mai")).toBe(true);
   });
 
   it("同じ本文がない（8文字以上）", () => {

@@ -53,19 +53,31 @@ export function listFollowingIds(viewerId: string): string[] {
 }
 
 /**
- * ホームのタイムライン（おすすめ・フォロー中で共通）。返信を除くトップレベルの
- * 投稿を新しい順で返す。出るのは「フォロー中のアカウントと自分が、自分の参加
- * 以降に書いた投稿」だけ — フォローしていない人（かのん）の投稿と、自分が
- * アカウントを開く前の古い投稿（2019年の攻略投稿など）はホームに出さない。
- * それらは検索・プロフィール・個別投稿ページから従来どおり辿れる。
+ * タイムラインに出す「物語の現在」の下限。ここより前の投稿は、2019年の攻略投稿
+ * （post-101 など）のような答えに直結する古い話なので、ホーム・おすすめのどちらにも
+ * 出さない。検索・プロフィール・個別投稿ページからは従来どおり辿れる。
+ */
+const TIMELINE_SINCE = "2026-08-01T00:00:00+09:00";
+
+/**
+ * ホームの「フォロー中」タイムライン。返信を除くトップレベルの投稿を新しい順で返す。
+ * 出るのは「フォロー中のアカウントと自分が、物語の現在（{@link TIMELINE_SINCE}）以降に
+ * 書いた投稿」だけ — フォローしていない人（かのん）の投稿と、2019年の攻略投稿の
+ * ような古い投稿は出さない。
+ *
+ * #241: 以前は viewer の参加日（joinedAt）で切っていたが、参加した直後は投稿が
+ * 数件しか残らず「フォロー中」が空に見えた。参加日はプロフィールの事実として残し、
+ * フィードの窓はおすすめと同じ「物語の現在」に揃える（参加前の投稿が見えるのは
+ * 実際の SNS のフィードと同じ挙動）。
  */
 export function listHomePosts(viewerId: string): Post[] {
   const follows = new Set([viewerId, ...(twitterFollows[viewerId] ?? [])]);
-  const joinedAt = twitterProfiles.find((profile) => profile.userId === viewerId)?.joinedAt ?? "";
   return copyOf(
     twitterPosts
       .filter(isVisiblePost)
-      .filter((post) => !post.replyToId && follows.has(post.authorId) && post.postedAt >= joinedAt)
+      .filter(
+        (post) => !post.replyToId && follows.has(post.authorId) && post.postedAt >= TIMELINE_SINCE,
+      )
       .sort(byPostedAtDesc),
   );
 }
@@ -77,11 +89,12 @@ export function listHomePosts(viewerId: string): Post[] {
  */
 export function listRecommendedPosts(viewerId: string): Post[] {
   const hidden = new Set(["tw-kanon", "tw-old-denden"]);
-  const since = "2026-08-01T00:00:00+09:00";
   return copyOf(
     twitterPosts
       .filter(isVisiblePost)
-      .filter((post) => !post.replyToId && !hidden.has(post.authorId) && post.postedAt >= since)
+      .filter(
+        (post) => !post.replyToId && !hidden.has(post.authorId) && post.postedAt >= TIMELINE_SINCE,
+      )
       .sort(byPostedAtDesc),
   );
 }
