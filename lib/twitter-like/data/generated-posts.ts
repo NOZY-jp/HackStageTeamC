@@ -169,6 +169,8 @@ const CLUES = [
 ];
 
 const DATE_START = Date.UTC(2024, 9, 1, 9, 0, 0);
+/** 日本時間のオフセット。投稿日時は JST 表記で持つ（#273）。 */
+const JST_OFFSET_MS = 9 * 60 * 60 * 1000;
 
 export const generatedUsers: TwitterUser[] = Array.from({ length: 200 }, (_, index) => {
   const family = FAMILY[index % FAMILY.length];
@@ -222,7 +224,10 @@ const bodyFor = (index: number, attempt = 0): string => {
 
 const at = (index: number): string => {
   const day = new Date(DATE_START + index * 9 * 60 * 60 * 1000);
-  return day.toISOString().replace(".000Z", "+00:00");
+  // UTC のまま書き出すと日付が前日にずれる（例: 2024-10-01T09:00Z → 10-01 09:00+00:00 ではなく
+  // 日本時間の 18:00 として扱いたい）。JST の壁時計時刻に直してから +09:00 を付ける。
+  const jst = new Date(day.getTime() + JST_OFFSET_MS);
+  return jst.toISOString().replace(".000Z", "+09:00");
 };
 
 /** 一度使った本文を避けて、全投稿を一意にする */

@@ -168,15 +168,33 @@ describe("返信の質と物語データの不変（#248）", () => {
     }
   });
 
+  // 投稿日時は JST（+09:00）で持つ。UTC のまま日付を切ると前日にずれて登録日と比べられない（#273）。
+  const jstDate = (iso: string): string =>
+    new Date(Date.parse(iso) + 9 * 60 * 60 * 1000).toISOString().slice(0, 10);
+
+  it("投稿日時はすべて JST（+09:00）表記", () => {
+    for (const post of twitterPosts) {
+      expect(post.postedAt.endsWith("+09:00"), post.id).toBe(true);
+    }
+    expect(twitterPosts.some((post) => post.postedAt.endsWith("+00:00"))).toBe(false);
+  });
+
+  it("生成した返信に手がかり語（でんでん・ストーカー）を出さない", () => {
+    const generatedReplies = replies.filter((reply) => reply.id.startsWith("reply-"));
+    expect(generatedReplies.length).toBeGreaterThanOrEqual(150);
+    for (const reply of generatedReplies) {
+      expect(reply.body.includes("でんでん"), reply.id).toBe(false);
+      expect(reply.body.includes("ストーカー"), reply.id).toBe(false);
+    }
+  });
+
   it("生成投稿の日時は投稿者の登録日より後で、「〜の話の話」を作らない", () => {
     const joinedAt = new Map(
       twitterProfiles.map((profile) => [profile.userId, profile.joinedAt] as const),
     );
     for (const post of twitterPosts) {
       if (post.authorId.startsWith("tw-gen")) {
-        expect(post.postedAt.slice(0, 10) >= (joinedAt.get(post.authorId) ?? ""), post.id).toBe(
-          true,
-        );
+        expect(jstDate(post.postedAt) >= (joinedAt.get(post.authorId) ?? ""), post.id).toBe(true);
       }
       expect(post.body.includes("の話の話"), post.id).toBe(false);
     }
