@@ -103,8 +103,8 @@ describe("lib/browser/url-map", () => {
     });
 
     it("未知のドメインや検索語は Seek 検索パスに変換する", () => {
-      expect(resolveOmniboxInput("蒼穹フォトアワード 2020")).toBe(
-        "/search?q=%E8%92%BC%E7%A9%B9%E3%83%95%E3%82%A9%E3%83%88%E3%82%A2%E3%83%AF%E3%83%BC%E3%83%89%202020",
+      expect(resolveOmniboxInput("蒼穹フォトアワード 2018")).toBe(
+        "/search?q=%E8%92%BC%E7%A9%B9%E3%83%95%E3%82%A9%E3%83%88%E3%82%A2%E3%83%AF%E3%83%BC%E3%83%89%202018",
       );
       expect(resolveOmniboxInput("https://example.com")).toBe(
         "/search?q=https%3A%2F%2Fexample.com",
