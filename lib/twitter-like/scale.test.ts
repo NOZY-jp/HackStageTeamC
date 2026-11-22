@@ -10,6 +10,11 @@ const topLevel = twitterPosts.filter((post) => !post.replyToId);
 const replies = twitterPosts.filter((post) => post.replyToId);
 const CLUES = [
   "モンハン",
+  "狩猟",
+  "レイド",
+  "双剣",
+  "大剣",
+  "太刀",
   "ブログ",
   "弓",
   "写真コンテスト",
@@ -38,8 +43,9 @@ describe("Twixer のデータ規模（#248）", () => {
     }
   });
 
-  it("本文の完全一致がなく、書き出し20字の重複率が10%以下", () => {
-    const bodies = topLevel.map((post) => post.body.replace(/\s+/g, ""));
+  it("本文の完全一致がなく、書き出し20字の重複率が10%以下（返信を含む全投稿）", () => {
+    // 返信も会話として読まれるため、親投稿だけでなく全投稿で重複を禁じる（#248 PM指摘）
+    const bodies = twitterPosts.map((post) => post.body.replace(/\s+/g, ""));
     expect(new Set(bodies).size).toBe(bodies.length);
     const openers = new Map<string, number>();
     for (const body of bodies) {

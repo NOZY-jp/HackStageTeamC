@@ -204,18 +204,20 @@ describe("twitterTrends（いま話題）", () => {
     expect(deadEnds).toEqual([]);
   });
 
-  it("どのトレンドもゲーム仲間の雑談にしか着弾しない（手がかりの投稿に直行させない）", () => {
+  it("どのトレンドも、かのん・リア友・旧垢や手がかり投稿には着弾しない", () => {
     // リョウがこの SNS で知っているのは Hal・Mai・ソウだけ。
-    // かのん・リア友・旧アカウントの投稿に着弾する名前はトレンドに置かない
-    const smallTalkAuthors = new Set(["tw-hal", "tw-mai", "tw-sou"]);
+    // かのん・リア友・旧アカウントの投稿に着弾する名前はトレンドに置かない。
+    // #248 で一般アカウントを200人以上に増やしたため、トレンド語が一般の雑談に
+    // 当たるのは正しい挙動。ここでは「物語の手がかりへ直行させない」ことだけを見る。
+    const hiddenAuthors = new Set(["tw-kanon", "tw-tomo", "tw-old-denden"]);
     // 段階2の手がかり投稿。post-101 は Mai 本人の投稿なので authorId だけでは弾けない
-    const cluePostIds = new Set(["post-101", "post-102"]);
+    const cluePostIds = new Set(["post-101", "post-102", "post-105"]);
     for (const trend of listTrends()) {
       const hits = searchPosts(trend.name);
-      expect(hits.length).toBeGreaterThan(0);
+      expect(hits.length, trend.name).toBeGreaterThan(0);
       for (const hit of hits) {
-        expect(smallTalkAuthors.has(hit.authorId)).toBe(true);
-        expect(cluePostIds.has(hit.id)).toBe(false);
+        expect(hiddenAuthors.has(hit.authorId), `${trend.name} ${hit.id}`).toBe(false);
+        expect(cluePostIds.has(hit.id), `${trend.name} ${hit.id}`).toBe(false);
       }
     }
   });

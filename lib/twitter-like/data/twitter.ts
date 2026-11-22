@@ -1255,17 +1255,53 @@ export const twitterPosts: Post[] = [
   ...generatedPosts,
 ];
 const replyStore: Post[] = [];
-const REPLY_OPENERS = [
-  "それは",
-  "たしかに",
-  "わかる",
-  "自分も",
-  "ちょっと",
-  "なるほど",
-  "いいですね",
-  "うらやましい",
-  "気になります",
-  "あとで",
+/**
+ * #248: 返信は親の本文の一節を受けて書く。
+ * 定型文の巡回だと同じ本文が何度も出て、会話が作り物に見える（QA/PM指摘）。
+ * 親の文節を引用し、反応と自分の話を1つずつ添えて、全件が別の本文になるようにする。
+ */
+const REPLY_FRAMES = [
+  (word: string, reaction: string, personal: string) =>
+    `「${word}」の話、${reaction}。${personal}。`,
+  (word: string, reaction: string, personal: string) => `${word}、${reaction}。${personal}。`,
+  (word: string, reaction: string, personal: string) => `${word}か、${reaction}。${personal}。`,
+  (word: string, reaction: string, personal: string) => `「${word}」ね、${reaction}。${personal}。`,
+  (word: string, reaction: string, personal: string) =>
+    `${reaction}。「${word}」の話、${personal}。`,
+  (word: string, reaction: string, personal: string) => `${personal}。${word}の話、${reaction}。`,
+  (word: string, reaction: string, personal: string) => `「${word}」か。${reaction}。${personal}。`,
+  (word: string, reaction: string, personal: string) =>
+    `${reaction}。${personal}。「${word}」の話、また聞かせて。`,
+];
+const REPLY_REACTIONS = [
+  "それは気になる",
+  "いいなあ",
+  "分かる気がする",
+  "想像つくよ",
+  "そこは同感",
+  "ちょっと意外",
+  "自分も同じだった",
+  "うらやましい限り",
+  "それは助かる話",
+  "かなりいいと思う",
+  "なるほどね",
+  "それは大変だったね",
+  "聞いてみたかったやつだ",
+];
+const REPLY_PERSONAL = [
+  "今度ゆっくり聞かせて",
+  "こっちでも同じことがあったよ",
+  "写真があったら見たい",
+  "自分もやってみようと思う",
+  "また共有してほしい",
+  "時間が合えば一緒に行きたい",
+  "そのうち同じことしてみる",
+  "自分はまだそこまで行けてない",
+  "今度おすすめを教えて",
+  "忘れたころに思い出しそう",
+  "しばらく考えてみる",
+  "その話、あとで詳しく知りたい",
+  "だいたい想像できた",
 ];
 const REPLY_AUTHORS = [
   "tw-mai",
@@ -1277,37 +1313,62 @@ const REPLY_AUTHORS = [
   "tw-nagi",
   "tw-yuu",
 ];
-const REPLY_PARTS = [
-  "こっちでも同じでした",
-  "今度くわしく聞きたいです",
-  "自分もやってみます",
-  "その話は助かります",
-  "少し見直してみます",
-  "また共有してください",
-  "同じところで迷いました",
-  "今度一緒にどうですか",
-  "写真があったら見たいです",
-  "時間が合えば行きます",
-];
+/**
+ * 親の本文から、返信で引ける名詞句（カタカナ語・漢字2〜6字）を拾う。
+ * 文節の途中で切ると不自然になるため、語単位だけを使う。
+ * 時刻や順序を表す語は引用すると意味が伝わらないので除く。
+ */
+const REPLY_WORD_STOPWORDS = new Set([
+  "今日",
+  "最初",
+  "今週",
+  "平日",
+  "昨日",
+  "明日",
+  "今年",
+  "去年",
+  "自分",
+  "最近",
+]);
+const fragmentsOf = (body: string): string[] => {
+  const words = body.match(/[\u30a1-\u30fc]{3,}|[\u4e00-\u9fff]{2,6}/g) ?? [];
+  const unique = [...new Set(words)].filter(
+    (word) => !REPLY_WORD_STOPWORDS.has(word) && !/^[一二三四五六七八九十百千万何数]/.test(word),
+  );
+  return unique.sort((a, b) => b.length - a.length || a.localeCompare(b));
+};
 const replyParents = twitterPosts
   .filter(
     (post) =>
       !post.replyToId &&
       !post.authorId.startsWith("tw-gen") &&
+      // 鍵垢の本文を公開の返信で引用すると内容が漏れる（#248 PM指摘）
+      !twitterUsers.find((user) => user.id === post.authorId)?.protected &&
       post.id !== "post-101" &&
       post.id !== "post-105",
   )
   .slice(0, 42);
+const usedReplyBodies = new Set<string>();
 replyParents.forEach((parent, pIndex) => {
+  const fragments = fragmentsOf(parent.body);
   for (let n = 0; n < 4; n += 1) {
-    const opener = REPLY_OPENERS[(pIndex + n) % REPLY_OPENERS.length];
-    const part = REPLY_PARTS[(pIndex * 2 + n) % REPLY_PARTS.length];
+    const fragment = fragments.length > 0 ? fragments[(pIndex + n) % fragments.length] : "その話";
+    const frame = REPLY_FRAMES[(pIndex + n) % REPLY_FRAMES.length];
+    let body = "";
+    // 文節の重なりで同じ本文になった場合だけ、言い回しをずらして一意にする
+    for (let attempt = 0; attempt < REPLY_PERSONAL.length; attempt += 1) {
+      const reaction = REPLY_REACTIONS[(pIndex + n + attempt) % REPLY_REACTIONS.length];
+      const personal = REPLY_PERSONAL[(pIndex * 3 + n + attempt) % REPLY_PERSONAL.length];
+      body = frame(fragment, reaction, personal);
+      if (!usedReplyBodies.has(body)) break;
+    }
+    usedReplyBodies.add(body);
     const start = Date.parse(parent.postedAt) + (n + 1) * 9 * 60 * 1000;
     replyStore.push({
       id: `reply-${parent.id}-${n + 1}`,
       authorId: REPLY_AUTHORS[(pIndex + n) % REPLY_AUTHORS.length],
       postedAt: new Date(start).toISOString().replace(".000Z", "+00:00"),
-      body: `${opener}、${part}。`,
+      body,
       replyToId: parent.id,
       replyCount: 0,
       repostCount: 0,
