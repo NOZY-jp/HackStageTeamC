@@ -12,11 +12,11 @@ import type { Message } from "./types";
 type ToneForm = "softEmoji" | "keigo" | "tameguchi";
 
 const GRAT_BASE =
-  /ありがと|あざ|サンキュ|さんきゅ|助か|了解|りょ(?:うかい)?(?:\s|$|！|!)|おけ|\bok\b|わかりまし|わかった|おつかれ|お疲れ|すみません|ごめん|おやすみ|お願い|よろしく|大丈夫|いいよ|もちろん|待って/i;
+  /ありがと|あざ|サンキュ|さんきゅ|助か|了解|りょ(?:うかい)?(?:\s|$|！|!)|おけ|\bok\b|わかりまし|わかった|おつかれ|お疲れ|すみません|ごめん|おやすみ|お願い|よろしく|大丈夫|いいよ|待って/i;
 const SOFT_MARKER =
   /[😊😂👍🙏💕✨🎉🙌]|(?<![0-9一二三四五六七八九十時分日月])[〜～]|(?:ありがと|おやすみ|おつかれ|ごめん|助かる|よろしく|いいよ|待ってる|直す)ね(?:\s|$|[、,！!。])/u;
 const KEIGO_GRAT =
-  /ありがとうございま|ありがとうございました|助かります|助かりました|了解です|わかりました|おつかれさまです|おつかれさまでした|お疲れ様です|お疲れ様でした|承知しました|お願いします|よろしくお願いします|すみません|大丈夫です|待ってます|もちろん、|\bokです/i;
+  /ありがとうございま|ありがとうございました|助かります|助かりました|了解です|わかりました|おつかれさまです|おつかれさまでした|お疲れ様です|お疲れ様でした|承知しました|お願いします|よろしくお願いします|すみません|大丈夫です|待ってます|\bokです/i;
 const TAME_GRAT =
   /ありがと(?![う]*ございま)|サンキュー|さんきゅ|あざ(?:す|ーっす)|助かる(?!ま)|助かった|了解(?!です)|りょ(?:うかい)?(?:\s|$|！|!)|おけ|\bok\b(?!です)|おつかれ(?!さま)|ごめん(?!なさい)|よろしく(?!お願)|わかった(?!り)|大丈夫(?!です)|いいよ(?!ね)|待ってる(?!ね)/i;
 
@@ -115,24 +115,35 @@ const SINGLE_CONCRETE_NOUN = new Set([
 const GENERIC_STEM_KANJI =
   "何誰私僕俺一二三四五六七八九十今先前後上下中大小多少早遅長短高安新古良悪";
 
+const POLITE_VERB_SUFFIX = /^(?:[かきぎしじちびみりえけせねべめれ]?ま(?:す|した|せん))/;
+const VERB_SUFFIX =
+  /^(?:[かきぎしじちびみりえけせねべめれ]?ま(?:す|した|せん)|った|って|んだ|んで|いた|いて|かった|くて|[かきさしじたちばまみらりわえけせねべめれ]?(?:ない|なかった)|[っいんきしじちびみりえけせねべめれ]?(?:てる|てた|てい|てく|てき|てお|てみ)|[かきさしじたちばまみらりえけせねべめれ]?たい|(?:れ|られ|せ|させ)(?:る|た|て|ない|ます|ました)|[くぐすつぬぶむるう](?=[。、！？!?…\s]|$|けど|から|ので|のに|なら|よ|ね|わ|ぞ|な|か|し))/;
+
 /** 発話から具象名詞・ドメイン語・動詞/形容詞の漢字語幹を取り出す。 */
 function extractContentTerms(body: string): { nouns: string[]; verbStems: string[] } {
   const multi =
     body.match(/[一-龠]{2,}|[ァ-ヶー]{2,}|[A-Za-z]{2,}|\d+[時分日枚本個回戦限号館]/g) ?? [];
   const singleNouns: string[] = [];
+  const verbStems: string[] = [];
+
   for (let i = 0; i < body.length; i += 1) {
     const ch = body[i];
-    if (!SINGLE_CONCRETE_NOUN.has(ch)) continue;
     const prevKanji = i > 0 && /[一-龠]/.test(body[i - 1]);
     const nextKanji = i + 1 < body.length && /[一-龠]/.test(body[i + 1]);
-    if (!prevKanji && !nextKanji) singleNouns.push(ch);
-  }
-  const verbStems: string[] = [];
-  for (const match of body.matchAll(/([一-龠])[ぁ-ん]/g)) {
-    if (!GENERIC_STEM_KANJI.includes(match[1])) {
-      verbStems.push(match[1]);
+
+    if (SINGLE_CONCRETE_NOUN.has(ch) && !prevKanji && !nextKanji) {
+      singleNouns.push(ch);
     }
+
+    if (!/[一-龠]/.test(ch) || GENERIC_STEM_KANJI.includes(ch)) continue;
+    const suffixMatch = VERB_SUFFIX.exec(body.slice(i + 1));
+    if (!suffixMatch) continue;
+    const afterIdx = i + 1 + suffixMatch[0].length;
+    if (afterIdx < body.length && /[一-龠]/.test(body[afterIdx])) continue;
+    if (prevKanji && !POLITE_VERB_SUFFIX.test(suffixMatch[0])) continue;
+    verbStems.push(ch);
   }
+
   return {
     nouns: [...new Set([...multi, ...singleNouns].filter((word) => !STOP_WORDS.has(word)))],
     verbStems: [...new Set(verbStems)],
@@ -140,17 +151,32 @@ function extractContentTerms(body: string): { nouns: string[]; verbStems: string
 }
 
 /**
- * 発話中に語が「その語として」現れるか。
- * 1字の漢字名詞は「猫」が「猫背」に含まれるような別語との部分一致を数えない
- * （前後が漢字なら同じ語の一部とみなす）。
+ * 発話中に語が「その語として」境界付きで現れるか。
+ * 英字・カタカナ・数字+単位・漢字のいずれも部分一致（「CD」と「LCD」、「猫」と「猫背」等）を弾く。
  */
 function termOccursIn(body: string, term: string): boolean {
-  if (term.length !== 1 || !/[一-龠]/.test(term)) return body.includes(term);
+  const isAscii = /^[A-Za-z]+$/.test(term);
+  const isKatakana = /^[ァ-ヶー]+$/.test(term);
+  const isDigitUnit = /^\d+/.test(term);
+  const isKanji = /^[一-龠]+$/.test(term);
+
   let index = body.indexOf(term);
   while (index !== -1) {
     const left = index > 0 ? body[index - 1] : "";
-    const right = index + 1 < body.length ? body[index + 1] : "";
-    if (!/[一-龠]/.test(left) && !/[一-龠]/.test(right)) return true;
+    const right = index + term.length < body.length ? body[index + term.length] : "";
+    let boundaryOk = false;
+    if (isAscii) {
+      boundaryOk = !/[A-Za-z]/.test(left) && !/[A-Za-z]/.test(right);
+    } else if (isKatakana) {
+      boundaryOk = !/[ァ-ヶー]/.test(left) && !/[ァ-ヶー]/.test(right);
+    } else if (isDigitUnit) {
+      boundaryOk = !/[0-9]/.test(left) && !/[一-龠]/.test(right);
+    } else if (isKanji) {
+      boundaryOk = !/[一-龠]/.test(left) && !/[一-龠]/.test(right);
+    } else {
+      boundaryOk = true;
+    }
+    if (boundaryOk) return true;
     index = body.indexOf(term, index + 1);
   }
   return false;
@@ -376,6 +402,8 @@ describe("Round 6 精度指標（#252）", () => {
       expect(classifyReplyTone("OKです")).toBe("keigo");
       expect(classifyReplyTone("サンキュー")).toBe("tameguchi");
       expect(classifyReplyTone("いいよ")).toBe("tameguchi");
+      expect(classifyReplyTone("もちろん、いいよ")).toBe("tameguchi");
+      expect(classifyReplyTone("もちろん、待ってます")).toBe("keigo");
       expect(classifyReplyTone("お願いします！ざっくり14時〜17時で！")).toBe("keigo");
       const uniform = chiSquared([
         [10, 10, 10],
@@ -431,10 +459,17 @@ describe("Round 6 精度指標（#252）", () => {
       expect(echoesPrecedingTurn("今日すごく暑いですね", "了解です")).toBe(false);
       expect(echoesPrecedingTurn("ESの添削をお願いします", "修正したES送ります")).toBe(true);
       expect(echoesPrecedingTurn("一次、通った？", "一次通りました")).toBe(true);
-      // 同じ字を含む別の語（猫 / 猫背）や、1字漢字の部分一致は引き継ぎに数えない
+      // 同じ字を含む別の語（猫 / 猫背、CD / LCD、傘を持っていく / 持ち株）は引き継ぎに数えない
       expect(echoesPrecedingTurn("猫が寝ている", "新しい猫背矯正の広告を見た")).toBe(false);
       expect(echoesPrecedingTurn("犬を散歩した", "犬種の話になった")).toBe(false);
       expect(echoesPrecedingTurn("猫が寝ている", "猫が起きた")).toBe(true);
+      expect(echoesPrecedingTurn("CDを聴いた", "LCDを買った")).toBe(false);
+      expect(echoesPrecedingTurn("バスに乗った", "バスケットを見た")).toBe(false);
+      expect(echoesPrecedingTurn("1時に集合", "21時に解散")).toBe(false);
+      expect(echoesPrecedingTurn("傘を持っていく", "持ち株が下がった")).toBe(false);
+      expect(echoesPrecedingTurn("傘を持っていく", "気持ちが沈んだ")).toBe(false);
+      expect(echoesPrecedingTurn("傘を持っていく", "荷物も持ってきた")).toBe(true);
+      expect(echoesPrecedingTurn("写真撮った", "写真館に行った")).toBe(false);
     });
   });
 
