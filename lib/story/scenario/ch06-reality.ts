@@ -91,7 +91,7 @@ export const chapter6: Beat[] = [
       narrate("その時、ドアの隙間から声が聞こえた。"),
       narrate("「もう、つきまとわないで」"),
       effect("fade-to-black", { wait: true }),
-      title("主人公ストーカーEND"),
+      title("BAD END"),
     ],
     choices: [
       {
