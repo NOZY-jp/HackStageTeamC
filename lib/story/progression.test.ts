@@ -131,8 +131,8 @@ describe("進行チェック（各プラットフォームのデータに手が�
     expect(listMylistEntries(mylist).map((item) => item.id)).toContain("e20181117");
   });
 
-  it("段階7・8: コンテスト名が造語「蒼穹フォトアワード 2020」で、記事 e20181117 と sitemap に結果ページがある", () => {
-    expect(PHOTO_CONTEST_NAME).toBe("蒼穹フォトアワード 2020");
+  it("段階7・8: コンテスト名が造語「蒼穹フォトアワード 2018」で、記事 e20181117 と sitemap に結果ページがある", () => {
+    expect(PHOTO_CONTEST_NAME).toBe("蒼穹フォトアワード 2018");
     const entry = getEntry("denden0102", "e20181117");
     expect(entry).toBeDefined();
     const bodyText = (entry?.body ?? [])

@@ -1,18 +1,10 @@
 import type { Metadata } from "next";
 import Image from "next/image";
-import { notFound } from "next/navigation";
 import { ContestResultReveal } from "@/components/common/story/contest-result-reveal";
-import { getBlog } from "@/lib/blog-like";
-import {
-  PHOTO_CONTEST_BLOG_ID,
-  PHOTO_CONTEST_NAME,
-  PHOTO_CONTEST_RESULT_PATH,
-} from "@/lib/seo/contest";
+import { PHOTO_CONTEST_NAME, PHOTO_CONTEST_RESULT_PATH } from "@/lib/seo/contest";
 import { canonicalUrl } from "@/lib/seo/site";
 
 export const instant = false;
-
-type Props = PageProps<"/pochiblo/[blogId]/contest/soukyuu-photo-award-2020">;
 
 export const metadata: Metadata = {
   title: { absolute: `${PHOTO_CONTEST_NAME} 結果` },
@@ -21,33 +13,14 @@ export const metadata: Metadata = {
 };
 
 /**
- * 写真コンテストの結果告知（2018年12月）。主催者側のページとして独立させ、
- * 個人ブログのヘッダー・プロフィール・カウンターは出さない（#222）。
- * 受賞者の本名は、段階7の後だけクライアント側で表示する（#76 順序7〜8）。
+ * 写真コンテストの主催者サイトの、結果発表ページ（#222・#265）。
+ * 作中の URL は soukyuu-photo.jp/2018/result。受賞者の本名が載る唯一のページ（#76 段階8）。
+ * このサイトの他のページからはリンクせず、検索（sitemap）からだけ届く。
  */
-export default async function ContestResultPage({ params }: Props) {
-  const { blogId } = await params;
-  const blog = getBlog(blogId);
-  if (!blog || blogId !== PHOTO_CONTEST_BLOG_ID) {
-    notFound();
-  }
-
+export default function ContestResultPage() {
   return (
     <div className="contest-site">
-      <header className="contest-site-header">
-        <div className="contest-site-inner">
-          <p className="contest-site-logo">
-            <span className="contest-site-mark" aria-hidden="true" />
-            <span className="contest-site-name">
-              蒼穹フォトアワード
-              <span className="contest-site-name-en">SOUKYU PHOTO AWARD</span>
-            </span>
-          </p>
-          <p className="contest-site-organizer">主催　蒼穹フォトアワード実行委員会</p>
-        </div>
-      </header>
-
-      <main className="contest-result">
+      <div className="contest-result">
         <section className="contest-result-hero">
           <div className="contest-site-inner">
             <p className="contest-result-kicker">RESULTS</p>
@@ -117,9 +90,7 @@ export default async function ContestResultPage({ params }: Props) {
 
           <p className="contest-result-foot">受賞者のみなさま、おめでとうございます。</p>
         </div>
-      </main>
-
-      <footer className="contest-site-footer">© 蒼穹フォトアワード実行委員会</footer>
+      </div>
     </div>
   );
 }

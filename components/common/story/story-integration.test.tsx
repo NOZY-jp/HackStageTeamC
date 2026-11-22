@@ -1,7 +1,7 @@
 import { render, screen, waitFor } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import ContestResultPage from "@/app/(blog-like)/pochiblo/[blogId]/contest/soukyuu-photo-award-2020/page";
 import EntryPage from "@/app/(blog-like)/pochiblo/[blogId]/entry/[entryId]/page";
+import ContestResultPage from "@/app/(contest-like)/soukyuu-photo/2018/result/page";
 import TalkupPage from "@/app/(facebook-like)/talkup/page";
 import { canConfirmTalkup } from "@/app/(facebook-like)/talkup/reveal";
 import { FacebookProvider } from "@/components/facebook-like/facebook-context";
@@ -30,11 +30,7 @@ const entryPage = () =>
     params: Promise.resolve({ blogId: PHOTO_CONTEST_BLOG_ID, entryId: "e20181117" }),
     searchParams: Promise.resolve({}),
   });
-const resultPage = () =>
-  ContestResultPage({
-    params: Promise.resolve({ blogId: PHOTO_CONTEST_BLOG_ID }),
-    searchParams: Promise.resolve({}),
-  });
+const resultPage = () => ContestResultPage();
 
 const seed = (flags: string[]) =>
   window.localStorage.setItem(

@@ -1,5 +1,10 @@
 import type { MetadataRoute } from "next";
 import { listBlogs, listPublicEntries } from "@/lib/blog-like";
+import {
+  CONTEST_CONTACT_PATH,
+  CONTEST_GUIDELINES_PATH,
+  CONTEST_SITE_PATH,
+} from "@/lib/contest-like/site";
 import { articleHref, creatorHref, listArticles, listCreators } from "@/lib/note-like";
 import { PHOTO_CONTEST_RESULT_PATH } from "@/lib/seo/contest";
 import { SITE_URL } from "@/lib/seo/site";
@@ -42,13 +47,17 @@ export default function sitemap(): MetadataRoute.Sitemap {
   ];
 
   // コンテストの結果ページ（サイト内リンクは張らず、sitemap 経由でだけ届く）
+  // 写真コンテストの主催者サイト（#222）。結果発表で受賞者の本名に届く（#77 手順8）
   const contestPages: MetadataRoute.Sitemap = [
-    {
-      url: `${SITE_URL}${PHOTO_CONTEST_RESULT_PATH}`,
-      changeFrequency: "yearly" as const,
-      priority: 0.5,
-    },
-  ];
+    CONTEST_SITE_PATH,
+    CONTEST_GUIDELINES_PATH,
+    PHOTO_CONTEST_RESULT_PATH,
+    CONTEST_CONTACT_PATH,
+  ].map((path) => ({
+    url: `${SITE_URL}${path}`,
+    changeFrequency: "yearly" as const,
+    priority: 0.5,
+  }));
 
   return [...blogPages, ...contestPages, ...notePages];
 }
