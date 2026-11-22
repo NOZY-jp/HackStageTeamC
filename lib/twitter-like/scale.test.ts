@@ -72,11 +72,14 @@ describe("返信の質と物語データの不変（#248）", () => {
   const parentBody = new Map(twitterPosts.map((post) => [post.id, post.body]));
 
   /**
-   * 親の本文の語を拾う。漢字・カタカナは語のまとまりで、ひらがなは4文字の窓で見る
-   * （「でんでん」のようにひらがなだけの語も拾うため）。
+   * 親の本文の語を拾う。**2文字以上**の語だけを見る（1字の偶然一致を通さないため）。
+   * ひらがなだけの語（でんでん等）は4文字の窓で拾い、意味の薄い語は除く。
    */
+  const STOPWORDS = new Set(["今日", "明日", "昨日", "自分", "時間", "最近", "最初"]);
   const wordsOf = (text: string): string[] => {
-    const words: string[] = Array.from(text.match(/[ァ-ー]{2,}|[一-鿿]{1,}/g) ?? []);
+    const words: string[] = Array.from(text.match(/[ァ-ー]{2,}|[一-鿿]{2,}/g) ?? []).filter(
+      (word) => !STOPWORDS.has(word) && !/^[ぁ-ん]+$/.test(word),
+    );
     for (let i = 0; i + 4 <= text.length; i += 1) {
       const window = text.slice(i, i + 4);
       if (/^[ぁ-ん]{4}$/.test(window)) words.push(window);

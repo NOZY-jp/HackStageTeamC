@@ -1317,34 +1317,33 @@ const REPLY_AUTHORS = [
 const REPLY_QUOTE_WORDS = [
   "モンハン",
   "クエスト",
-  "弓",
-  "装備",
   "写真コンテスト",
-  "ブログ",
-  "でんでん",
   "ストーカー",
   "集会所",
+  "喫茶店",
+  "コーヒー",
+  "ゲーム",
+  "アップデート",
+  "コンテスト",
+  "レポート",
+  "メニュー",
+  "シフト",
+  "カメラ",
+  "バイト",
+  "面接",
+  "装備",
+  "ブログ",
+  "でんでん",
   "狩猟",
   "レイド",
   "双剣",
   "大剣",
   "太刀",
-  "カメラ",
-  "喫茶店",
-  "コーヒー",
-  "ゲーム",
   "散歩",
   "本屋",
   "料理",
   "洗濯物",
-  "レポート",
   "就活",
-  "バイト",
-  "シフト",
-  "メニュー",
-  "コンテスト",
-  "アップデート",
-  "面接",
   "ゼミ",
   "発表",
   "締切",
@@ -1356,8 +1355,12 @@ const REPLY_QUOTE_WORDS = [
   "失敗",
   "コース",
 ];
+/**
+ * 長い語から順に探し、1字の偶然一致（「弓」など）で引用が成立しないようにする。
+ */
+const REPLY_QUOTE_WORDS_BY_LENGTH = [...REPLY_QUOTE_WORDS].sort((a, b) => b.length - a.length);
 const quoteOf = (body: string): string | undefined =>
-  REPLY_QUOTE_WORDS.find((word) => body.includes(word));
+  REPLY_QUOTE_WORDS_BY_LENGTH.find((word) => body.includes(word));
 
 /**
  * 一般アカウントの投稿だけを返信の親にする。
