@@ -18,14 +18,26 @@ describe("Twixer の検索候補（#248）", () => {
     expect(searchPosts("モンスターハンターワールド、はじめた。武器は双剣にした。")).toEqual([]);
   });
 
-  it("発見前はかのんのアカウントと投稿を検索に出さず、発見後に出す", () => {
-    expect(searchUsers("kanon__dayo").map((user) => user.id)).not.toContain("tw-kanon");
-    expect(searchPosts("ストーカー").map((post) => post.id)).not.toContain("post-105");
-    expect(searchUsers("kanon__dayo", { foundBff: true }).map((user) => user.id)).toContain(
-      "tw-kanon",
+  it.each(["ストーカー", "かのん", "@kanon__dayo"])(
+    "「%s」では発見後にだけアカウントと post-105 を検索結果に出す",
+    (query) => {
+      const found = { foundBff: true };
+      expect(searchUsers(query).map((user) => user.id)).not.toContain("tw-kanon");
+      expect(searchPosts(query).map((post) => post.id)).not.toContain("post-105");
+      expect(searchUsers(query, found).map((user) => user.id)).toContain("tw-kanon");
+      expect(searchPosts(query, found).map((post) => post.id)).toContain("post-105");
+    },
+  );
+
+  it("本文だけの語から公開アカウントを見つけ、鍵付き投稿だけの語では拾わない", () => {
+    const visible = searchPosts("写真コンテスト").find((post) =>
+      post.authorId.startsWith("tw-gen-"),
     );
-    expect(searchPosts("ストーカー", { foundBff: true }).map((post) => post.id)).toContain(
-      "post-105",
+    expect(visible).toBeDefined();
+    const results = searchUsers("写真コンテスト");
+    expect(results.map((user) => user.id)).toContain(visible?.authorId);
+    expect(searchUsers("ブログもはじめてみた").map((user) => user.id)).not.toContain(
+      "tw-old-denden",
     );
   });
 });
