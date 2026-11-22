@@ -45,7 +45,8 @@ describe("TextWindow", () => {
       "data-frame",
       "think",
     );
-    expect(screen.getByText("リョウ")).toBeInTheDocument();
+    // 開示前はプレイヤーが知っている名前（琥珀）で出す（#208）
+    expect(screen.getByText("琥珀")).toBeInTheDocument();
   });
 
   it("本文のクリックと Enter で次へ進む", () => {
