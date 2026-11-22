@@ -19,9 +19,9 @@ export const twitterUsers: TwitterUser[] = [
     displayName: "かのん",
     handle: "kanon__dayo",
     avatarColor: "#c2563f",
-    // ツーショット写真の右（茶髪のロング）と同一人物だと分かる自画像（#169）
+    // 卒業式の写真の左（橙髪）と同一人物だと分かる自画像（#169）
     avatarSrc: "/twitter-like/kanon-avatar.svg",
-    avatarAlt: "自画像。茶髪のロングヘアで、写真の右側に写っている人物と同じ見た目",
+    avatarAlt: "橙髪の自画像。卒業式の写真では左側に写っている人物",
   },
   // まいのリア友とみられる人物（post-102 の返信者）。名前は #76 未確定。表示名・handle は仮決め
   { id: "tw-tomo", displayName: "とも", handle: "tomo-0718", avatarColor: "#4e8a5c" },
@@ -357,14 +357,14 @@ export const twitterPosts: Post[] = [
     likeCount: 28,
     media: [
       {
-        src: "/twitter-like/photo-01.svg",
-        alt: "制服姿で並ぶ二人。左は黒髪のボブ、右は茶髪のロングが本人",
-        width: 800,
-        height: 600,
+        src: "/blog-like/photos/graduation.webp",
+        alt: "卒業式で肩を寄せて笑う二人。左は橙髪、右は黒髪のボブ",
+        width: 1200,
+        height: 800,
       },
       {
         src: "/twitter-like/photo-02.svg",
-        alt: "テーブルをはさんで笑う二人。手前の子は茶髪のロング",
+        alt: "テーブルをはさんで笑う二人。左は黒髪のボブ、右は橙髪",
         width: 800,
         height: 600,
       },
@@ -381,7 +381,7 @@ export const twitterPosts: Post[] = [
     media: [
       {
         src: "/twitter-like/photo-03.svg",
-        alt: "古いアルバムから。並んで笑う二人。左は黒髪のボブ、右は茶髪のロングが本人",
+        alt: "古いアルバムから。並んで笑う二人。左は黒髪のボブ、右は橙髪が本人",
         width: 800,
         height: 600,
       },
