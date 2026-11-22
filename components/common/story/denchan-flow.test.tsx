@@ -206,7 +206,7 @@ describe("でんちゃん誤認の分岐（#120・実プレイ経由）", () => 
     await playScene(user, "違和感を調べ直す");
     const shown = await finishScene(user, "ch6-bad-end");
     expect(shown).toContain("その呼び方");
-    expect(shown).toContain("主人公ストーカーEND");
+    expect(shown).toContain("BAD END");
   }, 180_000);
 
   it("表示名で呼べば、誤認の結末は出ない", async () => {
@@ -226,7 +226,7 @@ describe("でんちゃん誤認の分岐（#120・実プレイ経由）", () => 
     const shown = await finishScene(user, "ch6-wait-end");
     expect(shown).toContain("今は、会えない");
     expect(shown).not.toContain("その呼び方");
-    expect(shown).not.toContain("主人公ストーカーEND");
+    expect(shown).not.toContain("BAD END");
   }, 180_000);
 
   it("住所を特定していなければ、呼び名の選択は出ない", async () => {
