@@ -1,13 +1,13 @@
 import type { Metadata } from "next";
+import { cookies } from "next/headers";
 import Link from "next/link";
 import { StoryTrigger } from "@/components/common/story/story-trigger";
-import { Avatar } from "@/components/twitter-like/avatar";
-import { LockIcon, SearchIcon } from "@/components/twitter-like/icons";
-import { replyTargetAuthor, usersById } from "@/components/twitter-like/lookup";
+import { SearchIcon } from "@/components/twitter-like/icons";
 import { PageHeader } from "@/components/twitter-like/page-header";
-import { PostCard } from "@/components/twitter-like/post-card";
 import { RightSidebar } from "@/components/twitter-like/right-sidebar";
-import { getPost, isProtected, searchPosts, searchUsers } from "@/lib/twitter-like";
+import { SearchResults } from "@/components/twitter-like/search-results";
+import { FOUND_BFF_COOKIE } from "@/lib/story/discovery-cookie";
+import { searchPosts, searchUsers } from "@/lib/twitter-like";
 
 export const metadata: Metadata = { title: "検索" };
 
@@ -34,9 +34,11 @@ export default async function TwitterSearchPage({ searchParams }: Props) {
   const { q, f } = await searchParams;
   const query = (Array.isArray(q) ? q[0] : (q ?? "")).trim();
   const tab = tabOf(f);
-  const users = usersById();
-  const allUsers = query ? searchUsers(query) : [];
-  const allPosts = query ? searchPosts(query) : [];
+  // 未発見のデータを初期配信物（HTML/RSC/JS）に載せないため、サーバー側で出し分ける（#248）
+  const foundBff = (await cookies()).get(FOUND_BFF_COOKIE)?.value === "1";
+  const options = { foundBff };
+  const allUsers = query ? searchUsers(query, options) : [];
+  const allPosts = query ? searchPosts(query, options) : [];
   const matchedUsers = tab === "top" || tab === "user" ? allUsers : [];
   const matchedPosts =
     tab === "user"
@@ -77,58 +79,12 @@ export default async function TwitterSearchPage({ searchParams }: Props) {
             ))}
           </nav>
         ) : null}
-        {query === "" ? (
-          <div className="tw-empty">キーワードを入力して検索してください。</div>
-        ) : matchedUsers.length === 0 && matchedPosts.length === 0 ? (
-          <div className="tw-empty">
-            <p className="tw-empty-title">「{query}」に一致する結果はありません</p>
-            <p className="tw-empty-sub">別のキーワードで検索してみてください。</p>
-          </div>
-        ) : (
-          <>
-            {matchedUsers.length > 0 ? (
-              <section aria-label="ユーザー">
-                <h2 className="tw-card-title">ユーザー</h2>
-                <ul>
-                  {matchedUsers.map((user) => (
-                    <li key={user.id} className="tw-suggest-item">
-                      <Link href={`/twitter/profile/${user.handle}`} className="tw-suggest">
-                        <Avatar user={user} />
-                        <span className="tw-suggest-text">
-                          <span className="tw-name">
-                            {user.displayName}
-                            {isProtected(user) ? <LockIcon /> : null}
-                          </span>
-                          <span className="tw-handle">@{user.handle}</span>
-                        </span>
-                      </Link>
-                    </li>
-                  ))}
-                </ul>
-              </section>
-            ) : null}
-            {tab === "user" ? null : matchedPosts.length > 0 ? (
-              <section aria-label="ポスト">
-                <h2 className="tw-card-title">ポスト</h2>
-                {matchedPosts.map((post) => {
-                  const author = users.get(post.authorId);
-                  return author ? (
-                    <PostCard
-                      key={post.id}
-                      post={post}
-                      author={author}
-                      replyTo={replyTargetAuthor(post, getPost, users)}
-                    />
-                  ) : null;
-                })}
-              </section>
-            ) : (
-              <div className="tw-empty">
-                <p className="tw-empty-sub">「{query}」に一致するポストはありません</p>
-              </div>
-            )}
-          </>
-        )}
+        <SearchResults
+          query={query}
+          tab={tab}
+          matchedUsers={matchedUsers}
+          matchedPosts={matchedPosts}
+        />
       </main>
       <RightSidebar hideSearch />
     </>

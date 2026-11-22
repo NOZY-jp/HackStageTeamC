@@ -4,7 +4,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import type { ReactNode } from "react";
 import { HAL_HANDLE } from "@/lib/discord-like/data/names";
-import { getUserByHandle } from "@/lib/twitter-like";
+import type { TwitterUser } from "@/lib/twitter-like/types";
 import { Avatar } from "./avatar";
 import {
   BrandIcon,
@@ -49,9 +49,8 @@ const items: Item[] = [
   },
 ];
 
-export function TwitterNav() {
+export function TwitterNav({ me }: { me?: TwitterUser }) {
   const pathname = usePathname();
-  const me = getUserByHandle(ME_HANDLE);
   return (
     <header className="tw-left">
       <Link href="/twitter" className="tw-logo" aria-label="Twixer ホームへ">

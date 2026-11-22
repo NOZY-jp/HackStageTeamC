@@ -25,6 +25,7 @@ import {
   type VoiceChannel,
   type VoiceRoom,
 } from "@/lib/story";
+import { clearFoundBff, rememberFoundBff } from "@/lib/story/discovery-cookie";
 
 /**
  * シナリオの進行状態を、全プラットフォームで共有する。
@@ -95,6 +96,11 @@ export function StoryProvider({ children }: { children: ReactNode }) {
     }
   }, [state, ready]);
 
+  // 発見済みなら、検索ページがサーバー側で出し分けられるよう cookie に控える（#248）
+  useEffect(() => {
+    if (ready && state.flags.includes("foundBff")) rememberFoundBff();
+  }, [ready, state.flags]);
+
   const onSetFlag = useCallback(
     (flag: FlagId) => setState((current) => setFlag(current, flag)),
     [],
@@ -112,6 +118,7 @@ export function StoryProvider({ children }: { children: ReactNode }) {
     setState(initialState);
     setLiveChats([]);
     setVoice([]);
+    clearFoundBff();
   }, []);
 
   const chats = useMemo(() => {

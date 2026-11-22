@@ -18,8 +18,8 @@ import {
 
 describe("lib/twitter-like のアクセサ", () => {
   it("listPosts は postedAt 降順で返す", () => {
-    const times = listPosts().map((post) => post.postedAt);
-    expect(times).toEqual([...times].sort().reverse());
+    const times = listPosts().map((post) => Date.parse(post.postedAt));
+    expect(times).toEqual([...times].sort((a, b) => b - a));
   });
 
   it("listPostsByAuthor は authorId の投稿だけを返す", () => {
@@ -123,9 +123,11 @@ describe("鍵アカウントの投稿の扱い", () => {
     }
     // 公開投稿への返信は公開アカウントの返信だけ
     const repliesToPublicPost = listReplies("post-003").map((reply) => reply.id);
-    expect(repliesToPublicPost).toEqual(["post-004"]);
-    // 鍵垢の投稿への返信（post-202、同じ鍵垢からの自己返信）は公開面に出ない
-    expect(listReplies("post-201")).toEqual([]);
+    expect(repliesToPublicPost).toContain("post-004");
+    // 鍵垢（tw-old-denden）の返信は公開面に出ない
+    for (const reply of [...listReplies("post-003"), ...listReplies("post-201")]) {
+      expect(reply.authorId).not.toBe("tw-old-denden");
+    }
   });
 
   it("listPostsByAuthor は件数表示のため鍵垢の投稿も含める", () => {
@@ -183,8 +185,11 @@ describe("searchPosts", () => {
     // 旧垢（tw-old-denden・鍵垢）の post-201〜203 の本文に一致する語で探しても出てこない
     expect(searchPosts("モンスターハンターワールド")).toEqual([]);
     expect(searchPosts("ブログもはじめてみた")).toEqual([]);
-    // 「ブログ」で見つかるのは公開の返信（post-102）だけ。鍵垢の投稿（post-202/203）は出ない
-    expect(searchPosts("ブログ").map((post) => post.id)).toEqual(["post-102"]);
+    // 「ブログ」で公開の返信（post-102）が見つかり、鍵垢の投稿（post-202/203）は出ない
+    const blogHits = searchPosts("ブログ").map((post) => post.id);
+    expect(blogHits).toContain("post-102");
+    expect(blogHits).not.toContain("post-202");
+    expect(blogHits).not.toContain("post-203");
   });
 });
 
@@ -199,18 +204,20 @@ describe("twitterTrends（いま話題）", () => {
     expect(deadEnds).toEqual([]);
   });
 
-  it("どのトレンドもゲーム仲間の雑談にしか着弾しない（手がかりの投稿に直行させない）", () => {
+  it("どのトレンドも、かのん・リア友・旧垢や手がかり投稿には着弾しない", () => {
     // リョウがこの SNS で知っているのは Hal・Mai・ソウだけ。
-    // かのん・リア友・旧アカウントの投稿に着弾する名前はトレンドに置かない
-    const smallTalkAuthors = new Set(["tw-hal", "tw-mai", "tw-sou"]);
+    // かのん・リア友・旧アカウントの投稿に着弾する名前はトレンドに置かない。
+    // #248 で一般アカウントを200人以上に増やしたため、トレンド語が一般の雑談に
+    // 当たるのは正しい挙動。ここでは「物語の手がかりへ直行させない」ことだけを見る。
+    const hiddenAuthors = new Set(["tw-kanon", "tw-tomo", "tw-old-denden"]);
     // 段階2の手がかり投稿。post-101 は Mai 本人の投稿なので authorId だけでは弾けない
-    const cluePostIds = new Set(["post-101", "post-102"]);
+    const cluePostIds = new Set(["post-101", "post-102", "post-105"]);
     for (const trend of listTrends()) {
       const hits = searchPosts(trend.name);
-      expect(hits.length).toBeGreaterThan(0);
+      expect(hits.length, trend.name).toBeGreaterThan(0);
       for (const hit of hits) {
-        expect(smallTalkAuthors.has(hit.authorId)).toBe(true);
-        expect(cluePostIds.has(hit.id)).toBe(false);
+        expect(hiddenAuthors.has(hit.authorId), `${trend.name} ${hit.id}`).toBe(false);
+        expect(cluePostIds.has(hit.id), `${trend.name} ${hit.id}`).toBe(false);
       }
     }
   });
@@ -218,18 +225,24 @@ describe("twitterTrends（いま話題）", () => {
 
 describe("searchUsers", () => {
   it("handle・displayName・bio を対象に検索する", () => {
-    expect(searchUsers("kohakunchos0117").map((user) => user.id)).toEqual(["tw-hal"]);
-    expect(searchUsers("ソウ").map((user) => user.id)).toEqual(["tw-sou"]);
-    const bioMatch = searchUsers("古い友達");
+    expect(searchUsers("kohakunchos0117").map((user) => user.id)).toEqual([
+      "tw-hal",
+      "tw-mai",
+      "tw-sou",
+    ]);
+    expect(searchUsers("ソウ")[0]?.id).toBe("tw-sou");
+    const bioMatch = searchUsers("古い友達", { foundBff: true });
     expect(bioMatch.map((user) => user.id)).toEqual(["tw-kanon"]);
   });
 
-  it("過去ブログの記事タイトル等で旧アカウントをユーザー検索できる（単体の一般語「ブログ」では出さない）", () => {
-    expect(searchUsers("弓属性強化ガン積み構成").map((user) => user.handle)).toContain(
+  it("旧垢の公開 bio にある記事名では見つかり、追加語句では見つからない", () => {
+    expect(searchUsers("写真コンテストで賞をもらいました！").map((user) => user.handle)).toContain(
       "maimai_mhw",
     );
-    expect(searchUsers("ブログはじめました！").map((user) => user.handle)).toContain("maimai_mhw");
-    expect(searchUsers("ブログ")).toEqual([]);
+    expect(searchUsers("ブログはじめました！").map((user) => user.handle)).not.toContain(
+      "maimai_mhw",
+    );
+    expect(searchUsers("ブログ").map((user) => user.handle)).not.toContain("maimai_mhw");
   });
 
   it("空のクエリでは何も返さない", () => {

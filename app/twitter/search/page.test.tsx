@@ -1,4 +1,4 @@
-import { render, screen, within } from "@testing-library/react";
+import { fireEvent, render, screen, within } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { StoryProvider, useStory } from "@/components/common/story/story-provider";
 import * as twitter from "@/lib/twitter-like";
@@ -11,6 +11,14 @@ function StoryFlagProbe() {
   const { state } = useStory();
   return <output data-testid="story-flags">{state.flags.join(",")}</output>;
 }
+
+const cookie = vi.hoisted(() => ({ found: false }));
+vi.mock("next/headers", () => ({
+  cookies: async () => ({
+    get: (name: string) =>
+      name === "hs-found-bff" && cookie.found ? { name, value: "1" } : undefined,
+  }),
+}));
 
 const params = (q: string, f?: string) => ({ searchParams: Promise.resolve({ q, f }) });
 
@@ -33,6 +41,7 @@ const mediaPost: Post = {
 describe("TwitterSearchPage", () => {
   afterEach(() => {
     vi.restoreAllMocks();
+    cookie.found = false;
   });
   it.each([
     { f: "top", label: "話題", showsUsers: true, showsTextPost: true, showsMediaPost: true },
@@ -55,8 +64,8 @@ describe("TwitterSearchPage", () => {
   ])(
     "$f のタブで対象の検索結果を表示する",
     async ({ f, label, showsUsers, showsTextPost, showsMediaPost }) => {
-      const query = "かのん";
-      vi.spyOn(twitter, "searchPosts").mockReturnValueOnce([textPost, mediaPost]);
+      const query = "mai2mai2";
+      vi.spyOn(twitter, "searchPosts").mockReturnValue([textPost, mediaPost]);
       render(await TwitterSearchPage(params(query, f)));
 
       const tabs = within(screen.getByRole("navigation", { name: "検索結果の切り替え" }));
@@ -99,18 +108,57 @@ describe("TwitterSearchPage", () => {
   });
 
   it("公開アカウントのユーザーには鍵アイコンを出さない", async () => {
-    render(await TwitterSearchPage(params("かのん")));
+    render(await TwitterSearchPage(params("mai2mai2")));
     const link = screen
-      .getAllByRole("link", { name: /かのん/ })
+      .getAllByRole("link", { name: /mai2mai2/ })
       .find((el) => el.classList.contains("tw-suggest"));
     expect(link).toBeDefined();
     // 公開アカウントなので鍵アイコン（tw-icon）は無い
     expect(link?.querySelectorAll("svg.tw-icon")).toHaveLength(0);
   });
 
+  it("発見前はかのんと post-105 を出さず、発見済みのリクエストでは出す", async () => {
+    window.localStorage.clear();
+    const body = twitter.getPost("post-105")?.body ?? "";
+    expect(body).not.toBe("");
+
+    cookie.found = false;
+    const before = render(await TwitterSearchPage(params("kanon__dayo")));
+    expect(screen.queryByRole("link", { name: /かのん/ })).not.toBeInTheDocument();
+    expect(screen.queryByText(body)).not.toBeInTheDocument();
+    before.unmount();
+
+    // 発見済みは cookie でサーバーに伝わり、次のリクエストから未開放の結果を含む
+    cookie.found = true;
+    render(await TwitterSearchPage(params("kanon__dayo")));
+    expect(screen.getAllByRole("link", { name: /かのん/ }).length).toBeGreaterThan(0);
+    expect(screen.getByText(body)).toBeInTheDocument();
+    window.localStorage.clear();
+  });
+
   it("ユーザー・ポストとも0件なら従来の空メッセージのまま", async () => {
     render(await TwitterSearchPage(params("zzzz")));
     expect(screen.getByText(/一致する結果はありません/)).toBeInTheDocument();
+  });
+
+  it("発見済みなら、追加ポストを公開結果の途中に同じ検索順で表示する", async () => {
+    window.localStorage.clear();
+    const query = "写真";
+    const body = twitter.getPost("post-107")?.body ?? "";
+    expect(body).not.toBe("");
+    cookie.found = true;
+
+    render(await TwitterSearchPage(params(query, "live")));
+
+    const discovered = screen.getByText(body);
+    const region = screen.getByRole("region", { name: "ポスト" });
+    const results = within(region).getAllByRole("article");
+    const expected = twitter.searchPosts(query, { foundBff: true });
+    expect(results).toHaveLength(expected.length);
+    expect(results.indexOf(discovered.closest("article") as HTMLElement)).toBe(
+      expected.findIndex((post) => post.id === "post-107"),
+    );
+    window.localStorage.clear();
   });
 
   it("「ブログ」でリプライ(post-102)がヒットすると s02-bff-reply フラグが立つ", async () => {

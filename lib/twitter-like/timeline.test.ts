@@ -13,8 +13,8 @@ const ids = (posts: { id: string }[]) => posts.map((post) => post.id);
 
 describe("Twixer のタイムライン（#212）", () => {
   it("アカウントと投稿が増え、MaiMai は20件以上", () => {
-    expect(twitterUsers.length).toBeGreaterThanOrEqual(12);
-    expect(twitterPosts.length).toBeGreaterThanOrEqual(70);
+    expect(twitterUsers.length).toBeGreaterThanOrEqual(200);
+    expect(twitterPosts.length).toBeGreaterThanOrEqual(2000);
     expect(twitterPosts.filter((post) => post.authorId === "tw-mai").length).toBeGreaterThanOrEqual(
       20,
     );
@@ -37,6 +37,13 @@ describe("Twixer のタイムライン（#212）", () => {
     const follows = new Set(["tw-hal", ...listFollowingIds("tw-hal")]);
     expect(RECOMMENDED.some((post) => !follows.has(post.authorId))).toBe(true);
     expect(twitterFollows["tw-hal"]).toEqual(["tw-mai", "tw-sou"]);
+  });
+
+  it("UTC の生成投稿と JST の既存投稿を実時刻順に並べる", () => {
+    const posts = ids(RECOMMENDED);
+    expect(posts).toContain("post-g1874");
+    expect(posts).toContain("post-400");
+    expect(posts.indexOf("post-g1874")).toBeLessThan(posts.indexOf("post-400"));
   });
 
   it("かのんと旧アカウントは「おすすめ」にも出さない", () => {
