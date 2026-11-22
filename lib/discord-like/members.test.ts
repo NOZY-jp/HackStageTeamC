@@ -105,22 +105,19 @@ describe("サーバーごとのメンバー（#163）", () => {
     }
   });
 
-  it("学科・リア友の背景メンバーはサーバーに合った名前（ハンター名は mhc だけ）", () => {
-    const hunterName = (id: string) => {
-      const user = getUser(id);
-      return (
-        /^ハンター\d{4}$/.test(user?.displayName ?? "") || /^hunter_\d{4}$/.test(user?.handle ?? "")
-      );
-    };
-    const backgroundOf = (guildId: string) =>
-      (getGuild(guildId)?.memberIds ?? []).filter((id) => id.startsWith("bg-"));
-    // mhc の背景はハンター名のまま（モンハン鯖では自然）
-    for (const id of backgroundOf("mhc")) {
-      expect(hunterName(id), `mhc:${id}`).toBe(true);
-    }
-    // 学科・リア友ではハンター名を使わない
-    for (const id of [...backgroundOf("univ"), ...backgroundOf("friend")]) {
-      expect(hunterName(id), id).toBe(false);
+  it("各サーバーの背景メンバーに連番の仮名がなく、mhc の250人の名前はそれぞれ異なる", () => {
+    for (const guild of listGuilds()) {
+      const backgrounds = guild.memberIds.filter((id) => id.startsWith("bg-")).map(getUser);
+      if (guild.id === "mhc") {
+        expect(backgrounds).toHaveLength(250);
+        expect(new Set(backgrounds.map((user) => user?.displayName)).size).toBe(250);
+        expect(new Set(backgrounds.map((user) => user?.handle)).size).toBe(250);
+      }
+      for (const user of backgrounds) {
+        expect(user?.displayName).not.toMatch(/^ハンター(?:\d{4}|[A-Z])$/i);
+        expect(user?.handle).not.toMatch(/^hunter_\d{4}$/);
+        expect(user?.handle).toMatch(/^[a-z][a-z0-9_]*$/);
+      }
     }
   });
 

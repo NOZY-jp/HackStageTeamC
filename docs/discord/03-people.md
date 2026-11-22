@@ -140,7 +140,7 @@
 ## 4. 背景アカウント350人（生成規則）
 
 - **決定的に**生成（乱数・`Math.random` は使わない。SSR/テストの再現性）。ID は `bg-NNNN` で固定
-- 表示名・ハンドルは所属サーバーに合わせる（#170）: mhc は `ハンターNNNN` / `hunter_NNNN`、univ は名字ベースのカタカナ＋`語幹_MMDD` ハンドル、friend はあだ名のカタカナ＋`語幹_MMDD` ハンドル。区切りは `BACKGROUND_SPLIT`（mhc→univ→friend の順に index を割る）
+- 表示名・ハンドルは所属サーバーに合わせる（#170）: mhc は `MHC_NAMES` の人名・狩猟用語・日常語・英数字から決定的に選んだ表示名と `語幹_MMDD` ハンドル、univ は名字ベースのカタカナ＋`語幹_MMDD` ハンドル、friend はあだ名のカタカナ＋`語幹_MMDD` ハンドル。区切りは `BACKGROUND_SPLIT`（mhc→univ→friend の順に index を割る）
 - `status` は大半 `offline`、`idle` 10・`dnd` 4 を混ぜる（オンライン合計30に合わせる）
 - 背景アカウントは**発言しない**。`data-integrity.test.ts` で「背景アカウントの発言が0件」を固定
 - メンバー一覧のページング（100件超）が壊れないことをテスト（サーバーあたり 150〜250人）
