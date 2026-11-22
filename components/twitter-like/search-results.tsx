@@ -5,6 +5,10 @@ import { Avatar } from "./avatar";
 import { LockIcon } from "./icons";
 import { replyTargetAuthor, usersById } from "./lookup";
 import { PostCard } from "./post-card";
+import { PostSeenTrigger } from "./post-seen-trigger";
+
+/** 段階2の手がかりになる返信。検索結果で見えた時点でフラグを立てる（#274）。 */
+const BFF_REPLY_POST_ID = "post-102";
 
 export function SearchResults({
   query,
@@ -56,14 +60,23 @@ export function SearchResults({
           <h2 className="tw-card-title">ポスト</h2>
           {matchedPosts.map((post) => {
             const author = users.get(post.authorId);
-            return author ? (
+            if (!author) return null;
+            const card = (
               <PostCard
                 key={post.id}
                 post={post}
                 author={author}
                 replyTo={replyTargetAuthor(post, getPost, users)}
               />
-            ) : null;
+            );
+            // 検索結果に出ただけでは物語を進めない。実際に見えたときだけ段階2を立てる（#274）
+            return post.id === BFF_REPLY_POST_ID ? (
+              <PostSeenTrigger key={post.id} flag="s02-bff-reply">
+                {card}
+              </PostSeenTrigger>
+            ) : (
+              card
+            );
           })}
         </section>
       ) : tab === "user" ? null : (

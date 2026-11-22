@@ -1,7 +1,6 @@
 import type { Metadata } from "next";
 import { cookies } from "next/headers";
 import Link from "next/link";
-import { StoryTrigger } from "@/components/common/story/story-trigger";
 import { SearchIcon } from "@/components/twitter-like/icons";
 import { PageHeader } from "@/components/twitter-like/page-header";
 import { RightSidebar } from "@/components/twitter-like/right-sidebar";
@@ -49,7 +48,6 @@ export default async function TwitterSearchPage({ searchParams }: Props) {
 
   return (
     <>
-      {matchedPosts.some((p) => p.id === "post-102") ? <StoryTrigger flag="s02-bff-reply" /> : null}
       <main className="tw-main">
         <PageHeader title="検索" backHref="/twitter" />
         <form className="tw-search" action="/twitter/search">
