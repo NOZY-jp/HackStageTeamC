@@ -43,4 +43,34 @@ export const creators: Creator[] = [
     bio: "晩の台所と、翌朝の取り分。",
     avatarColor: "#85584c",
   },
+  {
+    id: "freewheel",
+    displayName: "下りは足を止める",
+    bio: "自転車で寄り道。時間と距離は抜かりがち。",
+    avatarColor: "#487365",
+  },
+  {
+    id: "side_b",
+    displayName: "裏面の音",
+    bio: "町の音、鍵盤、合奏。録音の終わりは少し長め。",
+    avatarColor: "#635c87",
+  },
+  {
+    id: "return_slot",
+    displayName: "返却口の灯",
+    bio: "読み終わった本と、まだ開けない本の両方を書きます。",
+    avatarColor: "#75644e",
+  },
+  {
+    id: "cat_and_umbrella",
+    displayName: "猫と雨傘",
+    bio: "同居の猫一匹。出勤前だけ観察時間です。",
+    avatarColor: "#8a6448",
+  },
+  {
+    id: "fern_room",
+    displayName: "窓辺の鉢帳",
+    bio: "植物の置き場所と失敗の記録。目盛りは家にあるもので測ります。",
+    avatarColor: "#557451",
+  },
 ];
