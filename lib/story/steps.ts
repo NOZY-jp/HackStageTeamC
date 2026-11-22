@@ -142,9 +142,9 @@ export const steps: Step[] = [
     places: [
       { platform: "google", label: "Seek 検索（または実在の Google 検索）", href: "/search" },
       {
-        platform: "blog",
-        label: "写真コンテスト結果ページ",
-        href: "/pochiblo/denden0102/contest/soukyuu-photo-award-2020",
+        platform: "google",
+        label: "写真コンテスト結果ページ（主催者のサイト）",
+        href: "/soukyuu-photo/2018/result",
       },
     ],
     status: { done: true },
