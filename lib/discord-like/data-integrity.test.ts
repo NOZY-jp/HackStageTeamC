@@ -536,7 +536,8 @@ describe("量と会話の構造（#154・#119）", () => {
   });
 
   it("静的ログ・検索に、カイの進捗助言と結末が無い（dm-kai の「でんちゃん」助言を除く）", () => {
-    const plot = /本名で検索|住所を特定しました|例の件、どこまで進んだ|使い回してる/;
+    const plot =
+      /ゲーム仲間の近況をTalkupの写真で|本名で検索|住所を特定しました|例の件、どこまで進んだ|使い回してる/;
     const staticMessages = [
       ...Object.values(staticDmMessages).flat(),
       ...Object.values(staticChannelMessages).flat(),
@@ -594,7 +595,10 @@ describe("カイの進捗は進行のときだけ読める（#119）", () => {
     const afterContact = completeBeat(atName, contact);
     expect(completedChats(afterContact)).toEqual(
       expect.arrayContaining([
-        expect.objectContaining({ from: "kai", text: expect.stringContaining("本名で検索") }),
+        expect.objectContaining({
+          from: "kai",
+          text: "俺、ゲーム仲間の近況をTalkupの写真で知ったことがあるよ。",
+        }),
       ]),
     );
     // 結末は選択するまで出ない
