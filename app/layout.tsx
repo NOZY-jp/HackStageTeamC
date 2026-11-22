@@ -4,6 +4,7 @@ import { BrowserChrome } from "@/components/common/browser/browser-chrome";
 import { StoryPage, StoryProvider } from "@/components/common/story/story-provider";
 import { StoryStage } from "@/components/common/story/story-stage";
 import { StoryStart } from "@/components/common/story/story-start";
+import { DocumentHistoryTracker } from "@/components/twitter-like/document-history";
 import { SITE_URL } from "@/lib/seo/site";
 import { googleVerification } from "@/lib/seo/verification";
 import "./globals.css";
@@ -22,6 +23,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
     <html lang="ja" className="h-full">
       <body className="h-full">
+        <DocumentHistoryTracker />
         {/* シナリオの進行状態は全プラットフォームで共有する */}
         <StoryProvider>
           {/* 作中ブラウザの上部ツールバー */}
