@@ -54,3 +54,42 @@ describe("Mai の投稿（#241）", () => {
     }
   });
 });
+
+describe("Mai の季節表現（#272）", () => {
+  // 8月下旬に移した投稿の本文が秋冬のままだと、直前の post-621（残暑）と食い違う。
+  const AUTUMN_WINTER = [
+    "秋",
+    "冬",
+    "寒",
+    "こたつ",
+    "コート",
+    "紅葉",
+    "雪",
+    "暖房",
+    "ストーブ",
+    "マフラー",
+    "手袋",
+    "スープ",
+  ];
+
+  it("8月の投稿に秋冬の語を出さない", () => {
+    const august = mai.filter((post) => post.postedAt.slice(0, 7) === "2026-08");
+    expect(august.length).toBeGreaterThan(0);
+    for (const post of august) {
+      const hits = AUTUMN_WINTER.filter((word) => post.body.includes(word));
+      expect(hits, `${post.id} ${post.body}`).toEqual([]);
+    }
+  });
+
+  it("8月下旬へ移した3件は日付を変えず、本文だけ残暑に合わせる", () => {
+    const byId = new Map(mai.map((post) => [post.id, post]));
+    expect(byId.get("post-650")?.postedAt).toBe("2026-08-30T21:05:00+09:00");
+    expect(byId.get("post-651")?.postedAt).toBe("2026-08-29T20:40:00+09:00");
+    expect(byId.get("post-652")?.postedAt).toBe("2026-08-20T19:25:00+09:00");
+    for (const id of ["post-650", "post-651", "post-652"]) {
+      const post = byId.get(id);
+      expect(post, id).toBeDefined();
+      expect(post?.body.length ?? 0).toBeGreaterThan(15);
+    }
+  });
+});
