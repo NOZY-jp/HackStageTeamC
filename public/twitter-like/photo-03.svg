@@ -1,4 +1,4 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="800" height="600" viewBox="0 0 800 600" role="img" aria-label="古いアルバムから。並んで笑う二人。左は黒髪のボブ、右は茶髪のロング">
+<svg xmlns="http://www.w3.org/2000/svg" width="800" height="600" viewBox="0 0 800 600" role="img" aria-label="古いアルバムから。並んで笑う二人。左は黒髪のボブ、右は橙髪">
   <rect width="800" height="600" fill="#f6efe3"/>
   <rect y="450" width="800" height="150" fill="#d9c8ae"/>
   <g>
@@ -11,7 +11,7 @@
   </g>
   <g>
     <circle cx="500" cy="282" r="62" fill="#f7dcc4"/>
-    <path d="M434 282c0-60 30-96 66-96 42 0 66 40 66 96l-6 128-10-8-6-112-88 2-6 110-10 8Z" fill="#7a4a2c"/>
+    <path d="M434 282c0-60 30-96 66-96 42 0 66 40 66 96l-6 128-10-8-6-112-88 2-6 110-10 8Z" fill="#c45625"/>
     <circle cx="480" cy="278" r="6" fill="#3a2a20"/>
     <circle cx="520" cy="278" r="6" fill="#3a2a20"/>
     <path d="M482 318q18 16 36 0" stroke="#c2664f" stroke-width="5" fill="none" stroke-linecap="round"/>

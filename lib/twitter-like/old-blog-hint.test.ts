@@ -138,7 +138,9 @@ describe("第三章 Twitter 側（#94）", () => {
       expect(post.media?.length).toBeGreaterThan(0);
       for (const media of post.media ?? []) {
         expect(media.alt.length).toBeGreaterThan(0);
-        expect(media.src.startsWith("/twitter-like/")).toBe(true);
+        expect(media.src).toMatch(
+          /^\/(twitter-like\/[^/]+\.svg|blog-like\/photos\/graduation\.webp)$/,
+        );
       }
     }
     const text = photoPosts.map((post) => post.body).join("\n");
