@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { type MouseEvent, useEffect, useRef } from "react";
 import { canGoBackWithinDocument } from "./document-history";
@@ -28,15 +29,13 @@ function isSameOrigin(url: string | null): boolean {
 
 export function BackButton({ fallbackHref }: { fallbackHref: string }) {
   const router = useRouter();
-  const pendingBack = useRef<number | undefined>(undefined);
-
   const clearPendingBack = useRef<(() => void) | undefined>(undefined);
 
   useEffect(() => () => clearPendingBack.current?.(), []);
 
   const onClick = (event: MouseEvent<HTMLAnchorElement>) => {
     if (event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
-    if (pendingBack.current !== undefined) {
+    if (clearPendingBack.current) {
       event.preventDefault();
       return;
     }
@@ -48,46 +47,51 @@ export function BackButton({ fallbackHref }: { fallbackHref: string }) {
     if (window.history.length <= 1) return;
     if (navigation) {
       if (!previous || !isSameOrigin(previous.url)) return;
-      // A document referrer does not change during SPA moves.
-      if (!previous.sameDocument && !isSameOrigin(document.referrer)) return;
     } else if (!canGoBackWithinDocument()) {
       return;
     }
 
     event.preventDefault();
     const url = window.location.href;
+    const fallback = () => {
+      if (window.location.href === url) router.replace(fallbackHref);
+    };
+
+    if (navigation && previous && !previous.sameDocument) {
+      // クロスドキュメントの遷移では Promise が完了しない。応答待ちをタイマーで横取りしない。
+      const { committed, finished } = navigation.traverseTo(previous.key);
+      void Promise.all([committed, finished]).catch(fallback);
+      return;
+    }
+
+    let timer: number | undefined;
     const complete = () => {
       if (clearPendingBack.current !== complete) return;
-      window.clearTimeout(pendingBack.current);
-      pendingBack.current = undefined;
+      window.clearTimeout(timer);
       window.removeEventListener("popstate", complete);
       clearPendingBack.current = undefined;
     };
     clearPendingBack.current = complete;
     window.addEventListener("popstate", complete, { once: true });
-    pendingBack.current = window.setTimeout(() => {
+    const fail = () => {
+      if (clearPendingBack.current !== complete) return;
       complete();
-      if (window.location.href === url) router.replace(fallbackHref);
-    }, 300);
+      fallback();
+    };
 
     if (navigation && previous) {
       const { committed, finished } = navigation.traverseTo(previous.key);
-      void Promise.all([committed, finished]).then(
-        () => {
-          if (window.location.href !== url) complete();
-        },
-        () => {
-          // The timeout also covers a failed traversal.
-        },
-      );
+      void committed.then(complete, fail);
+      void finished.catch(fail);
     } else {
+      timer = window.setTimeout(fail, 300);
       window.history.back();
     }
   };
 
   return (
-    <a href={fallbackHref} className="tw-back" aria-label="戻る" onClick={onClick}>
+    <Link href={fallbackHref} className="tw-back" aria-label="戻る" onClick={onClick}>
       <BackIcon />
-    </a>
+    </Link>
   );
 }

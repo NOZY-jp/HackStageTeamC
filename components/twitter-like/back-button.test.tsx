@@ -58,9 +58,8 @@ describe("Twixer の戻る（#249）", () => {
   it.each([
     ["新規タブ", 1, origin, origin],
     ["外部流入", 3, "https://example.com/", "https://example.com/"],
-    ["偽装ドメイン", 3, `${origin}.evil.com/`, origin],
-    ["偽装userinfo", 3, `${origin}@evil.com/`, origin],
-    ["referrerなし", 3, "", origin],
+    ["偽装ドメイン", 3, origin, `${origin}.evil.com/`],
+    ["偽装userinfo", 3, origin, `${origin}@evil.com/`],
   ])(
     "%s では canGoBack が true でも既定のリンクへ進む",
     (_label, length, referrer, previousUrl) => {
@@ -81,7 +80,7 @@ describe("Twixer の戻る（#249）", () => {
     },
   );
 
-  it("外部流入後のアプリ内移動からは検索に戻り q と f を維持する", () => {
+  it("外部流入後のアプリ内移動からは検索に戻り q と f を維持する", async () => {
     const traverseTo = setHistory(3, "https://example.com/", {
       url: origin + search,
       sameDocument: true,
@@ -95,33 +94,57 @@ describe("Twixer の戻る（#249）", () => {
     expect(clickBack()).toBe(true);
     expect(traverseTo).toHaveBeenCalledExactlyOnceWith("previous");
     expect(window.location.search).toBe("?q=%E5%BC%93&f=user");
-    act(() => vi.advanceTimersByTime(300));
+    await act(async () => {});
     expect(router.replace).not.toHaveBeenCalled();
     expect(clickBack()).toBe(false);
   });
 
-  it("確認済みの履歴に戻れない場合は300ms後に既定の行き先へ置き換える", () => {
-    const traverseTo = setHistory(2, origin + search, {
+  it("referrer が空でも同一オリジンの文書に戻り、遅い応答を置き換えない", () => {
+    const traverseTo = setHistory(2, "", {
       url: origin + search,
       sameDocument: false,
     });
+    const pending = new Promise<never>(() => {});
+    traverseTo.mockReturnValue({ committed: pending, finished: pending });
     render(<BackButton fallbackHref="/twitter" />);
     expect(clickBack()).toBe(true);
-    expect(clickBack()).toBe(true);
     expect(traverseTo).toHaveBeenCalledExactlyOnceWith("previous");
-    act(() => vi.advanceTimersByTime(299));
+    act(() => vi.advanceTimersByTime(1000));
     expect(router.replace).not.toHaveBeenCalled();
-    act(() => vi.advanceTimersByTime(1));
+  });
+
+  it("Navigation API が戻りを拒否したら既定の行き先へ移る", async () => {
+    const traverseTo = setHistory(2, "", {
+      url: origin + search,
+      sameDocument: true,
+    });
+    traverseTo.mockImplementation(() => ({
+      committed: Promise.reject(new DOMException("Missing entry", "InvalidStateError")),
+      finished: Promise.reject(new DOMException("Missing entry", "InvalidStateError")),
+    }));
+    render(<BackButton fallbackHref="/twitter" />);
+    expect(clickBack()).toBe(true);
+    await act(async () => {});
     expect(router.replace).toHaveBeenCalledExactlyOnceWith("/twitter");
   });
 
-  it("アンマウント時に待機中のタイマーを解除する", () => {
-    setHistory(2, origin + search, { url: origin + search, sameDocument: false });
+  it("Navigation API 非対応時はアンマウントでタイマーを解除する", () => {
+    vi.stubGlobal("navigation", undefined);
+    const stopTracking = trackDocumentHistory();
+    Object.defineProperty(history, "length", { value: 2, configurable: true });
+    history.pushState(null, "", search);
+    const back = vi.spyOn(history, "back").mockImplementation(() => {});
     const { unmount } = render(<BackButton fallbackHref="/twitter" />);
-    expect(clickBack()).toBe(true);
-    unmount();
-    act(() => vi.advanceTimersByTime(300));
-    expect(router.replace).not.toHaveBeenCalled();
+    try {
+      expect(clickBack()).toBe(true);
+      expect(back).toHaveBeenCalledOnce();
+      unmount();
+      act(() => vi.advanceTimersByTime(300));
+      expect(router.replace).not.toHaveBeenCalled();
+    } finally {
+      back.mockRestore();
+      stopTracking();
+    }
   });
 
   it("Navigation APIなしでも同じ文書内のpushから戻り、外部へは抜けない", async () => {

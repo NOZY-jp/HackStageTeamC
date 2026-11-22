@@ -1,4 +1,4 @@
-import { render, waitFor } from "@testing-library/react";
+import { render, screen, waitFor } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { StoryProvider, useStory } from "@/components/common/story/story-provider";
 import type { FlagId } from "@/lib/story";
@@ -30,6 +30,10 @@ describe("TwitterPostPage", () => {
       </StoryProvider>,
     );
 
+    expect(screen.getByRole("link", { name: "戻る" })).toHaveAttribute(
+      "href",
+      "/twitter/profile/kanon__dayo",
+    );
     await waitFor(() => expect(seen.at(-1)).toContain("te04-kanon-stalker-post"));
   });
 
