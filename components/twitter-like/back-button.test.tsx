@@ -13,7 +13,7 @@ const origin = window.location.origin;
 function setHistory(
   length: number,
   referrer: string,
-  previous?: { url: string; sameDocument: boolean },
+  previous?: { url: string | null; sameDocument: boolean },
 ) {
   Object.defineProperty(window.history, "length", { value: length, configurable: true });
   Object.defineProperty(window.document, "referrer", { value: referrer, configurable: true });
@@ -99,9 +99,9 @@ describe("Twixer の戻る（#249）", () => {
     expect(clickBack()).toBe(false);
   });
 
-  it("referrer が空でも同一オリジンの文書に戻り、遅い応答を置き換えない", () => {
+  it("referrer と URL が隠れた同一オリジンの履歴に戻り、遅い応答を置き換えない", () => {
     const traverseTo = setHistory(2, "", {
-      url: origin + search,
+      url: null,
       sameDocument: false,
     });
     const pending = new Promise<never>(() => {});

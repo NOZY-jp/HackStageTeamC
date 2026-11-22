@@ -46,7 +46,8 @@ export function BackButton({ fallbackHref }: { fallbackHref: string }) {
       current && current.index >= 1 ? navigation?.entries()[current.index - 1] : undefined;
     if (window.history.length <= 1) return;
     if (navigation) {
-      if (!previous || !isSameOrigin(previous.url)) return;
+      // entries() は同一オリジンの履歴だけを返す。Referrer-Policy により URL 自体が隠れることがある。
+      if (!previous || (previous.url !== null && !isSameOrigin(previous.url))) return;
     } else if (!canGoBackWithinDocument()) {
       return;
     }
