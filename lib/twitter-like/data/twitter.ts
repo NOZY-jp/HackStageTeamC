@@ -286,7 +286,7 @@ export const twitterPosts: Post[] = [
   {
     id: "post-019",
     authorId: "tw-mai",
-    postedAt: "2026-11-06T23:12:00+09:00",
+    postedAt: "2026-11-15T23:12:00+09:00",
     body: "きのうから、知ってるはずのない言い回しを目にする。たぶん偶然。そう思うことにする。",
     replyCount: 0,
     repostCount: 4,
