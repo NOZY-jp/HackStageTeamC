@@ -86,40 +86,51 @@ function BigText({ props, onDone, instant }: CustomCueProps) {
   );
 }
 
+const LOOK_TRANSITION = { delay: 0.6, duration: 0.6 };
+
 /**
  * 絵を見せて、押すまで待つ。画面全体を押せる面にして、押す・Enter・Space で次へ。
  * 文章の窓は look() が先に隠している。右下に小さく「押すと続く」印だけを出す
  */
 function Look({ onDone, instant }: CustomCueProps) {
+  const [ready, setReady] = useState(false);
+
   useEffect(() => {
     if (instant) {
       onDone();
       return;
     }
+    // 表示が落ち着くまで、クリックとキー操作の両方を待たせる
+    const timer = window.setTimeout(
+      () => setReady(true),
+      (LOOK_TRANSITION.delay + LOOK_TRANSITION.duration) * 1000,
+    );
+    return () => window.clearTimeout(timer);
+  }, [instant, onDone]);
+
+  useEffect(() => {
+    if (!ready || instant) return;
     const onKey = (event: KeyboardEvent) => {
       if (event.key === "Enter" || event.key === " ") {
         event.preventDefault();
-        onDone();
+        if (!event.repeat) onDone();
       }
     };
-    // 前の文章を送った同じキー入力で、すぐ閉じないよう少し待ってから受け付ける
-    const timer = window.setTimeout(() => window.addEventListener("keydown", onKey), 300);
-    return () => {
-      window.clearTimeout(timer);
-      window.removeEventListener("keydown", onKey);
-    };
-  }, [instant, onDone]);
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [ready, instant, onDone]);
 
   return (
     <motion.button
       type="button"
       className="sp-look"
       aria-label="続ける"
+      disabled={!ready || instant}
       onClick={onDone}
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
-      transition={{ delay: 0.6, duration: 0.6 }}
+      transition={LOOK_TRANSITION}
     >
       <span className="sp-look-hint" aria-hidden="true">
         ▼

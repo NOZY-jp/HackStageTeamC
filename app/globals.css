@@ -6599,16 +6599,20 @@ a.tw-dm-item:focus-visible {
   position: absolute;
   right: 28px;
   bottom: 24px;
-  color: rgb(255 255 255 / 0.85);
+  display: grid;
+  place-items: center;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: #242424;
+  color: #fff;
   font-size: 14px;
-  text-shadow: 0 1px 6px rgb(0 0 0 / 0.7);
   animation: sp-look-bob 1.6s ease-in-out infinite;
 }
 
 @keyframes sp-look-bob {
   50% {
     translate: 0 4px;
-    opacity: 0.5;
   }
 }
 

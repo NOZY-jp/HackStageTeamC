@@ -1,6 +1,6 @@
 import { existsSync } from "node:fs";
 import { join } from "node:path";
-import { fireEvent, render, screen } from "@testing-library/react";
+import { act, fireEvent, render, screen } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
 import { BACKGROUNDS, look } from "@/lib/story";
 import { BackgroundImage } from "./asset-image";
@@ -40,23 +40,24 @@ describe("look（絵を見せて、押すまで待つ）", () => {
     ]);
   });
 
-  it("押すと次へ進む", () => {
-    const onDone = vi.fn();
-    render(<Look props={{}} onDone={onDone} instant={false} />);
-    expect(onDone).not.toHaveBeenCalled();
-    fireEvent.click(screen.getByRole("button", { name: "続ける" }));
-    expect(onDone).toHaveBeenCalledTimes(1);
-  });
-
-  it("Enter でも次へ進む（送ったキーですぐ閉じないよう、少し待ってから受け付ける）", () => {
+  it.each(["クリック", "Enter", "Space"])("表示のフェードインが終わると %s で次へ進む", (input) => {
     vi.useFakeTimers();
     try {
       const onDone = vi.fn();
       render(<Look props={{}} onDone={onDone} instant={false} />);
-      fireEvent.keyDown(window, { key: "Enter" });
+      const button = screen.getByRole("button", { name: "続ける" });
+      const key = input === "Space" ? " " : "Enter";
+      const advance = () =>
+        input === "クリック" ? fireEvent.click(button) : fireEvent.keyDown(window, { key });
+
+      act(() => vi.advanceTimersByTime(1199));
+      advance();
       expect(onDone).not.toHaveBeenCalled();
-      vi.advanceTimersByTime(300);
-      fireEvent.keyDown(window, { key: "Enter" });
+
+      act(() => vi.advanceTimersByTime(1));
+      fireEvent.keyDown(window, { key, repeat: true });
+      expect(onDone).not.toHaveBeenCalled();
+      advance();
       expect(onDone).toHaveBeenCalledTimes(1);
     } finally {
       vi.useRealTimers();
