@@ -1,4 +1,5 @@
 import { describe, expect, it } from "vitest";
+import { LEAF_CREATOR_ID } from "@/lib/blog-migration/articles";
 import {
   formatPublishedAt,
   getArticle,
@@ -6,7 +7,9 @@ import {
   listArticles,
   listArticlesByCreator,
   listCreators,
+  listTopArticles,
   matchesQuery,
+  orderTopArticles,
   searchArticles,
 } from "./index";
 import type { Article, Creator } from "./types";
@@ -59,6 +62,48 @@ describe("lib/note-like のアクセサ", () => {
     const before = first.displayName;
     first.displayName = "書き換え";
     expect(getCreator(first.id)?.displayName).toBe(before);
+  });
+
+  it("listTopArticles は MaiMai を含まず、同じ書き手が3件以上連続しない", () => {
+    const top = listTopArticles();
+    expect(top.length).toBeGreaterThanOrEqual(30);
+    expect(top.some((item) => item.creatorId === LEAF_CREATOR_ID)).toBe(false);
+
+    for (let i = 2; i < top.length; i += 1) {
+      const sameThree =
+        top[i].creatorId === top[i - 1].creatorId && top[i].creatorId === top[i - 2].creatorId;
+      expect(sameThree, `${top[i].id} で ${top[i].creatorId} が3連続`).toBe(false);
+    }
+
+    const originalTitle = top[0].title;
+    top[0].title = "改変";
+    expect(listTopArticles()[0].title).toBe(originalTitle);
+  });
+
+  it("orderTopArticles は偏った新着順でも同じ書き手の3連続を防ぐ", () => {
+    const makeArticle = (id: string, creatorId: string, day: number): Article => ({
+      ...article,
+      id,
+      creatorId,
+      publishedAt: `2026-10-${String(day).padStart(2, "0")}T12:00:00+09:00`,
+    });
+    const sorted = [
+      makeArticle("a5", "creator_a", 21),
+      makeArticle("a4", "creator_a", 20),
+      makeArticle("a3", "creator_a", 19),
+      makeArticle("b1", "creator_b", 18),
+      makeArticle("a2", "creator_a", 17),
+      makeArticle("a1", "creator_a", 16),
+      makeArticle("b2", "creator_b", 15),
+    ];
+    const ordered = orderTopArticles(sorted);
+    expect(ordered).toHaveLength(sorted.length);
+    for (let i = 2; i < ordered.length; i += 1) {
+      expect(
+        ordered[i].creatorId === ordered[i - 1].creatorId &&
+          ordered[i].creatorId === ordered[i - 2].creatorId,
+      ).toBe(false);
+    }
   });
 });
 

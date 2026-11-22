@@ -1,3 +1,4 @@
+import { LEAF_CREATOR_ID } from "../blog-migration/articles";
 import { articles } from "./data/articles";
 import { creators } from "./data/creators";
 import type { Article, Creator } from "./types";
@@ -28,6 +29,73 @@ export function getCreator(id: string): Creator | undefined {
 /** 全記事（新しい順） */
 export function listArticles(): Article[] {
   return copyOf([...articles].sort(byPublishedAtDesc));
+}
+
+function canFinishWithoutTripleStreak(
+  remaining: readonly Article[],
+  last1: string | undefined,
+  last2: string | undefined,
+): boolean {
+  const counts = new Map<string, number>();
+  for (const article of remaining) {
+    counts.set(article.creatorId, (counts.get(article.creatorId) ?? 0) + 1);
+  }
+  const total = remaining.length;
+  for (const [creatorId, count] of counts) {
+    let minSeparators: number;
+    if (creatorId === last1 && creatorId === last2) {
+      minSeparators = Math.ceil(count / 2);
+    } else if (creatorId === last1) {
+      minSeparators = Math.floor(count / 2);
+    } else {
+      minSeparators = Math.max(0, Math.ceil(count / 2) - 1);
+    }
+    if (total - count < minSeparators) {
+      return false;
+    }
+  }
+  return true;
+}
+
+/**
+ * publishedAt 降順を保ちつつ、同じ creatorId が3件以上連続しないよう貪欲に並べ替える。
+ */
+export function orderTopArticles(sortedDesc: readonly Article[]): Article[] {
+  const remaining = [...sortedDesc];
+  const result: Article[] = [];
+
+  while (remaining.length > 0) {
+    const last1 = result.at(-1)?.creatorId;
+    const last2 = result.at(-2)?.creatorId;
+    const blocked = last1 && last1 === last2 ? last1 : undefined;
+
+    let chosenIndex = remaining.findIndex((candidate) => {
+      if (candidate.creatorId === blocked) {
+        return false;
+      }
+      const nextRemaining = remaining.filter((item) => item !== candidate);
+      return canFinishWithoutTripleStreak(nextRemaining, candidate.creatorId, last1);
+    });
+
+    if (chosenIndex === -1) {
+      chosenIndex = remaining.findIndex((candidate) => candidate.creatorId !== blocked);
+    }
+    if (chosenIndex === -1) {
+      chosenIndex = 0;
+    }
+
+    const [chosen] = remaining.splice(chosenIndex, 1);
+    result.push(chosen);
+  }
+
+  return result;
+}
+
+/** トップ一覧用の記事（MaiMai を除き、同じ書き手が3件以上連続しないよう並べ替える） */
+export function listTopArticles(): Article[] {
+  return orderTopArticles(
+    listArticles().filter((article) => article.creatorId !== LEAF_CREATOR_ID),
+  );
 }
 
 /** 書き手の記事（新しい順） */
