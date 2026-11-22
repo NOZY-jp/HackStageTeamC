@@ -14,11 +14,13 @@ import {
   type Choice,
   characters,
   charIntervalMs,
+  type FlagId,
   FRAMES,
   PLAYBACK_MODE_LABELS,
   type PlaybackMode,
   type PlaybackSettings,
   sliceChars,
+  speakerLabel,
   TEXT_SPEED_LABELS,
   type TextCue,
   type TextSpeed,
@@ -36,6 +38,8 @@ export type TextWindowProps = {
   cue?: TextCue;
   /** 場面の最後で選ぶ選択肢（出すときだけ渡す） */
   choices?: Choice[];
+  /** いま立っているフラグ（本名の開示で話者ラベルを切り替える） */
+  flags?: readonly FlagId[];
   /** 演出（動き・カスタム演出）の再生中。次へ進めない */
   busy: boolean;
   /** 場面の最後の行か（「▼ 閉じる」の表示に使う） */
@@ -93,19 +97,27 @@ function isPageControl(target: EventTarget | null, windowElement: HTMLElement | 
   return target.closest(PAGE_CONTROLS) !== null;
 }
 
-function speakerOf(cue: TextCue): { name: string; color: string } | null {
+function speakerOf(
+  cue: TextCue,
+  options: { realNameKnown?: boolean } = {},
+): { name: string; color: string } | null {
   if (!cue.from || cue.frame === "narration" || cue.frame === "title" || cue.frame === "system") {
     return null;
   }
   const person = characters[cue.from];
-  // 通話では Discord の表示名で出す（通話アプリの画面に出る名前）
-  const name = cue.frame === "call" ? (person.accounts.discordName ?? person.name) : person.name;
+  // 通話では Discord の表示名で出す（通話アプリの画面に出る名前）。
+  // 対面は、本名を知る前だけ「リョウ（琥珀）」と出す（#208）。
+  const name =
+    cue.frame === "call"
+      ? (person.accounts.discordName ?? person.name)
+      : speakerLabel(cue.from, { frame: cue.frame, realNameKnown: options.realNameKnown });
   return { name, color: person.color };
 }
 
 export function TextWindow({
   cue,
   choices,
+  flags,
   busy,
   isLast,
   settings,
@@ -231,7 +243,9 @@ export function TextWindow({
     advance();
   };
 
-  const speaker = cue ? speakerOf(cue) : null;
+  const speaker = cue
+    ? speakerOf(cue, { realNameKnown: Boolean(flags?.includes("s08-real-name")) })
+    : null;
   // 読み上げ用の1行（行が変わったときだけ変わる）
   const spoken = cue ? (speaker ? `${speaker.name}：${text}` : text) : "";
 

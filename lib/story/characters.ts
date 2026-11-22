@@ -106,3 +106,23 @@ export const FORBIDDEN_WORDS = [
 export function getCharacter(id: CharacterId): Character {
   return characters[id];
 }
+
+/**
+ * 話者ラベル（#208）。リョウの本名は s08-real-name で開示される。
+ * 開示前は、対面も心の声も「琥珀」（プレイヤーが知っている名前）で出し、
+ * 開示後は「リョウ」に切り替える。通話（Discord）は「琥珀」のまま。
+ * 切替はここ1か所だけ（台本や alt・title に名前を直書きしない）。
+ */
+export function speakerLabel(
+  id: CharacterId,
+  options: { frame?: string; realNameKnown?: boolean } = {},
+): string {
+  const person = characters[id];
+  if (options.frame === "call") {
+    return person.accounts.discordName ?? person.name;
+  }
+  if (id !== "ryo") {
+    return person.name;
+  }
+  return options.realNameKnown ? person.name : HAL_NAME;
+}
