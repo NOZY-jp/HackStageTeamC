@@ -131,8 +131,8 @@ describe("進行チェック（各プラットフォームのデータに手が�
     expect(listMylistEntries(mylist).map((item) => item.id)).toContain("e20181117");
   });
 
-  it("段階7・8: コンテスト名が造語「蒼穹フォトアワード 2020」で、記事 e20181117 と sitemap に結果ページがある", () => {
-    expect(PHOTO_CONTEST_NAME).toBe("蒼穹フォトアワード 2020");
+  it("段階7・8: コンテスト名が造語「蒼穹フォトアワード 2018」で、記事 e20181117 と sitemap に結果ページがある", () => {
+    expect(PHOTO_CONTEST_NAME).toBe("蒼穹フォトアワード 2018");
     const entry = getEntry("denden0102", "e20181117");
     expect(entry).toBeDefined();
     const bodyText = (entry?.body ?? [])
@@ -152,16 +152,20 @@ describe("進行チェック（各プラットフォームのデータに手が�
     ).toBe(false);
   });
 
-  it("段階9: ch5-kai-contact でカイが「本名で検索」を助言し、s09-kai-contact を立てる", () => {
+  it("段階9: ch5-kai-contact でカイがTalkupの体験談を伝え、s09-kai-contact を立てる", () => {
     const beat = beats.find((candidate) => candidate.id === "ch5-kai-contact");
     expect(beat).toBeDefined();
     expect(beat?.sets).toContain("s09-kai-contact");
     expect(beat?.place).toBe("discord:dm-kai");
     const hasHintInScript = textsOf(beat?.script ?? []).some(
-      (line) => line.from === "kai" && line.text.includes("本名で検索"),
+      (line) =>
+        line.from === "kai" &&
+        line.text === "俺、ゲーム仲間の近況をTalkupの写真で知ったことがあるよ。",
     );
     const hasHintInChats = chatsOf("ch5-kai-contact", beat?.script ?? []).some(
-      (message) => message.from === "kai" && message.text.includes("本名で検索"),
+      (message) =>
+        message.from === "kai" &&
+        message.text === "俺、ゲーム仲間の近況をTalkupの写真で知ったことがあるよ。",
     );
     expect(hasHintInScript).toBe(false);
     expect(hasHintInChats).toBe(true);

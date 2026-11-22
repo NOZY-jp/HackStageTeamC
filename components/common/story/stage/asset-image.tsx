@@ -34,6 +34,15 @@ export function BackgroundImage({ background }: { background: BackgroundId | { c
   if (!asset.src) {
     return <Placeholder label={`背景：${asset.label}`} color={asset.color} kind="background" />;
   }
+  if (asset.fit === "contain") {
+    // 写真は画面を覆わず、縦横比を保ったまま中央に収める（#226）
+    return (
+      <div className="sp-fill sp-photo">
+        {/* biome-ignore lint/performance/noImgElement: 演出の画像は寸法が場面ごとに変わるので素の img で出す */}
+        <img className="sp-photo-image" src={asset.src} alt="" />
+      </div>
+    );
+  }
   // biome-ignore lint/performance/noImgElement: 演出の画像は寸法が場面ごとに変わるので素の img で出す
   return <img className="sp-fill sp-cover" src={asset.src} alt="" />;
 }
