@@ -222,7 +222,7 @@ describe("ゲームでの場面の進行", () => {
       expect.objectContaining({
         channel: "discord:dm-kai",
         from: "ryo",
-        text: "ありがとう、その線で探してみる",
+        text: "話せて少し落ち着いた。ありがとう。",
       }),
     );
     expect(nextBeat(state)).toBeUndefined();
